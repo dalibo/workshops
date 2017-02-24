@@ -347,7 +347,7 @@ CREATE INDEX idx_bt_tab800 ON tab800 USING btree (bla, bli varchar_pattern_ops);
 ANALYZE tab800;
 ```
 
-La ligne qui va nous servir d'exemple à rechercher vaudra `bla=50` et
+La ligne qui va nous servir d'exemple à rechercher vaudra `bla=50` et   
 `bli = 'e00b425b7ff60f42bd5fa61e043a46d6'`.
 
 
@@ -467,7 +467,7 @@ WHERE bla BETWEEN 50 AND 51 AND bli LIKE 'e00b%';
 
 
   * Dans une première instance : instance1 (celle par défaut sur votre poste)
-    * Installer l'extension postgres_fdw
+    * Installer l'extension `postgres_fdw`
     * Créer un utilisateur bobby avec un mot de passe
 
   * Dans une seconde instance : instance2 (créée sur le même poste sur un autre port, ou sur une autre machine)
@@ -807,6 +807,7 @@ STOP TIME: 2016-08-12 18:14:58 CEST
 
 
 ### Visibility Map
+
 * On crée une nouvelle table avec 451 lignes :
 
 ```
@@ -1129,7 +1130,7 @@ SELECT * FROM pg_visibility('test_visibility');
 ```
 
 Ces lignes ont été écrites dans le bloc 0 et entraînent le retour à false
-des attributs all_visible et all_frozen.
+des attributs  all_visible et all_frozen.
 
 
 
