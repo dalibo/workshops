@@ -1913,17 +1913,17 @@ Le chiffre 3 dans `<3>` indique la distance entre _monter_ et _cheval_.
 <div class="slide-content">
 
   * Avant la version 9.6
-
-  postgres=# CREATE EXTENSION ltree_plpythonu;
-  ERREUR:  l'extension « ltree » requise n'est pas installée
-
-
+    ```
+    postgres=# CREATE EXTENSION ltree_plpythonu;
+    ERREUR:  l'extension « ltree » requise n'est pas installée
+    ```
   * Après la version 9.6
-
-  postgres=# CREATE EXTENSION ltree_plpythonu CASCADE;
-  NOTICE:  installing required extension "ltree"
-  NOTICE:  installing required extension "plpythonu"
-  CREATE EXTENSION
+    ```
+    postgres=# CREATE EXTENSION ltree_plpythonu CASCADE;
+    NOTICE:  installing required extension "ltree"
+    NOTICE:  installing required extension "plpythonu"
+    CREATE EXTENSION
+    ```
 </div>
 
 
@@ -2399,3 +2399,5 @@ La roadmap par société : <https://wiki.postgresql.org/wiki/PostgreSQL10_Roadma
 
 
 ## Questions
+
+-----
