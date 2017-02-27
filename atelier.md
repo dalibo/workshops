@@ -347,8 +347,9 @@ CREATE INDEX idx_bt_tab800 ON tab800 USING btree (bla, bli varchar_pattern_ops);
 ANALYZE tab800;
 ```
 
-La ligne qui va nous servir d'exemple à rechercher vaudra `bla=50` et
-`bli = 'e00b425b7ff60f42bd5fa61e043a46d6'`.
+La ligne qui va nous servir d'exemple à rechercher vaudra :
+
+`bla=50` et `bli = 'e00b425b7ff60f42bd5fa61e043a46d6'`.
 
 
   * Le plus efficace dans ce cas précis restera le btree (`Index Seq Scan`) :
@@ -407,7 +408,7 @@ filtrées alors que l'index les avait trouvées.
 
 ```
                                     QUERY PLAN
------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
  Bitmap Heap Scan on public.tab800  (cost=178436.00..178440.02 rows=1 width=49)
    (actual time=84.572..84.581 rows=1 loops=1)
    Output: id, bla, bli, blu
@@ -431,9 +432,10 @@ filtrées alors que l'index les avait trouvées.
 ```sql
 EXPLAIN (ANALYZE ,VERBOSE, BUFFERS)
 SELECT * FROM tab800 WHERE bli = 'e00b425b7ff60f42bd5fa61e043a46d6';
-
+```
+```
                                      QUERY PLAN
------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
  Bitmap Heap Scan on public.tab800  (cost=153436.00..153440.01 rows=1 width=49)
    (actual time=68.305..83.765 rows=1 loops=1)
    Output: id, bla, bli, blu
@@ -745,8 +747,8 @@ piloup=# SELECT * FROM pg_stop_backup(false);
 
 NOTICE:  pg_stop_backup terminé, tous les journaux de transactions requis ont été
   archivés
-    lsn     |                           labelfile                            | spcmapfile
-------------+----------------------------------------------------------------+------------
+    lsn     |                           labelfile                            | ...
+------------+----------------------------------------------------------------+----
  1/1D0002F0 | START WAL LOCATION: 1/1C000060 (file 00000001000000010000001C)+|
             | CHECKPOINT LOCATION: 1/1C000098                               +|
             | BACKUP METHOD: streamed                                       +|
@@ -776,8 +778,8 @@ On termine ensuite la seconde sauvegarde :
 postgres=#  SELECT * FROM pg_stop_backup(false);
 NOTICE:  pg_stop_backup terminé, tous les journaux de transactions requis ont été
 archivés
-    lsn     |                           labelfile                            | spcmapfile
-------------+----------------------------------------------------------------+------------
+    lsn     |                           labelfile                            | ...
+------------+----------------------------------------------------------------+----
  1/1E000088 | START WAL LOCATION: 1/1D000028 (file 00000001000000010000001D)+|
             | CHECKPOINT LOCATION: 1/1D000060                               +|
             | BACKUP METHOD: streamed                                       +|
@@ -790,8 +792,8 @@ archivés
 
 Un autre fichier apparaît dans `pg_xlog` :
 
-```FIXME
--bash-4.2$ cat 00000001000000010000001D.00000028.backup
+```
+$ cat 00000001000000010000001D.00000028.backup
 START WAL LOCATION: 1/1D000028 (file 00000001000000010000001D)
 STOP WAL LOCATION: 1/1E000088 (file 00000001000000010000001E)
 CHECKPOINT LOCATION: 1/1D000060
@@ -835,8 +837,8 @@ On lance donc une opération de vacuum :
 VACUUM VERBOSE test_visibility ;
 
 INFO:  exécution du VACUUM sur « public.test_visibility »
-INFO:  « test_visibility » : 0 versions de ligne supprimables, 451 non supprimables
-parmi 2 pages sur 2
+INFO:  « test_visibility » : 0 versions de ligne supprimables, 451 non
+supprimables parmi 2 pages sur 2
 DÉTAIL : 0 versions de lignes mortes ne peuvent pas encore être supprimées.
 Il y avait 0 pointeur d'éléments inutilisés.
 Ignore 0 page à cause des verrous de blocs.
@@ -887,8 +889,8 @@ VACUUM VERBOSE test_visibility ;
 
 INFO:  exécution du VACUUM sur « public.test_visibility »
 INFO:  « test_visibility » : 50 versions de ligne supprimées parmi 1 pages
-INFO:  « test_visibility » : 50 versions de ligne supprimables, 451 non supprimables
-parmi 3 pages sur 3
+INFO:  « test_visibility » : 50 versions de ligne supprimables, 451 non
+supprimables parmi 3 pages sur 3
 DÉTAIL : 0 versions de lignes mortes ne peuvent pas encore être supprimées.
 Il y avait 0 pointeur d'éléments inutilisés.
 Ignore 0 page à cause des verrous de blocs.
@@ -915,8 +917,8 @@ visibles :
 ```sql
 vacuum VERBOSE test_visibility ;
 INFO:  exécution du VACUUM sur « public.test_visibility »
-INFO:  « test_visibility » : 0 versions de ligne supprimables, 451 non supprimables
-parmi 3 pages sur 3
+INFO:  « test_visibility » : 0 versions de ligne supprimables, 451 non
+supprimables parmi 3 pages sur 3
 DÉTAIL : 0 versions de lignes mortes ne peuvent pas encore être supprimées.
 Il y avait 49 pointeurs d'éléments inutilisés.
 Ignore 0 page à cause des verrous de blocs.
@@ -960,8 +962,8 @@ a été ajouté à la suite.
 VACUUM VERBOSE test_visibility ;
 
 INFO:  exécution du VACUUM sur « public.test_visibility »
-INFO:  « test_visibility » : 0 versions de ligne supprimables, 671 non supprimables
-parmi 3 pages sur 3
+INFO:  « test_visibility » : 0 versions de ligne supprimables, 671 non
+supprimables parmi 3 pages sur 3
 DÉTAIL : 0 versions de lignes mortes ne peuvent pas encore être supprimées.
 Il y avait 0 pointeur d'éléments inutilisés.
 Ignore 0 page à cause des verrous de blocs.
@@ -1000,8 +1002,8 @@ SELECT * FROM pg_visibility('test_visibility');
 ```
 VACUUM VERBOSE test_visibility ;
 INFO:  exécution du VACUUM sur « public.test_visibility »
-INFO:  « test_visibility » : 0 versions de ligne supprimables, 681 non supprimables
-parmi 4 pages sur 4
+INFO:  « test_visibility » : 0 versions de ligne supprimables, 681 non
+supprimables parmi 4 pages sur 4
 DÉTAIL : 0 versions de lignes mortes ne peuvent pas encore être supprimées.
 Il y avait 0 pointeur d'éléments inutilisés.
 Ignore 0 page à cause des verrous de blocs.
@@ -1254,6 +1256,8 @@ primary_slot_name='standby3'
 
 
   * Testez les différentes de performance entre les différentes valeurs de `synchronous_commit`, par exemple avec pgbench :
-    * Initialisation dans une base dédiée nommée pgbench : ` pgbench -i -s 100 --foreign-keys -p 5432 pgbench`
-    * Tests (à répéter plusieurs fois à cause du cache) avec `pgbench --client=3 --jobs=4 --transactions=1000 -p 5432 pgbench`
+    * Initialisation dans une base dédiée nommée pgbench :\
+    ` pgbench -i -s 100 --foreign-keys -p 5432 pgbench`
+    * Tests (à répéter plusieurs fois à cause du cache) avec:\
+    `pgbench --client=3 --jobs=4 --transactions=1000 -p 5432 pgbench`
 </div>
