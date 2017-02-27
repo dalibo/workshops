@@ -188,9 +188,9 @@ actuellement parallélisables.
 
 <div class="slide-content">
 
-  * max_worker_processes : Nombre max de background worker
-  * max_parallel_workers_per_gather : Nombre max de worker par gather
-  * min_parallel_relation_size : Taille min de la relation pour déclencher le parallélisme
+  * `max_worker_processes` : Nombre max de background worker
+  * `max_parallel_workers_per_gather` : Nombre max de worker par gather
+  * `min_parallel_relation_size` : Taille min de la relation pour déclencher le parallélisme
     * Possibilité de forcer le nombre de worker possible pour une table :
     *  `SET (parallel_workers = x)`
 </div>
@@ -226,8 +226,8 @@ configuration sauf pour `max_worker_processes` qui nécessite un redémarrage.
 
 <div class="slide-content">
 
-  * parallel_setup_cost : Coût de la mise en place du parallélisme
-  * parallel_tuple_cost : Coût pour passer une ligne d'un worker au gather.
+  * `parallel_setup_cost` : Coût de la mise en place du parallélisme
+  * `parallel_tuple_cost` : Coût pour passer une ligne d'un worker au gather.
 </div>
 
 
@@ -566,7 +566,7 @@ cette opération (Workers Planned), et
 qu'en effet, trois workers ont été
 utilisés pour la réaliser (Workers Launched).
 
-Si par exemple, la limite des workers définie dans max_worker_processes
+Si par exemple, la limite des workers définie dans `max_worker_processes`
 est atteinte, on pourra se retrouver avec l'information suivante :
 
 ```
@@ -798,8 +798,7 @@ et la valeur finale est renvoyée par le nœud `Finalize Aggregate`.
 
 <div class="slide-content">
 
-  * Infrastructure pour de nouvelles méthodes d'accès sous forme d'extensions.
-
+Infrastructure pour de nouvelles méthodes d'accès sous forme d'extensions.
 
   * Premier exemple : les index **bloom**
     * extension
@@ -887,14 +886,14 @@ du CPU.
 
 <div class="slide-content">
 
-  * Gestion des slots de réplication pour pg_basebackup
+  * Gestion des slots de réplication pour `pg_basebackup`
   * Sauvegardes à chaud concurrentes
   * Réplication synchrone sur plusieurs nœuds
   * Amélioration des Foreign Data Wrapper
   * Amélioration du freeze
-    * et nouvelle extension : pg_visibility
+    * et nouvelle extension : `pg_visibility`
   * Divers
-    * pg_config, pg_control*
+    * `pg_config`, `pg_control*`
 </div>
 
 
@@ -951,10 +950,10 @@ archivage des journaux.
 
 <div class="slide-content">
 
-  * Déjà possible avec pg_basebackup...
-    * mais pas en manuel avec pg_start_backup()
+  * Déjà possible avec `pg_basebackup`...
+    * mais pas en manuel avec `pg_start_backup()`
   * Nouvelle API
-  * pg_start_backup() et pg_stop_backup()
+  * `pg_start_backup()` et `pg_stop_backup()`
     * paramètre supplémentaire pour utilisation concurrente
     * par défaut à false
   * Contraintes lorsqu'on utilise l'option concurrente
@@ -1037,16 +1036,12 @@ Plusieurs serveurs secondaires pouvaient être indiqués comme potentiellement
 synchrones, mais un seul était réellement synchrone à un instant t.
 Autrement
 dit, le serveur primaire attendait la confirmation par le
-serveur secondaire de l
-'inscription des données sur son disque pour renvoyer
-le succès de l'opération
-à l'utilisateur.
+serveur secondaire de l'inscription des données sur son disque pour renvoyer
+le succès de l'opération à l'utilisateur.
 
-En cas d'indisponibilité du serveur secondaire synchrone, le serveur suivant
-
+En cas d'indisponibilité du serveur secondaire synchrone, le serveur suivant 
 dans la liste des serveurs synchrones potentiels configurés avec le
-paramètre `synchronous_standby_names
-` prenait la main comme serveur synchrone.
+paramètre `synchronous_standby_names` prenait la main comme serveur synchrone.
 
 Si aucun serveur potentiellement synchrone n'était disponible, la validation
 des
@@ -1066,14 +1061,14 @@ des
   * Soit le client, soit le maître
   * Les modifications sont écrites dans les WAL avant d'envoyer la confirmation
   * Nouvelle valeur :
-    * remote_apply
+    * `remote_apply`
 </div>
 
 
 <div class="notes">
 
 
-La valeur du paramètre synchronous_commit permet de définir les conditions
+La valeur du paramètre `synchronous_commit` permet de définir les conditions
 nécessaires pour pouvoir renvoyer à l'utilisateur que sa transaction a été
 validée.
 
@@ -1124,21 +1119,22 @@ secondaire. Cependant, elle rajoute une latence supplémentaire.
 
 Tableau récapitulatif :
 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
-| synchronous _commit | Ecriture WAL local       | Enregistré en mémoire distant | Ecriture WAL distant     | Rejeu distant            |
-|                     | (synchronisé sur disque) | (non-synchronisé sur disque)  | (synchronisé sur disque) | (enregistrement visible) |
-+=====================+==========================+===============================+==========================+==========================+
-| off                 |                          |                               |                          |                          | 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
-| remote_write        |       X                  |     X                         |                          |                          | 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
-| local               |       X                  |                               |                          |                          | 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
-| on                  |       X                  |                               |         X                |                          | 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
-| remote_apply        |       X                  |                               |         X                |          X               | 
-+---------------------+--------------------------+-------------------------------+--------------------------+--------------------------+
+: Valeur paramètre `synchronous_commit`
 
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| Ecriture       | WAL local                | Mémoire distant              | WAL distant              | Rejeu distant            |
+|                | (synchronisé sur disque) | (non-synchronisé sur disque) | (synchronisé sur disque) | (enregistrement visible) |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| `off`          |                          |                              |                          |                          |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| `remote_write` | X                        | X                            |                          |                          |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| `local`        | X                        |                              |                          |                          |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| `on`           | X                        |                              | X                        |                          |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
+| `remote_apply` | X                        |                              | X                        | X                        |
++----------------+--------------------------+------------------------------+--------------------------+--------------------------+
 
 </div>
 
@@ -1169,7 +1165,7 @@ plusieurs esclaves.
 
 En effet, la déclaration d'un esclave synchrone se fait en définissant
 le paramètre `synchronous_standby_names`. Ce dernier possède une nouvelle
-syntaxe telle que : 'N (<Slave_n°1>, <Slave_n°2>, ...)'.
+syntaxe telle que : `'N (<Slave_n°1>, <Slave_n°2>, ...)'`.
 
 Cette méthode, bien utilisée, permet d'avoir plusieurs serveurs répliqués
 avec
@@ -1699,7 +1695,7 @@ en lecture/écriture.
   * Pivotage des résultats
   * Autres nouveautés
     * fonction mathématiques
-    * jsonb_insert()
+    * `jsonb_insert()`
 </div>
 
 
@@ -1917,17 +1913,17 @@ Le chiffre 3 dans `<3>` indique la distance entre _monter_ et _cheval_.
 <div class="slide-content">
 
   * Avant la version 9.6
-
-  postgres=# CREATE EXTENSION ltree_plpythonu;
-  ERREUR:  l'extension « ltree » requise n'est pas installée
-
-
+    ```
+    postgres=# CREATE EXTENSION ltree_plpythonu;
+    ERREUR:  l'extension « ltree » requise n'est pas installée
+    ```
   * Après la version 9.6
-
-  postgres=# CREATE EXTENSION ltree_plpythonu CASCADE;
-  NOTICE:  installing required extension "ltree"
-  NOTICE:  installing required extension "plpythonu"
-  CREATE EXTENSION
+    ```
+    postgres=# CREATE EXTENSION ltree_plpythonu CASCADE;
+    NOTICE:  installing required extension "ltree"
+    NOTICE:  installing required extension "plpythonu"
+    CREATE EXTENSION
+    ```
 </div>
 
 
@@ -2060,7 +2056,6 @@ cave=# \crosstabview annee libelle
   * Amélioration des performances globales pour plusieurs fonctions mathématiques
     * ln() / log() / exp() / pow()
 
-
   * Ajout des fonctions
     * sind() /  cosd() / tand()
 </div>
@@ -2118,9 +2113,9 @@ textes=# SELECT tand(90);
 
 <div class="slide-content">
 
-  * Nouvelles colonnes dans pg_stat_activity
-  * Nouvelle fonction pg_blocking_pid()
-  * Nouvelle vue pg_stat_progress_vacuum
+  * Nouvelles colonnes dans `pg_stat_activity`
+  * Nouvelle fonction `pg_blocking_pid()`
+  * Nouvelle vue `pg_stat_progress_vacuum`
 </div>
 
 
@@ -2140,7 +2135,7 @@ textes=# SELECT tand(90);
   * Avant la 9.6
     * identification complexe d'une requête bloquante
     * et de la raison du blocage
-  * Ajout de la fonction pg_blocking_pids
+  * Ajout de la fonction `pg_blocking_pids()`
   * modification de la colonne waiting en deux colonnes
     * wait_event
     * wait_event_type
@@ -2221,7 +2216,7 @@ query           | INSERT INTO test_blocage (champ) (SELECT 'ligne '||i
     * requête complexe pour trouver la session bloquante
     * voire collection de requêtes
   * Depuis la 9.6
-    * fonction pg_blocking_pids()
+    * fonction `pg_blocking_pids()`
 </div>
 
 <div class="notes">
@@ -2355,11 +2350,11 @@ View "pg_catalog.pg_stat_progress_vacuum"
 
 <div class="slide-content">
 
-  * Il n'est plus possible de créer des rôles commençant par pg_
+  * Il n'est plus possible de créer des rôles commençant par `pg_*`
   * L'option -c de psql (exécution de commande) n'active plus --no-psqlrc
-  * L'option -t de pg_restore ne correspond plus seulement aux tables
+  * L'option -t de `pg_restore` ne correspond plus seulement aux tables
     * mais à tous types de relations
-  * Niveaux `archive` et `hot_standby` n'existent plus pour wal_level.
+  * Niveaux `archive` et `hot_standby` n'existent plus pour `wal_level`.
     * Remplacés par un niveau `replica` <=> `hot_standby`
 </div>
 
@@ -2367,10 +2362,10 @@ View "pg_catalog.pg_stat_progress_vacuum"
 <div class="notes">
 
 
-Les rôles commençant par pg_ sont réservés aux rôles systèmes de gestion
+Les rôles commençant par `pg_*` sont réservés aux rôles systèmes de gestion
 de droits (comme `pg_signal_backend`).
 
-Les niveaux `archive` et `hot_standby` n'existent plus pour wal_level. Ils sont remplacés par le
+Les niveaux `archive` et `hot_standby` n'existent plus pour `wal_level`. Ils sont remplacés par le
 niveau `replica`. Afin de conserver une compatibilité, les niveaux `archive` et `hot_standby` sont
 remplacé en interne par `replica`.
 </div>
@@ -2395,7 +2390,7 @@ remplacé en interne par `replica`.
 <div class="notes">
 
 
-La roadmap par société : https://wiki.postgresql.org/wiki/PostgreSQL10_Roadmap
+La roadmap par société : <https://wiki.postgresql.org/wiki/PostgreSQL10_Roadmap>
 </div>
 
 
@@ -2404,3 +2399,5 @@ La roadmap par société : https://wiki.postgresql.org/wiki/PostgreSQL10_Roadmap
 
 
 ## Questions
+
+-----
