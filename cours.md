@@ -2379,18 +2379,20 @@ remplacé en interne par `replica`.
 
 <div class="slide-content">
 
-  * Version 10, en septembre 2017
-  * A priori
-    * améliorations de la parallélisation
-    * améliorations de la réplication logique
-  * Premier commitfest démarré mi-août
+  * Version 10, en septembre/octobre 2017
+  * Beta 1 depuis le 18 mai
+  * Fonctionnalités majeures
+    * réplication logique
+	* partitionnement natif de table (suite et liste)
+    * amélioration du partitionnement (parcours d'index, de bitmap, jointure
+	  par tri)
+	* quorum pour la réplication synchrone
 </div>
 
 
 <div class="notes">
-
-
 La roadmap par société : <https://wiki.postgresql.org/wiki/PostgreSQL10_Roadmap>
+La documentation : <https://www.postgresql.org/docs/10/static/index.html>
 </div>
 
 
