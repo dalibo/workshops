@@ -306,6 +306,106 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 
 -----
 
+### Performances en insertion
+
+<div class="slide-content">
+```
+postgres=# insert into t1 select i, 'toto' from generate_series(0, 9999999) i;
+INSERT 0 10000000
+Time: 10097.098 ms (00:10.097)
+postgres=# checkpoint;
+CHECKPOINT
+Time: 501.660 ms
+postgres=# insert into t2 select i, 'toto' from generate_series(0, 9999999) i;
+INSERT 0 10000000
+Time: 11448.867 ms (00:11.449)
+postgres=# checkpoint;
+CHECKPOINT
+Time: 501.212 ms
+postgres=# insert into t3 select i, 'toto' from generate_series(0, 9999999) i;
+INSERT 0 0
+Time: 125351.918 ms (02:05.352)
+postgres=# checkpoint;
+CHECKPOINT
+Time: 802.073 ms
+```
+</div>
+
+<div class="notes">
+La table *t1* est une table non partitionnée :
+
+```
+CREATE TABLE t1 (c1 integer, c2 text);
+```
+
+La table *t2* est une table partitionnée utilisant les nouvelles
+fonctionnalités de la version 10 :
+
+```
+create table t2 (c1 integer, c2 text) partition by range (c1);
+create table t2_1 partition of t2 for values from (      0) to ( 1000000);
+create table t2_2 partition of t2 for values from (1000000) to ( 2000000);
+create table t2_3 partition of t2 for values from (2000000) to ( 3000000);
+create table t2_4 partition of t2 for values from (3000000) to ( 4000000);
+create table t2_5 partition of t2 for values from (4000000) to ( 5000000);
+create table t2_6 partition of t2 for values from (5000000) to ( 6000000);
+create table t2_7 partition of t2 for values from (6000000) to ( 7000000);
+create table t2_8 partition of t2 for values from (7000000) to ( 8000000);
+create table t2_9 partition of t2 for values from (8000000) to ( 9000000);
+create table t2_0 partition of t2 for values from (9000000) to (10000000);
+```
+
+Enfin, la table *t3* est une table utilisant l'ancienne méthode de
+partitionnement :
+
+```
+CREATE TABLE t3 (c1 integer, c2 text);
+CREATE TABLE t3_1 (CHECK (c1 BETWEEN       0 AND  1000000)) INHERITS (t3);
+CREATE TABLE t3_2 (CHECK (c1 BETWEEN 1000000 AND  2000000)) INHERITS (t3);
+CREATE TABLE t3_3 (CHECK (c1 BETWEEN 2000000 AND  3000000)) INHERITS (t3);
+CREATE TABLE t3_4 (CHECK (c1 BETWEEN 3000000 AND  4000000)) INHERITS (t3);
+CREATE TABLE t3_5 (CHECK (c1 BETWEEN 4000000 AND  5000000)) INHERITS (t3);
+CREATE TABLE t3_6 (CHECK (c1 BETWEEN 5000000 AND  6000000)) INHERITS (t3);
+CREATE TABLE t3_7 (CHECK (c1 BETWEEN 6000000 AND  7000000)) INHERITS (t3);
+CREATE TABLE t3_8 (CHECK (c1 BETWEEN 7000000 AND  8000000)) INHERITS (t3);
+CREATE TABLE t3_9 (CHECK (c1 BETWEEN 8000000 AND  9000000)) INHERITS (t3);
+CREATE TABLE t3_0 (CHECK (c1 BETWEEN 9000000 AND 10000000)) INHERITS (t3);
+
+CREATE OR REPLACE FUNCTION insert_into() RETURNS TRIGGER
+LANGUAGE plpgsql
+AS $FUNC$
+BEGIN
+  IF NEW.c1    BETWEEN       0 AND  1000000 THEN
+    INSERT INTO t3_1 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 1000000 AND  2000000 THEN
+    INSERT INTO t3_2 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 2000000 AND  3000000 THEN
+    INSERT INTO t3_3 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 3000000 AND  4000000 THEN
+    INSERT INTO t3_4 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 4000000 AND  5000000 THEN
+    INSERT INTO t3_5 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 5000000 AND  6000000 THEN
+    INSERT INTO t3_6 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 6000000 AND  7000000 THEN
+    INSERT INTO t3_7 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 7000000 AND  8000000 THEN
+    INSERT INTO t3_8 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 8000000 AND  9000000 THEN
+    INSERT INTO t3_9 VALUES (NEW.*);
+  ELSIF NEW.c1 BETWEEN 9000000 AND 10000000 THEN
+    INSERT INTO t3_0 VALUES (NEW.*);
+  END IF;
+  RETURN NULL;
+END;
+$FUNC$;
+
+CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3 FOR EACH ROW EXECUTE PROCEDURE insert_into();
+```
+</div>
+
+-----
+
 ### Limitations
 
 <div class="slide-content">
