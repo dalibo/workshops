@@ -1009,11 +1009,29 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 ## Sécurité - pg_hba.conf
 
 <div class="slide-content">
- * Méthode d'authentification *SCRAM-SHA-256*, plus robuste que *MD5* pour la négociation et le stockage des mots de passe
   * Vue *pg_hba_file_rules*
+  * Par défaut, connexion locale de réplication à *trust*
+  * Nouvelle méthode d'authentification *SCRAM-SHA-256*
 </div>
 
 <div class="notes">
+La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès. 
+
+```
+ line_number | type  |   database    | user_name |  address  |                 netmask                 | auth_method | options | error 
+-------------+-------+---------------+-----------+-----------+-----------------------------------------+-------------+---------+-------
+          84 | local | {all}         | {all}     |           |                                         | trust       |         | 
+          86 | host  | {all}         | {all}     | 127.0.0.1 | 255.255.255.255                         | trust       |         | 
+          88 | host  | {all}         | {all}     | ::1       | ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff | trust       |         | 
+          91 | local | {replication} | {all}     |           |                                         | trust       |         | 
+          92 | host  | {replication} | {all}     | 127.0.0.1 | 255.255.255.255                         | trust       |         | 
+          93 | host  | {replication} | {all}     | ::1       | ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff | trust       |         | 
+(6 rows)
+```
+
+Les valeurs par défaut relatives à la réplication, contenues dans le fichier `pg_hba.conf` ont été modifiée. Par défaut, les connexions locales ont comme méthode d'authentification *trust*.
+
+Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son apparition. Il s'agit de l'implémentation du **Salted Challenge Response Authentication Mechanism**. Ceci est basé sur un schéma de type question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas être supportée par d'anciens clients. 
 </div>
 
 -----
