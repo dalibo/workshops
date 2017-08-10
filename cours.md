@@ -1134,7 +1134,7 @@ toto2@totodb=> SELECT * FROM comptes;
 Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
 
 ```
-toto2@totodb=> EXPLAIN(ANALYSE) SELECT * FROM comptes;
+toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
                                             QUERY PLAN                                             
 ---------------------------------------------------------------------------------------------------
  Seq Scan on comptes  (cost=0.00..21.38 rows=6 width=96) (actual time=0.022..0.024 rows=2 loops=1)
@@ -1163,7 +1163,7 @@ toto2@totodb=> SELECT * FROM comptes;
  toto2 | dalibo  | toto2@dalibo.com
 (1 row)
 
-toto2@totodb=> EXPLAIN(ANALYSE) SELECT * FROM comptes;
+toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
                                             QUERY PLAN                                             
 ---------------------------------------------------------------------------------------------------
  Seq Scan on comptes  (cost=0.00..21.38 rows=1 width=96) (actual time=0.040..0.043 rows=1 loops=1)
