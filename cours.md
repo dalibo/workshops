@@ -163,7 +163,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 ### Ancient partitionnement
 
 <div class="slide-content">
-  * La partitionnement par héritage se base sur
+  * Le partitionnement par héritage se base sur
     * la notion d'héritage (1 table mère et des tables filles)
     * des triggers pour orienter les insertions vers les tables filles
     * des contraintes d’exclusion pour optimiser les requêtes
@@ -322,10 +322,11 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 </div>
 
 <div class="notes">
+FIXME: remplacement de UNBOUNDED par MINVALUE et MAXVALUE dans la beta3 ?
 
-Toute donnée doit pouvoir être placé dans une partition. Dans le cas
+Toute donnée doit pouvoir être placée dans une partition. Dans le cas
 contraire, la donnée ne sera pas placée dans la table mère (contrairement au
-partitionnement traditionnel). À la place, une erreur est générée :
+partitionnement traditionnel). À la place, une erreur sera générée :
 
 ERROR:  no partition of relation "t2" found for row
 
@@ -337,8 +338,6 @@ ERROR:  cannot create index on partitioned table "t1"
 Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non
 plus possible de faire pointer une clé étrangère vers ce type de table.
-
-FIXME: remplacement de UNBOUNDED par MINVALUE et MAXVALUE dans la beta3 ?
 
 Vous pouvez également consulter 4 articles avec des explications ainsi que des exemples concrets :
 
@@ -366,11 +365,10 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
 </div>
 
 <div class="notes">
-Quelques usages typiques de la réplication logique :
-
-  * Alimentation d'une base de données de type *datawarehouse*
-  * Déport sur un serveur secondaire de traitements lourds
-  * Changement de version majeure de PostgreSQL sans arrêt de service
+  * Quelques usages typiques de la réplication logique
+    * alimentation d'une base de données de type *datawarehouse*
+    * déport sur un serveur secondaire de traitements lourds
+    * changement de version majeure de PostgreSQL sans arrêt de service
 
 Ce nouveau type de réplication supporte la recopie des tables à la création de la souscription, ce qui peut s'avérer être très pratique. Pour en savoir plus sur ce sujet, vous pouvez consulter l'article [Logical replication support for initial data copy](https://dali.bo/waiting-for-postgresql-10-logical-replication-support-for-initial-data-copy "waiting-for-postgresql-10-logical-replication-support-for-initial-data-copy").
 
