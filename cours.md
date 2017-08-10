@@ -873,6 +873,8 @@ Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 </div>
 
 <div class="notes">
+FIXME: Barman et autres outils
+
 Voici une grille de compatibilité des outils Dalibo :
 
 | Outil | Compatibilité avec PostgreSQL 10 |
@@ -894,7 +896,6 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 </div>
 
 -----
-
 
 ## Futur
 
