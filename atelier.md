@@ -1,4 +1,4 @@
-## Atelier
+# Atelier
 
 <div class="slide-content">
 À présent, place à l'atelier...
@@ -23,7 +23,7 @@
   * FIXME: comparaison partitionnements (pg_class ; exemples de gilles ? depesz ?)
   * FIXME: comparaison de plans d'exécution liés au parallèlisme
 
-### Installation
+## Installation
 Les machines de la salle de formation sont en CentOS 6. L'utilisateur dalibo peut utiliser sudo pour les opérations système.
 
 Le site postgresql.org propose son propre dépôt RPM, nous allons donc l'utiliser.
@@ -81,7 +81,7 @@ sudo -iu postgres psql
 
 
 
-### Parallélisation
+## Parallélisation
 Créer les tables suivantes :
 
 ```sql
@@ -347,7 +347,7 @@ vous pouvez réinitialiser entre deux essais avec la fonction
 
 
 
-### Index bloom
+## Index bloom
 
   * Nous allons comparer un index btree classique et un bloom sur seulement deux attributs :
 
@@ -486,7 +486,7 @@ WHERE bla BETWEEN 50 AND 51 AND bli LIKE 'e00b%';
 
 
 
-### FDW
+## FDW
 
 
   * Dans une première instance : instance1 (celle par défaut sur votre poste)
@@ -662,7 +662,7 @@ volumétries plus importantes, chercher la cause des débits assez bas.
 
 
 
-### Sauvegardes
+## Sauvegardes
 
 
   * Faire une sauvegarde classique et vérifier le contenu des fichiers backup_label puis XXXX.XXXX.backup
@@ -829,7 +829,7 @@ STOP TIME: 2016-08-12 18:14:58 CEST
 
 
 
-### Visibility Map
+## Visibility Map
 
 * On crée une nouvelle table avec 451 lignes :
 
@@ -1157,7 +1157,7 @@ des attributs  all_visible et all_frozen.
 
 
 
-### Fonctions SQL
+## Fonctions SQL
 
 Afficher le sinus pour 30° puis pour 0,523599 rd
 
@@ -1180,7 +1180,7 @@ SELECT sin(0.523599);
 
 
 
-### Réplication Synchrone
+## Réplication Synchrone
 
 
 
