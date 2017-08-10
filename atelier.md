@@ -2,6 +2,15 @@
 
 <div class="slide-content">
 À présent, place à l'atelier...
+
+* Installation
+* Parallélisation
+* Index bloom
+* FDW
+* Sauvegardes
+* Visibility Map
+* Fonctions SQL
+* Réplication Synchrone
 </div>
 
 <div class="notes">

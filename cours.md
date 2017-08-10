@@ -48,7 +48,6 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
   * Futur
 </div>
 
-
 <div class="notes">
 PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'ores et déjà détaillées dans de nombreux articles. Voici 3 liens vers des articles en anglais :
 
