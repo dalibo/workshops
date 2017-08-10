@@ -174,7 +174,7 @@ postgres=# \df *switch_wal*
 ## Authentification avec SCRAM-SHA-256
 
 <div class="notes">
-Créons tout d'abord un utilisateur sans préciser l'algorithme :
+Créons tout d'abord un utilisateur sans préciser l'algorithme de chiffrement :
 
 ```sql
 postgres=# CREATE USER testmd5 WITH PASSWORD 'XXX';
@@ -221,8 +221,6 @@ postgres=# SELECT pg_reload_conf();
 ----------------
  t
 (1 row)
-
-FIXME: authentification possible avec scram-sha-256 quand md5 est précisé ???
 ```
 </div>
 
