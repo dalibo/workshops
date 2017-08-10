@@ -12,6 +12,7 @@
   * Parallélisation
   * Partitionnement
   * Performances
+  * Collations ICU
 </div>
 
 -----
@@ -562,6 +563,9 @@ testseq=# EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM t1 WHERE id < 
 
 Dans le contexte d'un noeud `Index Only Scan`, un noeud `Gather` n'est bien présent que dans l'instance 10.
 
+FIXME: à compléter / détailler
+</div>
+
 -----
 
 ## Partitionnement
@@ -576,4 +580,12 @@ FIXME: contenu
 
 <div class="notes">
 FIXME: contenu / tri / mail de thomas
+</div>
+
+-----
+
+## Collations ICU
+
+<div class="notes">
+FIXME: contenu / mail d'Adrien
 </div>
