@@ -1004,7 +1004,20 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 
 -----
 
-## Sécurité - pg_hba.conf
+## Sécurité
+
+<div class="slide-content">
+  * pg_hba.conf
+  * Row-Level Security
+  * Nouveaux rôles
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+### pg_hba.conf
 
 <div class="slide-content">
   * Vue *pg_hba_file_rules*
@@ -1034,7 +1047,7 @@ Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son a
 
 -----
 
-## Sécurité - Row-Level Security
+### Row-Level Security
 
 <div class="slide-content">
   * Politique de sécurité pour l'accès aux lignes d'une table
@@ -1163,7 +1176,7 @@ Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 
 -----
 
-## Sécurité - Nouveaux rôles
+### Nouveaux rôles
 
 <div class="slide-content">
   * Supervision normalement réservée aux super-utilisateurs
