@@ -199,15 +199,10 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
   * Nommage des arguments longs
     * --xlog-method -> --wal-method
     * --xlogdir -> --waldir
-  * Slot de réplication temporaire
 </div>
 
 <div class="notes">
 Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
-
-Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
-
-De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre la fin de la sauvegarde et le début de lancement de la réplication en flux.
 </div>
 
 -----
@@ -527,7 +522,6 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
   * Supervision
   * Exemples
 </div>
-
 
 <div class="notes">
 </div>
@@ -877,6 +871,11 @@ postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
  (workshop,0/1620288)
 (1 row)
 ```
+
+pg_basebackup :
+Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
+De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre la fin de la sauvegarde et le début de lancement de la réplication en flux.
+
 
 Voici par ailleurs deux exemples permettant de définir le quorum  :
 
