@@ -622,26 +622,89 @@ D'autres catalogues déjà existants peuvent également être utiles :
 ### Exemple - Création d'une publication
 
 <div class="slide-content">
+  * Définir wal_level à logical
+  * Initialiser une base de données et sauvegarder son schéma
+  * Créer une publication `CREATE PUBLICATION ma_publication FOR ALL TABLES;`
 </div>
 
 <div class="notes">
-createdb bench
-pgbench -i -s 100 bench
-pg_dump --schema-only bench > bench-schema.sql
-psql -d bench -c "CREATE PUBLICATION bench_pub FOR ALL TABLES ;"
+**Exemple complet :**
+
+Définir le paramètre `wal_level = logical` dans le fichier `postgresql.conf` des serveurs éditeurs et abonnés.
+
+Initialiser une base de données :
+
+```bash
+$ createdb bench
+$ pgbench -i -s 100 bench
+```
+
+Sauvegarder son schéma :
+
+```bash
+$ pg_dump --schema-only bench > bench-schema.sql
+```
+
+Créer la publication :
+
+```
+postgres@bench=# CREATE PUBLICATION ma_publication FOR ALL TABLES;
+CREATE PUBLICATION
+```
+
+Une publication doit être créée par base de données. 
+
+Elle liste les tables dont la réplication est souhaitée. 
+
+L'attribut `FOR ALL TABLES` permet de ne pas spécifier cette liste. Pour utiliser cet attribut, il faut être super-utilisateur.
+
+Créer ensuite l'utilisateur qui servira pour la réplication :
+
+```bash
+$ createuser --replication repliuser
+```
+
+Lui autoriser l'accès dans le fichier `pg_hba.conf` et lui permettre de visualiser les données dans la base :
+
+```
+postgres@bench=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO repliuser;
+GRANT
+```
 </div>
+
 
 -----
 
 ### Exemple - Création d'une souscription
 
 <div class="slide-content">
+  * Initialiser une base de données et importer son schéma
+  * Créer l'abonnement `CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;`
 </div>
 
 <div class="notes">
-createdb bench
-psql -f bench-schema.sql --single-transaction bench
-psql -d bench -c "CREATE SUBSCRIPTION bench_sub CONNECTION 'host=127.0.0.1 port=5434 user=repuser dbname=bench' PUBLICATION bench_pub;"
+**Exemple complet :**
+
+Initialiser la base de données et son schéma :
+
+```bash
+$ createdb bench
+$ psql -f bench-schema.sql --single-transaction bench
+```
+
+Créer l'utilisateur pour la réplication :
+
+```bash
+createuser --replication repliuser
+```
+
+En tant que super-utilisateur, créer l'abonnement :
+
+```
+postgres@bench=# CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;
+NOTICE:  created replication slot "ma_souscription" on publisher
+CREATE SUBSCRIPTION
+```
 </div>
 
 -----
@@ -649,17 +712,140 @@ psql -d bench -c "CREATE SUBSCRIPTION bench_sub CONNECTION 'host=127.0.0.1 port=
 ### Exemple - Visualisation de l'état de la réplication
 
 <div class="slide-content">
+  * Sur l'éditeur
+    * état de la réplication `select * from pg_stat_replication;`
+    * slot de réplication `select * from pg_replication_slots;`
+    * état de la publication `select * from pg_publication;`
+    * contenu de la publication `select * from pg_publication_tables;`
+  * Sur l'abonné
+    * état de l'abonnement `select * from pg_subscription;`
+    * état de la réplication `select * from pg_replication_origin_status;`
 </div>
 
 <div class="notes">
-pgbench -T 300 bench
+*pg_stat_replication*
 
-pg_stat_replication 
-pg_publication 
-pg_publication_tables 
-pg_replication_slot 
-pg_subscription
-pg_replication_origin_status
+```
+postgres@bench=# select * from pg_stat_replication;
+-[ RECORD 1 ]----+-----------------------------
+pid              | 10299
+usesysid         | 16407
+usename          | repliuser
+application_name | ma_souscription
+client_addr      | 127.0.0.1
+client_hostname  | 
+client_port      | 49936
+backend_start    | 2017-08-08 10:28:14.49455+02
+backend_xmin     | 
+state            | streaming
+sent_lsn         | 0/4E3BCD08
+write_lsn        | 0/4E3BCD08
+flush_lsn        | 0/4E3BCD08
+replay_lsn       | 0/4E3BCD08
+write_lag        | 
+flush_lag        | 
+replay_lag       | 
+sync_priority    | 0
+sync_state       | async
+```
+
+*pg_replication_slots*
+
+```
+postgres@bench=# select * from pg_replication_slots;
+    slot_name    |  plugin  | slot_type | datoid | database | temporary | active | active_pid | xmin | catalog_xmin | restart_lsn | confirmed_flush_lsn 
+-----------------+----------+-----------+--------+----------+-----------+--------+------------+------+--------------+-------------+---------------------
+ ma_souscription | pgoutput | logical   |  16384 | bench    | f         | t      |      10299 |      |          581 | 0/4E3BCCD0  | 0/4E3BCD08
+(1 row)
+```
+
+*pg_publication*
+
+```
+postgres@bench=# select * from pg_publication;
+    pubname     | pubowner | puballtables | pubinsert | pubupdate | pubdelete 
+----------------+----------+--------------+-----------+-----------+-----------
+ ma_publication |       10 | t            | t         | t         | t
+(1 row)
+```
+
+*pg_publication_tables*
+
+```
+postgres@bench=# select * from pg_publication_tables;
+    pubname     | schemaname |    tablename     
+----------------+------------+------------------
+ ma_publication | public     | pgbench_history
+ ma_publication | public     | pgbench_tellers
+ ma_publication | public     | pgbench_branches
+ ma_publication | public     | pgbench_accounts
+(4 rows)
+```
+
+*pg_subscription*
+
+```
+postgres@bench=# select * from pg_subscription;
+ subdbid |     subname     | subowner | subenabled |                     subconninfo                      |   subslotname   | subsynccommit | subpublications  
+---------+-----------------+----------+------------+------------------------------------------------------+-----------------+---------------+------------------
+   16406 | ma_souscription |       10 | t          | host=127.0.0.1 port=5433 user=repliuser dbname=bench | ma_souscription | off           | {ma_publication}
+(1 row)
+```
+
+*pg_replication_origin_status*
+
+```
+postgres@bench=# select * from pg_replication_origin_status;
+ local_id | external_id | remote_lsn | local_lsn  
+----------+-------------+------------+------------
+        1 | pg_16425    | 0/0        | 0/D07ACA48
+(1 row)
+```
+
+
+*Exemple de suivi de l'évolution de la réplication :*
+
+Simuler de l'activité :
+
+```bash
+$ pgbench -T 300 bench
+```
+
+Sur l'éditeur :
+
+```
+postgres@bench=# select * from pg_stat_replication;
+-[ RECORD 1 ]----+-----------------------------
+pid              | 10299
+usesysid         | 16407
+usename          | repliuser
+application_name | ma_souscription
+client_addr      | 127.0.0.1
+client_hostname  | 
+client_port      | 49936
+backend_start    | 2017-08-08 10:28:14.49455+02
+backend_xmin     | 
+state            | streaming
+sent_lsn         | 0/5D549928
+write_lsn        | 0/5D547768
+flush_lsn        | 0/5D5323B0
+replay_lsn       | 0/5D547768
+write_lag        | 
+flush_lag        | 00:00:00.011534
+replay_lag       | 
+sync_priority    | 0
+sync_state       | async
+```
+
+Sur l'abonné :
+
+```
+postgres@bench=# select * from pg_replication_origin_status;
+ local_id | external_id | remote_lsn | local_lsn  
+----------+-------------+------------+------------
+        1 | pg_16425    | 0/5DED5628 | 0/DFC90780
+(1 row)
+```
 </div>
 
 -----
