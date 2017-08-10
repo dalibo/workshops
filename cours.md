@@ -1036,15 +1036,131 @@ Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son a
 
 -----
 
-## Sécurité - Row Level Security
+## Sécurité - Row-Level Security
 
 <div class="slide-content">
-  * Nouvel attribut pour l'instruction *CREATE POLICY* des *Row Level Security*
+  * Politique de sécurité pour l'accès aux lignes d'une table
+  * Nouvel attribut pour l'instruction *CREATE POLICY*
     * *PERMISSIVE* : les politiques d’une table sont reliées par des *OR* (valeur par défaut)
     * *RESTRICTIVE* : les politiques d’une table sont reliées par des *AND*
 </div>
 
 <div class="notes">
+Les tables peuvent avoir des politiques de sécurité pour l'accès aux lignes qui restreignent, utilisateur par utilisateur, les lignes qui peuvent être renvoyées par les requêtes d'extraction ou les commandes d'insertions, de mises à jour ou de suppressions. Cette fonctionnalité est aussi connue sous le nom de `Row-Level Security`.
+
+Lorsque la protection des lignes est activée sur une table, tous les accès classiques à la table pour sélectionner ou modifier des lignes doivent être autorisés par une politique de sécurité. 
+
+Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiques de sécurité. Si aucune politique n'existe pour la table, une politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est visible ou ne peut être modifiée.
+
+Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Il est depuis la version 10 possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
+
+**Exemple :**
+
+Soit 2 utilisateurs :
+
+```
+postgres@postgres=# CREATE ROLE toto WITH LOGIN;
+CREATE ROLE
+
+postgres@postgres=# CREATE ROLE toto2 WITH LOGIN;
+CREATE ROLE
+```
+
+Créons une table *comptes*, insérons-y des données et permettons aux utilisateurs d'accéder à ces données :
+
+```
+toto@totodb=> CREATE TABLE comptes (admin text, societe text, contact_email text);
+CREATE TABLE
+
+toto@totodb=> INSERT INTO comptes VALUES ('toto', 'dalibo', 'toto@dalibo.com');
+INSERT 0 1
+
+toto@totodb=> INSERT INTO comptes VALUES ('toto2', 'dalibo', 'toto2@dalibo.com');
+INSERT 0 1
+
+toto@totodb=> INSERT INTO comptes VALUES ('toto3', 'paris', 'toto2@paris.fr');
+INSERT 0 1
+
+toto@totodb=> GRANT SELECT ON comptes TO toto2;
+GRANT
+```
+
+Activons maintenant deux politiques permissives :
+
+```
+toto@totodb=> ALTER TABLE comptes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE
+
+toto@totodb=> CREATE POLICY compte_admins ON comptes USING (admin = current_user);
+CREATE POLICY
+
+toto@totodb=> SELECT * FROM comptes;
+ admin | societe |  contact_email   
+-------+---------+------------------
+ toto  | dalibo  | toto@dalibo.com
+ toto2 | dalibo  | toto2@dalibo.com
+(2 rows)
+
+toto2@totodb=> SELECT * FROM comptes;
+ admin | societe |  contact_email   
+-------+---------+------------------
+ toto2 | dalibo  | toto2@dalibo.com
+(1 row)
+
+toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'paris');
+CREATE POLICY
+
+toto2@totodb=> SELECT * FROM comptes;
+ admin | societe |  contact_email   
+-------+---------+------------------
+ toto2 | dalibo  | toto2@dalibo.com
+ toto3 | paris   | toto2@paris.fr
+(2 rows)
+```
+
+*toto* étant propriétaire de cette table, les politiques ne s'appliquent pas à lui, au contraire de *toto2*.
+
+Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
+
+```
+toto2@totodb=> EXPLAIN(ANALYSE) SELECT * FROM comptes;
+                                            QUERY PLAN                                             
+---------------------------------------------------------------------------------------------------
+ Seq Scan on comptes  (cost=0.00..21.38 rows=6 width=96) (actual time=0.022..0.024 rows=2 loops=1)
+   Filter: ((societe = 'paris'::text) OR (admin = (CURRENT_USER)::text))
+   Rows Removed by Filter: 1
+```
+
+Remplaçons maintenant l'une de ces politiques permissives par une politique restrictive :
+
+```
+toto@totodb=> DROP POLICY compte_admins ON comptes;
+DROP POLICY
+
+toto@totodb=> DROP POLICY pol_societe ON comptes;
+DROP POLICY
+
+toto@totodb=> CREATE POLICY compte_admins ON comptes AS RESTRICTIVE USING (admin = current_user);
+CREATE POLICY
+
+toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'dalibo');
+CREATE POLICY
+
+toto2@totodb=> SELECT * FROM comptes;
+ admin | societe |  contact_email   
+-------+---------+------------------
+ toto2 | dalibo  | toto2@dalibo.com
+(1 row)
+
+toto2@totodb=> EXPLAIN(ANALYSE) SELECT * FROM comptes;
+                                            QUERY PLAN                                             
+---------------------------------------------------------------------------------------------------
+ Seq Scan on comptes  (cost=0.00..21.38 rows=1 width=96) (actual time=0.040..0.043 rows=1 loops=1)
+   Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
+   Rows Removed by Filter: 2
+```
+
+Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 </div>
 
 -----
