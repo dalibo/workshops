@@ -111,13 +111,75 @@ Vous trouverez plus de détails dans l'article de Josh Berkus disponible sur son
     * *pg_xlog* -> *pg_wal*
     * *pg_clog* -> *pg_xact*
   * Au niveau des fonctions
-    * *pg_switch_wal*, *pg_walfile_name*, *pg_current_wal*, *pg_last_wal*, *pg_wal_location_diff*
+    * *xlog* -> *wal*
+    * *location* -> *lsn*
   * Au niveau des outils
-    * *pg_receivewal*, *pg_resetwal*, *pg_waldump*
+    * *xlog* -> *wal*
 </div>
 
 <div class="notes">
-Afin de clarifier le rôle de ces répertoires qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, les deux renommages ont été effectués dans $PGDATA ainsi qu'au niveau des fonctions.
+Afin de clarifier le rôle de ces répertoires qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, les deux renommages ont été effectués dans $PGDATA ainsi qu'au niveau des fonctions :
+
+Voici le contenu actuel d'un répertoire de données PostgreSQL, tout de suite
+après son initialisation :
+
+```
+drwx------. 5 postgres postgres  4096 Aug  3 17:24 base
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 global
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_commit_ts
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_dynshmem
+-rw-------. 1 postgres postgres  4513 Aug  3 17:24 pg_hba.conf
+-rw-------. 1 postgres postgres  1636 Aug  3 17:24 pg_ident.conf
+drwx------. 4 postgres postgres  4096 Aug  3 17:24 pg_logical
+drwx------. 4 postgres postgres  4096 Aug  3 17:24 pg_multixact
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_notify
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_replslot
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_serial
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_snapshots
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_stat
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_stat_tmp
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_subtrans
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_tblspc
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_twophase
+-rw-------. 1 postgres postgres     3 Aug  3 17:24 PG_VERSION
+drwx------. 3 postgres postgres  4096 Aug  3 17:24 pg_wal
+drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_xact
+-rw-------. 1 postgres postgres    88 Aug  3 17:24 postgresql.auto.conf
+-rw-------. 1 postgres postgres 22746 Aug  3 17:24 postgresql.conf
+```
+
+De même pour les fonctions :
+
+```
+postgres=# select proname from pg_proc where proname like '%wal%' order by proname;
+          proname
+---------------------------
+ pg_current_wal_flush_lsn
+ pg_current_wal_insert_lsn
+ pg_current_wal_lsn
+ pg_is_wal_replay_paused
+ pg_last_wal_receive_lsn
+ pg_last_wal_replay_lsn
+ pg_ls_waldir
+ pg_stat_get_wal_receiver
+ pg_stat_get_wal_senders
+ pg_switch_wal
+ pg_wal_lsn_diff
+ pg_wal_replay_pause
+ pg_wal_replay_resume
+ pg_walfile_name
+ pg_walfile_name_offset
+(15 rows)
+```
+
+Pour les outils, cela concerne :
+
+```
+$ ls -l *wal*
+-rwxr-xr-x. 1 postgres postgres 248832 Aug  2 11:09 pg_receivewal
+-rwxr-xr-x. 1 postgres postgres 149576 Aug  2 11:09 pg_resetwal
+-rwxr-xr-x. 1 postgres postgres 482344 Aug  2 11:09 pg_waldump
+```
 
 L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer à cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
 
