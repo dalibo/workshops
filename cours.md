@@ -1429,16 +1429,16 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 
 <div class="slide-content">
   * psql : ajout de méta-commandes
-    * \gx, force l'affichage étendu de \g
-    * structure conditionnelle \if, \elif, \else, \endif
+    * \\gx, force l'affichage étendu de \\g
+    * structure conditionnelle \\if, \\elif, \\else, \\endif
   * Journalisation des indexes Hash
   * Possibilité de renommer une valeur d'un type existant via *ALTER TYPE*
 </div>
 
 <div class="notes">
-**\gx**
+**\\gx**
 
-\gx est équivalent à \g, mais force l'affichage étendu pour cette requête. 
+\\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête. 
 
 Exemple :
 
@@ -1450,14 +1450,14 @@ postgres=# SELECT * FROM t1 LIMIT 2;
  0 | 0
 (2 rows)
 
-postgres=# \g
+postgres=# \\g
  a | b 
 ---+---
  0 | 0
  0 | 0
 (2 rows)
 
-postgres=# \gx
+postgres=# \\gx
 -[ RECORD 1 ]
 a | 0
 b | 0
@@ -1469,9 +1469,9 @@ b | 0
 
 Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command "waiting-for-postgresql-10-psql-add-gx-command")
 
-**\if, \elif, \else, \endif**
+**\\if, \\elif, \\else, \\endif**
 
-Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \if et se terminer par un \endif. Entre les deux, il peut y avoir plusieurs clauses \elif, pouvant être suivies facultativement par une unique clause \else.
+Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
 
 Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting "waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting")
 
