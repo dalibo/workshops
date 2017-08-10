@@ -68,7 +68,6 @@ Actuellement, deux versions, [Beta1](https://dali.bo/pg10-beta1-changes "pg10-be
   * Changement de *pg_basebackup*
 </div>
 
-
 <div class="notes">
 </div>
 
@@ -215,7 +214,6 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
   * Nouvelle syntaxe
   * Quelques limitations
 </div>
-
 
 <div class="notes">
 </div>
@@ -803,7 +801,7 @@ postgres@bench=# select * from pg_replication_origin_status;
 ```
 
 
-*Exemple de suivi de l'évolution de la réplication :*
+**Exemple de suivi de l'évolution de la réplication :**
 
 Simuler de l'activité :
 
@@ -1196,44 +1194,175 @@ La version 10 implémente les nouveaux rôles suivants :
 ## Autres nouveautés - Pour les DBA
 
 <div class="slide-content">
-  * Statistiques multi-colonnes pour la corrélation et le % de valeurs distinctes (utilisées pour la création des plans d'exécution)
-  * Gestion du *failover* dans le protocole *libpq* (on se connecte au premier serveur qui répond)
-  * Réplication avec quorum, c'est à dire qu'un *commit* doit par exemple être acquitté par 2 serveurs synchrones.
-  * Gestion de la compression dans *pg_receivewal* (via *libz*, avec un ratio entre 0 et 9)
-  * Améliorations diverses sur les *FDW* (ex : "SELECT COUNT(\*) FROM foreign_table")
-  * Bibliothèque  de collations *ICU* indépendante de l'OS
-  * Slots de réplication temporaires
-  * pg_log -> log = changement valeur par défaut de log_directory
-  * L'extension file_fdw peut utiliser un programme en entrée
+  * pg_stat_activity
+  * Architecture
+  * FDW
+  * Divers
 </div>
 
 <div class="notes">
-Il est désormais possible dans *libpq* de spécifier plusieurs serveurs, ainsi que des attributs qui permettront par exemple de trouver le serveur qui accepte les écritures.
+</div>
 
-Un slot de réplication (utilisation par la réplication, par *pg_basebackup*, etc.) peut désormais être créé temporairement :
+-----
+
+### pg_stat_activity
+
+<div class="slide-content">
+  * Affichage des processus auxiliaires
+    * nouvelle colonne *backend_type*
+  * Nouveaux types d'événements pour lesquels le processus est en attente
+    * Activity
+    * Extension
+    * Client
+    * IPC
+    * Timeout
+    * IO
+  * Renommage des types LWLockNamed et LWLockTranche en LWLock
+</div>
+
+<div class="notes">
+Affichage des processus auxiliaires dans la nouvelle colonne *backend_type*.
+
+Les types possibles sont : autovacuum launcher, autovacuum worker, background worker, background writer, client backend, checkpointer, startup, walreceiver, walsender et walwriter.
+
+```
+postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, backend_type FROM pg_stat_activity ;
+ pid  | application_name | wait_event_type |     wait_event      |    backend_type     
+------+------------------+-----------------+---------------------+---------------------
+ 4938 |                  | Activity        | AutoVacuumMain      | autovacuum launcher
+ 4940 |                  | Activity        | LogicalLauncherMain | background worker
+ 4956 | psql             |                 |                     | client backend
+ 4936 |                  | Activity        | BgWriterHibernate   | background writer
+ 4935 |                  | Activity        | CheckpointerMain    | checkpointer
+ 4937 |                  | Activity        | WalWriterMain       | walwriter
+```
+
+De nouveaux types d'événements pour lesquels le processus est en attente apparaissent :
+  * Activity : The server process is idle. This is used by system processes waiting for activity in their main processing loop.
+  * Extension : The server process is waiting for activity in an extension module. This category is useful for modules to track custom waiting points. 
+  * Client : The server process is waiting for some activity on a socket from user applications, and that the server expects something to happen that is independent from its internal processes.
+  * IPC : The server process is waiting for some activity from another process in the server.
+  * Timeout :  The server process is waiting for a timeout to expire.
+  * IO : The server process is waiting for a IO to complete.
+
+Les types d'événements LWLockNamed et LWLockTranche ont été renommés en LWLock.
+</div>
+
+-----
+
+### Architecture
+
+<div class="slide-content">
+  * Architecture
+    * Amélioration de la librairie libpq
+    * Changement de la valeur par défaut de log_directory de pg_log à log
+    * Slots de réplication temporaires
+    * Support de la librairie ICU pour la gestion des collations
+</div>
+
+<div class="notes">
+**Amélioration de la librairie libpq**
+
+Il est possible de spécifier plusieurs instances aux options de connexions host et port.
+
+Exemple avec psql :
+
+```bash
+$ psql --host=127.0.0.1,127.0.0.1 --port=5432,5433
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.1" and accepting
+	TCP/IP connections on port 5432?
+could not connect to server: Connection refused
+	Is the server running on host "127.0.0.1" and accepting
+	TCP/IP connections on port 5433?
+```
+
+Il est également désormais possible de fournir l'attribut target_session_attrs à l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion dans laquelle une transaction *read-write* est possible ou n'importe quel type de transaction (*any*).
+
+Cela peu s'avérer utile pour établir une chaîne de connexion entre plusieurs instances en réplication et permettre l'exécution des requêtes en écriture sur le serveur primaire.
+
+Exemple avec psql :
+
+```bash
+$ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session_attrs=any"
+
+```
+
+**Slots de réplication temporaires**
+
+Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...) peut désormais être créé temporairement :
 
 ```sql
 postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
- pg_create_physical_replication_slot 
+pg_create_physical_replication_slot 
 -------------------------------------
- (workshop,0/1620288)
+(workshop,0/1620288)
 (1 row)
 ```
 
-pg_basebackup :
+Remarque pour *pg_basebackup* :
+
 Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
 De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre la fin de la sauvegarde et le début de lancement de la réplication en flux.
 
+**Support de la librairie ICU**
 
-Voici par ailleurs deux exemples permettant de définir le quorum  :
+Une collation est un objet du catalogue dont le nom au niveau SQL correspond à une locale fournie par les bibliothèques installées sur le système. Une définition de la collation a un fournisseur spécifiant quelle bibliothèque fournit les données locales. L'un des fournisseurs standards est libc, qui utilise les locales fournies par la bibliothèque C du système. Ce sont les locales les plus utilisées par des outils du système.
 
-  * *synchronous_standby_names* = FIRST 2 (node1,node2);
-  * *synchronous_standby_names* = ANY 2 (node1,node2,node3);
+La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*.
+</div>
 
-Pour compléter ces informations, vous pouvez également consulter :
+-----
 
-  * [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
-  * [postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers "waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers")
+### FDW
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+* Allow file_fdw to read from program output as well as files (Corey Huinker, Adam Gomaa)
+
+
+* Push aggregates to foreign data wrapper servers, where possible (Jeevan Chalke, Ashutosh Bapat)
+
+	This reduces the amount of data that must be passed from the foreign data wrapper server, and offloads aggregate computation from the requesting server. The postgres_fdw FDW is able to perform this optimization. There are also improvements in pushing down joins involving extensions.
+
+	Pour compléter ces informations, vous pouvez également consulter :
+	[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers "waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers")
+
+</div>
+
+-----
+
+### Divers
+
+<div class="slide-content">
+  * Divers
+    * quroum-based synchronous replication
+    * pg_receivewal
+    * Statistiques multi-colonnes
+</div>
+
+<div class="notes">
+* Réplication avec quorum, c'est à dire qu'un *commit* doit par exemple être acquitté par 2 serveurs synchrones.
+
+	Voici par ailleurs deux exemples permettant de définir le quorum  :
+	* *synchronous_standby_names* = FIRST 2 (node1,node2);
+	* *synchronous_standby_names* = ANY 2 (node1,node2,node3);
+
+
+* Gestion de la compression dans *pg_receivewal*
+
+	Add pg_receivewal option -Z/--compress to specify compression
+	-Z level, --compress=level
+
+	Active la compression gzip des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
+
+
+* Statistiques multi-colonnes pour la corrélation et le % de valeurs distinctes (utilisées pour la création des plans d'exécution)
+	
+	Pour compléter ces informations, vous pouvez également consulter :
+	[Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
 </div>
 
 -----
