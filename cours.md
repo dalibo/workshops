@@ -1505,25 +1505,166 @@ Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-alterty
 
 <div class="slide-content">
   * *Full Text Search* sur des colonnes de type *JSON* et *JSONB*
-  * *XMLTABLE*
+  * Fonction *XMLTABLE*
 </div>
 
 <div class="notes">
+**Full Text Search**
 
-Quelques informations sur *XMLTABLE* :
+Les fonctions ts_headline() et to_tsvector() peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
 
-  * Norme *SQL/XML*
-  * Permet de voir des éléments de documents *XML* sous forme de table relationnelle
-  * Une clause *XMLTABLE* dans la clause FROM définit le mapping entre éléments XML et colonnes
+Exemple :
+
+```
+postgres=# SELECT jsonb_pretty(document) FROM stock_jsonb;
+                jsonb_pretty                
+--------------------------------------------
+ {                                         +
+     "vin": {                              +
+         "type_vin": "blanc",              +
+         "recoltant": {                    +
+             "nom": "Mas Daumas Gassac",   +
+             "adresse": "34150 Aniane"     +
+         },                                +
+         "appellation": {                  +
+             "region": "Provence et Corse",+
+             "libelle": "Ajaccio"          +
+         }                                 +
+     },                                    +
+     "stocks": [                           +
+         {                                 +
+             "annee": 1999,                +
+             "nombre": 12,                 +
+             "contenant": {                +
+                 "libelle": "bouteille",   +
+                 "contenance": 0.75        +
+             }                             +
+         },                                +
+         {                                 +
+             "annee": 1999,                +
+             "nombre": 8,                  +
+             "contenant": {                +
+                 "libelle": "magnum",      +
+                 "contenance": 1.5         +
+             }                             +
+         },                                +
+         {                                 +
+             "annee": 1999,                +
+             "nombre": 10,                 +
+             "contenant": {                +
+                 "libelle": "jeroboam",    +
+                 "contenance": 4.5         +
+             }                             +
+         }                                 +
+     ]                                     +
+ }
+(1 row)
 
 
+postgres=# SELECT to_tsvector('french', document) FROM stock_jsonb;
+                                                                  to_tsvector                                                                  
+-----------------------------------------------------------------------------------------------------------------------------------------------
+ '34150':7 'ajaccio':14 'anian':8 'blanc':1 'bouteil':16,24 'cors':12 'daum':4 'gassac':5 'jeroboam':20,26 'magnum':18,22 'mas':3 'provenc':10
+(1 row)
+
+postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery)) FROM stock_jsonb;
+                 jsonb_pretty                  
+-----------------------------------------------
+ {                                            +
+     "vin": {                                 +
+         "type_vin": "blanc",                 +
+         "recoltant": {                       +
+             "nom": "Mas Daumas Gassac",      +
+             "adresse": "34150 Aniane"        +
+         },                                   +
+         "appellation": {                     +
+             "region": "Provence et Corse",   +
+             "libelle": "Ajaccio"             +
+         }                                    +
+     },                                       +
+     "stocks": [                              +
+         {                                    +
+             "annee": 1999,                   +
+             "nombre": 12,                    +
+             "contenant": {                   +
+                 "libelle": "bouteille",      +
+                 "contenance": 0.75           +
+             }                                +
+         },                                   +
+         {                                    +
+             "annee": 1999,                   +
+             "nombre": 8,                     +
+             "contenant": {                   +
+                 "libelle": "magnum",         +
+                 "contenance": 1.5            +
+             }                                +
+         },                                   +
+         {                                    +
+             "annee": 1999,                   +
+             "nombre": 10,                    +
+             "contenant": {                   +
+                 "libelle": "<b>jeroboam</b>",+
+                 "contenance": 4.5            +
+             }                                +
+         }                                    +
+     ]                                        +
+ }
+(1 row)
+```
+
+Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb "waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb")
 
 
-  * [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb "waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb")
+**XMLTABLE**
 
+La fonction xmltable produit une table basée sur la valeur XML donnée. Cette table pourra ensuite être utilisée par exemple comme table primaire d'une clause *FROM*.
 
+L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec l'option de configuration *--with-libxml*.
 
+Exemple :
+
+```
+postgres=# WITH x AS (
+    SELECT '<people>
+                <person>
+                    <first_name>Hubert</first_name>
+                    <last_name>Lubaczewski</last_name>
+                    <nick>depesz</nick>
+                </person>
+                <person>
+                    <first_name>Andrew</first_name>
+                    <last_name>Gierth</last_name>
+                    <nick>RhodiumToad</nick>
+                </person>
+                <person>
+                    <first_name>Devrim</first_name>
+                    <last_name>Gündüz</last_name>
+                </person>
+            </people>'::xml AS source_xml
+)
+SELECT decoded.*
+FROM
+    x,
+    xmltable(
+        '//people/person'
+        PASSING source_xml
+        COLUMNS
+            first_name text,
+            last_name text,
+            nick_name text PATH 'nick'
+    ) AS decoded;
+    
+first_name |  last_name  |    nick     
+------------+-------------+-------------
+Hubert     | Lubaczewski | depesz
+Andrew     | Gierth      | RhodiumToad
+Devrim     | Gündüz      | [null]
+(3 rows)
+```
+
+Pour en savoir plus :
   * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression "waiting-for-postgresql-10-support-xmltable-query-expression")
+  * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
 
 -----
