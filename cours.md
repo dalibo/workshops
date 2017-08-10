@@ -1006,26 +1006,55 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 
 -----
 
-## Sécurité
+## Sécurité - pg_hba.conf
 
 <div class="slide-content">
-  * Méthode d'authentification *SCRAM-SHA-256*, plus robuste que *MD5* pour la négociation et le stockage des mots de passe
+ * Méthode d'authentification *SCRAM-SHA-256*, plus robuste que *MD5* pour la négociation et le stockage des mots de passe
   * Vue *pg_hba_file_rules*
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+## Sécurité - Row Level Security
+
+<div class="slide-content">
   * Nouvel attribut pour l'instruction *CREATE POLICY* des *Row Level Security*
     * *PERMISSIVE* : les politiques d’une table sont reliées par des *OR* (valeur par défaut)
     * *RESTRICTIVE* : les politiques d’une table sont reliées par des *AND*
-  * Nouveaux rôles de monitoring permettant d'éviter l'attribut *SUPERUSER*
+</div>
 
 <div class="notes">
-PostgreSQL 10 dispose de nouveaux rôles, qui permettront notamment de limiter l'attribution de *SUPERUSER* aux rôles le nécessitant réellement.
+</div>
+
+-----
+
+## Sécurité - Nouveaux rôles
+
+<div class="slide-content">
+  * Supervision normalement réservée aux super-utilisateurs
+  * Nouveaux rôles
+    * pg_monitor
+    * pg_read_all_settings
+    * pg_read_all_stats
+    * pg_stat_scan_tables
+</div>
+
+<div class="notes">
+PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines informations et fonctionnalités privilégiées, habituellement nécessaires. Les administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres rôles de leurs environnements, fournissant à ces utilisateurs les fonctionnalités et les informations spécifiées. 
+
+Ils accordent un ensemble de privilèges permettant au rôle de lire plusieurs paramètres de configuration, statistiques et information système normalement réservés aux super-utilisateurs. 
+
+La version 10 implémente les nouveaux rôles suivants :
 
 | Rôle | Accès autorisé |
 | ------------------------ | ------------------------------------------------ |
+| pg_monitor | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
 | pg_read_all_settings | Lit toutes les variables de configuration, y compris celles normalement visibles des seuls super-utilisateurs. |
 | pg_read_all_stats | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
 | pg_stat_scan_tables | Exécute des fonctions de monitoring pouvant prendre des verrous verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
-| pg_signal_backend | Envoie des signaux à d'autres processus serveurs (par exemple pour annuler une requête ou fermer une session). |
-| pg_monitor | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
 </div>
 
 -----
