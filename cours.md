@@ -14,15 +14,17 @@ Public Domain CC0.
 
 <div class="slide-content">
   * Développement depuis août 2016
-  * Version Beta1 sortie le 18/05/2017
-  * Version Beta2 sortie le 13/07/2017
-  * Sortie de la release prévue en 2017
+  * Version beta 1 sortie le 18 mai
+  * Version beta 2 sortie le 13 juillet
+  * Sortie de la release prévue deuxième moitié 2017
   * Plus de 1,4 millions de lignes de code *C*
   * Des centaines de contributeurs
 </div>
 
 
 <div class="notes">
+Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue fin septembre/début octobre.
+
 La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
 Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL, une présentation récente de *Daniel Vérité* est disponible en ligne :
@@ -36,8 +38,7 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
 ## Table des matières
 
 <div class="slide-content">
-  * Nouveau système de numérotation des versions
-  * Changements de nommage
+  * Changements importants
   * Partitionnement
   * Réplication logique
   * Performances
@@ -55,7 +56,7 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
   * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10 "new-features-coming-in-postgresql-10") de *Robert Haas*
   * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10 "hp-new-features-pg10") de *HP*
 
-Actuellement, deux versions [Beta1](https://dali.bo/pg10-beta1-changes "pg10-beta1-changes") et [Beta2](https://dali.bo/pg10-beta2-changes "pg10-beta2-changes") ont été publiées.
+Actuellement, deux versions, [Beta1](https://dali.bo/pg10-beta1-changes "pg10-beta1-changes") et [Beta2](https://dali.bo/pg10-beta2-changes "pg10-beta2-changes"), ont été publiées.
 </div>
 
 -----
@@ -81,43 +82,45 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
 <div class="notes">
 La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
 
-Josh Berkus a détaillé les raisons de ce changement sur son [blog](https://dali.bo/changing-postgresql-version-numbering "changing-postgresql-version-numbering"), on notera que cela devrait notamment permettre de faciliter la communication externe, certains utilisateurs confondant avec l'ancien nommage les versions mineures et majeures.
+L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer le premier nombre ou les deux premiers nombres.  Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparait et les développeurs peuvent se concentrer sur un travail plus productif.
+
+Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
+
+Vous trouverez plus de détails sur l'article de Josh Berkus sur les raisons de ce changement sur son [blog](https://dali.bo/changing-postgresql-version-numbering "changing-postgresql-version-numbering").
 </div>
 
 -----
 
-## Changements de nommage - Le répertoire de données
+## XLOG devient WAL
 
 <div class="slide-content">
-
-Au niveau de $PGDATA :
-
-  * *xlog* -> *wal* : le répertoire devient *pg_wal*
-  * *clog* -> *xact* : le répertoire devient *pg_xact*
-
-Au niveau des fonctions :
-
-  * *pg_switch_xlog()* devient *pg_switch_wal()*
-
-Les outils livrés avec PostgreSQL ont bien sûr été adaptés.
+  * au niveau des répertoires
+    * *pg_xlog* -> *pg_wal*
+    * *pg_clog* -> *pg_xact*
+  * au niveau des fonctions
+    * *pg_switch_wal*, *pg_walfile_name*, *pg_current_wal*, *pg_last_wal*, *pg_wal_location_diff*
+  * au niveau des outils
+    * *pg_receivewal*, *pg_resetwal*, *pg_waldump*
 </div>
 
 <div class="notes">
 Afin de clarifier le rôle de ces répertoires qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, ces deux renommages ont été effectués dans $PGDATA, ainsi qu'au niveau des fonctions.
 
-L'ensemble des contibutions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Pour en savoir plus sur le sujet, vous pouvez consulter l'article [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal "waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal").
+L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer à cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
+
+Pour en savoir plus sur le sujet, vous pouvez consulter l'article [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal "waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal").
 </div>
 
 -----
 
-## Changements de nommage - Changements dans pg_basebackup
+## Changements dans pg_basebackup
 
 <div class="slide-content">
-  * L'option *-x* de *pg_basebackup* a été supprimée
-  * La méthode de transfert des WAL par défaut a été modifiée, on peut désormais utiliser pour l'option *-X* :
+  * Suppression de l'option *-x*
+  * Modification de la méthode de transfert des WAL par défaut
     * *none* : pas de récupération des WAL
     * *fetch* : récupération des WAL à la fin de la copie des données
-    * *stream* : streaming, par défaut
+    * *stream* : streaming (par défaut)
   * Nommage des arguments longs :
     * --xlog-method -> --wal-method
     * --xlogdir -> --waldir
