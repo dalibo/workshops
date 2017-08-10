@@ -575,7 +575,7 @@ Un abonnement définit la connexion à une autre base de données et un ensemble
 ### Fonctionnement
 
 <div class="slide-content">
-![Schema](medias/z100-schema-repli-logique.png)
+FIXME - mettre schema
 </div>
 
 <div class="notes">
