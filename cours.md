@@ -35,7 +35,7 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
 
 -----
 
-## Table des matières
+### Au menu
 
 <div class="slide-content">
   * Changements importants
@@ -61,7 +61,21 @@ Actuellement, deux versions, [Beta1](https://dali.bo/pg10-beta1-changes "pg10-be
 
 -----
 
-## Nouveau système de numérotation des versions
+## Changements importants
+
+<div class="slide-content">
+  * Changement de la numérotation
+  * Changement de noms
+  * Changement de *pg_basebackup*
+</div>
+
+
+<div class="notes">
+</div>
+
+-----
+
+### Nouveau système de numérotation des versions
 
 <div class="slide-content">
 Ancienne numérotation composée de 3 nombres :
@@ -91,7 +105,7 @@ Vous trouverez plus de détails sur l'article de Josh Berkus sur les raisons de 
 
 -----
 
-## XLOG devient WAL
+### XLOG devient WAL
 
 <div class="slide-content">
   * au niveau des répertoires
@@ -113,7 +127,7 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article [Rename “pg_
 
 -----
 
-## Changements dans pg_basebackup
+### Changements dans pg_basebackup
 
 <div class="slide-content">
   * Suppression de l'option *-x*
@@ -132,7 +146,21 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 
 -----
 
-## Partitionnement - Par héritage
+## Partitionnement
+
+<div class="slide-content">
+  * Nouveau partitionnement
+  * Nouvelle syntaxe
+  * Quelques limitations
+</div>
+
+
+<div class="notes">
+</div>
+
+-----
+
+### Partitionnement - Par héritage
 
 <div class="slide-content">
 La partitionnement par héritage se base sur :
@@ -150,7 +178,7 @@ Elle permet également d'ajouter des colonnes dans les tables filles.
 
 -----
 
-## Partitionnement - Déclaratif
+### Partitionnement - Déclaratif
 
 <div class="slide-content">
   * On n'utilise plus de trigger, les insertions sont donc plus rapides
@@ -192,7 +220,7 @@ Lors de la déclaration des partitions, *FROM x TO y* indique que les données *
 
 -----
 
-## Partitionnement - Déclaratif
+### Partitionnement - Déclaratif
 
 <div class="slide-content">
   * La table mère ne peut pas avoir de données
@@ -221,7 +249,7 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
 
 -----
 
-## Réplication logique - Introduction
+## Réplication logique
 
 <div class="slide-content">
   * Intégration partielle de l’extension *pglogical* dans le cœur de Postgres
@@ -248,7 +276,7 @@ Sur le sujet plus général de la réplication logique, la lecture de l'article 
 
 -----
 
-## Réplication logique - Fonctionnement
+### Réplication logique - Fonctionnement
 
 <div class="slide-content">
 FIXME: schémas (reprendre ceux du diaporama de Philippe)
@@ -256,7 +284,7 @@ FIXME: schémas (reprendre ceux du diaporama de Philippe)
 
 -----
 
-## Réplication logique - Exemple
+### Réplication logique - Exemple
 
 <div class="slide-content">
 FIXME: exemple / CRA GALEC
@@ -264,7 +292,20 @@ FIXME: exemple / CRA GALEC
 
 -----
 
-## Performances - Les tris
+## Performances
+
+<div class="slide-content">
+  * Tris
+  * Agrégats
+  * Parallélisme
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+### Tris
 
 <div class="slide-content">
   * Gains très significatifs au niveau des performances
@@ -339,7 +380,7 @@ time=836.725..1161.973 rows=4000000 loops=1)
 
 -----
 
-## Performances - Les agrégats
+### Agrégats
 
 <div class="slide-content">
   * Les noeuds *HashAggregate* ont été améliorés
@@ -384,7 +425,7 @@ Execution time: 2122.746 ms
 
 -----
 
-## Performances - Le parallèlisme
+### Parallélisme
 
 <div class="slide-content">
 Les noeuds suivants sont désormais gérés :
@@ -520,7 +561,19 @@ Pour en savoir plus :
 
 -----
 
-## Compatibilité - Changements dans les outils
+## Compatibilité
+
+<div class="slide-content">
+  * Changements dans les outils
+  * Les outils de la sphère Dalibo
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+### Changements dans les outils
 
 <div class="slide-content">
 Changements de comportement :
@@ -542,7 +595,7 @@ Chaque version majeure introduit son lot d'incompatibilités, et il demeure impo
 
 -----
 
-## Compatibilité - Les outils de la sphère Dalibo
+### Les outils de la sphère Dalibo
 
 <div class="slide-content">
 Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
