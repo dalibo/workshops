@@ -1,11 +1,11 @@
 # Nouveautés de PostgreSQL 10
 
-![PostgreSQL](medias/z1-elephant-1057465_1280.jpg)
+![PostgreSQL](medias/elephant-rock-valley-of-fire.jpg)
 
 <div class="notes">
-Photographie obtenue sur [pixabay](https://pixabay.com/en/elephant-ears-butterfly-1057465/ "elephant-ears-butterfly-1057465").
+Photographie obtenue sur [urltarget.com](http://www.urltarget.com/elephant-rock-valley-of-fire.html "elephant-rock-valley-of-fire").
 
-CC0 Public Domain, Free for commercial use, No attribution required.
+Public Domain CC0.
 </div>
 
 -----
