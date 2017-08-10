@@ -1,5 +1,10 @@
 ## Atelier
 
+<div class="slide-content">
+À présent, place à l'atelier...
+</div>
+
+<div class="notes">
   * FIXME: mise à jour du workshop existant et suppression des éléments inutiles
   * FIXME: installation des 2 versions (https://wiki.postgresql.org/wiki/Apt)
   * FIXME: test SCRAM-SHA-256
@@ -9,7 +14,6 @@
   * FIXME: comparaison partitionnements (pg_class ; exemples de gilles ? depesz ?)
   * FIXME: comparaison de plans d'exécution liés au parallèlisme
 
-<div class="notes">
 ### Installation
 Les machines de la salle de formation sont en CentOS 6. L'utilisateur dalibo peut utiliser sudo pour les opérations système.
 
@@ -1168,6 +1172,8 @@ SELECT sin(0.523599);
 
 
 ### Réplication Synchrone
+
+
 
 
   * Installer deux nouvelles instances en 9.6.
