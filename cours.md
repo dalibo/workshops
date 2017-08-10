@@ -1266,11 +1266,10 @@ Les types d'événements LWLockNamed et LWLockTranche ont été renommés en LWL
 ### Architecture
 
 <div class="slide-content">
-  * Architecture
-    * Amélioration de la librairie libpq
-    * Changement de la valeur par défaut de log_directory de pg_log à log
-    * Slots de réplication temporaires
-    * Support de la librairie ICU pour la gestion des collations
+  * Amélioration de la librairie libpq
+  * Changement de la valeur par défaut de log_directory de pg_log à log
+  * Slots de réplication temporaires
+  * Support de la librairie ICU pour la gestion des collations
 </div>
 
 <div class="notes">
@@ -1305,7 +1304,7 @@ $ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session
 
 Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...) peut désormais être créé temporairement :
 
-```sql
+```
 postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
 pg_create_physical_replication_slot 
 -------------------------------------
@@ -1421,32 +1420,123 @@ postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
 (10 rows)
 ```
 
-Pour compléter ces informations, vous pouvez également consulter :
-[Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
+Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
 </div>
 
 -----
 
-## Autres nouveautés - Pour les développeurs
+## Autres nouveautés - Pour les développeurs (1)
 
 <div class="slide-content">
-  * *Full Text Search* sur des colonnes de type *JSON* et *JSONB*
-  * Possibilité de renommer les valeurs des types énumérations (*ALTER TYPE ... RENAME VALUE*)
-  * Nouveau catalogue *pg_sequence*
-  * *XMLTABLE*
-  * Tables de transition pour les triggers de type AFTER et de niveau STATEMENT, ils peuvent voir les lignes avant et/ou après modification
-  * Gestion des séquences conforme à la norme SQL
-  * Les index *hash* sont utilisables !
-  * Scripting conditionnel
-  * \\GX
+  * psql : ajout de méta-commandes
+    * \gx, force l'affichage étendu de \g
+    * structure conditionnelle \if, \elif, \else, \endif
+  * Journalisation des indexes Hash
+  * Possibilité de renommer une valeur d'un type existant via *ALTER TYPE*
 </div>
 
 <div class="notes">
+**\gx**
+
+\gx est équivalent à \g, mais force l'affichage étendu pour cette requête. 
+
+Exemple :
+
+```
+postgres=# SELECT * FROM t1 LIMIT 2;
+ a | b 
+---+---
+ 0 | 0
+ 0 | 0
+(2 rows)
+
+postgres=# \g
+ a | b 
+---+---
+ 0 | 0
+ 0 | 0
+(2 rows)
+
+postgres=# \gx
+-[ RECORD 1 ]
+a | 0
+b | 0
+-[ RECORD 2 ]
+a | 0
+b | 0
+
+```
+
+Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command "waiting-for-postgresql-10-psql-add-gx-command")
+
+**\if, \elif, \else, \endif**
+
+Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \if et se terminer par un \endif. Entre les deux, il peut y avoir plusieurs clauses \elif, pouvant être suivies facultativement par une unique clause \else.
+
+Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting "waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting")
+
+**indexes Hash**
+
+Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crash et seront utilisables sur un environnement répliqué.
+
+Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal "waiting-for-postgresql-10-hash-indexing-vs-wal")
+
+**ALTER TYPE**
+
+Il est désormais possible de renommer une valeur d'un type existant.
+
+Exemple :
+
+```
+postgres=# CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy') ;
+CREATE TYPE
+
+postgres=# ALTER TYPE mood RENAME VALUE 'ok' TO 'good' ;
+ALTER TYPE
+```
+
+Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-altertype.html)
+</div>
+
+-----
+
+## Autres nouveautés - Pour les développeurs (2)
+
+<div class="slide-content">
+  * *Full Text Search* sur des colonnes de type *JSON* et *JSONB*
+  * *XMLTABLE*
+</div>
+
+<div class="notes">
+
 Quelques informations sur *XMLTABLE* :
 
   * Norme *SQL/XML*
   * Permet de voir des éléments de documents *XML* sous forme de table relationnelle
   * Une clause *XMLTABLE* dans la clause FROM définit le mapping entre éléments XML et colonnes
+
+
+
+
+  * [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb "waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb")
+
+
+
+  * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression "waiting-for-postgresql-10-support-xmltable-query-expression")
+</div>
+
+-----
+
+## Autres nouveautés - Pour les développeurs (3)
+
+<div class="slide-content">
+  * Nouveau catalogue *pg_sequence*
+  * Tables de transition pour les triggers de type AFTER et de niveau STATEMENT, ils peuvent voir les lignes avant et/ou après modification
+  * Gestion des séquences conforme à la norme SQL
+
+</div>
+
+<div class="notes">
 
 Pour ce qui est des séquences :
 
@@ -1456,24 +1546,14 @@ Pour ce qui est des séquences :
     * les copies de tables
   * On peut forcer l’usage de la séquence avec GENERATED ALWAYS AS IDENTITY
 
-Du côté des indexes hash :
+    * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers "waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers")
 
-  * Journalisés => "crash safe" + réplicables
-  * Amélioration des performances
-  * Supportés par la contribution *pageinspect*
-
-Pour en savoir plus :
-
-  * [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb "waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb")
-  * [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog "waiting-for-postgresql-10-add-pg_sequence-system-catalog")
-  * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression "waiting-for-postgresql-10-support-xmltable-query-expression")
-  * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers "waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers")
-  * [Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns "waiting-for-postgresql-10-identity-columns")
-  * [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal "waiting-for-postgresql-10-hash-indexing-vs-wal")
-  * [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting "waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting")
-  * [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command "waiting-for-postgresql-10-psql-add-gx-command")
   * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition "cool-stuff-in-postgresql-10-transition")
-  * [ALTER TYPE](https://www.postgresql.org/docs/10/static/sql-altertype.html)
+
+
+  * [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog "waiting-for-postgresql-10-add-pg_sequence-system-catalog")
+
+  * [Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns "waiting-for-postgresql-10-identity-columns")
 </div>
 
 -----
