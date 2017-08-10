@@ -80,7 +80,7 @@ Actuellement, deux versions, [Beta1](https://dali.bo/pg10-beta1-changes "pg10-be
 Ancienne numérotation composée de 3 nombres :
 
 ```
-  9 . 5 . 3 
+  9 . 6 . 3 
   Majeure1 . Majeure2 . Mineure
 ```
 
@@ -199,10 +199,15 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
   * Nommage des arguments longs
     * --xlog-method -> --wal-method
     * --xlogdir -> --waldir
+  * Slot de réplication temporaire
 </div>
 
 <div class="notes">
 Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
+
+Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
+
+De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre la fin de la sauvegarde et le début de lancement de la réplication en flux.
 </div>
 
 -----
@@ -222,7 +227,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 
 -----
 
-### Ancient partitionnement
+### Ancien partitionnement
 
 <div class="slide-content">
   * Le partitionnement par héritage se base sur
@@ -516,41 +521,152 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
 ## Réplication logique
 
 <div class="slide-content">
-  * Intégration partielle de l’extension *pglogical* dans le cœur de Postgres
-  * Réutilisation de l’infrastructure de réplication physique (streaming, slots)
-  * Réplique des ensembles de tables d’une base de données lors de la création de la souscription (facultatif)
-  * Possibilité de filtrer sur les verbes (INSERT / UPDATE / DELETE)
-  * Support des réplications entre différentes versions majeures de postgres
-  * Les tables répliquées peuvent avoir des index différents
-  * Apparition des vues *pg_stat_replication* et *pg_stat_subscription*
-  * Attention, elle ne réplique ni les *DDL*, ni les *TRUNCATE*
+  * Petit rappel sur la réplication physique
+  * Qu'est-ce que la réplication logique ?
+  * Fonctionnement
+  * Supervision
+  * Exemples
+</div>
+
+
+<div class="notes">
+</div>
+
+-----
+
+### Réplication physique
+
+<div class="slide-content">
+  * Réplication de toute l'instance
+    * au niveau bloc
+    * par rejeu des journaux de transactions
 </div>
 
 <div class="notes">
-  * Quelques usages typiques de la réplication logique
-    * alimentation d'une base de données de type *datawarehouse*
-    * déport sur un serveur secondaire de traitements lourds
-    * changement de version majeure de PostgreSQL sans arrêt de service
+Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes mais le résultat de celles-ci. Plus précisément, les modifications des blocs de données.
 
-Ce nouveau type de réplication supporte la recopie des tables à la création de la souscription, ce qui peut s'avérer être très pratique. Pour en savoir plus sur ce sujet, vous pouvez consulter l'article [Logical replication support for initial data copy](https://dali.bo/waiting-for-postgresql-10-logical-replication-support-for-initial-data-copy "waiting-for-postgresql-10-logical-replication-support-for-initial-data-copy").
+Le serveur secondaire se contente de rejouer les journaux de transaction.
 
-Sur le sujet plus général de la réplication logique, la lecture de l'article intitulé [Logical replication](https://dali.bo/waiting-for-postgresql-10-logical-replication "waiting-for-postgresql-10-logical-replication") est également conseillée.
+Quelques limitations :
+  * on doit répliquer l’intégralité de l’instance
+  * il n’est pas possible de faire une réplication entre différentes architectures (x86, ARM…)
+  * le secondaire n’accepte aucune requête en écriture. Il n’est dont pas possible de créer des vues personnalisées ou des index.
 </div>
 
 -----
 
-### Réplication logique - Fonctionnement
+### Réplication logique - Principe
 
 <div class="slide-content">
-FIXME: schémas (reprendre ceux du diaporama de Philippe)
+  * Réutilisation de l'infrastructure existante
+    * réplication en flux
+    * slots de réplication
+  * Réplique les changements sur une seule base de données
+    * d'un ensemble de tables défini
+  * Uniquement INSERT/UPDATE/DELETE
+    * Pas les DDL, ni les TRUNCATE
+</div>
+
+<div class="notes">
+Contrairement à la réplication physique, la réplication logique ne réplique pas les blocs de données. Elle décode le résultat des requêtes qui sont transmis au secondaire. Celui-ci applique les modifications SQL issues du flux de réplication logique.
+
+La réplication logique utilise un système de publication/abonnement avec un ou plusieurs abonnés qui s'abonnent à une ou plusieurs publications d'un nœud particulier.
+
+Une publication peut être définie sur n'importe quel serveur primaire de réplication physique. Le nœud sur laquelle la publication est définie est nommé éditeur. Le nœud où un abonnement a été défini est nommé abonné.
+
+Une publication est un ensemble de modifications générées par une table ou un groupe de table. Chaque publication existe au sein d'une seule base de données.
+
+Un abonnement définit la connexion à une autre base de données et un ensemble de publications (une ou plus) auxquelles l'abonné veut souscrire.
 </div>
 
 -----
 
-### Réplication logique - Exemple
+### Fonctionnement
 
 <div class="slide-content">
-FIXME: exemple / CRA GALEC
+![Schema](medias/z100-schema-repli-logique.png)
+</div>
+
+<div class="notes">
+Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
+
+  * Une publication est créée sur le serveur éditeur.
+  * L'abonné souscrit à cette publication, c’est un « souscripteur ».
+  * Un processus spécial est lancé : le  « bgworker logical replication ». Il va se connecter à un slot de réplication sur le serveur éditeur.
+  * Le serveur éditeur va procéder à un décodage logique des journaux de transaction pour extraire les résultats des ordres SQL.
+  * Le flux logique est transmis à l'abonné qui les applique sur les tables.
+</div>
+
+-----
+
+### Supervision
+
+<div class="slide-content">
+  * Nouveaux catalogues
+    * pg_publication*
+    * pg_subscription*
+    * pg_stat_subscription
+</div>
+
+<div class="notes">
+De nouveaux catalogues ont été ajoutés pour permettre la supervision de la réplication logique.
+
+Notamment :
+| pg_publication | informations sur les publications |
+| pg_publication_tables | correspondance entre les publications et les tables qu'elles contiennent |
+| pg_stat_subscription | état des journaux de transactions reçus en souscription |
+| pg_subscription | informations sur les souscriptions existantes |
+| pg_subscription_rel | contient l'état de chaque relation répliquée dans chaque souscription |
+
+D'autres catalogues déjà existants peuvent également être utiles :
+| pg_stat_replication | une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
+| pg_replication_slot | liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
+| pg_replication_origin_status | informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
+</div>
+
+-----
+
+### Exemple - Création d'une publication
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+createdb bench
+pgbench -i -s 100 bench
+pg_dump --schema-only bench > bench-schema.sql
+psql -d bench -c "CREATE PUBLICATION bench_pub FOR ALL TABLES ;"
+</div>
+
+-----
+
+### Exemple - Création d'une souscription
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+createdb bench
+psql -f bench-schema.sql --single-transaction bench
+psql -d bench -c "CREATE SUBSCRIPTION bench_sub CONNECTION 'host=127.0.0.1 port=5434 user=repuser dbname=bench' PUBLICATION bench_pub;"
+</div>
+
+-----
+
+### Exemple - Visualisation de l'état de la réplication
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+pgbench -T 300 bench
+
+pg_stat_replication 
+pg_publication 
+pg_publication_tables 
+pg_replication_slot 
+pg_subscription
+pg_replication_origin_status
 </div>
 
 -----
@@ -745,6 +861,8 @@ PostgreSQL 10 dispose de nouveaux rôles, qui permettront notamment de limiter l
   * Améliorations diverses sur les *FDW* (ex : "SELECT COUNT(\*) FROM foreign_table")
   * Bibliothèque  de collations *ICU* indépendante de l'OS
   * Slots de réplication temporaires
+  * pg_log -> log = changement valeur par défaut de log_directory
+  * L'extension file_fdw peut utiliser un programme en entrée
 </div>
 
 <div class="notes">
@@ -897,6 +1015,7 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 
 -----
 
+
 ## Futur
 
 <div class="slide-content">
@@ -904,7 +1023,7 @@ FIXME: PostgreSQL 11
 </div>
 
 <div class="notes">
-Attention, les utilisateurs des versions Beta doivent considérer que les mises à jour concernent des versions majeures. Ceci permettra notamment de pouvoir contourner toutes les incompatibilités ou changements de comportement dûs au fait que PostgreSQL 10 est toujours en développemet.
+Attention, les utilisateurs des versions Beta doivent considérer que les mises à jour concernent des versions majeures. Ceci permettra notamment de pouvoir contourner toutes les incompatibilités ou changements de comportement dû au fait que PostgreSQL 10 est toujours en développement.
 
 La [roadmap](https://dali.bo/pg-roadmap "pg-roadmap") du projet détaille les prochaines grandes étapes.
 </div>
