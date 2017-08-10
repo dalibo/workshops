@@ -574,9 +574,7 @@ Un abonnement définit la connexion à une autre base de données et un ensemble
 
 ### Fonctionnement
 
-<div class="slide-content">
-FIXME - mettre schema
-</div>
+![Schema du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
 
 <div class="notes">
 Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
