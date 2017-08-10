@@ -222,6 +222,8 @@ postgres=# SELECT pg_reload_conf();
  t
 (1 row)
 ```
+
+Attention, la méthode d'authentification précisée dans le fichier `pg_hba.conf' doit être égale ou supérieure à la méthode de stockage. Par exemple, un utilisateur disposant d'un mot de passe en `SCRAM-SHA-256` ne pourra pas se connecter si l'entrée correspondante dans `pg_hba.conf` mentionne `md5` ou `password`.
 </div>
 
 -----
