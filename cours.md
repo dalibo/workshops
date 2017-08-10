@@ -148,6 +148,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 ## Partitionnement
 
 <div class="slide-content">
+  * Petit rappel sur l'ancien partitionnement
   * Nouveau partitionnement
   * Nouvelle syntaxe
   * Quelques limitations
@@ -159,58 +160,76 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 
 -----
 
-### Partitionnement - Par héritage
+### Ancient partitionnement
 
 <div class="slide-content">
-La partitionnement par héritage se base sur :
-
-  * La notion d'héritage (1 table mère et des tables filles)
-  * Des triggers pour orienter les insertions vers les tables filles
-  * Des contraintes d’exclusion pour optimiser les requêtes
+  * La partitionnement par héritage se base sur
+    * la notion d'héritage (1 table mère et des tables filles)
+    * des triggers pour orienter les insertions vers les tables filles
+    * des contraintes d’exclusion pour optimiser les requêtes
+  * Disponible depuis longtemps
 </div>
 
 <div class="notes">
-Cette méthode ne répondait pas à toutes les attentes du partitionnement, mais permettait tout de même d'orienter les lignes en fonction de certains critères.
+Cette méthode ne répond pas à toutes les attentes du partitionnement, mais permet tout de même d'orienter les lignes en fonction de certains critères.
 
 Elle permet également d'ajouter des colonnes dans les tables filles.
 </div>
 
 -----
 
-### Partitionnement - Déclaratif
+### Nouveau partitionnement
 
 <div class="slide-content">
-  * On n'utilise plus de trigger, les insertions sont donc plus rapides
-  * L'administration est simplifiée et directement intégrée au SGBD
-  * Une colonne clé du partitionnement peut être une expression
-  * Chaque partition a une contrainte implicite de partitionnement
-  * Les données insérées sont routées dans la bonne partition
-  * Une partition peut être détachée / attachée à une autre partition
-  * La vue *pg_class* a été completée
-  * Le catalogue *pg_partioned_table* a été ajouté
-  * Une partition peut être... partitionnée (sous partitions)
+  * Mise en place et administration simplifiée
+    * car directement intégrée au moteur
+  * Plus de trigger
+    * insertions plus rapides
+    * routage des données insérées dans la bonne partition
+    * erreur si aucune partition destinataire
+  * Partition
+    * attacher/détacher une partition
+    * contrainte implicite de partitionnement
+    * expression possible pour la clé de partitionnement
+    * sous-partitions possibles
+  * Changement du catalogue système
+    * nouvelles colonnes dans *pg_class*
+    * nouveau catalogue *pg_partioned_table*
 </div>
 
 <div class="notes">
 La version *10* apporte un nouveau système de partitionnement se basant sur de l'infrastructure qui existait déjà dans PostgreSQL.
 
+Le but est de simplifier la mise en place et l'administration des tables
+partitionnées. Des clauses spécialisées ont été ajoutées aux ordres SQL déjà
+existant, comme *CREATE TABLE* et *ALTER TABLE*, pour ajouter, attacher,
+détacher des partitions.
+
+Au niveau de la simplification de la mise en place, on peut noter qu'il n'est
+plus nécessaire de créer une fonction trigger et d'ajouter des triggers pour
+gérer les insertions et mises à jour. Le routage est géré de façon automatique
+par rapport à la définition des partitions. Si les données insérées ne
+trouvent pas de partition cible, les données ne sont pas insérées dans la
+table mère. L'insertion est tout simplement en erreur. Du fait de ce routage
+automatique, les insertions se révèlent aussi plus rapides.
+
 Le catalogue *pg_class* a été modifié et indique désormais :
 
-  * si une table est en rapport avec le partitionnement (relispartition = 't' pour les deux)
-  * si une table est partionnée (relkind = 'p') ou s'il s'agit d'une partition (relkind = 'r')
+  * si une table est en rapport avec le partitionnement (*relispartition = 't'* pour les deux)
+  * si une table est partitionnée (*relkind = 'p'*) ou s'il s'agit d'une partition (*relkind = 'r'*)
   * la représentation interne des bornes du partitionnement (relpartbound)
 
 Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes :
 
-| Colonne | Contenu |
-| ------------ | ------------------------------------------------ |
-| partrelid | OID de la table partitionnée référencé dans *pg_class* |
-| partstrat | Stratégie de partitionnement ; l = partitionnement par liste, r = partitionnement par intervalle |
-| partnatts | Nombre de colonnes de la clé de partitionnement |
-| partattrs | Tableau de partnatts valeurs indiquant les colonnes de la table faisant partie de la clé de partitionnement |
-| partclass | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser |
+| Colonne       | Contenu                                                                                                                |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| partrelid     | OID de la table partitionnée référencé dans *pg_class*                                                                 |
+| partstrat     | Stratégie de partitionnement ; l = partitionnement par liste, r = partitionnement par intervalle                       |
+| partnatts     | Nombre de colonnes de la clé de partitionnement                                                                        |
+| partattrs     | Tableau de partnatts valeurs indiquant les colonnes de la table faisant partie de la clé de partitionnement            |
+| partclass     | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser                   |
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
-| partexprs | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne |
+| partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
 
 Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme celà se faisait déjà avec l'héritage.
 
@@ -219,21 +238,106 @@ Lors de la déclaration des partitions, *FROM x TO y* indique que les données *
 
 -----
 
-### Partitionnement - Déclaratif
+### Exemple de partitionnement liste
+
+<div class="slide-content">
+  * Créer une table partitionnée `create table t1(c1 integer, c2 text) partition by list (c1);`
+  * Ajouter une partition `create table t1_a partition of t1 for values in (1, 2, 3);`
+  * Détacher la partition `alter table t1 detach partition t1_a;`
+</div>
+
+<div class="notes">
+Exemple complet :
+
+```
+postgres=# create table t1(c1 integer, c2 text) partition by list (c1);
+CREATE TABLE
+postgres=# create table t1_a partition of t1 for values in (1, 2, 3);
+CREATE TABLE
+postgres=# create table t1_b partition of t1 for values in (4, 5);
+CREATE TABLE
+postgres=# insert into t1 values (0);
+ERROR:  no partition of relation "t1" found for row
+DETAIL:  Partition key of the failing row contains (c1) = (0).
+postgres=# insert into t1 values (1);
+INSERT 0 1
+postgres=# insert into t1 values (2);
+INSERT 0 1
+postgres=# insert into t1 values (5);
+INSERT 0 1
+postgres=# insert into t1 values (6);
+ERROR:  no partition of relation "t1" found for row
+DETAIL:  Partition key of the failing row contains (c1) = (6).
+```
+</div>
+
+-----
+
+### Exemple de partitionnement intervalle
+
+<div class="slide-content">
+  * Créer une table partitionnée `create table t2(c1 integer, c2 text) partition by range (c1);`
+  * Ajouter une partition `create table t2_a partition of t2 for values from (1) to (100);`
+  * Détacher la partition `alter table t2 detach partition t2_a;`
+</div>
+
+<div class="notes">
+Exemple complet :
+
+```
+postgres=# create table t2(c1 integer, c2 text) partition by range (c1);
+CREATE TABLE
+postgres=# create table t2_a partition of t2 for values from (1) to (100);
+CREATE TABLE
+postgres=# insert into t2 values (0);
+ERROR:  no partition of relation "t2" found for row
+DETAIL:  Partition key of the failing row contains (c1) = (0).
+postgres=# insert into t2 values (1);
+INSERT 0 1
+postgres=# insert into t2 values (2);
+INSERT 0 1
+postgres=# insert into t2 values (5);
+INSERT 0 1
+postgres=# insert into t2 values (101);
+ERROR:  no partition of relation "t2" found for row
+DETAIL:  Partition key of the failing row contains (c1) = (101).
+```
+</div>
+
+-----
+
+### Limitations
 
 <div class="slide-content">
   * La table mère ne peut pas avoir de données
-  * La table mère ne peut pas avoir d'index => ni PK, ni UK, ni FK pointant vers elle
-  * Les partitions ne peuvent avoir de colonnes additionnelles
+  * La table mère ne peut pas avoir d'index
+    * ni PK, ni UK, ni FK pointant vers elle
+  * Les partitions ne peuvent pas avoir de colonnes additionnelles
   * L'héritage multiple n'est pas permis
   * Les partitions n'acceptent les valeurs nulles que si la table partitionnée le permet
   * Les partitions distantes ne sont pour l'instant pas supportées
   * En cas d'attachement d'une partition
-    * un scan complet de la table est effectué de façon à vérifier qu'aucune ligne ne viole la contrainte de partitionnement
-    * il peut être évité en ajoutant au préalable une contrainte *CHECK* identique
+    * vérification du respect de la contrainte avec un parcours complet de la table
+    * sauf si ajout au préalable d'une contrainte *CHECK* identique
 </div>
 
 <div class="notes">
+
+Toute donnée doit pouvoir être placé dans une partition. Dans le cas
+contraire, la donnée ne sera pas placée dans la table mère (contrairement au
+partitionnement traditionnel). À la place, une erreur est générée :
+
+ERROR:  no partition of relation "t2" found for row
+
+De même, il n'est pas possible d'ajouter un index à la table mère, sous peine
+de voir l'erreur suivante apparaître :
+
+ERROR:  cannot create index on partitioned table "t1"
+
+Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
+et une contrainte unique sur ce type de table. De ce fait, il n'est pas non
+plus possible de faire pointer une clé étrangère vers ce type de table.
+
 FIXME: remplacement de UNBOUNDED par MINVALUE et MAXVALUE dans la beta3 ?
 
 Vous pouvez également consulter 4 articles avec des explications ainsi que des exemples concrets :
