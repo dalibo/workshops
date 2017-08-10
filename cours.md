@@ -1258,6 +1258,8 @@ De nouveaux types d'événements pour lesquels le processus est en attente appar
   * Timeout :  The server process is waiting for a timeout to expire.
   * IO : The server process is waiting for a IO to complete.
 
+[FIXME - utiliser les traductions de la doc dès que disponible]
+
 Les types d'événements LWLockNamed et LWLockTranche ont été renommés en LWLock.
 </div>
 
@@ -1283,11 +1285,11 @@ Exemple avec psql :
 ```bash
 $ psql --host=127.0.0.1,127.0.0.1 --port=5432,5433
 psql: could not connect to server: Connection refused
-	Is the server running on host "127.0.0.1" and accepting
-	TCP/IP connections on port 5432?
+  Is the server running on host "127.0.0.1" and accepting
+  TCP/IP connections on port 5432?
 could not connect to server: Connection refused
-	Is the server running on host "127.0.0.1" and accepting
-	TCP/IP connections on port 5433?
+  Is the server running on host "127.0.0.1" and accepting
+  TCP/IP connections on port 5433?
 ```
 
 Il est également désormais possible de fournir l'attribut target_session_attrs à l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion dans laquelle une transaction *read-write* est possible ou n'importe quel type de transaction (*any*).
@@ -1330,19 +1332,15 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 ### FDW
 
 <div class="slide-content">
+  * file_fdw peut exécuter des programmes sur le serveur et lire leur sortie
+  * postgres_fdw exécute les agrégations et jointures (*FULL JOIN*) sur le serveur distant
 </div>
 
 <div class="notes">
-* Allow file_fdw to read from program output as well as files (Corey Huinker, Adam Gomaa)
+postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
 
-
-* Push aggregates to foreign data wrapper servers, where possible (Jeevan Chalke, Ashutosh Bapat)
-
-	This reduces the amount of data that must be passed from the foreign data wrapper server, and offloads aggregate computation from the requesting server. The postgres_fdw FDW is able to perform this optimization. There are also improvements in pushing down joins involving extensions.
-
-	Pour compléter ces informations, vous pouvez également consulter :
-	[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers "waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers")
-
+Pour plus d'information à ce sujet, vous pouvez consulter : 
+[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers "waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers")
 </div>
 
 -----
@@ -1350,32 +1348,83 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 ### Divers
 
 <div class="slide-content">
-  * Divers
-    * quroum-based synchronous replication
-    * pg_receivewal
-    * Statistiques multi-colonnes
+  * Réplication synchrone basée sur un quorum
+  * Gestion de la compression dans *pg_receivewal*
+  * Statistiques multi-colonnes
 </div>
 
 <div class="notes">
-* Réplication avec quorum, c'est à dire qu'un *commit* doit par exemple être acquitté par 2 serveurs synchrones.
+**Réplication synchrone basée sur un quorum**
 
-	Voici par ailleurs deux exemples permettant de définir le quorum  :
-	* *synchronous_standby_names* = FIRST 2 (node1,node2);
-	* *synchronous_standby_names* = ANY 2 (node1,node2,node3);
+Il est possible d'appliquer arbitrairement une réplication synchrone à un sous-ensemble d'un groupe d'instances grâce au paramètre suivant : *synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
 
+Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur la priorité, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur *num_sync* serveurs secondaires, choisis en fonction de leur priorités. 
 
-* Gestion de la compression dans *pg_receivewal*
+Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit à attendre la réponse de trois serveurs secondaire de plus haute priorité choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs secondaires actuellement synchrones se déconnecte pour quelque raison que ce soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
 
-	Add pg_receivewal option -Z/--compress to specify compression
-	-Z level, --compress=level
+Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur un quorum, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur au moins *num_sync* des serveurs secondaires listés. 
 
-	Active la compression gzip des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
+Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 and s4 aient répondu, quels qu'ils soient. 
 
+**Gestion de la compression dans *pg_receivewal* **
 
-* Statistiques multi-colonnes pour la corrélation et le % de valeurs distinctes (utilisées pour la création des plans d'exécution)
-	
-	Pour compléter ces informations, vous pouvez également consulter :
-	[Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
+L'option -Z/--compress active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
+
+**Statistiques multi-colonnes**
+
+Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une même table. Cela améliore les estimations des plans d'exécution dans le cas de colonnes fortement corrélées.
+
+Par exemple :
+
+```
+postgres=# CREATE TABLE t1 (a int, b int);
+CREATE TABLE
+
+postgres=# INSERT INTO t1 SELECT i/100, i/500 FROM generate_series(1,10000000) s(i);
+INSERT 0 10000000
+
+postgres=# ANALYZE t1;
+ANALYZE
+
+postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..107747.96 rows=1 width=8) (actual time=0.863..380.714 rows=100 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=16306 read=28044 dirtied=10513 written=9062
+   ->  Parallel Seq Scan on t1  (cost=0.00..106747.86 rows=1 width=8) (actual time=246.324..372.866 rows=33 loops=3)
+         Filter: ((a = 1) AND (b = 0))
+         Rows Removed by Filter: 3333300
+         Buffers: shared hit=16212 read=28036 dirtied=10513 written=9062
+ Planning time: 0.364 ms
+ Execution time: 384.013 ms
+(10 rows)
+
+postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t1;
+CREATE STATISTICS
+
+postgres=# ANALYZE t1;
+ANALYZE
+
+postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
+                                                      QUERY PLAN                                                      
+----------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..107761.66 rows=138 width=8) (actual time=0.418..321.794 rows=100 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=16272 read=28078
+   ->  Parallel Seq Scan on t1  (cost=0.00..106747.86 rows=58 width=8) (actual time=210.955..318.026 rows=33 loops=3)
+         Filter: ((a = 1) AND (b = 0))
+         Rows Removed by Filter: 3333300
+         Buffers: shared hit=16170 read=28078
+ Planning time: 0.191 ms
+ Execution time: 325.278 ms
+(10 rows)
+```
+
+Pour compléter ces informations, vous pouvez également consulter :
+[Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
 </div>
 
 -----
