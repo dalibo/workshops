@@ -534,17 +534,16 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
   * Réplication de toute l'instance
     * au niveau bloc
     * par rejeu des journaux de transactions
+  * Quelques limitations :
+    * on doit répliquer l’intégralité de l’instance
+    * réplication impossible entre différentes architectures (x86, ARM…)
+    * pas de requête en écriture sur le secondaire, donc impossible de créer des objets personnalisés
 </div>
 
 <div class="notes">
 Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes mais le résultat de celles-ci. Plus précisément, les modifications des blocs de données.
 
 Le serveur secondaire se contente de rejouer les journaux de transaction.
-
-Quelques limitations :
-  * on doit répliquer l’intégralité de l’instance
-  * il n’est pas possible de faire une réplication entre différentes architectures (x86, ARM…)
-  * le secondaire n’accepte aucune requête en écriture. Il n’est dont pas possible de créer des vues personnalisées ou des index.
 </div>
 
 -----
