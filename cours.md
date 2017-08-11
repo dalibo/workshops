@@ -814,21 +814,21 @@ Dans *pg_stat_replication* :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
--[ RECORD 1 ]----+-----------------------------
-pid              | 10299
-usesysid         | 16407
+-[ RECORD 1 ]----+------------------------------
+pid              | 26537
+usesysid         | 16405
 usename          | repliuser
 application_name | ma_souscription
 client_addr      | 127.0.0.1
 client_hostname  | 
-client_port      | 49936
-backend_start    | 2017-08-08 10:28:14.49455+02
+client_port      | 59272
+backend_start    | 2017-08-11 16:15:01.505706+02
 backend_xmin     | 
 state            | streaming
-sent_lsn         | 0/4E3BCD08
-write_lsn        | 0/4E3BCD08
-flush_lsn        | 0/4E3BCD08
-replay_lsn       | 0/4E3BCD08
+sent_lsn         | 0/9CA63FA0
+write_lsn        | 0/9CA63FA0
+flush_lsn        | 0/9CA63FA0
+replay_lsn       | 0/9CA63FA0
 write_lag        | 
 flush_lag        | 
 replay_lag       | 
@@ -839,23 +839,34 @@ sync_state       | async
 Dans *pg_replication_slots* :
 
 ```sql
-FIXME: taille
 postgres@bench=# SELECT * FROM pg_replication_slots;
-    slot_name    |  plugin  | slot_type | datoid | database | temporary | active | active_pid | xmin | catalog_xmin | restart_lsn | confirmed_flush_lsn 
------------------+----------+-----------+--------+----------+-----------+--------+------------+------+--------------+-------------+---------------------
- ma_souscription | pgoutput | logical   |  16384 | bench    | f         | t      |      10299 |      |          581 | 0/4E3BCCD0  | 0/4E3BCD08
-(1 row)
+-[ RECORD 1 ]-------+----------------
+slot_name           | ma_souscription
+plugin              | pgoutput
+slot_type           | logical
+datoid              | 16384
+database            | bench
+temporary           | f
+active              | t
+active_pid          | 26537
+xmin                | 
+catalog_xmin        | 115734
+restart_lsn         | 0/9CA63F68
+confirmed_flush_lsn | 0/9CA63FA0
 ```
 
 Dans *pg_publication* :
 
 ```
-FIXME: taille
 postgres@bench=# SELECT * FROM pg_publication;
-    pubname     | pubowner | puballtables | pubinsert | pubupdate | pubdelete 
-----------------+----------+--------------+-----------+-----------+-----------
- ma_publication |       10 | t            | t         | t         | t
-(1 row)
+-[ RECORD 1 ]+---------------
+pubname      | ma_publication
+pubowner     | 10
+puballtables | t
+pubinsert    | t
+pubupdate    | t
+pubdelete    | t
+
 ```
 
 Dans *pg_publication_tables* :
@@ -874,12 +885,17 @@ postgres@bench=# SELECT * FROM pg_publication_tables;
 Dans *pg_subscription* :
 
 ```
-FIXME: taille
 postgres@bench=# SELECT * FROM pg_subscription;
- subdbid |     subname     | subowner | subenabled |                     subconninfo                      |   subslotname   | subsynccommit | subpublications  
----------+-----------------+----------+------------+------------------------------------------------------+-----------------+---------------+------------------
-   16406 | ma_souscription |       10 | t          | host=127.0.0.1 port=5433 user=repliuser dbname=bench | ma_souscription | off           | {ma_publication}
-(1 row)
+-[ RECORD 1 ]---+-----------------------------------------------------
+subdbid         | 16384
+subname         | ma_souscription
+subowner        | 10
+subenabled      | t
+subconninfo     | host=127.0.0.1 port=5433 user=repliuser dbname=bench
+subslotname     | ma_souscription
+subsynccommit   | off
+subpublications | {ma_publication}
+
 ```
 
 Dans *pg_replication_origin_status* :
@@ -888,7 +904,7 @@ Dans *pg_replication_origin_status* :
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
-        1 | pg_16425    | 0/0        | 0/D07ACA48
+        1 | pg_16404    | 0/9CA5C5B0 | 0/BB88AD40
 (1 row)
 ```
 
@@ -904,23 +920,23 @@ Sur l'éditeur :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
--[ RECORD 1 ]----+-----------------------------
-pid              | 10299
-usesysid         | 16407
+-[ RECORD 1 ]----+------------------------------
+pid              | 26537
+usesysid         | 16405
 usename          | repliuser
 application_name | ma_souscription
 client_addr      | 127.0.0.1
 client_hostname  | 
-client_port      | 49936
-backend_start    | 2017-08-08 10:28:14.49455+02
+client_port      | 59272
+backend_start    | 2017-08-11 16:15:01.505706+02
 backend_xmin     | 
 state            | streaming
-sent_lsn         | 0/5D549928
-write_lsn        | 0/5D547768
-flush_lsn        | 0/5D5323B0
-replay_lsn       | 0/5D547768
+sent_lsn         | 0/A6131DA0
+write_lsn        | 0/A6131DA0
+flush_lsn        | 0/A611DA10
+replay_lsn       | 0/A6131DA0
 write_lag        | 
-flush_lag        | 00:00:00.011534
+flush_lag        | 
 replay_lag       | 
 sync_priority    | 0
 sync_state       | async
@@ -932,7 +948,7 @@ Sur l'abonné :
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
-        1 | pg_16425    | 0/5DED5628 | 0/DFC90780
+        1 | pg_16404    | 0/A6A96110 | 0/C730EBB8
 (1 row)
 ```
 </div>
