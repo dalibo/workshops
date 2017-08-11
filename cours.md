@@ -50,7 +50,7 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
 </div>
 
 <div class="notes">
-PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'ores et déjà détaillées dans de nombreux articles. Voici 3 liens vers des articles en anglais :
+PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers des articles en anglais :
 
   * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet PostgreSQL
   * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
@@ -63,8 +63,8 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
 
 <div class="slide-content">
   * Changement de la numérotation
-  * Changement de noms
-  * Changement de *pg_basebackup*
+  * Changement de nommage
+  * Changements dans *pg_basebackup*
 </div>
 
 <div class="notes">
@@ -97,7 +97,7 @@ L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux déve
 
 Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
 
-Vous trouverez plus de détails dans l'article de Josh Berkus disponible sur son [blog](https://dali.bo/changing-postgresql-version-numbering).
+Vous trouverez plus de détails dans cet [article](https://dali.bo/changing-postgresql-version-numbering) de Josh Berkus.
 </div>
 
 -----
@@ -116,10 +116,9 @@ Vous trouverez plus de détails dans l'article de Josh Berkus disponible sur son
 </div>
 
 <div class="notes">
-Afin de clarifier le rôle de ces répertoires qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, les deux renommages ont été effectués dans $PGDATA ainsi qu'au niveau des fonctions :
+Afin de clarifier le rôle des répertoires *pg_xlog* et *pg_clog* qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, les deux renommages ont été effectués dans $PGDATA. Les fonctions dont les noms y faisaient référence ont également été renommées.
 
-Voici le contenu actuel d'un répertoire de données PostgreSQL, tout de suite
-après son initialisation :
+Ainsi, voici le contenu actuel d'un répertoire de données PostgreSQL après son initialisation :
 
 ```
 drwx------. 5 postgres postgres  4096 Aug  3 17:24 base
@@ -146,7 +145,7 @@ drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_xact
 -rw-------. 1 postgres postgres 22746 Aug  3 17:24 postgresql.conf
 ```
 
-De même pour les fonctions :
+Si on regarde les fonctions contenant le mot clé *wal* :
 
 ```
 postgres=# select proname from pg_proc where proname like '%wal%' order by proname;
@@ -179,7 +178,7 @@ $ ls -l *wal*
 -rwxr-xr-x. 1 postgres postgres 482344 Aug  2 11:09 pg_waldump
 ```
 
-L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer à cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
+L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer sur cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
 
 Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
@@ -292,7 +291,7 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 
 Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme celà se faisait déjà avec l'héritage.
 
-Lors de la déclaration des partitions, *FROM x TO y* indique que les données *supérieures ou égales à x* et *inférieures à y* (mais pas égales !) seront concernées.
+Lors de la déclaration des partitions, *FROM x TO y* indique que les données *supérieures ou égales à x* et *inférieures à y* (mais pas égales !) seront concernées. Il est possible d'utiliser plusieurs colonnes et donc plusieurs bornes.
 </div>
 
 -----
