@@ -704,7 +704,9 @@ D'autres catalogues déjà existants peuvent également être utiles :
 <div class="slide-content">
   * Définir wal_level à logical
   * Initialiser une base de données et sauvegarder son schéma
-  * Créer une publication `CREATE PUBLICATION ma_publication FOR ALL TABLES;`
+  * Créer une publication :
+
+    `CREATE PUBLICATION ma_publication FOR ALL TABLES;`
 </div>
 
 <div class="notes">
@@ -759,7 +761,10 @@ GRANT
 
 <div class="slide-content">
   * Initialiser une base de données et importer son schéma
-  * Créer l'abonnement `CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;`
+  * Créer l'abonnement :
+
+    `CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1`
+    `port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;`
 </div>
 
 <div class="notes">
@@ -775,7 +780,7 @@ $ psql -f bench-schema.sql --single-transaction bench
 Créer l'utilisateur pour la réplication :
 
 ```bash
-createuser --replication repliuser
+$ createuser --replication repliuser
 ```
 
 En tant que super-utilisateur, créer l'abonnement :
@@ -793,20 +798,20 @@ CREATE SUBSCRIPTION
 
 <div class="slide-content">
   * Sur l'éditeur
-    * état de la réplication `select * from pg_stat_replication;`
-    * slot de réplication `select * from pg_replication_slots;`
-    * état de la publication `select * from pg_publication;`
-    * contenu de la publication `select * from pg_publication_tables;`
+    * état de la réplication `SELECT * FROM pg_stat_replication;`
+    * slot de réplication `SELECT * FROM pg_replication_slots;`
+    * état de la publication `SELECT * FROM pg_publication;`
+    * contenu de la publication `SELECT * FROM pg_publication_tables;`
   * Sur l'abonné
-    * état de l'abonnement `select * from pg_subscription;`
-    * état de la réplication `select * from pg_replication_origin_status;`
+    * état de l'abonnement `SELECT * FROM pg_subscription;`
+    * état de la réplication `SELECT * FROM pg_replication_origin_status;`
 </div>
 
 <div class="notes">
 *pg_stat_replication*
 
 ```
-postgres@bench=# select * from pg_stat_replication;
+postgres@bench=# SELECT * FROM pg_stat_replication;
 -[ RECORD 1 ]----+-----------------------------
 pid              | 10299
 usesysid         | 16407
@@ -832,7 +837,7 @@ sync_state       | async
 *pg_replication_slots*
 
 ```
-postgres@bench=# select * from pg_replication_slots;
+postgres@bench=# SELECT * FROM pg_replication_slots;
     slot_name    |  plugin  | slot_type | datoid | database | temporary | active | active_pid | xmin | catalog_xmin | restart_lsn | confirmed_flush_lsn 
 -----------------+----------+-----------+--------+----------+-----------+--------+------------+------+--------------+-------------+---------------------
  ma_souscription | pgoutput | logical   |  16384 | bench    | f         | t      |      10299 |      |          581 | 0/4E3BCCD0  | 0/4E3BCD08
@@ -842,7 +847,7 @@ postgres@bench=# select * from pg_replication_slots;
 *pg_publication*
 
 ```
-postgres@bench=# select * from pg_publication;
+postgres@bench=# SELECT * FROM pg_publication;
     pubname     | pubowner | puballtables | pubinsert | pubupdate | pubdelete 
 ----------------+----------+--------------+-----------+-----------+-----------
  ma_publication |       10 | t            | t         | t         | t
@@ -852,7 +857,7 @@ postgres@bench=# select * from pg_publication;
 *pg_publication_tables*
 
 ```
-postgres@bench=# select * from pg_publication_tables;
+postgres@bench=# SELECT * FROM pg_publication_tables;
     pubname     | schemaname |    tablename     
 ----------------+------------+------------------
  ma_publication | public     | pgbench_history
@@ -865,7 +870,7 @@ postgres@bench=# select * from pg_publication_tables;
 *pg_subscription*
 
 ```
-postgres@bench=# select * from pg_subscription;
+postgres@bench=# SELECT * FROM pg_subscription;
  subdbid |     subname     | subowner | subenabled |                     subconninfo                      |   subslotname   | subsynccommit | subpublications  
 ---------+-----------------+----------+------------+------------------------------------------------------+-----------------+---------------+------------------
    16406 | ma_souscription |       10 | t          | host=127.0.0.1 port=5433 user=repliuser dbname=bench | ma_souscription | off           | {ma_publication}
@@ -875,7 +880,7 @@ postgres@bench=# select * from pg_subscription;
 *pg_replication_origin_status*
 
 ```
-postgres@bench=# select * from pg_replication_origin_status;
+postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
         1 | pg_16425    | 0/0        | 0/D07ACA48
@@ -894,7 +899,7 @@ $ pgbench -T 300 bench
 Sur l'éditeur :
 
 ```
-postgres@bench=# select * from pg_stat_replication;
+postgres@bench=# SELECT * FROM pg_stat_replication;
 -[ RECORD 1 ]----+-----------------------------
 pid              | 10299
 usesysid         | 16407
@@ -920,7 +925,7 @@ sync_state       | async
 Sur l'abonné :
 
 ```
-postgres@bench=# select * from pg_replication_origin_status;
+postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
         1 | pg_16425    | 0/5DED5628 | 0/DFC90780
@@ -950,7 +955,8 @@ postgres@bench=# select * from pg_replication_origin_status;
   * Exemple avec les tris, à vérifier avec votre environnement...
 
 ```sql
-postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
+EXPLAIN (analyze, buffers) SELECT i
+  FROM test ORDER BY i DESC;
 ```
 
 Avec PostgreSQL 9.6 :
