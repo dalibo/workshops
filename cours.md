@@ -239,18 +239,17 @@ Elle permet également d'ajouter des colonnes spécifiques aux tables filles.
 ### Nouveau partitionnement
 
 <div class="slide-content">
-  * Mise en place et administration simplifiée
-    * car directement intégrée au moteur
-    * attention, le mot clé *UNBOUNDED* a été retiré et il ne doit donc plus être utilisé.
+  * Mise en place et administration simplifiées car intégrées au moteur
   * Plus de trigger
     * insertions plus rapides
     * routage des données insérées dans la bonne partition
     * erreur si aucune partition destinataire
-  * Partition
+  * Partitions
     * attacher/détacher une partition
     * contrainte implicite de partitionnement
     * expression possible pour la clé de partitionnement
     * sous-partitions possibles
+    * attention, le mot clé *UNBOUNDED* a été *retiré*
   * Changement du catalogue système
     * nouvelles colonnes dans *pg_class*
     * nouveau catalogue *pg_partioned_table*
@@ -297,9 +296,17 @@ Si on souhaite vérifier que la table partitionnée ne contient effectivement pa
 ### Exemple de partitionnement liste
 
 <div class="slide-content">
-  * Créer une table partitionnée `CREATE TABLE t1(c1 integer, c2 text) PARTITION BY LIST (c1);`
-  * Ajouter une partition `CREATE TABLE t1_a PARTITION of t1 FOR VALUES IN (1, 2, 3);`
-  * Détacher la partition `AlTER TABLE t1 DETACH PARTITION t1_a;`
+  * Créer une table partitionnée :
+
+    `CREATE TABLE t1(c1 integer, c2 text) PARTITION BY LIST (c1);`
+
+  * Ajouter une partition :
+
+    `CREATE TABLE t1_a PARTITION of t1 FOR VALUES IN (1, 2, 3);`
+
+  * Détacher la partition :
+
+    `AlTER TABLE t1 DETACH PARTITION t1_a;`
 </div>
 
 <div class="notes">
@@ -332,9 +339,17 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 ### Exemple de partitionnement intervalle
 
 <div class="slide-content">
-  * Créer une table partitionnée `CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);`
-  * Ajouter une partition `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);`
-  * Détacher la partition `ALTER TABLE t2 DETACH PARTITION t2_a;`
+  * Créer une table partitionnée :
+
+    `CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);`
+
+  * Ajouter une partition :
+
+    `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);`
+
+  * Détacher une partition :
+
+    `ALTER TABLE t2 DETACH PARTITION t2_a;`
 </div>
 
 <div class="notes">
@@ -359,7 +374,7 @@ ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
 
-Il est également possible de créer les partitions en utilisant plusieurs colonnes et des tablespaces différents :
+Il est également possible de créer les partitions en utilisant plusieurs colonnes, ainsi que des tablespaces différents :
 
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
@@ -381,7 +396,7 @@ postgres=# CREATE TABLE t2_b PARTITION OF t2
        TABLESPACE tsB;
 ```
 
-Si c1 est trop petit :
+Si la valeur pour `c1` est trop petit :
 
 ```sql
 postgres=# INSERT INTO t2 VALUES (0, 'test', '2017-08-10');
@@ -389,7 +404,7 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (0, 2017-08-10).
 ```
 
-Si c3 (date) est antérieure :
+Si la valeur pour `c3` (colonne de type date) est antérieure :
 
 ```sql
 postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-09');
@@ -397,7 +412,7 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 ```
 
-Si les valeurs sont comprises dans les bornes :
+Si les valeurs sont bien comprises dans les bornes :
 
 ```sql
 postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-10');
@@ -409,16 +424,17 @@ INSERT 0 1
 postgres=# ANALYZE t2;
 ANALYZE
 
-postgres=# SELECT relname,relispartition,relkind,reltuples FROM pg_class WHERE relname LIKE 't2%';
+postgres=# SELECT relname,relispartition,relkind,reltuples
+           FROM pg_class WHERE relname LIKE 't2%';
  relname | relispartition | relkind | reltuples 
 ---------+----------------+---------+-----------
  t2      | f              | p       |         0
  t2_a    | t              | r       |         1
  t2_b    | t              | r       |         1
 (3 lignes)
-
-L'ensemble des colonnes est documenté dans la documentation de [pg_class]("https://dali.bo/pg-class").
 ```
+
+Les différentes colonnes sont détaillées dans la documentation de [pg_class](https://dali.bo/pg-class).
 </div>
 
 -----
@@ -429,46 +445,43 @@ L'ensemble des colonnes est documenté dans la documentation de [pg_class]("http
 t1 (non partitionnée) :
 
 ```sql
-postgres=# INSERT INTO t1 select i, 'toto' FROM generate_series(0, 9999999) i;
-INSERT 0 10000000
+INSERT INTO t1 select i, 'toto'
+  FROM generate_series(0, 9999999) i;
 Time: 10097.098 ms (00:10.097)
-postgres=# checkpoint;
-CHECKPOINT
+CHECKPOINT;
 Time: 501.660 ms
 ```
 
 t1 (partitionnement déclaratif) :
 
 ```sql
-postgres=# INSERT INTO t2 select i, 'toto' FROM generate_series(0, 9999999) i;
-INSERT 0 10000000
+INSERT INTO t2 select i, 'toto'
+  FROM generate_series(0, 9999999) i;
 Time: 11448.867 ms (00:11.449)
-postgres=# checkpoint;
-CHECKPOINT
+CHECKPOINT;
 Time: 501.212 ms
 ```
 
 t3 (partitionnement par héritage) :
 
 ```sql
-postgres=# INSERT INTO t3 select i, 'toto' FROM generate_series(0, 9999999) i;
-INSERT 0 0
+INSERT INTO t3 select i, 'toto'
+  FROM generate_series(0, 9999999) i;
 Time: 125351.918 ms (02:05.352)
-postgres=# checkpoint;
-CHECKPOINT
+CHECKPOINT;
 Time: 802.073 ms
 ```
 </div>
 
 <div class="notes">
-La table *t1* est une table non partitionnée :
+La table *t1* est une table non partitionnée. Elle a été créée comme suit :
 
 ```sql
 CREATE TABLE t1 (c1 integer, c2 text);
 ```
 
 La table *t2* est une table partitionnée utilisant les nouvelles
-fonctionnalités de la version 10 :
+fonctionnalités de la version 10 de PostgreSQL :
 
 ```sql
 CREATE TABLE t2 (c1 integer, c2 text) PARTITION BY RANGE (c1);
@@ -577,7 +590,7 @@ Plusieurs articles contiennent des explications et des exemples concrets, comme 
 
 Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été retiré.
 
-Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser l'extension [pg_partman](https://dali.bo/pg-partman).
+Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser les extensions [pg_partman](https://dali.bo/pg-partman) et / ou [pg_pathman](https://dali.bo/pg-pathman).
 </div>
 
 -----
@@ -625,7 +638,7 @@ Le serveur secondaire se contente de rejouer les journaux de transaction.
     * slots de réplication
   * Réplique les changements sur une seule base de données
     * d'un ensemble de tables défini
-  * Uniquement INSERT/UPDATE/DELETE
+  * Uniquement INSERT / UPDATE / DELETE
     * Pas les DDL, ni les TRUNCATE
 </div>
 
