@@ -1449,9 +1449,9 @@ De nouveaux types d'événements pour lesquels le processus est en attente appar
   * Timeout :  The server process is waiting for a timeout to expire.
   * IO : The server process is waiting for a IO to complete.
 
-[FIXME - utiliser les traductions de la doc dès que disponible]
+FIXME: utiliser les traductions de la doc dès que disponible
 
-Les types d'événements LWLockNamed et LWLockTranche ont été renommés en LWLock.
+Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
 </div>
 
 -----
