@@ -3,7 +3,7 @@
 ![PostgreSQL](medias/elephant-rock-valley-of-fire.jpg)
 
 <div class="notes">
-Photographie obtenue sur [urltarget.com](http://www.urltarget.com/elephant-rock-valley-of-fire.html "elephant-rock-valley-of-fire").
+Photographie obtenue sur [urltarget.com](http://www.urltarget.com/elephant-rock-valley-of-fire.html).
 
 Public Domain CC0.
 </div>
@@ -52,9 +52,9 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
 <div class="notes">
 PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'ores et déjà détaillées dans de nombreux articles. Voici 3 liens vers des articles en anglais :
 
-  * [New in postgres 10](https://dali.bo/new-in-postgres-10 "new-in-postgres-10") du projet PostgreSQL
-  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10 "new-features-coming-in-postgresql-10") de *Robert Haas*
-  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10 "hp-new-features-pg10") de *HP*
+  * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet PostgreSQL
+  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
+  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10) de *HP*
 </div>
 
 -----
@@ -97,7 +97,7 @@ L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux déve
 
 Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
 
-Vous trouverez plus de détails dans l'article de Josh Berkus disponible sur son [blog](https://dali.bo/changing-postgresql-version-numbering "changing-postgresql-version-numbering").
+Vous trouverez plus de détails dans l'article de Josh Berkus disponible sur son [blog](https://dali.bo/changing-postgresql-version-numbering).
 </div>
 
 -----
@@ -181,7 +181,7 @@ $ ls -l *wal*
 
 L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer à cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
 
-Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal "waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal").
+Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
 
 -----
@@ -502,12 +502,12 @@ plus possible de faire pointer une clé étrangère vers ce type de table.
 
 Plusieurs articles contiennent des explications et des exemples concrets, comme par exemple :
 
-  * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement "pgday-2017-partitionnement")
-  * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned "cool-stuff-in-postgresql-10-partitioned")
+  * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
+  * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
 
 Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été retiré.
 
-Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser l'extension [pg_partman](https://dali.bo/pg-partman "pg-partman").
+Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser l'extension [pg_partman](https://dali.bo/pg-partman).
 </div>
 
 -----
@@ -998,7 +998,7 @@ Les noeuds suivants sont désormais gérés :
 </div>
 
 <div class="notes">
-Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2 "parallel-query-v2") de *Robert Haas*.
+Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
 </div>
 
 -----
@@ -1338,7 +1338,7 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
-[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers "waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers")
+[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
 </div>
 
 -----
@@ -1421,7 +1421,7 @@ postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
 (10 rows)
 ```
 
-Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients "waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients")
+Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients)
 </div>
 
 -----
@@ -1468,19 +1468,19 @@ b | 0
 
 ```
 
-Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command "waiting-for-postgresql-10-psql-add-gx-command")
+Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command)
 
 **\\if, \\elif, \\else, \\endif**
 
 Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
 
-Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting "waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting")
+Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
 
 **indexes Hash**
 
 Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crash et seront utilisables sur un environnement répliqué.
 
-Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal "waiting-for-postgresql-10-hash-indexing-vs-wal")
+Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
 
 **ALTER TYPE**
 
@@ -1612,7 +1612,7 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery)) FROM 
 (1 row)
 ```
 
-Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb "waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb")
+Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
 
 
 **XMLTABLE**
@@ -1663,7 +1663,7 @@ Devrim     | Gündüz      | [null]
 ```
 
 Pour en savoir plus :
-  * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression "waiting-for-postgresql-10-support-xmltable-query-expression")
+  * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression)
   * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
 
@@ -1742,8 +1742,8 @@ UPDATE 1
 ```
 
 Pour en savoir plus :
-  * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers "waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers")
-  * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition "cool-stuff-in-postgresql-10-transition")
+  * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
+  * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
 
 
 ** Améliorations sur les séquences **
@@ -1762,7 +1762,7 @@ postgres=# SELECT * FROM pg_sequence;
     16539 |       23 |        1 |            1 | 2147483647 |      1 |        1 | f
 ```
 
-Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog "waiting-for-postgresql-10-add-pg_sequence-system-catalog")
+Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
 
 
 - Ajout de l'option *CREATE SEQUENCE AS type_donnee*
@@ -1778,7 +1778,7 @@ La contrainte *GENERATED AS IDENTITY* a été ajoutée à l'ordre *CREATE TABLE*
 
 Comme le type *serial*, une colonne d'identité utilisera une séquence.
 
-Pour en savoir plus : [Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns "waiting-for-postgresql-10-identity-columns")
+Pour en savoir plus : [Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
 </div>
 
 -----
@@ -1866,7 +1866,7 @@ FIXME: PostgreSQL 11
 <div class="notes">
 Attention, les utilisateurs des versions Beta doivent considérer que les mises à jour concernent des versions majeures. Ceci permettra notamment de pouvoir contourner toutes les incompatibilités ou changements de comportement dû au fait que PostgreSQL 10 est toujours en développement.
 
-La [roadmap](https://dali.bo/pg-roadmap "pg-roadmap") du projet détaille les prochaines grandes étapes.
+La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines grandes étapes.
 </div>
 
 -----
