@@ -948,27 +948,26 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 -----
 
-### Tris
+#<div class="slide-content">
+  * Gains significatifs pour les tris sur disque
+    * Visible pour les noeuds : *Sort Method: external merge*
 
-<div class="slide-content">
-  * Gains très significatifs au niveau des performances
-  * Exemple avec les tris, à vérifier avec votre environnement...
+  * Test avec installation par défaut et disques SSD :
 
 ```sql
-EXPLAIN (analyze, buffers) SELECT i
-  FROM test ORDER BY i DESC;
+postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
 ```
 
-Avec PostgreSQL 9.6 :
+    * Avec PostgreSQL 9.6 :
 
 ```
-Execution time: 2645.577 ms
+Execution time: 2268.116 ms
 ```
 
-Avec PostgreSQL 10 :
+    * Avec PostgreSQL 10 :
 
 ```
-Execution time: 1285.398 ms
+Execution time: 1695.880 ms
 ```
 </div>
 
@@ -986,39 +985,34 @@ Requête avec PostgreSQL 9.6 :
 
 ```sql
 postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
-                                                      QUERY PLAN
-
+                                                      QUERY PLAN                                                      
 ----------------------------------------------------------------------------------------------------------------------
- Sort  (cost=551018.87..561018.87 rows=4000000 width=4) (actual
-time=1359.623..2437.687 rows=4000000 loops=1)
+ Sort  (cost=605706.37..615706.37 rows=4000000 width=4) (actual time=1539.208..2124.541 rows=4000000 loops=1)
    Sort Key: i DESC
-   Sort Method: external merge  Disk: 54680kB
-   Buffers: shared hit=17700, temp read=6850 written=6850
-   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4)
-(actual time=0.009..329.761 rows=4000000 loops=1)
-         Buffers: shared hit=17700
- Planning time: 0.090 ms
- Execution time: 2645.577 ms
-(8 lignes)
+   Sort Method: external merge  Disk: 54752kB
+   Buffers: shared hit=15451 read=2249, temp read=15264 written=15264
+   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4) (actual time=0.132..232.824 rows=4000000 loops=1)
+         Buffers: shared hit=15451 read=2249
+ Planning time: 0.085 ms
+ Execution time: 2268.116 ms
+(8 rows)
 ```
 
 Requête avec PostgreSQL 10 :
 
 ```sql
 postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
-                                                      QUERY PLAN
-
+                                                      QUERY PLAN                                                      
 ----------------------------------------------------------------------------------------------------------------------
- Sort  (cost=605706.37..615706.37 rows=4000000 width=4) (actual
-time=836.725..1161.973 rows=4000000 loops=1)
+ Sort  (cost=605706.37..615706.37 rows=4000000 width=4) (actual time=1175.235..1551.828 rows=4000000 loops=1)
    Sort Key: i DESC
    Sort Method: external merge  Disk: 54872kB
-   Buffers: shared hit=15611 read=2089, temp read=14287 written=14358
-   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4)
-(actual time=0.081..179.833 rows=4000000 loops=1)
-         Buffers: shared hit=15611 read=2089
- Planning time: 0.161 ms
- Execution time: 1285.398 ms
+   Buffers: shared hit=15419 read=2281, temp read=14287 written=14358
+   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4) (actual time=0.082..227.361 rows=4000000 loops=1)
+         Buffers: shared hit=15419 read=2281
+ Planning time: 0.163 ms
+ Execution time: 1695.880 ms
+(8 rows)
 ```
 </div>
 
@@ -1027,13 +1021,27 @@ time=836.725..1161.973 rows=4000000 loops=1)
 ### Agrégats
 
 <div class="slide-content">
-  * Les noeuds *HashAggregate* ont été améliorés
-  * Dans l'exemple fournit, on passe de 6985.745 ms à 2122.746 ms
+  * Permettre l'exécution d'un agrégat par hachage (opération HashAggregate d'un plan d'exécution)
+    * lors de l'utilisation d'un ensemble de regroupement (par exemple, un GROUP BY)
+
+  * Test avec installation par défaut et disques SSD :
+
+    * Avec PostgreSQL 9.6 :
+
+```
+Execution time: 4985.385 ms
+```
+
+    * Avec PostgreSQL 10 :
+
+```
+Execution time: 2642.349 ms
+```
 </div>
 
 <div class="notes">
 ```sql
-# EXPLAIN (ANALYZE, BUFFERS) SELECT
+postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT
 GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
@@ -1051,19 +1059,97 @@ GROUPING(type_client,code_pays)::bit(2),
 GROUP BY CUBE (type_client, code_pays);
 ```
 
-Avec PostgreSQL 9.6, on termine par un noeud de type *GroupAggregate* et :
+Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 
 ```sql
-
-Planning time: 2.346 ms
-Execution time: 6985.745 ms
-
-Avec PostgreSQL 10, on termine par un noeud de type *MixedAggregate* et :
+                                                                            QUERY PLAN                                                                             
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ GroupAggregate  (cost=334597.85..512073.04 rows=80 width=48) (actual time=2720.032..4971.515 rows=40 loops=1)
+   Group Key: cl.type_client, co.code_pays
+   Group Key: cl.type_client
+   Group Key: ()
+   Sort Key: co.code_pays
+     Group Key: co.code_pays
+   Buffers: shared hit=8551 read=47879, temp read=32236 written=32218
+   ->  Sort  (cost=334597.85..337643.61 rows=1218303 width=15) (actual time=2718.534..3167.936 rows=1226456 loops=1)
+         Sort Key: cl.type_client, co.code_pays
+         Sort Method: external merge  Disk: 34664kB
+         Buffers: shared hit=8551 read=47879, temp read=25050 written=25032
+         ->  Hash Join  (cost=54327.22..190627.59 rows=1218303 width=15) (actual time=525.656..1862.380 rows=1226456 loops=1)
+               Hash Cond: (l.numero_commande = c.numero_commande)
+               Buffers: shared hit=8551 read=47879, temp read=17777 written=17759
+               ->  Seq Scan on lignes_commandes l  (cost=0.00..73621.16 rows=3141916 width=18) (actual time=0.091..438.819 rows=3141967 loops=1)
+                     Buffers: shared hit=2241 read=39961
+               ->  Hash  (cost=47586.24..47586.24 rows=387758 width=13) (actual time=523.476..523.476 rows=390331 loops=1)
+                     Buckets: 131072  Batches: 8  Memory Usage: 3162kB
+                     Buffers: shared hit=6310 read=7918, temp read=1611 written=2979
+                     ->  Hash Join  (cost=12818.57..47586.24 rows=387758 width=13) (actual time=152.778..457.347 rows=390331 loops=1)
+                           Hash Cond: (c.client_id = cl.client_id)
+                           Buffers: shared hit=6310 read=7918, temp read=1611 written=1607
+                           ->  Seq Scan on commandes c  (cost=0.00..25159.00 rows=387758 width=16) (actual time=10.810..132.984 rows=390331 loops=1)
+                                 Filter: ((date_commande >= '2014-01-01'::date) AND (date_commande <= '2014-12-31'::date))
+                                 Rows Removed by Filter: 609669
+                                 Buffers: shared hit=2241 read=7918
+                           ->  Hash  (cost=11079.57..11079.57 rows=100000 width=13) (actual time=139.381..139.381 rows=100000 loops=1)
+                                 Buckets: 131072  Batches: 2  Memory Usage: 3522kB
+                                 Buffers: shared hit=4069, temp read=515 written=750
+                                 ->  Hash Join  (cost=3862.00..11079.57 rows=100000 width=13) (actual time=61.976..119.724 rows=100000 loops=1)
+                                       Hash Cond: (co.contact_id = cl.contact_id)
+                                       Buffers: shared hit=4069, temp read=515 written=513
+                                       ->  Seq Scan on contacts co  (cost=0.00..4143.05 rows=110005 width=11) (actual time=0.051..18.025 rows=110005 loops=1)
+                                             Buffers: shared hit=3043
+                                       ->  Hash  (cost=2026.00..2026.00 rows=100000 width=18) (actual time=57.926..57.926 rows=100000 loops=1)
+                                             Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                                             Buffers: shared hit=1026, temp written=269
+                                             ->  Seq Scan on clients cl  (cost=0.00..2026.00 rows=100000 width=18) (actual time=0.060..21.896 rows=100000 loops=1)
+                                                   Buffers: shared hit=1026
+ Planning time: 1.739 ms
+ Execution time: 4985.385 ms
+(41 rows)
 ```
 
+Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise bien un hachage :
+
 ```sql
-Planning time: 1.471 ms
-Execution time: 2122.746 ms
+                                                                         QUERY PLAN                                                                          
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
+ MixedAggregate  (cost=54402.81..239741.84 rows=40 width=48) (actual time=2640.531..2640.561 rows=40 loops=1)
+   Hash Key: cl.type_client, co.code_pays
+   Hash Key: cl.type_client
+   Hash Key: co.code_pays
+   Group Key: ()
+   Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
+   ->  Hash Join  (cost=54402.81..190774.44 rows=1224165 width=15) (actual time=494.339..1813.743 rows=1226456 loops=1)
+         Hash Cond: (l.numero_commande = c.numero_commande)
+         Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
+         ->  Seq Scan on lignes_commandes l  (cost=0.00..73622.35 rows=3142035 width=18) (actual time=0.019..417.992 rows=3141967 loops=1)
+               Buffers: shared hit=2137 read=40065
+         ->  Hash  (cost=47629.69..47629.69 rows=389609 width=13) (actual time=493.558..493.558 rows=390331 loops=1)
+               Buckets: 131072  Batches: 8  Memory Usage: 3162kB
+               Buffers: shared hit=6278 read=7950, temp read=1611 written=2979
+               ->  Hash Join  (cost=12818.57..47629.69 rows=389609 width=13) (actual time=159.207..429.528 rows=390331 loops=1)
+                     Hash Cond: (c.client_id = cl.client_id)
+                     Buffers: shared hit=6278 read=7950, temp read=1611 written=1607
+                     ->  Seq Scan on commandes c  (cost=0.00..25159.00 rows=389609 width=16) (actual time=2.562..103.812 rows=390331 loops=1)
+                           Filter: ((date_commande >= '2014-01-01'::date) AND (date_commande <= '2014-12-31'::date))
+                           Rows Removed by Filter: 609669
+                           Buffers: shared hit=2209 read=7950
+                     ->  Hash  (cost=11079.57..11079.57 rows=100000 width=13) (actual time=155.728..155.728 rows=100000 loops=1)
+                           Buckets: 131072  Batches: 2  Memory Usage: 3522kB
+                           Buffers: shared hit=4069, temp read=515 written=750
+                           ->  Hash Join  (cost=3862.00..11079.57 rows=100000 width=13) (actual time=73.906..135.779 rows=100000 loops=1)
+                                 Hash Cond: (co.contact_id = cl.contact_id)
+                                 Buffers: shared hit=4069, temp read=515 written=513
+                                 ->  Seq Scan on contacts co  (cost=0.00..4143.05 rows=110005 width=11) (actual time=0.011..18.347 rows=110005 loops=1)
+                                       Buffers: shared hit=3043
+                                 ->  Hash  (cost=2026.00..2026.00 rows=100000 width=18) (actual time=70.006..70.006 rows=100000 loops=1)
+                                       Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                                       Buffers: shared hit=1026, temp written=269
+                                       ->  Seq Scan on clients cl  (cost=0.00..2026.00 rows=100000 width=18) (actual time=0.014..26.689 rows=100000 loops=1)
+                                             Buffers: shared hit=1026
+ Planning time: 1.910 ms
+ Execution time: 2642.349 ms
+(36 rows)
 ```
 </div>
 
