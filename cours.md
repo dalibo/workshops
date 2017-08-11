@@ -1440,7 +1440,8 @@ postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, b
  4937 |                  | Activity        | WalWriterMain       | walwriter
 ```
 
-De nouveaux types d'événements pour lesquels le processus est en attente apparaissent :
+De nouveaux types d'événements pour lesquels le processus est en attente apparaissent en version 10 :
+
   * Activity : The server process is idle. This is used by system processes waiting for activity in their main processing loop.
   * Extension : The server process is waiting for activity in an extension module. This category is useful for modules to track custom waiting points. 
   * Client : The server process is waiting for some activity on a socket from user applications, and that the server expects something to happen that is independent from its internal processes.
