@@ -1158,18 +1158,20 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 ### Parallélisme
 
 <div class="slide-content">
-Les noeuds suivants sont désormais gérés :
+  * Noeuds désormais gérés :
+    * *Parallel Bitmap Heap Scan*
+    * *Parallel Index Scan*
+    * *Gather Merge*
+    * *Parallel Merge Join*
 
-  * *Parallel Bitmap Heap Scan*
-  * *Parallel Index Scan*
-  * *Gather Merge*
-  * *Parallel Merge Join*
+  * Support également des :
+    * requêtes préparées (*PREPARE* / *EXECUTE*)
+    * sous-requêtes non-corrélées
 
-À noter également :
-
-  * Différentes améliorations
-  * Davantage de fonctions en langage procédural (*PL/pgsql*)
-  * Le GUC *max_parallel_workers*
+  * Paramétrage
+    * nouveaux paramètres *min_parallel_table_scan_size* et *min_parallel_index_scan_size*
+    * suppression de *min_parallel_relation_size*, jugé trop générique
+    * *max_parallel_workers* : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
 </div>
 
 <div class="notes">
