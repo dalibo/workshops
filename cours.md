@@ -229,9 +229,9 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 </div>
 
 <div class="notes">
-Cette méthode ne répond pas à toutes les attentes du partitionnement, mais permet tout de même d'orienter les lignes en fonction de certains critères.
+Cette méthode ne répond pas à toutes les attentes du partitionnement mais elle permet tout de même d'orienter les lignes en fonction de certains critères.
 
-Elle permet également d'ajouter des colonnes dans les tables filles.
+Elle permet également d'ajouter des colonnes spécifiques aux tables filles.
 </div>
 
 -----
@@ -241,6 +241,7 @@ Elle permet également d'ajouter des colonnes dans les tables filles.
 <div class="slide-content">
   * Mise en place et administration simplifiée
     * car directement intégrée au moteur
+    * attention, le mot clé *UNBOUNDED* a été retiré et il ne doit donc plus être utilisé.
   * Plus de trigger
     * insertions plus rapides
     * routage des données insérées dans la bonne partition
@@ -266,16 +267,15 @@ détacher des partitions.
 Au niveau de la simplification de la mise en place, on peut noter qu'il n'est
 plus nécessaire de créer une fonction trigger et d'ajouter des triggers pour
 gérer les insertions et mises à jour. Le routage est géré de façon automatique
-par rapport à la définition des partitions. Si les données insérées ne
-trouvent pas de partition cible, les données ne sont pas insérées dans la
-table mère. L'insertion est tout simplement en erreur. Du fait de ce routage
-automatique, les insertions se révèlent aussi plus rapides.
+en fonction de la définition des partitions. Si les données insérées ne
+trouvent pas de partition cible, l'insertion est tout simplement en erreur.
+Du fait de ce routage automatique, les insertions se révèlent aussi plus rapides.
 
 Le catalogue *pg_class* a été modifié et indique désormais :
 
-  * si une table est en rapport avec le partitionnement (*relispartition = 't'* pour les deux)
-  * si une table est partitionnée (*relkind = 'p'*) ou s'il s'agit d'une partition (*relkind = 'r'*)
-  * la représentation interne des bornes du partitionnement (relpartbound)
+  * si une table est une partition (dans ce cas : *relispartition = 't'*)
+  * si une table est partitionnée (*relkind = 'p'*) ou si elle est ordinaire (*relkind = 'r'*)
+  * la représentation interne des bornes de partitionnement (relpartbound)
 
 Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes :
 
@@ -290,8 +290,6 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
 
 Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme celà se faisait déjà avec l'héritage.
-
-Lors de la déclaration des partitions, *FROM x TO y* indique que les données *supérieures ou égales à x* et *inférieures à y* (mais pas égales !) seront concernées. Il est possible d'utiliser plusieurs colonnes et donc plusieurs bornes.
 </div>
 
 -----
@@ -299,32 +297,32 @@ Lors de la déclaration des partitions, *FROM x TO y* indique que les données *
 ### Exemple de partitionnement liste
 
 <div class="slide-content">
-  * Créer une table partitionnée `create table t1(c1 integer, c2 text) partition by list (c1);`
-  * Ajouter une partition `create table t1_a partition of t1 for values in (1, 2, 3);`
-  * Détacher la partition `alter table t1 detach partition t1_a;`
+  * Créer une table partitionnée `CREATE TABLE t1(c1 integer, c2 text) PARTITION BY LIST (c1);`
+  * Ajouter une partition `CREATE TABLE t1_a PARTITION of t1 FOR VALUES IN (1, 2, 3);`
+  * Détacher la partition `AlTER TABLE t1 DETACH PARTITION t1_a;`
 </div>
 
 <div class="notes">
 Exemple complet :
 
-```
-postgres=# create table t1(c1 integer, c2 text) partition by list (c1);
+```sql
+postgres=# CREATE TABLE t1(c1 integer, c2 text) PARTITION BY LIST (c1);
 CREATE TABLE
-postgres=# create table t1_a partition of t1 for values in (1, 2, 3);
+postgres=# CREATE TABLE t1_a PARTITION OF t1 FOR VALUES IN (1, 2, 3);
 CREATE TABLE
-postgres=# create table t1_b partition of t1 for values in (4, 5);
+postgres=# CREATE TABLE t1_b PARTITION OF t1 FOR VALUES IN (4, 5);
 CREATE TABLE
-postgres=# insert into t1 values (0);
-ERROR:  no partition of relation "t1" found for row
+postgres=# INSERT INTO t1 VALUES (0);
+ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (0).
-postgres=# insert into t1 values (1);
+postgres=# INSERT INTO t1 VALUES (1);
 INSERT 0 1
-postgres=# insert into t1 values (2);
+postgres=# INSERT INTO t1 VALUES (2);
 INSERT 0 1
-postgres=# insert into t1 values (5);
+postgres=# INSERT INTO t1 VALUES (5);
 INSERT 0 1
-postgres=# insert into t1 values (6);
-ERROR:  no partition of relation "t1" found for row
+postgres=# INSERT INTO t1 VALUES (6);
+ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (6).
 ```
 </div>
@@ -334,31 +332,92 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 ### Exemple de partitionnement intervalle
 
 <div class="slide-content">
-  * Créer une table partitionnée `create table t2(c1 integer, c2 text) partition by range (c1);`
-  * Ajouter une partition `create table t2_a partition of t2 for values from (1) to (100);`
-  * Détacher la partition `alter table t2 detach partition t2_a;`
+  * Créer une table partitionnée `CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);`
+  * Ajouter une partition `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);`
+  * Détacher la partition `ALTER TABLE t2 DETACH PARTITION t2_a;`
 </div>
 
 <div class="notes">
 Exemple complet :
 
-```
-postgres=# create table t2(c1 integer, c2 text) partition by range (c1);
+```sql
+postgres=# CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);
 CREATE TABLE
-postgres=# create table t2_a partition of t2 for values from (1) to (100);
+postgres=# CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);
 CREATE TABLE
-postgres=# insert into t2 values (0);
-ERROR:  no partition of relation "t2" found for row
+postgres=# INSERT INTO t2 VALUES (0);
+ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (0).
-postgres=# insert into t2 values (1);
+postgres=# INSERT INTO t2 VALUES (1);
 INSERT 0 1
-postgres=# insert into t2 values (2);
+postgres=# INSERT INTO t2 VALUES (2);
 INSERT 0 1
-postgres=# insert into t2 values (5);
+postgres=# INSERT INTO t2 VALUES (5);
 INSERT 0 1
-postgres=# insert into t2 values (101);
-ERROR:  no partition of relation "t2" found for row
+postgres=# INSERT INTO t2 VALUES (101);
+ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
+```
+
+Il est également possible de créer les partitions en utilisant plusieurs colonnes et des tablespaces différents :
+
+```sql
+postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
+       PARTITION BY RANGE (c1, c3);
+CREATE TABLE
+
+postgres=# CREATE TABLE t2_a PARTITION OF t2
+       FOR VALUES FROM (1,'2017-08-10') to (100, '2017-08-11')
+       TABLESPACE tsA;
+CREATE TABLE
+
+postgres=# CREATE TABLE t2_b PARTITION OF t2
+       FOR VALUES FROM (100,'2017-08-10') to (200, '2017-08-11')
+       TABLESPACE tsB;
+ERROR:  partition "t2_b" would overlap partition "t2_a"
+
+postgres=# CREATE TABLE t2_b PARTITION OF t2
+       FOR VALUES FROM (101,'2017-08-10') to (200, '2017-08-11')
+       TABLESPACE tsB;
+```
+
+Si c1 est trop petit :
+
+```sql
+postgres=# INSERT INTO t2 VALUES (0, 'test', '2017-08-10');
+ERROR:  no partition of relation "t2" found for row
+DÉTAIL : Partition key of the failing row contains (c1, c3) = (0, 2017-08-10).
+```
+
+Si c3 (date) est antérieure :
+
+```sql
+postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-09');
+ERROR:  no partition of relation "t2" found for row
+DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
+```
+
+Si les valeurs sont comprises dans les bornes :
+
+```sql
+postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-10');
+INSERT 0 1
+
+postgres=# INSERT INTO t2 VALUES (150, 'test2', '2017-08-11');        
+INSERT 0 1
+
+postgres=# ANALYZE t2;
+ANALYZE
+
+postgres=# SELECT relname,relispartition,relkind,reltuples FROM pg_class WHERE relname LIKE 't2%';
+ relname | relispartition | relkind | reltuples 
+---------+----------------+---------+-----------
+ t2      | f              | p       |         0
+ t2_a    | t              | r       |         1
+ t2_b    | t              | r       |         1
+(3 lignes)
+
+L'ensemble des colonnes est documenté dans la documentation de [pg_class]("https://dali.bo/pg-class").
 ```
 </div>
 
@@ -367,20 +426,32 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 ### Performances en insertion
 
 <div class="slide-content">
-```
-postgres=# insert into t1 select i, 'toto' from generate_series(0, 9999999) i;
+t1 (non partitionnée) :
+
+```sql
+postgres=# INSERT INTO t1 select i, 'toto' FROM generate_series(0, 9999999) i;
 INSERT 0 10000000
 Time: 10097.098 ms (00:10.097)
 postgres=# checkpoint;
 CHECKPOINT
 Time: 501.660 ms
-postgres=# insert into t2 select i, 'toto' from generate_series(0, 9999999) i;
+```
+
+t1 (partitionnement déclaratif) :
+
+```sql
+postgres=# INSERT INTO t2 select i, 'toto' FROM generate_series(0, 9999999) i;
 INSERT 0 10000000
 Time: 11448.867 ms (00:11.449)
 postgres=# checkpoint;
 CHECKPOINT
 Time: 501.212 ms
-postgres=# insert into t3 select i, 'toto' from generate_series(0, 9999999) i;
+```
+
+t3 (partitionnement par héritage) :
+
+```sql
+postgres=# INSERT INTO t3 select i, 'toto' FROM generate_series(0, 9999999) i;
 INSERT 0 0
 Time: 125351.918 ms (02:05.352)
 postgres=# checkpoint;
@@ -392,31 +463,31 @@ Time: 802.073 ms
 <div class="notes">
 La table *t1* est une table non partitionnée :
 
-```
+```sql
 CREATE TABLE t1 (c1 integer, c2 text);
 ```
 
 La table *t2* est une table partitionnée utilisant les nouvelles
 fonctionnalités de la version 10 :
 
-```
-create table t2 (c1 integer, c2 text) partition by range (c1);
-create table t2_1 partition of t2 for values from (      0) to ( 1000000);
-create table t2_2 partition of t2 for values from (1000000) to ( 2000000);
-create table t2_3 partition of t2 for values from (2000000) to ( 3000000);
-create table t2_4 partition of t2 for values from (3000000) to ( 4000000);
-create table t2_5 partition of t2 for values from (4000000) to ( 5000000);
-create table t2_6 partition of t2 for values from (5000000) to ( 6000000);
-create table t2_7 partition of t2 for values from (6000000) to ( 7000000);
-create table t2_8 partition of t2 for values from (7000000) to ( 8000000);
-create table t2_9 partition of t2 for values from (8000000) to ( 9000000);
-create table t2_0 partition of t2 for values from (9000000) to (10000000);
+```sql
+CREATE TABLE t2 (c1 integer, c2 text) PARTITION BY RANGE (c1);
+CREATE TABLE t2_1 partition of t2 for values from (      0) TO ( 1000000);
+CREATE TABLE t2_2 partition of t2 for values from (1000000) TO ( 2000000);
+CREATE TABLE t2_3 partition of t2 for values from (2000000) TO ( 3000000);
+CREATE TABLE t2_4 partition of t2 for values from (3000000) TO ( 4000000);
+CREATE TABLE t2_5 partition of t2 for values from (4000000) TO ( 5000000);
+CREATE TABLE t2_6 partition of t2 for values from (5000000) TO ( 6000000);
+CREATE TABLE t2_7 partition of t2 for values from (6000000) TO ( 7000000);
+CREATE TABLE t2_8 partition of t2 for values from (7000000) TO ( 8000000);
+CREATE TABLE t2_9 partition of t2 for values from (8000000) TO ( 9000000);
+CREATE TABLE t2_0 partition of t2 FOR VALUES FROM (9000000) TO (10000000);
 ```
 
 Enfin, la table *t3* est une table utilisant l'ancienne méthode de
 partitionnement :
 
-```
+```sql
 CREATE TABLE t3 (c1 integer, c2 text);
 CREATE TABLE t3_1 (CHECK (c1 BETWEEN       0 AND  1000000)) INHERITS (t3);
 CREATE TABLE t3_2 (CHECK (c1 BETWEEN 1000000 AND  2000000)) INHERITS (t3);
