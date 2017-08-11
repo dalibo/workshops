@@ -1942,14 +1942,29 @@ Pour en savoir plus :
 
 ```sql
 postgres=# SELECT * FROM pg_sequences;
- schemaname | sequencename | sequenceowner | data_type | start_value | min_value | max_value  | increment_by | cycle | cache_size | last_value 
-------------+--------------+---------------+-----------+-------------+-----------+------------+--------------+-------+------------+------------
- public     | t1_id_seq    | postgres      | integer   |           1 |         1 | 2147483647 |            1 | f     |          1 |        101
+-[ RECORD 1 ]-+-----------
+schemaname    | public
+sequencename  | t1_id_seq
+sequenceowner | postgres
+data_type     | integer
+start_value   | 1
+min_value     | 1
+max_value     | 2147483647
+increment_by  | 1
+cycle         | f
+cache_size    | 1
+last_value    | 101
 
 postgres=# SELECT * FROM pg_sequence;
- seqrelid | seqtypid | seqstart | seqincrement |   seqmax   | seqmin | seqcache | seqcycle 
-----------+----------+----------+--------------+------------+--------+----------+----------
-    16539 |       23 |        1 |            1 | 2147483647 |      1 |        1 | f
+-[ RECORD 1 ]+-----------
+seqrelid     | 16384
+seqtypid     | 23
+seqstart     | 1
+seqincrement | 1
+seqmax       | 2147483647
+seqmin       | 1
+seqcache     | 1
+seqcycle     | f
 ```
 
 Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
