@@ -24,7 +24,7 @@ Public Domain CC0.
 
 
 <div class="notes">
-Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue fin septembre/début octobre.
+Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue fin septembre / début octobre 2017.
 
 La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
@@ -55,8 +55,6 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
   * [New in postgres 10](https://dali.bo/new-in-postgres-10 "new-in-postgres-10") du projet PostgreSQL
   * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10 "new-features-coming-in-postgresql-10") de *Robert Haas*
   * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10 "hp-new-features-pg10") de *HP*
-
-Actuellement, deux versions, [Beta1](https://dali.bo/pg10-beta1-changes "pg10-beta1-changes") et [Beta2](https://dali.bo/pg10-beta2-changes "pg10-beta2-changes"), ont été publiées.
 </div>
 
 -----
@@ -483,29 +481,31 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3 FOR EACH ROW EXECUTE PROCEDURE i
 </div>
 
 <div class="notes">
-FIXME: remplacement de UNBOUNDED par MINVALUE et MAXVALUE dans la beta3 ?
-
 Toute donnée doit pouvoir être placée dans une partition. Dans le cas
 contraire, la donnée ne sera pas placée dans la table mère (contrairement au
 partitionnement traditionnel). À la place, une erreur sera générée :
 
+```
 ERROR:  no partition of relation "t2" found for row
+```
 
 De même, il n'est pas possible d'ajouter un index à la table mère, sous peine
 de voir l'erreur suivante apparaître :
 
+```
 ERROR:  cannot create index on partitioned table "t1"
+```
 
 Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non
 plus possible de faire pointer une clé étrangère vers ce type de table.
 
-Vous pouvez également consulter 4 articles avec des explications ainsi que des exemples concrets :
+Plusieurs articles contiennent des explications et des exemples concrets, comme par exemple :
 
   * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement "pgday-2017-partitionnement")
   * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned "cool-stuff-in-postgresql-10-partitioned")
-  * [PostgreSQL 10 Built-in Partitioning](https://dali.bo/postgresql-10-built-in-partitioning "postgresql-10-built-in-partitioning")
-  * [Implement table partitioning](https://dali.bo/waiting-for-postgresql-10-implement-table-partitioning "waiting-for-postgresql-10-implement-table-partitioning")
+
+Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été retiré.
 
 Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser l'extension [pg_partman](https://dali.bo/pg-partman "pg-partman").
 </div>
