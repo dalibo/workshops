@@ -786,7 +786,9 @@ $ createuser --replication repliuser
 En tant que super-utilisateur, créer l'abonnement :
 
 ```
-postgres@bench=# CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;
+postgres@bench=# CREATE SUBSCRIPTION ma_souscription
+  CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'
+  PUBLICATION ma_publication;
 NOTICE:  created replication slot "ma_souscription" on publisher
 CREATE SUBSCRIPTION
 ```
@@ -808,9 +810,9 @@ CREATE SUBSCRIPTION
 </div>
 
 <div class="notes">
-*pg_stat_replication*
+Dans *pg_stat_replication* :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
 -[ RECORD 1 ]----+-----------------------------
 pid              | 10299
@@ -834,9 +836,10 @@ sync_priority    | 0
 sync_state       | async
 ```
 
-*pg_replication_slots*
+Dans *pg_replication_slots* :
 
-```
+```sql
+FIXME: taille
 postgres@bench=# SELECT * FROM pg_replication_slots;
     slot_name    |  plugin  | slot_type | datoid | database | temporary | active | active_pid | xmin | catalog_xmin | restart_lsn | confirmed_flush_lsn 
 -----------------+----------+-----------+--------+----------+-----------+--------+------------+------+--------------+-------------+---------------------
@@ -844,9 +847,10 @@ postgres@bench=# SELECT * FROM pg_replication_slots;
 (1 row)
 ```
 
-*pg_publication*
+Dans *pg_publication* :
 
 ```
+FIXME: taille
 postgres@bench=# SELECT * FROM pg_publication;
     pubname     | pubowner | puballtables | pubinsert | pubupdate | pubdelete 
 ----------------+----------+--------------+-----------+-----------+-----------
@@ -854,9 +858,9 @@ postgres@bench=# SELECT * FROM pg_publication;
 (1 row)
 ```
 
-*pg_publication_tables*
+Dans *pg_publication_tables* :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_publication_tables;
     pubname     | schemaname |    tablename     
 ----------------+------------+------------------
@@ -867,9 +871,10 @@ postgres@bench=# SELECT * FROM pg_publication_tables;
 (4 rows)
 ```
 
-*pg_subscription*
+Dans *pg_subscription* :
 
 ```
+FIXME: taille
 postgres@bench=# SELECT * FROM pg_subscription;
  subdbid |     subname     | subowner | subenabled |                     subconninfo                      |   subslotname   | subsynccommit | subpublications  
 ---------+-----------------+----------+------------+------------------------------------------------------+-----------------+---------------+------------------
@@ -877,9 +882,9 @@ postgres@bench=# SELECT * FROM pg_subscription;
 (1 row)
 ```
 
-*pg_replication_origin_status*
+Dans *pg_replication_origin_status* :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
@@ -887,10 +892,9 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 (1 row)
 ```
 
-
 **Exemple de suivi de l'évolution de la réplication :**
 
-Simuler de l'activité :
+Simulation de l'activité :
 
 ```bash
 $ pgbench -T 300 bench
@@ -898,7 +902,7 @@ $ pgbench -T 300 bench
 
 Sur l'éditeur :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
 -[ RECORD 1 ]----+-----------------------------
 pid              | 10299
@@ -924,7 +928,7 @@ sync_state       | async
 
 Sur l'abonné :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
  local_id | external_id | remote_lsn | local_lsn  
 ----------+-------------+------------+------------
@@ -948,7 +952,7 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 -----
 
-#<div class="slide-content">
+<div class="slide-content">
   * Gains significatifs pour les tris sur disque
     * Visible pour les noeuds : *Sort Method: external merge*
 
