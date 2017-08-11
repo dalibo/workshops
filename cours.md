@@ -1215,9 +1215,11 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 </div>
 
 <div class="notes">
-La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès. Voici un exemple faisant apparaitre les principales colonnes :
+La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès.
 
 ```sql
+postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
+
  line_number | type  |   database    | user_name | auth_method 
 -------------+-------+---------------+-----------+-------------
           84 | local | {all}         | {all}     | trust       

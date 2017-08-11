@@ -235,7 +235,6 @@ Attention, la méthode d'authentification précisée dans le fichier `pg_hba.con
 La vue `pg_hba_file_rules` permet de consulter en lecture les règles d'accès qui sont configurées :
 
 ```sql
-testseq=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
 postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
  type  |   database    |  user_name  | auth_method  
 -------+---------------+-------------+--------------
