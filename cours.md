@@ -970,25 +970,16 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 <div class="slide-content">
   * Gains significatifs pour les tris sur disque
-    * Visible pour les noeuds : *Sort Method: external merge*
+    * Visible uniquement pour les noeuds : *Sort Method: external merge*
 
   * Test avec installation par défaut et disques SSD :
 
-```sql
-postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
-```
+    `postgres=# EXPLAIN (analyze, buffers) SELECT i `
+    `FROM test ORDER BY i DESC;`
 
-    * Avec PostgreSQL 9.6 :
+    * PostgreSQL 9.6 : `Execution time: 2268.116 ms`
 
-```
-Execution time: 2268.116 ms
-```
-
-    * Avec PostgreSQL 10 :
-
-```
-Execution time: 1695.880 ms
-```
+    * PostgreSQL 10 : `Execution time: 1695.880 ms`
 </div>
 
 <div class="notes">
@@ -1005,13 +996,13 @@ Requête avec PostgreSQL 9.6 :
 
 ```sql
 postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
-                                                      QUERY PLAN                                                      
-----------------------------------------------------------------------------------------------------------------------
- Sort  (cost=605706.37..615706.37 rows=4000000 width=4) (actual time=1539.208..2124.541 rows=4000000 loops=1)
+                             QUERY PLAN                                       
+--------------------------------------------------------------------------------
+ Sort  (actual time=1539.208..2124.541 rows=4000000 loops=1)
    Sort Key: i DESC
    Sort Method: external merge  Disk: 54752kB
    Buffers: shared hit=15451 read=2249, temp read=15264 written=15264
-   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4) (actual time=0.132..232.824 rows=4000000 loops=1)
+   ->  Seq Scan on test  (actual time=0.132..232.824 rows=4000000 loops=1)
          Buffers: shared hit=15451 read=2249
  Planning time: 0.085 ms
  Execution time: 2268.116 ms
@@ -1022,13 +1013,13 @@ Requête avec PostgreSQL 10 :
 
 ```sql
 postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
-                                                      QUERY PLAN                                                      
-----------------------------------------------------------------------------------------------------------------------
- Sort  (cost=605706.37..615706.37 rows=4000000 width=4) (actual time=1175.235..1551.828 rows=4000000 loops=1)
+                             QUERY PLAN                                                      
+--------------------------------------------------------------------------------
+ Sort  (actual time=1175.235..1551.828 rows=4000000 loops=1)
    Sort Key: i DESC
    Sort Method: external merge  Disk: 54872kB
    Buffers: shared hit=15419 read=2281, temp read=14287 written=14358
-   ->  Seq Scan on test  (cost=0.00..57700.00 rows=4000000 width=4) (actual time=0.082..227.361 rows=4000000 loops=1)
+   ->  Seq Scan on test  (actual time=0.082..227.361 rows=4000000 loops=1)
          Buffers: shared hit=15419 read=2281
  Planning time: 0.163 ms
  Execution time: 1695.880 ms
@@ -1046,17 +1037,8 @@ postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
 
   * Test avec installation par défaut et disques SSD :
 
-    * Avec PostgreSQL 9.6 :
-
-```
-Execution time: 4985.385 ms
-```
-
-    * Avec PostgreSQL 10 :
-
-```
-Execution time: 2642.349 ms
-```
+    * PostgreSQL 9.6 : `Execution time: 4985.385 ms`
+    * PostgreSQL 10 : `Execution time: 2642.349 ms`
 </div>
 
 <div class="notes">
@@ -1082,47 +1064,55 @@ GROUP BY CUBE (type_client, code_pays);
 Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 
 ```sql
-                                                                            QUERY PLAN                                                                             
--------------------------------------------------------------------------------------------------------------------------------------------------------------------
- GroupAggregate  (cost=334597.85..512073.04 rows=80 width=48) (actual time=2720.032..4971.515 rows=40 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ GroupAggregate  (actual time=2720.032..4971.515 rows=40 loops=1)
    Group Key: cl.type_client, co.code_pays
    Group Key: cl.type_client
    Group Key: ()
    Sort Key: co.code_pays
      Group Key: co.code_pays
    Buffers: shared hit=8551 read=47879, temp read=32236 written=32218
-   ->  Sort  (cost=334597.85..337643.61 rows=1218303 width=15) (actual time=2718.534..3167.936 rows=1226456 loops=1)
+   ->  Sort  (actual time=2718.534..3167.936 rows=1226456 loops=1)
          Sort Key: cl.type_client, co.code_pays
          Sort Method: external merge  Disk: 34664kB
          Buffers: shared hit=8551 read=47879, temp read=25050 written=25032
-         ->  Hash Join  (cost=54327.22..190627.59 rows=1218303 width=15) (actual time=525.656..1862.380 rows=1226456 loops=1)
+         ->  Hash Join  (actual time=525.656..1862.380 rows=1226456 loops=1)
                Hash Cond: (l.numero_commande = c.numero_commande)
                Buffers: shared hit=8551 read=47879, temp read=17777 written=17759
-               ->  Seq Scan on lignes_commandes l  (cost=0.00..73621.16 rows=3141916 width=18) (actual time=0.091..438.819 rows=3141967 loops=1)
+               ->  Seq Scan on lignes_commandes l  
+                     (actual time=0.091..438.819 rows=3141967 loops=1)
                      Buffers: shared hit=2241 read=39961
-               ->  Hash  (cost=47586.24..47586.24 rows=387758 width=13) (actual time=523.476..523.476 rows=390331 loops=1)
+               ->  Hash  (actual time=523.476..523.476 rows=390331 loops=1)
                      Buckets: 131072  Batches: 8  Memory Usage: 3162kB
                      Buffers: shared hit=6310 read=7918, temp read=1611 written=2979
-                     ->  Hash Join  (cost=12818.57..47586.24 rows=387758 width=13) (actual time=152.778..457.347 rows=390331 loops=1)
+                     ->  Hash Join  
+                           (actual time=152.778..457.347 rows=390331 loops=1)
                            Hash Cond: (c.client_id = cl.client_id)
                            Buffers: shared hit=6310 read=7918, temp read=1611 written=1607
-                           ->  Seq Scan on commandes c  (cost=0.00..25159.00 rows=387758 width=16) (actual time=10.810..132.984 rows=390331 loops=1)
-                                 Filter: ((date_commande >= '2014-01-01'::date) AND (date_commande <= '2014-12-31'::date))
+                           ->  Seq Scan on commandes c  
+                                 (actual time=10.810..132.984 rows=390331 loops=1)
+                                 Filter: ((date_commande >= '2014-01-01'::date)
+                                           AND (date_commande <= '2014-12-31'::date))
                                  Rows Removed by Filter: 609669
                                  Buffers: shared hit=2241 read=7918
-                           ->  Hash  (cost=11079.57..11079.57 rows=100000 width=13) (actual time=139.381..139.381 rows=100000 loops=1)
+                           ->  Hash  (actual time=139.381..139.381 rows=100000 loops=1)
                                  Buckets: 131072  Batches: 2  Memory Usage: 3522kB
                                  Buffers: shared hit=4069, temp read=515 written=750
-                                 ->  Hash Join  (cost=3862.00..11079.57 rows=100000 width=13) (actual time=61.976..119.724 rows=100000 loops=1)
-                                       Hash Cond: (co.contact_id = cl.contact_id)
-                                       Buffers: shared hit=4069, temp read=515 written=513
-                                       ->  Seq Scan on contacts co  (cost=0.00..4143.05 rows=110005 width=11) (actual time=0.051..18.025 rows=110005 loops=1)
-                                             Buffers: shared hit=3043
-                                       ->  Hash  (cost=2026.00..2026.00 rows=100000 width=18) (actual time=57.926..57.926 rows=100000 loops=1)
-                                             Buckets: 65536  Batches: 2  Memory Usage: 3242kB
-                                             Buffers: shared hit=1026, temp written=269
-                                             ->  Seq Scan on clients cl  (cost=0.00..2026.00 rows=100000 width=18) (actual time=0.060..21.896 rows=100000 loops=1)
-                                                   Buffers: shared hit=1026
+                                 ->  Hash Join  
+                                     (actual time=61.976..119.724 rows=100000 loops=1)
+                                     Hash Cond: (co.contact_id = cl.contact_id)
+                                     Buffers: shared hit=4069, temp read=515 written=513
+                                     ->  Seq Scan on contacts co  
+                                           (actual time=0.051..18.025 rows=110005 loops=1)
+                                           Buffers: shared hit=3043
+                                     ->  Hash  
+                                           (actual time=57.926..57.926 rows=100000 loops=1)
+                                           Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                                           Buffers: shared hit=1026, temp written=269
+                                           ->  Seq Scan on clients cl  
+                                                 (actual time=0.060..21.896 rows=100000 loops=1)
+                                                 Buffers: shared hit=1026
  Planning time: 1.739 ms
  Execution time: 4985.385 ms
 (41 rows)
@@ -1131,42 +1121,45 @@ Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise bien un hachage :
 
 ```sql
-                                                                         QUERY PLAN                                                                          
--------------------------------------------------------------------------------------------------------------------------------------------------------------
- MixedAggregate  (cost=54402.81..239741.84 rows=40 width=48) (actual time=2640.531..2640.561 rows=40 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ MixedAggregate  (actual time=2640.531..2640.561 rows=40 loops=1)
    Hash Key: cl.type_client, co.code_pays
    Hash Key: cl.type_client
    Hash Key: co.code_pays
    Group Key: ()
    Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
-   ->  Hash Join  (cost=54402.81..190774.44 rows=1224165 width=15) (actual time=494.339..1813.743 rows=1226456 loops=1)
-         Hash Cond: (l.numero_commande = c.numero_commande)
-         Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
-         ->  Seq Scan on lignes_commandes l  (cost=0.00..73622.35 rows=3142035 width=18) (actual time=0.019..417.992 rows=3141967 loops=1)
-               Buffers: shared hit=2137 read=40065
-         ->  Hash  (cost=47629.69..47629.69 rows=389609 width=13) (actual time=493.558..493.558 rows=390331 loops=1)
-               Buckets: 131072  Batches: 8  Memory Usage: 3162kB
-               Buffers: shared hit=6278 read=7950, temp read=1611 written=2979
-               ->  Hash Join  (cost=12818.57..47629.69 rows=389609 width=13) (actual time=159.207..429.528 rows=390331 loops=1)
-                     Hash Cond: (c.client_id = cl.client_id)
-                     Buffers: shared hit=6278 read=7950, temp read=1611 written=1607
-                     ->  Seq Scan on commandes c  (cost=0.00..25159.00 rows=389609 width=16) (actual time=2.562..103.812 rows=390331 loops=1)
-                           Filter: ((date_commande >= '2014-01-01'::date) AND (date_commande <= '2014-12-31'::date))
-                           Rows Removed by Filter: 609669
-                           Buffers: shared hit=2209 read=7950
-                     ->  Hash  (cost=11079.57..11079.57 rows=100000 width=13) (actual time=155.728..155.728 rows=100000 loops=1)
-                           Buckets: 131072  Batches: 2  Memory Usage: 3522kB
-                           Buffers: shared hit=4069, temp read=515 written=750
-                           ->  Hash Join  (cost=3862.00..11079.57 rows=100000 width=13) (actual time=73.906..135.779 rows=100000 loops=1)
-                                 Hash Cond: (co.contact_id = cl.contact_id)
-                                 Buffers: shared hit=4069, temp read=515 written=513
-                                 ->  Seq Scan on contacts co  (cost=0.00..4143.05 rows=110005 width=11) (actual time=0.011..18.347 rows=110005 loops=1)
-                                       Buffers: shared hit=3043
-                                 ->  Hash  (cost=2026.00..2026.00 rows=100000 width=18) (actual time=70.006..70.006 rows=100000 loops=1)
-                                       Buckets: 65536  Batches: 2  Memory Usage: 3242kB
-                                       Buffers: shared hit=1026, temp written=269
-                                       ->  Seq Scan on clients cl  (cost=0.00..2026.00 rows=100000 width=18) (actual time=0.014..26.689 rows=100000 loops=1)
-                                             Buffers: shared hit=1026
+   ->  Hash Join  (actual time=494.339..1813.743 rows=1226456 loops=1)
+       Hash Cond: (l.numero_commande = c.numero_commande)
+       Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
+       ->  Seq Scan on lignes_commandes l  (actual time=0.019..417.992 rows=3141967 loops=1)
+             Buffers: shared hit=2137 read=40065
+       ->  Hash  (actual time=493.558..493.558 rows=390331 loops=1)
+             Buckets: 131072  Batches: 8  Memory Usage: 3162kB
+             Buffers: shared hit=6278 read=7950, temp read=1611 written=2979
+             ->  Hash Join  (actual time=159.207..429.528 rows=390331 loops=1)
+                   Hash Cond: (c.client_id = cl.client_id)
+                   Buffers: shared hit=6278 read=7950, temp read=1611 written=1607
+                   ->  Seq Scan on commandes c  (actual time=2.562..103.812 rows=390331 loops=1)
+                         Filter: ((date_commande >= '2014-01-01'::date)
+                                   AND (date_commande <= '2014-12-31'::date))
+                         Rows Removed by Filter: 609669
+                         Buffers: shared hit=2209 read=7950
+                   ->  Hash  (actual time=155.728..155.728 rows=100000 loops=1)
+                         Buckets: 131072  Batches: 2  Memory Usage: 3522kB
+                         Buffers: shared hit=4069, temp read=515 written=750
+                         ->  Hash Join  (actual time=73.906..135.779 rows=100000 loops=1)
+                               Hash Cond: (co.contact_id = cl.contact_id)
+                               Buffers: shared hit=4069, temp read=515 written=513
+                               ->  Seq Scan on contacts co  
+                                     (actual time=0.011..18.347 rows=110005 loops=1)
+                                     Buffers: shared hit=3043
+                               ->  Hash  (actual time=70.006..70.006 rows=100000 loops=1)
+                                     Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                                     Buffers: shared hit=1026, temp written=269
+                                     ->  Seq Scan on clients cl  
+                                           (actual time=0.014..26.689 rows=100000 loops=1)
+                                           Buffers: shared hit=1026
  Planning time: 1.910 ms
  Execution time: 2642.349 ms
 (36 rows)
@@ -1222,17 +1215,17 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 </div>
 
 <div class="notes">
-La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès. 
+La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès. Voici un exemple faisant apparaitre les principales colonnes :
 
-```
- line_number | type  |   database    | user_name |  address  |                 netmask                 | auth_method | options | error 
--------------+-------+---------------+-----------+-----------+-----------------------------------------+-------------+---------+-------
-          84 | local | {all}         | {all}     |           |                                         | trust       |         | 
-          86 | host  | {all}         | {all}     | 127.0.0.1 | 255.255.255.255                         | trust       |         | 
-          88 | host  | {all}         | {all}     | ::1       | ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff | trust       |         | 
-          91 | local | {replication} | {all}     |           |                                         | trust       |         | 
-          92 | host  | {replication} | {all}     | 127.0.0.1 | 255.255.255.255                         | trust       |         | 
-          93 | host  | {replication} | {all}     | ::1       | ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff | trust       |         | 
+```sql
+ line_number | type  |   database    | user_name | auth_method 
+-------------+-------+---------------+-----------+-------------
+          84 | local | {all}         | {all}     | trust       
+          86 | host  | {all}         | {all}     | trust       
+          88 | host  | {all}         | {all}     | trust       
+          91 | local | {replication} | {all}     | trust       
+          92 | host  | {replication} | {all}     | trust       
+          93 | host  | {replication} | {all}     | trust       
 (6 rows)
 ```
 
@@ -1261,11 +1254,9 @@ Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiq
 
 Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Il est depuis la version 10 possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
 
-**Exemple :**
+Par exemple, soit 2 utilisateurs :
 
-Soit 2 utilisateurs :
-
-```
+```sql
 postgres@postgres=# CREATE ROLE toto WITH LOGIN;
 CREATE ROLE
 
@@ -1275,7 +1266,7 @@ CREATE ROLE
 
 Créons une table *comptes*, insérons-y des données et permettons aux utilisateurs d'accéder à ces données :
 
-```
+```sql
 toto@totodb=> CREATE TABLE comptes (admin text, societe text, contact_email text);
 CREATE TABLE
 
@@ -1294,7 +1285,7 @@ GRANT
 
 Activons maintenant deux politiques permissives :
 
-```
+```sql
 toto@totodb=> ALTER TABLE comptes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE
 
@@ -1329,18 +1320,18 @@ toto2@totodb=> SELECT * FROM comptes;
 
 Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
 
-```
+```sql
 toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
-                                            QUERY PLAN                                             
----------------------------------------------------------------------------------------------------
- Seq Scan on comptes  (cost=0.00..21.38 rows=6 width=96) (actual time=0.022..0.024 rows=2 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Seq Scan on comptes  (actual time=0.022..0.024 rows=2 loops=1)
    Filter: ((societe = 'paris'::text) OR (admin = (CURRENT_USER)::text))
    Rows Removed by Filter: 1
 ```
 
 Remplaçons maintenant l'une de ces politiques permissives par une politique restrictive :
 
-```
+```sql
 toto@totodb=> DROP POLICY compte_admins ON comptes;
 DROP POLICY
 
@@ -1360,9 +1351,9 @@ toto2@totodb=> SELECT * FROM comptes;
 (1 row)
 
 toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
-                                            QUERY PLAN                                             
----------------------------------------------------------------------------------------------------
- Seq Scan on comptes  (cost=0.00..21.38 rows=1 width=96) (actual time=0.040..0.043 rows=1 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Seq Scan on comptes  (actual time=0.040..0.043 rows=1 loops=1)
    Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
    Rows Removed by Filter: 2
 ```
@@ -1434,8 +1425,9 @@ Affichage des processus auxiliaires dans la nouvelle colonne *backend_type*.
 
 Les types possibles sont : autovacuum launcher, autovacuum worker, background worker, background writer, client backend, checkpointer, startup, walreceiver, walsender et walwriter.
 
-```
-postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, backend_type FROM pg_stat_activity ;
+```sql
+postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, backend_type
+  FROM pg_stat_activity ;
  pid  | application_name | wait_event_type |     wait_event      |    backend_type     
 ------+------------------+-----------------+---------------------+---------------------
  4938 |                  | Activity        | AutoVacuumMain      | autovacuum launcher
@@ -1571,7 +1563,7 @@ Il est désormais possible de créer des statistiques sur plusieurs colonnes d'u
 
 Par exemple :
 
-```
+```sql
 postgres=# CREATE TABLE t1 (a int, b int);
 CREATE TABLE
 
@@ -1582,13 +1574,13 @@ postgres=# ANALYZE t1;
 ANALYZE
 
 postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                                                     QUERY PLAN                                                      
----------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..107747.96 rows=1 width=8) (actual time=0.863..380.714 rows=100 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Gather  (actual time=0.863..380.714 rows=100 loops=1)
    Workers Planned: 2
    Workers Launched: 2
    Buffers: shared hit=16306 read=28044 dirtied=10513 written=9062
-   ->  Parallel Seq Scan on t1  (cost=0.00..106747.86 rows=1 width=8) (actual time=246.324..372.866 rows=33 loops=3)
+   ->  Parallel Seq Scan on t1  (actual time=246.324..372.866 rows=33 loops=3)
          Filter: ((a = 1) AND (b = 0))
          Rows Removed by Filter: 3333300
          Buffers: shared hit=16212 read=28036 dirtied=10513 written=9062
@@ -1603,13 +1595,13 @@ postgres=# ANALYZE t1;
 ANALYZE
 
 postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                                                      QUERY PLAN                                                      
-----------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..107761.66 rows=138 width=8) (actual time=0.418..321.794 rows=100 loops=1)
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Gather  (actual time=0.418..321.794 rows=100 loops=1)
    Workers Planned: 2
    Workers Launched: 2
    Buffers: shared hit=16272 read=28078
-   ->  Parallel Seq Scan on t1  (cost=0.00..106747.86 rows=58 width=8) (actual time=210.955..318.026 rows=33 loops=3)
+   ->  Parallel Seq Scan on t1  (actual time=210.955..318.026 rows=33 loops=3)
          Filter: ((a = 1) AND (b = 0))
          Rows Removed by Filter: 3333300
          Buffers: shared hit=16170 read=28078
@@ -1618,7 +1610,7 @@ postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
 (10 rows)
 ```
 
-Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients)
+Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
 </div>
 
 -----
@@ -1640,7 +1632,7 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 
 Exemple :
 
-```
+```sql
 postgres=# SELECT * FROM t1 LIMIT 2;
  a | b 
 ---+---
@@ -1648,14 +1640,14 @@ postgres=# SELECT * FROM t1 LIMIT 2;
  0 | 0
 (2 rows)
 
-postgres=# \\g
+postgres=# \g
  a | b 
 ---+---
  0 | 0
  0 | 0
 (2 rows)
 
-postgres=# \\gx
+postgres=# \gx
 -[ RECORD 1 ]
 a | 0
 b | 0
@@ -1673,7 +1665,7 @@ Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc c
 
 Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
 
-**indexes Hash**
+**Indexes Hash**
 
 Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crash et seront utilisables sur un environnement répliqué.
 
@@ -1685,7 +1677,7 @@ Il est désormais possible de renommer une valeur d'un type existant.
 
 Exemple :
 
-```
+```sql
 postgres=# CREATE TYPE mood AS ENUM ('sad', 'ok', 'happy') ;
 CREATE TYPE
 
@@ -1712,7 +1704,7 @@ Les fonctions ts_headline() et to_tsvector() peuvent désormais être utilisées
 
 Exemple :
 
-```
+```sql
 postgres=# SELECT jsonb_pretty(document) FROM stock_jsonb;
                 jsonb_pretty                
 --------------------------------------------
@@ -1759,12 +1751,14 @@ postgres=# SELECT jsonb_pretty(document) FROM stock_jsonb;
 
 
 postgres=# SELECT to_tsvector('french', document) FROM stock_jsonb;
-                                                                  to_tsvector                                                                  
------------------------------------------------------------------------------------------------------------------------------------------------
- '34150':7 'ajaccio':14 'anian':8 'blanc':1 'bouteil':16,24 'cors':12 'daum':4 'gassac':5 'jeroboam':20,26 'magnum':18,22 'mas':3 'provenc':10
+                             to_tsvector                                                                  
+--------------------------------------------------------------------------------
+ '34150':7 'ajaccio':14 'anian':8 'blanc':1 'bouteil':16,24 'cors':12 'daum':4
+ 'gassac':5 'jeroboam':20,26 'magnum':18,22 'mas':3 'provenc':10
 (1 row)
 
-postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery)) FROM stock_jsonb;
+postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
+  FROM stock_jsonb;
                  jsonb_pretty                  
 -----------------------------------------------
  {                                            +
@@ -1820,7 +1814,7 @@ L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec l'
 
 Exemple :
 
-```
+```sql
 postgres=# WITH x AS (
     SELECT '<people>
                 <person>
@@ -1899,7 +1893,7 @@ INSERT 0 101
 
 Création du trigger :
 
-```
+```sql
 postgres=#  CREATE TRIGGER transition_tables 
 			AFTER UPDATE ON t1 
 			REFERENCING 
@@ -1911,8 +1905,7 @@ CREATE TRIGGER
 
 Création de la fonction manipulant ces tables de transition :
 
-```
-
+```sql
 postgres=#  CREATE FUNCTION test_trigger() RETURNS trigger AS $$
 			DECLARE
     			temprec record;
@@ -1931,7 +1924,7 @@ CREATE FUNCTION
 
 Exemple d'application :
 
-```
+```sql
 postgres@postgres=# UPDATE t1 SET c1 = 0 WHERE id = 1;
 NOTICE:  OLD: (1,0)
 NOTICE:  NEW: (1,0)
@@ -1947,7 +1940,7 @@ Pour en savoir plus :
 
 - Création des catalogues système *pg_sequence* et *pg_sequences*
 
-```
+```sql
 postgres=# SELECT * FROM pg_sequences;
  schemaname | sequencename | sequenceowner | data_type | start_value | min_value | max_value  | increment_by | cycle | cache_size | last_value 
 ------------+--------------+---------------+-----------+-------------+-----------+------------+--------------+-------+------------+------------
