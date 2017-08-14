@@ -1089,22 +1089,19 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 -----
 
+### Gain sur les tris
+
 <div class="slide-content">
   * Gains significatifs pour les tris sur disque
-    * Visible uniquement pour les noeuds : *Sort Method: external merge*
-
+    * noeud *Sort Method: external merge*
   * Test avec installation par défaut et disques SSD :
-
-    `postgres=# EXPLAIN (analyze, buffers) SELECT i `
-    `FROM test ORDER BY i DESC;`
-
-    * PostgreSQL 9.6 : `Execution time: 2268.116 ms`
-
-    * PostgreSQL 10 : `Execution time: 1695.880 ms`
+    * 9.6 : 2,2 secondes
+    * 10 : 1,6 secondes
 </div>
 
 <div class="notes">
-Création de la table de test, du jeu de données, et calcul des statistiques :
+Commençons par créer la table de test, peuplons la avec un jeu de données, et
+calculons les statistiques sur ses données :
 
 ```sql
 CREATE TABLE test AS SELECT i FROM generate_series(1, 1000000) i;
@@ -1115,8 +1112,11 @@ VACUUM ANALYZE test;
 
 Requête avec PostgreSQL 9.6 :
 
+FIXME ce n'est pas le résultat d'un EXPLAIN (ANALYZE, BUFFERS)... c'est soit
+un résultat trafiqué (auquel cas il faut le dire) soit un résultat d'un EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+
 ```sql
-postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
+postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT i FROM test ORDER BY i DESC;
                              QUERY PLAN                                       
 --------------------------------------------------------------------------------
  Sort  (actual time=1539.208..2124.541 rows=4000000 loops=1)
@@ -1133,7 +1133,7 @@ postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
 Requête avec PostgreSQL 10 :
 
 ```sql
-postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
+postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT i FROM test ORDER BY i DESC;
                              QUERY PLAN                                                      
 --------------------------------------------------------------------------------
  Sort  (actual time=1175.235..1551.828 rows=4000000 loops=1)
@@ -1150,19 +1150,19 @@ postgres=# EXPLAIN (analyze, buffers) SELECT i FROM test ORDER BY i DESC;
 
 -----
 
-### Agrégats
+### Gain sur les agrégats
 
 <div class="slide-content">
-  * Permettre l'exécution d'un agrégat par hachage (opération HashAggregate d'un plan d'exécution)
+  * Exécution d'un agrégat par hachage (HashAggregate)
     * lors de l'utilisation d'un ensemble de regroupement (par exemple, un GROUP BY)
-
   * Test avec installation par défaut et disques SSD :
-
-    * PostgreSQL 9.6 : `Execution time: 4985.385 ms`
-    * PostgreSQL 10 : `Execution time: 2642.349 ms`
+    * 9.6 : 4,9 secondes
+    * 10 : 2,6 secondes
 </div>
 
 <div class="notes">
+FIXME d'où vient l'exemple ? comment le refaire ?
+
 ```sql
 postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT
 GROUPING(type_client,code_pays)::bit(2),
@@ -1292,14 +1292,16 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 ### Parallélisme
 
 <div class="slide-content">
+  FIXME à traduire, on peut supposer que Parallel Index Scan est
+  compréhensible, mais pas Gather Merge
   * Noeuds désormais gérés :
-    * *Parallel Bitmap Heap Scan*
     * *Parallel Index Scan*
+    * *Parallel Bitmap Heap Scan*
     * *Gather Merge*
     * *Parallel Merge Join*
 
   * Support également des :
-    * requêtes préparées (*PREPARE* / *EXECUTE*)
+    * requêtes préparées
     * sous-requêtes non-corrélées
 
   * Paramétrage
@@ -1309,6 +1311,10 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 </div>
 
 <div class="notes">
+FIXME le lecteur n'est pas anglais, on veut du texte ici, détaillé, sur ce que
+ça apporte et perso, j'en ferais deux slides (nouvelles opérations supportés,
+paramétrages)
+
 Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
 </div>
 
