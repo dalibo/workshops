@@ -795,21 +795,21 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
 <div class="notes">
 De nouveaux catalogues ont été ajoutés pour permettre la supervision de la réplication logique. En voici la liste :
 
-| Catalogue             | Commentaires                                                             |
-| --------------------- | ------------------------------------------------------------------------ |
-| pg_publication        | Informations sur les publications                                        |
-| pg_publication_tables | Correspondance entre les publications et les tables qu'elles contiennent |
-| pg_stat_subscription  | État des journaux de transactions reçus en souscription                  |
-| pg_subscription       | Informations sur les souscriptions existantes                            |
-| pg_subscription_rel   | Contient l'état de chaque relation répliquée dans chaque souscription    |
+| Catalogue                    | Commentaires                                                      |
+| ---------------------------- | ----------------------------------------------------------------- |
+| pg_publication               | Informations sur les publications |
+| pg_publication_tables        | Correspondance entre les publications et les tables qu'elles contiennent |
+| pg_stat_subscription         | État des journaux de transactions reçus en souscription |
+| pg_subscription              | Informations sur les souscriptions existantes |
+| pg_subscription_rel          | Contient l'état de chaque relation répliquée dans chaque souscription |
 
 D'autres catalogues déjà existants peuvent également être utiles :
 
 | Catalogue                    | Commentaires                                                      |
 | ---------------------------- | ----------------------------------------------------------------- |
 | pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
-| pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant                                    |
-| pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée                                                   |
+| pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
+| pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
 </div>
 
 -----
