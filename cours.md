@@ -687,15 +687,36 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
     * au niveau bloc
     * par rejeu des journaux de transactions
   * Quelques limitations :
-    * on doit répliquer l’intégralité de l’instance
-    * réplication impossible entre différentes architectures (x86, ARM…)
-    * pas de requête en écriture sur le secondaire, donc impossible de créer des objets personnalisés
+    * intégralité de l’instance
+    * même architecture (x86, ARM…)
+    * même version majeure
+    * pas de requête en écriture sur le secondaire
 </div>
 
 <div class="notes">
-Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes mais le résultat de celles-ci. Plus précisément, les modifications des blocs de données.
+Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes mais le résultat de celles-ci, plus précisément les modifications des blocs de données. Le serveur secondaire se contente de rejouer les journaux de transaction.
 
-Le serveur secondaire se contente de rejouer les journaux de transaction.
+Cela impose certaines limitations. Les journaux de transactions ne contenant
+comme information que le nom des fichiers (pas les noms et/ou type des objets
+SQL impliqués), il n'est pas possible de ne rejouer qu'une partie. De ce fait,
+on réplique l'intégralité de l'instance.
+
+La façon dont les données sont codées dans les fichiers dépend de
+l'architecture matérielle (32/64 bits, little/big endian) et des composants
+logiciels du système d'exploitation (tri des données, pour les index). De
+ceci, il en découle que chaque instance du cluster de réplication doit
+fonctionner sur un matériel dont l'architecture est identique à celle des
+autres instances et sur un système d'exploitation qui trie les données de la
+même façon.
+
+Les versions majeures ne codent pas forcément les données de la même façon,
+notamment dans les journaux de transactions. Chaque instance du cluster de
+réplication doit donc être de la même version majeure.
+
+Enfin, les secondaires sont en lecture seule. Cela signifie (et c'est bien)
+qu'on ne peut pas insérer/modifier/supprimer de données sur les tables
+répliquées. Mais on ne peut pas non plus ajouter des index supplémentaires ou
+des tables de travail, ce qui est bien dommage dans certains cas.
 </div>
 
 -----
@@ -749,22 +770,30 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
     * pg_publication*
     * pg_subscription*
     * pg_stat_subscription
+  * Anciens catalogues
+    * pg_stat_replication
+	* pg_replication_slot
+	* pg_replication_origin_status
 </div>
 
 <div class="notes">
-De nouveaux catalogues ont été ajoutés pour permettre la supervision de la réplication logique.
+De nouveaux catalogues ont été ajoutés pour permettre la supervision de la réplication logique. En voici la liste :
 
-Notamment :
-| pg_publication | informations sur les publications |
-| pg_publication_tables | correspondance entre les publications et les tables qu'elles contiennent |
-| pg_stat_subscription | état des journaux de transactions reçus en souscription |
-| pg_subscription | informations sur les souscriptions existantes |
-| pg_subscription_rel | contient l'état de chaque relation répliquée dans chaque souscription |
+| Catalogue             | Commentaires                                                             |
+| --------------------- | ------------------------------------------------------------------------ |
+| pg_publication        | Informations sur les publications                                        |
+| pg_publication_tables | Correspondance entre les publications et les tables qu'elles contiennent |
+| pg_stat_subscription  | État des journaux de transactions reçus en souscription                  |
+| pg_subscription       | Informations sur les souscriptions existantes                            |
+| pg_subscription_rel   | Contient l'état de chaque relation répliquée dans chaque souscription    |
 
 D'autres catalogues déjà existants peuvent également être utiles :
-| pg_stat_replication | une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
-| pg_replication_slot | liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
-| pg_replication_origin_status | informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
+
+| Catalogue                    | Commentaires                                                                                                                       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
+| pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant                                    |
+| pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée                                                   |
 </div>
 
 -----
@@ -774,15 +803,18 @@ D'autres catalogues déjà existants peuvent également être utiles :
 <div class="slide-content">
   * Définir wal_level à logical
   * Initialiser une base de données et sauvegarder son schéma
-  * Créer une publication :
+  * Créer une publication pour toutes les tables
 
     `CREATE PUBLICATION ma_publication FOR ALL TABLES;`
+  * Créer une publication pour une table
+
+    `CREATE PUBLICATION ma_publication FOR TABLE t1;`
 </div>
 
 <div class="notes">
 **Exemple complet :**
 
-Définir le paramètre `wal_level = logical` dans le fichier `postgresql.conf` des serveurs éditeurs et abonnés.
+Définir le paramètre `wal_level` à la valeur `logical` dans le fichier `postgresql.conf` des serveurs éditeur et abonné.
 
 Initialiser une base de données :
 
@@ -804,11 +836,7 @@ postgres@bench=# CREATE PUBLICATION ma_publication FOR ALL TABLES;
 CREATE PUBLICATION
 ```
 
-Une publication doit être créée par base de données. 
-
-Elle liste les tables dont la réplication est souhaitée. 
-
-L'attribut `FOR ALL TABLES` permet de ne pas spécifier cette liste. Pour utiliser cet attribut, il faut être super-utilisateur.
+Une publication doit être créée par base de données. Elle liste les tables dont la réplication est souhaitée. L'attribut `FOR ALL TABLES` permet de ne pas spécifier cette liste. Pour utiliser cet attribut, il faut être super-utilisateur.
 
 Créer ensuite l'utilisateur qui servira pour la réplication :
 
@@ -816,7 +844,7 @@ Créer ensuite l'utilisateur qui servira pour la réplication :
 $ createuser --replication repliuser
 ```
 
-Lui autoriser l'accès dans le fichier `pg_hba.conf` et lui permettre de visualiser les données dans la base :
+Lui autoriser l'accès dans le fichier `pg_hba.conf` du serveur éditeur et lui permettre de visualiser les données dans la base :
 
 ```
 postgres@bench=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO repliuser;
@@ -870,16 +898,19 @@ CREATE SUBSCRIPTION
 
 <div class="slide-content">
   * Sur l'éditeur
-    * état de la réplication `SELECT * FROM pg_stat_replication;`
-    * slot de réplication `SELECT * FROM pg_replication_slots;`
-    * état de la publication `SELECT * FROM pg_publication;`
-    * contenu de la publication `SELECT * FROM pg_publication_tables;`
+    * état de la réplication dans `pg_stat_replication;`
+    * slot de réplication dans `pg_replication_slots;`
+    * état de la publication dans `pg_publication;`
+    * contenu de la publication dans `pg_publication_tables;`
   * Sur l'abonné
-    * état de l'abonnement `SELECT * FROM pg_subscription;`
-    * état de la réplication `SELECT * FROM pg_replication_origin_status;`
+    * état de l'abonnement dans `pg_subscription;`
+    * état de la réplication dans `pg_replication_origin_status;`
 </div>
 
 <div class="notes">
+
+FIXME tout ça, c'est très bien, mais ça manque cruellement d'explications.
+
 Dans *pg_stat_replication* :
 
 ```sql
