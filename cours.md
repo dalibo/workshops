@@ -434,8 +434,8 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 ### Clé de partitionnement multi-colonnes
 
 <div class="slide-content">
-  * Si on utilise le partitionnement par intervalle, il est possible d'utiliser
-    une clé sur plusieurs colonnes
+  * Clé sur plusieurs colonnes acceptée
+    * uniquement pour le partitionnement par intervalle
 
   * Créer une table partitionnée avec une clé multi-colonnes :
 
@@ -445,9 +445,6 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 
     `CREATE TABLE t1_a PARTITION of t1 FOR VALUES FROM (1,'2017-08-10') `
     `TO (100, '2017-08-11');`
-
-  * Attention, la valeur spéciale *UNBOUNDED* a été remplacée par
-    *MINVALUE* et *MAXVALUE*
 </div>
 
 <div class="notes">
@@ -517,7 +514,7 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 (3 lignes)
 ```
 
-Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été remplacé par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. La partition `t2_a` aurait par exemple pu être déclarée comme suit :
+Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. La partition `t2_a` aurait par exemple pu être déclarée comme suit :
 
 ```sql
 postgres=# CREATE TABLE t2_a PARTITION OF t2
