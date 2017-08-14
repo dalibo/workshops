@@ -399,11 +399,11 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 
   * Ajouter une partition :
 
-    `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) TO (100);`
+    `CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (1) TO (100);`
 
   * Détacher une partition :
 
-    `ALTER TABLE t2 DETACH PARTITION t2_a;`
+    `ALTER TABLE t2 DETACH PARTITION t2_1;`
 </div>
 
 <div class="notes">
@@ -412,7 +412,7 @@ Exemple complet :
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);
 CREATE TABLE
-postgres=# CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);
+postgres=# CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (1) to (100);
 CREATE TABLE
 postgres=# INSERT INTO t2 VALUES (0);
 ERROR:  no PARTITION OF relation "t2" found for row
@@ -450,26 +450,34 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 <div class="notes">
 Quand on utilise le partitionnement par intervalle, il est possible de créer les partitions en utilisant plusieurs colonnes.
 
-On profitera de l'exemple ci-dessous pour montrer l'utilisation de tablespaces différents dans le contexte du partitionnement.
+On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents dans le contexte du partitionnement.
 
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
        PARTITION BY RANGE (c1, c3);
 CREATE TABLE
 
-postgres=# CREATE TABLE t2_a PARTITION OF t2
+postgres=# CREATE TABLE t2_1 PARTITION OF t2
        FOR VALUES FROM (1,'2017-08-10') TO (100, '2017-08-11')
-       TABLESPACE tsA;
+       TABLESPACE ts1;
 CREATE TABLE
 
-postgres=# CREATE TABLE t2_b PARTITION OF t2
-       FOR VALUES FROM (100,'2017-08-10') TO (200, '2017-08-11')
-       TABLESPACE tsB;
-ERROR:  partition "t2_b" would overlap partition "t2_a"
+postgres=# CREATE TABLE t2_2 PARTITION OF t2
+       FOR VALUES FROM (100,'2017-08-11') TO (200, '2017-08-12')
+       TABLESPACE ts2;
+CREATE TABLE
+```
 
-postgres=# CREATE TABLE t2_b PARTITION OF t2
-       FOR VALUES FROM (101,'2017-08-10') TO (200, '2017-08-11')
-       TABLESPACE tsB;
+Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarée comme suit :
+
+```sql
+postgres=# CREATE TABLE t2_3 PARTITION OF t2
+       FOR VALUES FROM (MINVALUE, MINVALUE) TO (1,'2017-08-10')
+       TABLESPACE ts0;
+
+postgres=# CREATE TABLE t2_3 PARTITION OF t2
+       FOR VALUES FROM (200,'2017-08-12') TO (MAXVALUE, MAXVALUE)
+       TABLESPACE ts3;
 ```
 
 Si la valeur pour `c1` est trop petite :
@@ -501,7 +509,7 @@ postgres=# ANALYZE t2;
 ANALYZE
 ```
 
-Enfin, on consulte la table `pg_class` :
+Enfin, on consulte la table `pg_class` afin de vérifier la présence des différentes partitions :
 
 ```sql
 postgres=# SELECT relname,relispartition,relkind,reltuples
@@ -509,17 +517,11 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
  relname | relispartition | relkind | reltuples 
 ---------+----------------+---------+-----------
  t2      | f              | p       |         0
- t2_a    | t              | r       |         1
- t2_b    | t              | r       |         1
-(3 lignes)
-```
-
-Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. La partition `t2_a` aurait par exemple pu être déclarée comme suit :
-
-```sql
-postgres=# CREATE TABLE t2_a PARTITION OF t2
-       FOR VALUES FROM (1,MINVALUE) TO (MAXVALUE, '2017-08-11')
-       TABLESPACE tsA;
+ t2_0    | t              | r       |         1
+ t2_1    | t              | r       |         1
+ t2_2    | t              | r       |         1
+ t2_3    | t              | r       |         1
+(5 lignes)
 ```
 </div>
 
