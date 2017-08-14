@@ -1336,9 +1336,9 @@ Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l
 ### pg_hba.conf
 
 <div class="slide-content">
+  * Nouvelle méthode d'authentification *SCRAM-SHA-256*
   * Vue *pg_hba_file_rules*
   * Par défaut, connexion locale de réplication à *trust*
-  * Nouvelle méthode d'authentification *SCRAM-SHA-256*
 </div>
 
 <div class="notes">
@@ -1370,8 +1370,9 @@ Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son a
 <div class="slide-content">
   * Politique de sécurité pour l'accès aux lignes d'une table
   * Nouvel attribut pour l'instruction *CREATE POLICY*
-    * *PERMISSIVE* : les politiques d’une table sont reliées par des *OR* (valeur par défaut)
-    * *RESTRICTIVE* : les politiques d’une table sont reliées par des *AND*
+    * *PERMISSIVE* : politiques d’une table reliées par des *OR*
+    * *RESTRICTIVE* : politiques d’une table reliées par des *AND*
+  * *PERMISSIVE* par défaut
 </div>
 
 <div class="notes">
@@ -1381,9 +1382,13 @@ Lorsque la protection des lignes est activée sur une table, tous les accès cla
 
 Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiques de sécurité. Si aucune politique n'existe pour la table, une politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est visible ou ne peut être modifiée.
 
-Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Il est depuis la version 10 possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
+Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
+
+FIXME pour ton exemple, tu as changé ton prompt, ce qui est une bonne idée...  alors autant faire une petite note pour expliquer comment faire
 
 Par exemple, soit 2 utilisateurs :
+
+FIXME évitons les rôles toto, titi, tata, etc - au pire, si tu ne sais pas comment les appeler, fais des u1, u2, u3, etc
 
 ```sql
 postgres@postgres=# CREATE ROLE toto WITH LOGIN;
@@ -1421,6 +1426,10 @@ ALTER TABLE
 toto@totodb=> CREATE POLICY compte_admins ON comptes USING (admin = current_user);
 CREATE POLICY
 
+FIXME t'es sûr du résultat ? moi, je vois les trois lignes, ce qui est
+logique (d'ailleurs tu l'expliques après), il est propriétaire de la table, il
+voit tout
+
 toto@totodb=> SELECT * FROM comptes;
  admin | societe |  contact_email   
 -------+---------+------------------
@@ -1428,11 +1437,18 @@ toto@totodb=> SELECT * FROM comptes;
  toto2 | dalibo  | toto2@dalibo.com
 (2 rows)
 
+FIXME à moins d'être très observateur, c'est impossible de voir que tu t'es
+reconnecté en tant que toto2...
+
 toto2@totodb=> SELECT * FROM comptes;
  admin | societe |  contact_email   
 -------+---------+------------------
  toto2 | dalibo  | toto2@dalibo.com
 (1 row)
+
+FIXME oups, revenu à toto sans rien dire... à la rigueur, il y aurait un \c on
+pourrait comprendre, mais là tu passes de l'un à l'autre sans le montrer et
+sans l'expliquer
 
 toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'paris');
 CREATE POLICY
@@ -1448,6 +1464,8 @@ toto2@totodb=> SELECT * FROM comptes;
 *toto* étant propriétaire de cette table, les politiques ne s'appliquent pas à lui, au contraire de *toto2*.
 
 Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
+
+FIXME tu n'as pas besoin du ANALYZE pour avoir le filter, autant s'en passer
 
 ```sql
 toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
@@ -1473,11 +1491,16 @@ CREATE POLICY
 toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'dalibo');
 CREATE POLICY
 
+FIXME nouveau chgt de user sans indication
+
 toto2@totodb=> SELECT * FROM comptes;
  admin | societe |  contact_email   
 -------+---------+------------------
  toto2 | dalibo  | toto2@dalibo.com
 (1 row)
+
+FIXME nouveau chgt de user sans indication
+FIXME tu n'as pas besoin du ANALYZE pour avoir le filter, autant s'en passer
 
 toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
                              QUERY PLAN
@@ -1486,7 +1509,6 @@ toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
    Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
    Rows Removed by Filter: 2
 ```
-
 Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 </div>
 
@@ -1504,9 +1526,9 @@ Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 </div>
 
 <div class="notes">
-PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines informations et fonctionnalités privilégiées, habituellement nécessaires. Les administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres rôles de leurs environnements, fournissant à ces utilisateurs les fonctionnalités et les informations spécifiées. 
+PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines informations et fonctionnalités privilégiées, pour lesquelles il est habituellement nécessaire d'être superutilisateur pour en profier. Les administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres rôles de leurs environnements, fournissant à ces utilisateurs les fonctionnalités et les informations spécifiées. 
 
-Ils accordent un ensemble de privilèges permettant au rôle de lire plusieurs paramètres de configuration, statistiques et information système normalement réservés aux super-utilisateurs. 
+Ils accordent un ensemble de privilèges permettant au rôle de lire les paramètres de configuration, les statistiques et les informations systèmes normalement réservés aux super-utilisateurs. 
 
 La version 10 implémente les nouveaux rôles suivants :
 
