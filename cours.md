@@ -450,7 +450,7 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 <div class="notes">
 Quand on utilise le partitionnement par intervalle, il est possible de créer les partitions en utilisant plusieurs colonnes.
 
-On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents dans le contexte du partitionnement.
+On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents.
 
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
@@ -468,16 +468,14 @@ postgres=# CREATE TABLE t2_2 PARTITION OF t2
 CREATE TABLE
 ```
 
-Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarée comme suit :
+Si les valeurs sont bien comprises dans les bornes :
 
 ```sql
-postgres=# CREATE TABLE t2_3 PARTITION OF t2
-       FOR VALUES FROM (MINVALUE, MINVALUE) TO (1,'2017-08-10')
-       TABLESPACE ts0;
+postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-10');
+INSERT 0 1
 
-postgres=# CREATE TABLE t2_3 PARTITION OF t2
-       FOR VALUES FROM (200,'2017-08-12') TO (MAXVALUE, MAXVALUE)
-       TABLESPACE ts3;
+postgres=# INSERT INTO t2 VALUES (150, 'test2', '2017-08-11');        
+INSERT 0 1
 ```
 
 Si la valeur pour `c1` est trop petite :
@@ -496,22 +494,24 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 ```
 
-Si les valeurs sont bien comprises dans les bornes :
+Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarées comme suit et permettront d'insérer les lignes qui étaient ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*.
 
 ```sql
-postgres=# INSERT INTO t2 VALUES (1, 'test', '2017-08-10');
-INSERT 0 1
+postgres=# CREATE TABLE t2_3 PARTITION OF t2
+       FOR VALUES FROM (MINVALUE, MINVALUE) TO (1,'2017-08-10')
+       TABLESPACE ts0;
 
-postgres=# INSERT INTO t2 VALUES (150, 'test2', '2017-08-11');        
-INSERT 0 1
-
-postgres=# ANALYZE t2;
-ANALYZE
+postgres=# CREATE TABLE t2_3 PARTITION OF t2
+       FOR VALUES FROM (200,'2017-08-12') TO (MAXVALUE, MAXVALUE)
+       TABLESPACE ts3;
 ```
 
-Enfin, on consulte la table `pg_class` afin de vérifier la présence des différentes partitions :
+Enfin, on peut consulter la table `pg_class` afin de vérifier la présence des différentes partitions :
 
 ```sql
+postgres=# ANALYZE t2;
+ANALYZE
+
 postgres=# SELECT relname,relispartition,relkind,reltuples
            FROM pg_class WHERE relname LIKE 't2%';
  relname | relispartition | relkind | reltuples 
