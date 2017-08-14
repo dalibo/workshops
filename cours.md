@@ -222,7 +222,7 @@ plus nécessaire de redémarrer l'instance pour activer la réplication.
 
 <div class="notes">
 
-FIXME : Ce n'est pas suffisamment important pour être ici. Ça devrait être renvoyé dans une partie spécifique à pg_basebackup
+FIXME : Ce n'est pas suffisamment important pour être ici. Ça devrait être renvoyé dans une partie spécifique à pg_basebackup (dans la partie admin par exemple, avant la slide sur pgreceivewal)
 
 Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
 </div>
@@ -1542,12 +1542,12 @@ La version 10 implémente les nouveaux rôles suivants :
 
 -----
 
-## Autres nouveautés - Pour les DBA
+## Administration
 
 <div class="slide-content">
   * pg_stat_activity
   * Architecture
-  * FDW
+  * SQL/MED
   * Divers
 </div>
 
@@ -1569,12 +1569,19 @@ La version 10 implémente les nouveaux rôles suivants :
     * Timeout
     * IO
   * Renommage des types LWLockNamed et LWLockTranche en LWLock
+  * Impact sur les outils de supervision
 </div>
 
 <div class="notes">
-Affichage des processus auxiliaires dans la nouvelle colonne *backend_type*.
+*pg_stat_activity* n'affichait que les processus backend, autrement dit les
+processus gérant la communication avec les clients, et donc responsables de
+l'exécution des requêtes SQL. En version 10, cette vue affiche en plus les
+processus auxiliaires. Il est possible de différencier les processus avec
+la nouvelle colonne *backend_type*.
 
 Les types possibles sont : autovacuum launcher, autovacuum worker, background worker, background writer, client backend, checkpointer, startup, walreceiver, walsender et walwriter.
+
+Voici ce que pourrait donner une lecture de cette vue sur une version 10 :
 
 ```sql
 postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, backend_type
@@ -1589,7 +1596,7 @@ postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, b
  4937 |                  | Activity        | WalWriterMain       | walwriter
 ```
 
-De nouveaux types d'événements pour lesquels le processus est en attente apparaissent en version 10 :
+On y voit aussi de nouveaux types d'événements pour lesquels un processus peut être en attente. En voici la liste :
 
   * Activity : The server process is idle. This is used by system processes waiting for activity in their main processing loop.
   * Extension : The server process is waiting for activity in an extension module. This category is useful for modules to track custom waiting points. 
@@ -1599,8 +1606,18 @@ De nouveaux types d'événements pour lesquels le processus est en attente appar
   * IO : The server process is waiting for a IO to complete.
 
 FIXME: utiliser les traductions de la doc dès que disponible
+FIXME: plus simple et rapide et efficace de le traduire soi même, non ?
 
 Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
+
+Ce changement va avoir un impact fort sur les outils de supervision et
+notamment sur leur sonde. Par exemple, certaines sondes ont pour but de
+compter le nombre de connexions au serveur. Elles font généralement un
+simple *SELECT count* sur la vue *pg_stat_activity*. Sans modification, elles
+vont se retrouver avec un nombre plus important de connexions, vu qu'elles
+inclueront les processus auxiliaires. De ce fait, avant de mettre une version
+10 en production, assurez-vous que votre système de supervision ait été mis à
+jour.
 </div>
 
 -----
@@ -1608,9 +1625,8 @@ Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en
 ### Architecture
 
 <div class="slide-content">
-  * Amélioration de la librairie libpq
-  * Changement de la valeur par défaut de log_directory de pg_log à log
-  * Slots de réplication temporaires
+  * Amélioration des options de connexion
+  * Ajout des slots de réplication temporaires
   * Support de la librairie ICU pour la gestion des collations
 </div>
 
@@ -1633,7 +1649,7 @@ could not connect to server: Connection refused
 
 Il est également désormais possible de fournir l'attribut target_session_attrs à l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion dans laquelle une transaction *read-write* est possible ou n'importe quel type de transaction (*any*).
 
-Cela peu s'avérer utile pour établir une chaîne de connexion entre plusieurs instances en réplication et permettre l'exécution des requêtes en écriture sur le serveur primaire.
+Cela peut s'avérer utile pour établir une chaîne de connexion entre plusieurs instances en réplication et permettre l'exécution des requêtes en écriture sur le serveur primaire.
 
 Exemple avec psql :
 
@@ -1654,16 +1670,20 @@ pg_create_physical_replication_slot
 (1 row)
 ```
 
+Dans ce cas, le slot de réplication n'est valide que pendant la durée de vie
+de la connexion qui l'a créé. À la fin de la connexion, le slot temporaire est
+automatiquement supprimé.
+
 Remarque pour *pg_basebackup* :
 
 Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
-De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre la fin de la sauvegarde et le début de lancement de la réplication en flux.
+De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre le début et la fin de la sauvegarde (ce qui peut arriver sans archivage et sans configuration assez forte du paramètre *wal_keep_segments*).
 
 **Support de la librairie ICU**
 
-Une collation est un objet du catalogue dont le nom au niveau SQL correspond à une locale fournie par les bibliothèques installées sur le système. Une définition de la collation a un fournisseur spécifiant quelle bibliothèque fournit les données locales. L'un des fournisseurs standards est libc, qui utilise les locales fournies par la bibliothèque C du système. Ce sont les locales les plus utilisées par des outils du système.
+Une collation est un objet du catalogue dont le nom au niveau SQL correspond à une locale fournie par les bibliothèques installées sur le système. Une définition de la collation a un fournisseur spécifiant quelle bibliothèque fournit les données locales. L'un des fournisseurs standards est libc, qui utilise les locales fournies par la bibliothèque C du système. Ce sont les locales les plus utilisées par des outils du système. Cependant, ces locales sont fréquemment modifiées lors de la sortie de nouvelles versions de la libc. Or ces modifications ont parfois des conséquences sur l'ordre de tri des chaînes de caractères, ce qui n'est pas acceptable pour PostgreSQL et ses index.
 
-La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*.
+La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus performantes.
 </div>
 
 -----
@@ -1671,11 +1691,14 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 ### FDW
 
 <div class="slide-content">
-  * file_fdw peut exécuter des programmes sur le serveur et lire leur sortie
-  * postgres_fdw exécute les agrégations et jointures (*FULL JOIN*) sur le serveur distant
+  * Récupération du résultat d'un programme comme entrée pour *file_fdw*
+  * Support des agrégations et jointures (*FULL JOIN*) sur le serveur distant
+	par *postgres_fdw*
 </div>
 
 <div class="notes">
+FIXME un exemple des deux serait fortement apprécié
+
 postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
@@ -1693,6 +1716,11 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 </div>
 
 <div class="notes">
+
+FIXME : le quorum pour la réplication synchrone devrait avoir sa propre slide
+FIXME : les stats multi colonnes, c'est de la perf
+FIXME : pg_receivewal devrait avoir sa propre slide
+
 **Réplication synchrone basée sur un quorum**
 
 Il est possible d'appliquer arbitrairement une réplication synchrone à un sous-ensemble d'un groupe d'instances grâce au paramètre suivant : *synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
