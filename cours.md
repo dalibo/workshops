@@ -361,6 +361,10 @@ Si on souhaite vérifier que la table partitionnée ne contient effectivement pa
   * Détacher la partition :
 
     `ALTER TABLE t1 DETACH PARTITION t1_a;`
+
+  * Attacher la partition :
+
+    `ALTER TABLE t1 ATTACH PARTITION t1_a FOR VALUES IN (1, 2, 3);`
 </div>
 
 <div class="notes">
