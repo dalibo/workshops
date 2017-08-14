@@ -803,8 +803,8 @@ De nouveaux catalogues ont été ajoutés pour permettre la supervision de la r�
 
 D'autres catalogues déjà existants peuvent également être utiles :
 
-| Catalogue                    | Commentaires                                                                                                                       |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Catalogue                    | Commentaires                                                      |
+| ---------------------------- | ----------------------------------------------------------------- |
 | pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
 | pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant                                    |
 | pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée                                                   |
