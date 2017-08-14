@@ -304,7 +304,6 @@ il était préférable de s'en passer.
     * contrainte implicite de partitionnement
     * expression possible pour la clé de partitionnement
     * sous-partitions possibles
-    * attention, le mot clé *UNBOUNDED* a été *retiré*
   * Changement du catalogue système
     * nouvelles colonnes dans *pg_class*
     * nouveau catalogue *pg_partioned_table*
@@ -400,7 +399,7 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 
   * Ajouter une partition :
 
-    `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) to (100);`
+    `CREATE TABLE t2_a PARTITION OF t2 FOR VALUES FROM (1) TO (100);`
 
   * Détacher une partition :
 
@@ -428,16 +427,33 @@ postgres=# INSERT INTO t2 VALUES (101);
 ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
+</div>
 
-FIXME ce qui suit est intéressant et certainement à ajouter, mais ça tombe
-comme un cheveu dans la soupe. C'est quoi le lien avec la slide ? peut-être
-faudrait-il ajouter une slide indiquant de quoi on va parler avant de balancer
-ça. On pourrait nommer cette slide "Clé de partitionnement multi-colonnes". Il
-faut garder en tête que la slide est aussi le pense-bête du formateur. Si la
-slide n'indique pas un truc, soit il a une bonne mémoire et il n'oubliera pas
-grand chose, soit il a une mauvaise mémoire et il fera la moitié du workshop.
+-----
 
-Il est également possible de créer les partitions en utilisant plusieurs colonnes, ainsi que des tablespaces différents :
+### Clé de partitionnement multi-colonnes
+
+<div class="slide-content">
+  * Si on utilise le partitionnement par intervalle, il est possible d'utiliser
+    une clé sur plusieurs colonnes
+
+  * Créer une table partitionnée avec une clé multi-colonnes :
+
+    `CREATE TABLE t1(c1 integer, c2 text, c3 date) PARTITION BY RANGE (c1, c3);`
+
+  * Ajouter une partition :
+
+    `CREATE TABLE t1_a PARTITION of t1 FOR VALUES FROM (1,'2017-08-10') `
+    `TO (100, '2017-08-11');`
+
+  * Attention, la valeur spéciale *UNBOUNDED* a été remplacée par
+    *MINVALUE* et *MAXVALUE*
+</div>
+
+<div class="notes">
+Quand on utilise le partitionnement par intervalle, il est possible de créer les partitions en utilisant plusieurs colonnes.
+
+On profitera de l'exemple ci-dessous pour montrer l'utilisation de tablespaces différents dans le contexte du partitionnement.
 
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
@@ -445,21 +461,21 @@ postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
 CREATE TABLE
 
 postgres=# CREATE TABLE t2_a PARTITION OF t2
-       FOR VALUES FROM (1,'2017-08-10') to (100, '2017-08-11')
+       FOR VALUES FROM (1,'2017-08-10') TO (100, '2017-08-11')
        TABLESPACE tsA;
 CREATE TABLE
 
 postgres=# CREATE TABLE t2_b PARTITION OF t2
-       FOR VALUES FROM (100,'2017-08-10') to (200, '2017-08-11')
+       FOR VALUES FROM (100,'2017-08-10') TO (200, '2017-08-11')
        TABLESPACE tsB;
 ERROR:  partition "t2_b" would overlap partition "t2_a"
 
 postgres=# CREATE TABLE t2_b PARTITION OF t2
-       FOR VALUES FROM (101,'2017-08-10') to (200, '2017-08-11')
+       FOR VALUES FROM (101,'2017-08-10') TO (200, '2017-08-11')
        TABLESPACE tsB;
 ```
 
-Si la valeur pour `c1` est trop petit :
+Si la valeur pour `c1` est trop petite :
 
 ```sql
 postgres=# INSERT INTO t2 VALUES (0, 'test', '2017-08-10');
@@ -486,7 +502,11 @@ INSERT 0 1
 
 postgres=# ANALYZE t2;
 ANALYZE
+```
 
+Enfin, on consulte la table `pg_class` :
+
+```sql
 postgres=# SELECT relname,relispartition,relkind,reltuples
            FROM pg_class WHERE relname LIKE 't2%';
  relname | relispartition | relkind | reltuples 
@@ -497,9 +517,13 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 (3 lignes)
 ```
 
-FIXME elles sont surtout détaillées trois slides avant
+Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été remplacé par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de valeur de seuil limite. La partition `t2_a` aurait par exemple pu être déclarée comme suit :
 
-Les différentes colonnes sont détaillées dans la documentation de [pg_class](https://dali.bo/pg-class).
+```sql
+postgres=# CREATE TABLE t2_a PARTITION OF t2
+       FOR VALUES FROM (1,MINVALUE) TO (MAXVALUE, '2017-08-11')
+       TABLESPACE tsA;
+```
 </div>
 
 -----
@@ -652,13 +676,6 @@ Plusieurs articles contiennent des explications et des exemples concrets, comme 
 
   * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
   * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
-
-Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été remplacé par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de seuil limite. Les partitions `t2_1` et `t2_0` évoquées précédemment auraient pu être crées comme suit :
-
-```sql
-CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (MINVALUE) TO (1000000);
-CREATE TABLE t2_0 PARTITION OF t2 FOR VALUES FROM (9000000) TO (MAXVALUE);
-```
 
 Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser les extensions [pg_partman](https://dali.bo/pg-partman) et / ou [pg_pathman](https://dali.bo/pg-pathman).
 </div>
