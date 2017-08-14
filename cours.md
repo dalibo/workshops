@@ -485,16 +485,16 @@ fonctionnalités de la version 10 de PostgreSQL :
 
 ```sql
 CREATE TABLE t2 (c1 integer, c2 text) PARTITION BY RANGE (c1);
-CREATE TABLE t2_1 partition of t2 for values from (      0) TO ( 1000000);
-CREATE TABLE t2_2 partition of t2 for values from (1000000) TO ( 2000000);
-CREATE TABLE t2_3 partition of t2 for values from (2000000) TO ( 3000000);
-CREATE TABLE t2_4 partition of t2 for values from (3000000) TO ( 4000000);
-CREATE TABLE t2_5 partition of t2 for values from (4000000) TO ( 5000000);
-CREATE TABLE t2_6 partition of t2 for values from (5000000) TO ( 6000000);
-CREATE TABLE t2_7 partition of t2 for values from (6000000) TO ( 7000000);
-CREATE TABLE t2_8 partition of t2 for values from (7000000) TO ( 8000000);
-CREATE TABLE t2_9 partition of t2 for values from (8000000) TO ( 9000000);
-CREATE TABLE t2_0 partition of t2 FOR VALUES FROM (9000000) TO (10000000);
+CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (      0) TO ( 1000000);
+CREATE TABLE t2_2 PARTITION OF t2 FOR VALUES FROM (1000000) TO ( 2000000);
+CREATE TABLE t2_3 PARTITION OF t2 FOR VALUES FROM (2000000) TO ( 3000000);
+CREATE TABLE t2_4 PARTITION OF t2 FOR VALUES FROM (3000000) TO ( 4000000);
+CREATE TABLE t2_5 PARTITION OF t2 FOR VALUES FROM (4000000) TO ( 5000000);
+CREATE TABLE t2_6 PARTITION OF t2 FOR VALUES FROM (5000000) TO ( 6000000);
+CREATE TABLE t2_7 PARTITION OF t2 FOR VALUES FROM (6000000) TO ( 7000000);
+CREATE TABLE t2_8 PARTITION OF t2 FOR VALUES FROM (7000000) TO ( 8000000);
+CREATE TABLE t2_9 PARTITION OF t2 FOR VALUES FROM (8000000) TO ( 9000000);
+CREATE TABLE t2_0 PARTITION OF t2 FOR VALUES FROM (9000000) TO (10000000);
 ```
 
 Enfin, la table *t3* est une table utilisant l'ancienne méthode de
@@ -588,7 +588,12 @@ Plusieurs articles contiennent des explications et des exemples concrets, comme 
   * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
   * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
 
-Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été retiré.
+Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent le mot clé *UNBOUNDED* qui a été remplacé par *MINVALUE* et *MAXVALUE*. Ces valeurs spéciales permettent de ne pas indiquer de seuil limite. Les partitions `t2_1` et `t2_0` évoquées précédemment auraient pu être crées comme suit :
+
+```sql
+CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (MINVALUE) TO (1000000);
+CREATE TABLE t2_0 PARTITION OF t2 FOR VALUES FROM (9000000) TO (MAXVALUE);
+```
 
 Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser les extensions [pg_partman](https://dali.bo/pg-partman) et / ou [pg_pathman](https://dali.bo/pg-pathman).
 </div>
