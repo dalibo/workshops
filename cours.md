@@ -241,7 +241,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 <div class="notes">
 PostgreSQL dispose d'un contournement permettant de partitionner certaines
 tables. La mise en place et la maintenance de ce contournement étaient
-complexes. La version 20 améliore cela en proposant une intégration bien plus
+complexes. La version 10 améliore cela en proposant une intégration bien plus
 poussée du partitionnement.
 </div>
 
