@@ -239,6 +239,10 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 </div>
 
 <div class="notes">
+PostgreSQL dispose d'un contournement permettant de partitionner certaines
+tables. La mise en place et la maintenance de ce contournement étaient
+complexes. La version 20 améliore cela en proposant une intégration bien plus
+poussée du partitionnement.
 </div>
 
 -----
@@ -254,9 +258,35 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 </div>
 
 <div class="notes">
-Cette méthode ne répond pas à toutes les attentes du partitionnement mais elle permet tout de même d'orienter les lignes en fonction de certains critères.
+L'ancien partitionnement dans PostgreSQL se base sur un contournement de la
+fonctionnalité d'héritage. L'idée est de créer des tables filles d'une table
+parent par le biais de l'héritage. De ce fait, une lecture de la table mère
+provoquera une lecture des données des tables filles. Un ajout ultérieur à
+PostgreSQL a permis de faire en sorte que certaines tables filles ne soient
+pas lues si une contrainte CHECK permet de s'assurer qu'elles ne contiennent
+pas les données recherchées. Les lectures étaient donc assurées par le biais
+de l'optimiseur.
 
-Elle permet également d'ajouter des colonnes spécifiques aux tables filles.
+Il n'en allait pas de même pour les écritures. Une insertion dans la table
+mère n'était pas redirigée automatiquement dans la bonne table fille. Pour
+cela, il fallait ajouter un trigger qui annulait l'insertion sur la table mère
+pour la réaliser sur la bonne table fille. Les mises à jour étaient gérées
+tant qu'on ne mettait pas à jour les colonnes de la clé de partitionnement.
+Enfin, les suppressions étaient gérées correctement de façon automatique.
+
+Tout ceci générait un gros travail de mise en place. La maintenance n'était
+pas forcément plus aisée car il fallait s'assurer de créer les partitions en
+avance, à moins de laisser ce travail au trigger sur insertion.
+
+D'autres inconvénients étaient présents, notamment au niveau des index. Comme
+il n'est pas possible de créer un index global (ie, sur plusieurs tables), il
+n'est pas possible d'ajouter une clé primaire globale pour la table
+partitionnée. En fait, toute contrainte unique est impossible.
+
+En d'autres termes, ce contournement pouvait être intéressant dans certains
+cas très particuliers et il fallait bien s'assurer que cela ne générait pas
+d'autres soucis, notamment en terme de performances. Dans tous les autres cas,
+il était préférable de s'en passer.
 </div>
 
 -----
@@ -313,7 +343,7 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
 
-Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme celà se faisait déjà avec l'héritage.
+Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme cela se faisait déjà avec l'héritage.
 </div>
 
 -----
@@ -331,7 +361,7 @@ Si on souhaite vérifier que la table partitionnée ne contient effectivement pa
 
   * Détacher la partition :
 
-    `AlTER TABLE t1 DETACH PARTITION t1_a;`
+    `ALTER TABLE t1 DETACH PARTITION t1_a;`
 </div>
 
 <div class="notes">
@@ -399,6 +429,14 @@ ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
 
+FIXME ce qui suit est intéressant et certainement à ajouter, mais ça tombe
+comme un cheveu dans la soupe. C'est quoi le lien avec la slide ? peut-être
+faudrait-il ajouter une slide indiquant de quoi on va parler avant de balancer
+ça. On pourrait nommer cette slide "Clé de partitionnement multi-colonnes". Il
+faut garder en tête que la slide est aussi le pense-bête du formateur. Si la
+slide n'indique pas un truc, soit il a une bonne mémoire et il n'oubliera pas
+grand chose, soit il a une mauvaise mémoire et il fera la moitié du workshop.
+
 Il est également possible de créer les partitions en utilisant plusieurs colonnes, ainsi que des tablespaces différents :
 
 ```sql
@@ -459,6 +497,8 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 (3 lignes)
 ```
 
+FIXME elles sont surtout détaillées trois slides avant
+
 Les différentes colonnes sont détaillées dans la documentation de [pg_class](https://dali.bo/pg-class).
 </div>
 
@@ -477,7 +517,7 @@ CHECKPOINT;
 Time: 501.660 ms
 ```
 
-t1 (partitionnement déclaratif) :
+t2 (partitionnement déclaratif) :
 
 ```sql
 INSERT INTO t2 select i, 'toto'
