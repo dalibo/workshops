@@ -1148,10 +1148,19 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 </div>
 
 <div class="notes">
-FIXME d'où vient l'exemple ? comment le refaire ?
+L'exemple ci-dessous provient de la formation SQL2.
+
+FIXME
+```bash
+$ createdb sql2
+$ createuser anayrat
+$ pg_restore formation/formation/sql2/base_tp_sql2_avec_schemas.dump -d sql2 -1
+$ psql
+sql2=# SET search_path TO magasin;
+```
 
 ```sql
-postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT
+postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT
 GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
