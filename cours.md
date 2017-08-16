@@ -1804,7 +1804,12 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 ### Quorum réplication synchrone
 
 <div class="slide-content">
-  * Réplication synchrone basée sur un quorum
+  * Possibilité de réplication synchrone sur une liste de plusieurs esclaves
+    * Tous : *synchronous_standby_names = (s1, s2, s3, s4)*
+    * Certains par ordre de priorité : *synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)*
+    
+  * Nouveauté
+    * Certains basé sur un quorum : *synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)*
 </div>
 
 <div class="notes">
