@@ -668,6 +668,7 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
   * Petit rappel sur la réplication physique
   * Qu'est-ce que la réplication logique ?
   * Fonctionnement
+  * Limitations
   * Supervision
   * Exemples
 </div>
@@ -756,6 +757,17 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
   * Un processus spécial est lancé : le  « bgworker logical replication ». Il va se connecter à un slot de réplication sur le serveur éditeur.
   * Le serveur éditeur va procéder à un décodage logique des journaux de transaction pour extraire les résultats des ordres SQL.
   * Le flux logique est transmis à l'abonné qui les applique sur les tables.
+</div>
+
+-----
+
+### Limitations
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+FIXME : to do
 </div>
 
 -----
