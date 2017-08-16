@@ -1277,61 +1277,83 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 -----
 
 <div class="slide-content">
-  * Statistiques multi-colonnes
+  * *CREATE STATISTICS* permet de créer des statistiques sur plusieurs colonnes d'une même table
+    * Corrige les erreurs d'estimation en cas de colonnes fortement corrélées
 </div>
 
 <div class="notes">
-FIXME - améliorer slide
-
 Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une même table. Cela améliore les estimations des plans d'exécution dans le cas de colonnes fortement corrélées.
 
 Par exemple :
 
 ```sql
-postgres=# CREATE TABLE t1 (a int, b int);
+postgres=# CREATE TABLE t (a INT, b INT);
 CREATE TABLE
 
-postgres=# INSERT INTO t1 SELECT i/100, i/500 FROM generate_series(1,10000000) s(i);
-INSERT 0 10000000
+postgres=# INSERT INTO t SELECT i % 100, i % 100 FROM generate_series(1, 10000) s(i);
+INSERT 0 10000
 
-postgres=# ANALYZE t1;
+postgres=# ANALYZE t;
 ANALYZE
+```
 
-postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Gather  (actual time=0.863..380.714 rows=100 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   Buffers: shared hit=16306 read=28044 dirtied=10513 written=9062
-   ->  Parallel Seq Scan on t1  (actual time=246.324..372.866 rows=33 loops=3)
-         Filter: ((a = 1) AND (b = 0))
-         Rows Removed by Filter: 3333300
-         Buffers: shared hit=16212 read=28036 dirtied=10513 written=9062
- Planning time: 0.364 ms
- Execution time: 384.013 ms
-(10 rows)
+La distribution des données est très simple; il n'y a que 100 valeurs différentes dans chaque colonne, distribuées de manière uniforme.
 
-postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t1;
+L'exemple suivant montre le résultat de l'estimation d'une condition WHERE sur la colonne a : 
+
+```sql
+postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
+                                  QUERY PLAN                                   
+-------------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..170.00 rows=100 width=8) (actual rows=100 loops=1)
+   Filter: (a = 1)
+   Rows Removed by Filter: 9900
+ Planning time: 0.293 ms
+ Execution time: 2.570 ms
+(5 rows)
+```
+L'optimiseur examine la condition et détermine que la sélectivité de cette clause est d'1% (*rows=100* parmi les 10000 lignes insérées).
+
+Une estimation similaire peut être obtenue pour la colonne b.
+
+Appliquons maintenant la même condition sur chacune des colonnes en les combinant avec *AND* :
+
+```sql
+postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
+                                 QUERY PLAN                                  
+-----------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=1 width=8) (actual rows=100 loops=1)
+   Filter: ((a = 1) AND (b = 1))
+   Rows Removed by Filter: 9900
+ Planning time: 0.201 ms
+ Execution time: 4.413 ms
+(5 rows)
+```
+
+L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivité. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre *cost* et *actual*).
+
+Pour améliorer l'estimation, il est désormais possible de créer des statistiques multi-colonnes :
+
+```sql
+postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t;
 CREATE STATISTICS
 
-postgres=# ANALYZE t1;
+postgres=# ANALYZE t;
 ANALYZE
+```
 
-postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Gather  (actual time=0.418..321.794 rows=100 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   Buffers: shared hit=16272 read=28078
-   ->  Parallel Seq Scan on t1  (actual time=210.955..318.026 rows=33 loops=3)
-         Filter: ((a = 1) AND (b = 0))
-         Rows Removed by Filter: 3333300
-         Buffers: shared hit=16170 read=28078
- Planning time: 0.191 ms
- Execution time: 325.278 ms
-(10 rows)
+Vérifions ensuite :
+
+```sql
+postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
+                                  QUERY PLAN                                   
+-------------------------------------------------------------------------------
+ Seq Scan on t  (cost=0.00..195.00 rows=100 width=8) (actual rows=100 loops=1)
+   Filter: ((a = 1) AND (b = 1))
+   Rows Removed by Filter: 9900
+ Planning time: 0.400 ms
+ Execution time: 3.816 ms
+(5 rows)
 ```
 
 Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
@@ -1433,7 +1455,6 @@ Lorsque la protection des lignes est activée sur une table, tous les accès cla
 Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiques de sécurité. Si aucune politique n'existe pour la table, une politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est visible ou ne peut être modifiée.
 
 Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
-
 
 **Remarque** 
 
@@ -1621,8 +1642,8 @@ La version 10 implémente les nouveaux rôles suivants :
   * pg_stat_activity
   * Architecture
   * SQL/MED
-  * Changements dans pg_basebackup
   * Quorum réplication synchrone
+  * Changements dans pg_basebackup
   * pg_receivewal
 </div>
 
