@@ -1058,6 +1058,7 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 <div class="slide-content">
   * Tris
   * Agrégats
+  * Statistiques multi-colonnes
   * Parallélisme
 </div>
 
@@ -1263,6 +1264,68 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 (36 rows)
 ```
 </div>
+
+-----
+
+<div class="slide-content">
+  * Statistiques multi-colonnes
+</div>
+
+<div class="notes">
+FIXME - améliorer slide
+
+Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une même table. Cela améliore les estimations des plans d'exécution dans le cas de colonnes fortement corrélées.
+
+Par exemple :
+
+```sql
+postgres=# CREATE TABLE t1 (a int, b int);
+CREATE TABLE
+
+postgres=# INSERT INTO t1 SELECT i/100, i/500 FROM generate_series(1,10000000) s(i);
+INSERT 0 10000000
+
+postgres=# ANALYZE t1;
+ANALYZE
+
+postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Gather  (actual time=0.863..380.714 rows=100 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=16306 read=28044 dirtied=10513 written=9062
+   ->  Parallel Seq Scan on t1  (actual time=246.324..372.866 rows=33 loops=3)
+         Filter: ((a = 1) AND (b = 0))
+         Rows Removed by Filter: 3333300
+         Buffers: shared hit=16212 read=28036 dirtied=10513 written=9062
+ Planning time: 0.364 ms
+ Execution time: 384.013 ms
+(10 rows)
+
+postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t1;
+CREATE STATISTICS
+
+postgres=# ANALYZE t1;
+ANALYZE
+
+postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
+                             QUERY PLAN
+--------------------------------------------------------------------------------
+ Gather  (actual time=0.418..321.794 rows=100 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=16272 read=28078
+   ->  Parallel Seq Scan on t1  (actual time=210.955..318.026 rows=33 loops=3)
+         Filter: ((a = 1) AND (b = 0))
+         Rows Removed by Filter: 3333300
+         Buffers: shared hit=16170 read=28078
+ Planning time: 0.191 ms
+ Execution time: 325.278 ms
+(10 rows)
+```
+
+Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
 
 -----
 
@@ -1709,13 +1772,11 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 <div class="slide-content">
   * Réplication synchrone basée sur un quorum
   * Gestion de la compression dans *pg_receivewal*
-  * Statistiques multi-colonnes
 </div>
 
 <div class="notes">
 
 FIXME : le quorum pour la réplication synchrone devrait avoir sa propre slide
-FIXME : les stats multi colonnes, c'est de la perf
 FIXME : pg_receivewal devrait avoir sa propre slide
 
 **Réplication synchrone basée sur un quorum**
@@ -1734,60 +1795,7 @@ Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque comm
 
 L'option -Z/--compress active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
 
-**Statistiques multi-colonnes**
 
-Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une même table. Cela améliore les estimations des plans d'exécution dans le cas de colonnes fortement corrélées.
-
-Par exemple :
-
-```sql
-postgres=# CREATE TABLE t1 (a int, b int);
-CREATE TABLE
-
-postgres=# INSERT INTO t1 SELECT i/100, i/500 FROM generate_series(1,10000000) s(i);
-INSERT 0 10000000
-
-postgres=# ANALYZE t1;
-ANALYZE
-
-postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Gather  (actual time=0.863..380.714 rows=100 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   Buffers: shared hit=16306 read=28044 dirtied=10513 written=9062
-   ->  Parallel Seq Scan on t1  (actual time=246.324..372.866 rows=33 loops=3)
-         Filter: ((a = 1) AND (b = 0))
-         Rows Removed by Filter: 3333300
-         Buffers: shared hit=16212 read=28036 dirtied=10513 written=9062
- Planning time: 0.364 ms
- Execution time: 384.013 ms
-(10 rows)
-
-postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t1;
-CREATE STATISTICS
-
-postgres=# ANALYZE t1;
-ANALYZE
-
-postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Gather  (actual time=0.418..321.794 rows=100 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   Buffers: shared hit=16272 read=28078
-   ->  Parallel Seq Scan on t1  (actual time=210.955..318.026 rows=33 loops=3)
-         Filter: ((a = 1) AND (b = 0))
-         Rows Removed by Filter: 3333300
-         Buffers: shared hit=16170 read=28078
- Planning time: 0.191 ms
- Execution time: 325.278 ms
-(10 rows)
-```
-
-Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
 </div>
 
 -----
