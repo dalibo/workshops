@@ -1807,7 +1807,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
   * Possibilité de réplication synchrone sur une liste de plusieurs esclaves
     * Tous : *synchronous_standby_names = (s1, s2, s3, s4)*
     * Certains par ordre de priorité : *synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)*
-    
+
   * Nouveauté
     * Certains basé sur un quorum : *synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)*
 </div>
@@ -1830,6 +1830,8 @@ Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque comm
 
 <div class="slide-content">
   * Gestion de la compression dans *pg_receivewal*
+    * niveau 0 : pas de compression
+    * niveau 9 : meilleure compression possible
 </div>
 
 <div class="notes">
