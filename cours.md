@@ -1338,6 +1338,7 @@ postgres=# EXPLAIN(ANALYZE,BUFFERS) SELECT * FROM t1 WHERE (a = 1) AND (b = 0);
 ```
 
 Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
+</div>
 
 -----
 
@@ -1367,7 +1368,7 @@ FIXME le lecteur n'est pas anglais, on veut du texte ici, détaillé, sur ce que
 ça apporte et perso, j'en ferais deux slides (nouvelles opérations supportés,
 paramétrages)
 
-Pour en savoir plus sur le sujet du parallèlisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
+Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
 </div>
 
 -----
@@ -1601,7 +1602,8 @@ La version 10 implémente les nouveaux rôles suivants :
   * Architecture
   * SQL/MED
   * Changements dans pg_basebackup
-  * Divers
+  * Quorum réplication synchrone
+  * pg_receivewal
 </div>
 
 <div class="notes">
@@ -1779,20 +1781,13 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 
 -----
 
-### Divers
+### Quorum réplication synchrone
 
 <div class="slide-content">
   * Réplication synchrone basée sur un quorum
-  * Gestion de la compression dans *pg_receivewal*
 </div>
 
 <div class="notes">
-
-FIXME : le quorum pour la réplication synchrone devrait avoir sa propre slide
-FIXME : pg_receivewal devrait avoir sa propre slide
-
-**Réplication synchrone basée sur un quorum**
-
 Il est possible d'appliquer arbitrairement une réplication synchrone à un sous-ensemble d'un groupe d'instances grâce au paramètre suivant : *synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
 
 Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur la priorité, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur *num_sync* serveurs secondaires, choisis en fonction de leur priorités. 
@@ -1802,12 +1797,18 @@ Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit
 Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur un quorum, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur au moins *num_sync* des serveurs secondaires listés. 
 
 Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 and s4 aient répondu, quels qu'ils soient. 
+</div>
 
-**Gestion de la compression dans *pg_receivewal* **
+-----
 
+### pg_receivewal
+
+<div class="slide-content">
+  * Gestion de la compression dans *pg_receivewal*
+</div>
+
+<div class="notes">
 L'option -Z/--compress active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
-
-
 </div>
 
 -----
