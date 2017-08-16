@@ -1120,7 +1120,7 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 Requête avec PostgreSQL 10 :
 
 ```sql
-postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT i FROM test ORDER BY i DESC;
+postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i DESC;
                                 QUERY PLAN                                
 --------------------------------------------------------------------------
  Sort (actual time=1170.566..1547.257 rows=4000000 loops=1)
