@@ -1102,21 +1102,18 @@ VACUUM ANALYZE test;
 
 Requête avec PostgreSQL 9.6 :
 
-FIXME ce n'est pas le résultat d'un EXPLAIN (ANALYZE, BUFFERS)... c'est soit
-un résultat trafiqué (auquel cas il faut le dire) soit un résultat d'un EXPLAIN (ANALYZE, BUFFERS, COSTS off)
-
 ```sql
-postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT i FROM test ORDER BY i DESC;
-                             QUERY PLAN                                       
---------------------------------------------------------------------------------
- Sort  (actual time=1539.208..2124.541 rows=4000000 loops=1)
+postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i DESC;
+                                QUERY PLAN                                
+--------------------------------------------------------------------------
+ Sort (actual time=1506.804..2093.048 rows=4000000 loops=1)
    Sort Key: i DESC
    Sort Method: external merge  Disk: 54752kB
-   Buffers: shared hit=15451 read=2249, temp read=15264 written=15264
-   ->  Seq Scan on test  (actual time=0.132..232.824 rows=4000000 loops=1)
-         Buffers: shared hit=15451 read=2249
- Planning time: 0.085 ms
- Execution time: 2268.116 ms
+   Buffers: shared hit=15419 read=2281, temp read=15264 written=15264
+   ->  Seq Scan on test (actual time=0.023..225.907 rows=4000000 loops=1)
+         Buffers: shared hit=15419 read=2281
+ Planning time: 0.062 ms
+ Execution time: 2236.924 ms
 (8 rows)
 ```
 
@@ -1124,16 +1121,16 @@ Requête avec PostgreSQL 10 :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, BUFFERS) SELECT i FROM test ORDER BY i DESC;
-                             QUERY PLAN                                                      
---------------------------------------------------------------------------------
- Sort  (actual time=1175.235..1551.828 rows=4000000 loops=1)
+                                QUERY PLAN                                
+--------------------------------------------------------------------------
+ Sort (actual time=1170.566..1547.257 rows=4000000 loops=1)
    Sort Key: i DESC
    Sort Method: external merge  Disk: 54872kB
    Buffers: shared hit=15419 read=2281, temp read=14287 written=14358
-   ->  Seq Scan on test  (actual time=0.082..227.361 rows=4000000 loops=1)
+   ->  Seq Scan on test (actual time=0.057..220.840 rows=4000000 loops=1)
          Buffers: shared hit=15419 read=2281
- Planning time: 0.163 ms
- Execution time: 1695.880 ms
+ Planning time: 0.289 ms
+ Execution time: 1691.378 ms
 (8 rows)
 ```
 </div>
