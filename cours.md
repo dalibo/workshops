@@ -1738,8 +1738,7 @@ On y voit aussi de nouveaux types d'événements pour lesquels un processus peut
   * Timeout :  The server process is waiting for a timeout to expire.
   * IO : The server process is waiting for a IO to complete.
 
-FIXME: utiliser les traductions de la doc dès que disponible
-FIXME: plus simple et rapide et efficace de le traduire soi même, non ?
+FIXME: à traduire
 
 Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
 
@@ -1821,7 +1820,7 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 
 -----
 
-### FDW
+### SQL/MED, Foreign Data Wrappers
 
 <div class="slide-content">
   * Récupération du résultat d'un programme comme entrée pour *file_fdw*
@@ -1830,9 +1829,138 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 </div>
 
 <div class="notes">
-FIXME un exemple des deux serait fortement apprécié
+**file_fdw : exemple**
+
+Soit le script bash suivant :
+
+```bash
+$ cat /opt/postgresql/file_fdw.sh 
+#!/bin/bash
+for (( i=0; i <= 1000; i++ ))
+do
+    echo "$i,test"
+done
+```
+
+Créons l'extension et le serveur distant :
+
+```sql
+postgres=# CREATE EXTENSION file_fdw ;
+CREATE EXTENSION
+
+postgres=# CREATE SERVER fs FOREIGN DATA WRAPPER file_fdw ;
+CREATE SERVER
+```
+
+Associons ensuite une table étrangère au script bash :
+
+```sql
+postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10)) SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',') ;
+CREATE FOREIGN TABLE
+```
+
+Il est désormais possible d'accéder aux données de cette table :
+
+```sql
+postgres=# SELECT * FROM tfile1 LIMIT 1;
+ id | val  
+----+------
+  0 | test
+(1 row)
+```
+
+**postgres_fdw**
 
 postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
+
+
+*Exemple :*
+
+Création et initialisation d'une base de données exemple :
+
+```sql
+postgres=# CREATE DATABASE db1;
+CREATE DATABASE
+
+postgres=# \c db1
+You are now connected to database "db1" as user "postgres".
+
+db1=# CREATE TABLE t1 (c1 integer);
+CREATE TABLE
+
+postgres@db1=# INSERT INTO t1 SELECT * FROM generate_series(0,10000);
+INSERT 0 10001
+```
+
+Création de l'extension :
+
+```sql
+db1=# \c postgres
+You are now connected to database "postgres" as user "postgres".
+
+postgres=# CREATE EXTENSION postgres_fdw;
+CREATE EXTENSION
+```
+
+Création du serveur distant (ici notre base *db1* locale) :
+
+```sql
+postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
+CREATE SERVER
+```
+
+Création d'une correspondance entre notre utilisateur local et l'utilisateur distant :
+
+```sql
+postgres=# CREATE USER MAPPING FOR postgres SERVER fs1 OPTIONS (user 'postgres');
+CREATE USER MAPPING
+```
+
+Création localement de la table distante :
+
+```sql
+postgres@postgres=# CREATE FOREIGN TABLE remote_t1 (c1 integer) SERVER fs1 OPTIONS (table_name 't1');
+CREATE FOREIGN TABLE
+```
+
+Vérification de son bon fonctionnement :
+
+```sql
+postgres=# SELECT * FROM remote_t1 LIMIT 3;
+ c1 
+----
+  0
+  1
+  2
+(3 rows)
+```
+
+Exécutions d'une opération d’agrégation sur le serveur distant :
+
+```sql
+postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM remote_t1;
+                           QUERY PLAN                           
+----------------------------------------------------------------
+ Foreign Scan
+   Output: (count(*)), (avg(c1)), (sum(c1))
+   Relations: Aggregate on (public.remote_t1)
+   Remote SQL: SELECT count(*), avg(c1), sum(c1) FROM public.t1
+(4 rows)
+```
+
+Même requête sur PostgreSQL 9.6 :
+
+```sql
+postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM remote_t1;
+                  QUERY PLAN                  
+----------------------------------------------
+ Aggregate
+   Output: count(*), avg(c1), sum(c1)
+   ->  Foreign Scan on public.remote_t1
+         Output: c1
+         Remote SQL: SELECT c1 FROM public.t1
+(5 rows)
+```
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
 [postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
