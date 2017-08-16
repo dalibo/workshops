@@ -1361,21 +1361,46 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 
 -----
 
-### Parallélisme
+### Parallélisme - nouvelles opérations supportées
 
 <div class="slide-content">
-  FIXME à traduire, on peut supposer que Parallel Index Scan est
-  compréhensible, mais pas Gather Merge
-  * Noeuds désormais gérés :
-    * *Parallel Index Scan*
-    * *Parallel Bitmap Heap Scan*
-    * *Gather Merge*
-    * *Parallel Merge Join*
+  * Nœuds désormais gérés :
+    * Parcours d'index (*Index Scan* et *Index Only Scan*)
+    * Jointure-union (*Merge Join*)
+
+  * Nouveau nœud :
+    * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
 
   * Support également des :
     * requêtes préparées
     * sous-requêtes non-corrélées
+</div>
 
+<div class="notes">
+La version 9.6 intègre la parallélisation pour différentes opérations : les
+parcours séquentiels, les jointures et les agrégats. Mais attention, cela ne
+concerne que les requêtes en lecture : pas les `INSERT`/`UPDATE`/`DELETE`, pas les CTE en
+écriture, pas les opérations de maintenance (`CREATE INDEX`, `VACUUM`, `ANALYZE`).
+
+La version 10 propose la parallélisation de nouvelles opérations :
+  * parcours d'index (*Index Scan* et *Index Only Scan*)
+  * jointure-union (*Merge Join*)
+  * collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
+  * requêtes préparées
+  * sous-requêtes non-corrélées
+
+La jointure-union (*Merge Join*) est fondée sur le principe d'ordonner les tables gauche et droite et ensuite de les comparer en parallèle.
+
+Le nœud *Gather* introduit en 9.6 collecte les résultats de tous les *workers* dans un ordre arbitraire. Si chaque *worker* retourne des résultats triés, le nœud *Gather Merge* préservera l'ordre de ces résultats déjà triés.
+
+Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
+</div>
+
+-----
+
+### Parallélisme - paramétrage
+
+<div class="slide-content">
   * Paramétrage
     * nouveaux paramètres *min_parallel_table_scan_size* et *min_parallel_index_scan_size*
     * suppression de *min_parallel_relation_size*, jugé trop générique
@@ -1383,11 +1408,13 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 </div>
 
 <div class="notes">
-FIXME le lecteur n'est pas anglais, on veut du texte ici, détaillé, sur ce que
-ça apporte et perso, j'en ferais deux slides (nouvelles opérations supportés,
-paramétrages)
+*min_parallel_table_scan_size* spécifie la quantité minimale de données de la table qui doit être parcourue pour qu'un parcours parallèle soit envisagé. 
 
-Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
+*min_parallel_index_scan_size* spécifie la quantité minimale de données d'index qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
+
+*max_parallel_workers* positionne le nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8. Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier *max_parallel_workers_per_gather*.
+
+Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de processus parallèles pouvant être lancé par un seul noeud Gather. La valeur par défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de requête.
 </div>
 
 -----
