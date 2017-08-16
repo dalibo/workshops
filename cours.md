@@ -1645,6 +1645,7 @@ La version 10 implémente les nouveaux rôles suivants :
   * Quorum réplication synchrone
   * Changements dans pg_basebackup
   * pg_receivewal
+  * Index hash
 </div>
 
 <div class="notes">
@@ -1861,66 +1862,29 @@ L'option -Z/--compress active la compression des journaux de transaction, et sp�
 
 -----
 
-## Autres nouveautés - Pour les développeurs (1)
+### Index Hash
 
 <div class="slide-content">
-  * psql : ajout de méta-commandes
-    * \\gx, force l'affichage étendu de \\g
-    * structure conditionnelle \\if, \\elif, \\else, \\endif
-  * Journalisation des indexes Hash
-  * Possibilité de renommer une valeur d'un type existant via *ALTER TYPE*
+  * Journalisation
+  * Amélioration des performances
+  * Amélioration de l'efficacité sur le grossissement de ces index
 </div>
 
 <div class="notes">
-**\\gx**
-
-\\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête. 
-
-Exemple :
-
-```sql
-postgres=# SELECT * FROM t1 LIMIT 2;
- a | b 
----+---
- 0 | 0
- 0 | 0
-(2 rows)
-
-postgres=# \g
- a | b 
----+---
- 0 | 0
- 0 | 0
-(2 rows)
-
-postgres=# \gx
--[ RECORD 1 ]
-a | 0
-b | 0
--[ RECORD 2 ]
-a | 0
-b | 0
-
-```
-
-Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command)
-
-**\\if, \\elif, \\else, \\endif**
-
-Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
-
-Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
-
-**Indexes Hash**
-
 Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crash et seront utilisables sur un environnement répliqué.
 
 Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
+</div>
 
-**ALTER TYPE**
+-----
 
+### Renommage d'un enum
+
+<div class="slide-content">
 Il est désormais possible de renommer une valeur d'un type existant.
+</div>
 
+<div class="note">
 Exemple :
 
 ```sql
@@ -1936,19 +1900,33 @@ Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-alterty
 
 -----
 
-## Autres nouveautés - Pour les développeurs (2)
+## Utilisateurs
 
 <div class="slide-content">
-  * *Full Text Search* sur des colonnes de type *JSON* et *JSONB*
-  * Fonction *XMLTABLE*
+  * Full Text Search sur du json
+  * Nouvelle foncধon XMLTABLE
+  * Tables de transition
+  * Séquences
+  * Nouveau type de colonne identity
+  * Nouveautés pour psql
 </div>
 
-<div class="notes">
-**Full Text Search**
+<div class="note">
+</div>
 
+-----
+
+### Full Text Search sur du json
+
+<div class="slide-content">
+  * Type *json* et *jsonb*
+  * Impacte les fonctions *ts_headline()* et *to_tsvector()*
+</div>
+
+<div class="note">
 Les fonctions ts_headline() et to_tsvector() peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
 
-Exemple :
+En voici un exemple :
 
 ```sql
 postgres=# SELECT jsonb_pretty(document) FROM stock_jsonb;
@@ -2050,11 +2028,19 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
 ```
 
 Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+</div>
 
+-----
 
-**XMLTABLE**
+### XMLTABLE
 
-La fonction xmltable produit une table basée sur la valeur XML donnée. Cette table pourra ensuite être utilisée par exemple comme table primaire d'une clause *FROM*.
+<div class="slide-content">
+  * Transformation d'un document XML en table
+  * Nécessite libxml
+</div>
+
+<div class="note">
+La fonction *xmltable()* produit une table basée sur la valeur XML donnée. Cette table pourra ensuite être utilisée par exemple comme table primaire d'une clause *FROM*.
 
 L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec l'option de configuration *--with-libxml*.
 
@@ -2104,25 +2090,64 @@ Pour en savoir plus :
   * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
 
------
-
-## Autres nouveautés - Pour les développeurs (3)
+### psql, nouvelles méta-commandes
 
 <div class="slide-content">
-  * Tables de transition pour les triggers de type AFTER et de niveau STATEMENT
-    * Possibilité de stocker les lignes avant et/ou après modification
-
-  * Améliorations sur les séquences
-    * Création des catalogues système *pg_sequence* et *pg_sequences*
-    * Ajout de l'option *CREATE SEQUENCE AS type_donnee*
-
-  * Nouveau type de colonne *identity*
-    * Similaire au type *serial* mais confirme au standard SQL
+  * \\gx, force l'affichage étendu de \\g
+  * structure conditionnelle \\if, \\elif, \\else, \\endif
 </div>
 
 <div class="notes">
-** Tables de transition **
+**\\gx**
 
+\\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête. 
+
+Exemple :
+
+```sql
+postgres=# SELECT * FROM t1 LIMIT 2;
+ a | b 
+---+---
+ 0 | 0
+ 0 | 0
+(2 rows)
+
+postgres=# \g
+ a | b 
+---+---
+ 0 | 0
+ 0 | 0
+(2 rows)
+
+postgres=# \gx
+-[ RECORD 1 ]
+a | 0
+b | 0
+-[ RECORD 2 ]
+a | 0
+b | 0
+
+```
+
+Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command)
+</div>
+
+**\\if, \\elif, \\else, \\endif**
+
+Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
+
+Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+
+-----
+
+## Tables de transition
+
+<div class="slide-content">
+  * Pour les triggers de type AFTER et de niveau STATEMENT
+  * Possibilité de stocker les lignes avant et/ou après modification
+</div>
+
+<div class="notes">
 Avec un trigger de type AFTER, il est possible d'utiliser des tables de transition utilisables dans les fonctions exécutées.
 
 Par exemple :
@@ -2181,9 +2206,16 @@ Pour en savoir plus :
   * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
   * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
 
+-----
 
-** Améliorations sur les séquences **
+## Amélioration sur les séquences
 
+<div class="slide-content">
+  * Création des catalogues système *pg_sequence* et *pg_sequences*
+  * Ajout de l'option *CREATE SEQUENCE AS type_donnee*
+</div>
+
+<div class="notes">
 - Création des catalogues système *pg_sequence* et *pg_sequences*
 
 ```sql
@@ -2215,16 +2247,23 @@ seqcycle     | f
 
 Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
 
-
 - Ajout de l'option *CREATE SEQUENCE AS type_donnee*
 
 La clause facultative *AS type_donnee* spécifie le type de données de la séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par défaut). Le type de données détermine les valeurs minimales et maximales par défaut pour la séquence. 
 
 Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS type_donnee*.
+</div>
 
+-----
 
-** Nouveau type de colonne *identity* **
+## Colonne identity
 
+<div class="slide-content">
+  * Nouveau type de colonne *identity*
+  * Similaire au type *serial* mais confirme au standard SQL
+</div>
+
+<div class="notes">
 La contrainte *GENERATED AS IDENTITY* a été ajoutée à l'ordre *CREATE TABLE* pour assigner automatiquement une valeur unique à une colonne.
 
 Comme le type *serial*, une colonne d'identité utilisera une séquence.
