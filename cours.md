@@ -1437,130 +1437,153 @@ Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiq
 
 Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
 
-FIXME pour ton exemple, tu as changé ton prompt, ce qui est une bonne idée...  alors autant faire une petite note pour expliquer comment faire
 
-Par exemple, soit 2 utilisateurs :
+**Remarque** 
 
-FIXME évitons les rôles toto, titi, tata, etc - au pire, si tu ne sais pas comment les appeler, fais des u1, u2, u3, etc
+Afin de rendre l'exemple suivant plus lisible, le prompt psql a été modifié avec la commande suivante :
+
+```
+\set PROMPT1 '%n@%/%R%# '
+```
+
+Il est possible de rendre ce changement permanent en ajoutant la commande ci-dessus dans le fichier *~/.psqlrc*.
+
+**Exemple**
+
+Soit 2 utilisateurs :
 
 ```sql
-postgres@postgres=# CREATE ROLE toto WITH LOGIN;
+postgres@postgres=# CREATE ROLE u1 WITH LOGIN;
 CREATE ROLE
 
-postgres@postgres=# CREATE ROLE toto2 WITH LOGIN;
+postgres@postgres=# CREATE ROLE u2 WITH LOGIN;
 CREATE ROLE
 ```
 
 Créons une table *comptes*, insérons-y des données et permettons aux utilisateurs d'accéder à ces données :
 
 ```sql
-toto@totodb=> CREATE TABLE comptes (admin text, societe text, contact_email text);
+u1@db1=> CREATE TABLE comptes (admin text, societe text, contact_email text);
 CREATE TABLE
 
-toto@totodb=> INSERT INTO comptes VALUES ('toto', 'dalibo', 'toto@dalibo.com');
+u1@db1=> INSERT INTO comptes VALUES ('u1', 'dalibo', 'u1@dalibo.com');
 INSERT 0 1
 
-toto@totodb=> INSERT INTO comptes VALUES ('toto2', 'dalibo', 'toto2@dalibo.com');
+u1@db1=> INSERT INTO comptes VALUES ('u2', 'dalibo', 'u2@dalibo.com');
 INSERT 0 1
 
-toto@totodb=> INSERT INTO comptes VALUES ('toto3', 'paris', 'toto2@paris.fr');
+u1@db1=> INSERT INTO comptes VALUES ('u3', 'paris', 'u3@paris.fr');
 INSERT 0 1
 
-toto@totodb=> GRANT SELECT ON comptes TO toto2;
+u1@db1=> GRANT SELECT ON comptes TO u2;
 GRANT
 ```
 
-Activons maintenant deux politiques permissives :
+Activons maintenant une première politique permissive :
 
 ```sql
-toto@totodb=> ALTER TABLE comptes ENABLE ROW LEVEL SECURITY;
+u1@db1=> ALTER TABLE comptes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE
 
-toto@totodb=> CREATE POLICY compte_admins ON comptes USING (admin = current_user);
+u1@db1=> CREATE POLICY compte_admins ON comptes USING (admin = current_user);
 CREATE POLICY
 
-FIXME t'es sûr du résultat ? moi, je vois les trois lignes, ce qui est
-logique (d'ailleurs tu l'expliques après), il est propriétaire de la table, il
-voit tout
-
-toto@totodb=> SELECT * FROM comptes;
- admin | societe |  contact_email   
--------+---------+------------------
- toto  | dalibo  | toto@dalibo.com
- toto2 | dalibo  | toto2@dalibo.com
-(2 rows)
-
-FIXME à moins d'être très observateur, c'est impossible de voir que tu t'es
-reconnecté en tant que toto2...
-
-toto2@totodb=> SELECT * FROM comptes;
- admin | societe |  contact_email   
--------+---------+------------------
- toto2 | dalibo  | toto2@dalibo.com
-(1 row)
-
-FIXME oups, revenu à toto sans rien dire... à la rigueur, il y aurait un \c on
-pourrait comprendre, mais là tu passes de l'un à l'autre sans le montrer et
-sans l'expliquer
-
-toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'paris');
-CREATE POLICY
-
-toto2@totodb=> SELECT * FROM comptes;
- admin | societe |  contact_email   
--------+---------+------------------
- toto2 | dalibo  | toto2@dalibo.com
- toto3 | paris   | toto2@paris.fr
-(2 rows)
+u1@db1=> SELECT * FROM comptes;
+ admin | societe | contact_email 
+-------+---------+---------------
+ u1    | dalibo  | u1@dalibo.com
+ u2    | dalibo  | u2@dalibo.com
+ u3    | paris   | u3@paris.fr
+(3 rows)
 ```
 
-*toto* étant propriétaire de cette table, les politiques ne s'appliquent pas à lui, au contraire de *toto2*.
+Connectons-nous avec l'utilisateur *u2* et vérifions que la politique est bien appliquée :
+
+```sql
+u1@db1=> \c db1 u2
+You are now connected to database "db1" as user "u2".
+
+u2@db1=> SELECT * FROM comptes;
+ admin | societe | contact_email 
+-------+---------+---------------
+ u2    | dalibo  | u2@dalibo.com
+(1 row)
+```
+
+Créons une autre politique de sécurité permissive :
+
+```sql
+u2@db1=> \c db1 u1
+You are now connected to database "db1" as user "u1".
+
+u1@db1=> CREATE POLICY pol_societe ON comptes USING (societe = 'paris');
+CREATE POLICY
+```
+
+Vérifions maintenant comment elle s'applique à l'utilisateur *u2* :
+
+```sql
+u1@db1=> \c db1 u2
+You are now connected to database "db1" as user "u2".
+
+u2@db1=> SELECT * FROM comptes;
+ admin | societe | contact_email 
+-------+---------+---------------
+ u2    | dalibo  | u2@dalibo.com
+ u3    | paris   | u3@paris.fr
+(2 rows)
+
+```
+
+*u1* étant propriétaire de cette table, les politiques ne s'appliquent pas à lui, au contraire de *u2*.
 
 Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
 
-FIXME tu n'as pas besoin du ANALYZE pour avoir le filter, autant s'en passer
-
 ```sql
-toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Seq Scan on comptes  (actual time=0.022..0.024 rows=2 loops=1)
+u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
+                               QUERY PLAN                                
+-------------------------------------------------------------------------
+ Seq Scan on comptes
    Filter: ((societe = 'paris'::text) OR (admin = (CURRENT_USER)::text))
-   Rows Removed by Filter: 1
+(2 rows)
 ```
 
 Remplaçons maintenant l'une de ces politiques permissives par une politique restrictive :
 
 ```sql
-toto@totodb=> DROP POLICY compte_admins ON comptes;
+u2@db1=> \c db1 u1
+You are now connected to database "db1" as user "u1".
+
+u1@db1=> DROP POLICY compte_admins ON comptes;
 DROP POLICY
 
-toto@totodb=> DROP POLICY pol_societe ON comptes;
+u1@db1=> DROP POLICY pol_societe ON comptes;
 DROP POLICY
 
-toto@totodb=> CREATE POLICY compte_admins ON comptes AS RESTRICTIVE USING (admin = current_user);
+u1@db1=> CREATE POLICY compte_admins ON comptes AS RESTRICTIVE USING (admin = current_user);
 CREATE POLICY
 
-toto@totodb=> CREATE POLICY pol_societe ON comptes USING (societe = 'dalibo');
+u1@db1=> CREATE POLICY pol_societe ON comptes USING (societe = 'dalibo');
 CREATE POLICY
+```
 
-FIXME nouveau chgt de user sans indication
+Vérifions enfin avec l'utilisateur *u2* :
+```sql
+u1@db1=> \c db1 u2
+You are now connected to database "db1" as user "u2".
 
-toto2@totodb=> SELECT * FROM comptes;
- admin | societe |  contact_email   
--------+---------+------------------
- toto2 | dalibo  | toto2@dalibo.com
+u2@db1=> SELECT * FROM comptes;
+ admin | societe | contact_email 
+-------+---------+---------------
+ u2    | dalibo  | u2@dalibo.com
 (1 row)
 
-FIXME nouveau chgt de user sans indication
-FIXME tu n'as pas besoin du ANALYZE pour avoir le filter, autant s'en passer
-
-toto2@totodb=> EXPLAIN(ANALYZE) SELECT * FROM comptes;
-                             QUERY PLAN
---------------------------------------------------------------------------------
- Seq Scan on comptes  (actual time=0.040..0.043 rows=1 loops=1)
+u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
+                                QUERY PLAN                                 
+---------------------------------------------------------------------------
+ Seq Scan on comptes
    Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
-   Rows Removed by Filter: 2
+(2 rows)
 ```
 Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 </div>
