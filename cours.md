@@ -64,7 +64,6 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
 <div class="slide-content">
   * Changement de la numérotation
   * Changement de nommage
-  * Changements dans *pg_basebackup*
 </div>
 
 <div class="notes">
@@ -203,28 +202,6 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
 Certains paramètres ont vu leur valeur par défaut modifié. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
-</div>
-
------
-
-### Changements dans pg_basebackup
-
-<div class="slide-content">
-  * Suppression de l'option *-x*
-  * Modification de la méthode de transfert des WAL par défaut
-    * *none* : pas de récupération des WAL
-    * *fetch* : récupération des WAL à la fin de la copie des données
-    * *stream* : streaming (par défaut)
-  * Nommage des arguments longs
-    * --xlog-method -> --wal-method
-    * --xlogdir -> --waldir
-</div>
-
-<div class="notes">
-
-FIXME : Ce n'est pas suffisamment important pour être ici. Ça devrait être renvoyé dans une partie spécifique à pg_basebackup (dans la partie admin par exemple, avant la slide sur pgreceivewal)
-
-Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
 </div>
 
 -----
@@ -1548,6 +1525,7 @@ La version 10 implémente les nouveaux rôles suivants :
   * pg_stat_activity
   * Architecture
   * SQL/MED
+  * Changements dans pg_basebackup
   * Divers
 </div>
 
@@ -1703,6 +1681,25 @@ postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
 [postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
+</div>
+
+-----
+
+### Changements dans pg_basebackup
+
+<div class="slide-content">
+  * Suppression de l'option *-x*
+  * Modification de la méthode de transfert des WAL par défaut
+    * *none* : pas de récupération des WAL
+    * *fetch* : récupération des WAL à la fin de la copie des données
+    * *stream* : streaming (par défaut)
+  * Nommage des arguments longs
+    * --xlog-method -> --wal-method
+    * --xlogdir -> --waldir
+</div>
+
+<div class="notes">
+Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
 </div>
 
 -----
