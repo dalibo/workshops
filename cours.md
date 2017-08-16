@@ -1782,25 +1782,6 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 
 -----
 
-### Changements dans pg_basebackup
-
-<div class="slide-content">
-  * Suppression de l'option *-x*
-  * Modification de la méthode de transfert des WAL par défaut
-    * *none* : pas de récupération des WAL
-    * *fetch* : récupération des WAL à la fin de la copie des données
-    * *stream* : streaming (par défaut)
-  * Nommage des arguments longs
-    * --xlog-method -> --wal-method
-    * --xlogdir -> --waldir
-</div>
-
-<div class="notes">
-Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
-</div>
-
------
-
 ### Quorum réplication synchrone
 
 <div class="slide-content">
@@ -1822,6 +1803,25 @@ Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit
 Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur un quorum, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur au moins *num_sync* des serveurs secondaires listés. 
 
 Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 and s4 aient répondu, quels qu'ils soient. 
+</div>
+
+-----
+
+### Changements dans pg_basebackup
+
+<div class="slide-content">
+  * Suppression de l'option *-x*
+  * Modification de la méthode de transfert des WAL par défaut
+    * *none* : pas de récupération des WAL
+    * *fetch* : récupération des WAL à la fin de la copie des données
+    * *stream* : streaming (par défaut)
+  * Nommage des arguments longs
+    * --xlog-method -> --wal-method
+    * --xlogdir -> --waldir
+</div>
+
+<div class="notes">
+Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
 </div>
 
 -----
