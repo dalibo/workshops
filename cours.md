@@ -354,26 +354,43 @@ Si on souhaite vérifier que la table partitionnée ne contient effectivement pa
 <div class="notes">
 Exemple complet :
 
+Création de la table principale et des partitions :
+
 ```sql
 postgres=# CREATE TABLE t1(c1 integer, c2 text) PARTITION BY LIST (c1);
 CREATE TABLE
+
 postgres=# CREATE TABLE t1_a PARTITION OF t1 FOR VALUES IN (1, 2, 3);
 CREATE TABLE
+
 postgres=# CREATE TABLE t1_b PARTITION OF t1 FOR VALUES IN (4, 5);
 CREATE TABLE
+```
+
+Insertion de données :
+
+```sql
 postgres=# INSERT INTO t1 VALUES (0);
 ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (0).
+
 postgres=# INSERT INTO t1 VALUES (1);
 INSERT 0 1
+
 postgres=# INSERT INTO t1 VALUES (2);
 INSERT 0 1
+
 postgres=# INSERT INTO t1 VALUES (5);
 INSERT 0 1
+
 postgres=# INSERT INTO t1 VALUES (6);
 ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (6).
 ```
+
+Lors de l'insertion, les données sont correctement redirigées vers leurs partitions. 
+
+Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se produit.
 </div>
 
 -----
@@ -397,24 +414,40 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 <div class="notes">
 Exemple complet :
 
+Création de la table principale et d'une partition :
+
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text) PARTITION BY RANGE (c1);
 CREATE TABLE
+
 postgres=# CREATE TABLE t2_1 PARTITION OF t2 FOR VALUES FROM (1) to (100);
 CREATE TABLE
+```
+
+Insertion de données :
+
+```sql
 postgres=# INSERT INTO t2 VALUES (0);
 ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (0).
+
 postgres=# INSERT INTO t2 VALUES (1);
 INSERT 0 1
+
 postgres=# INSERT INTO t2 VALUES (2);
 INSERT 0 1
+
 postgres=# INSERT INTO t2 VALUES (5);
 INSERT 0 1
+
 postgres=# INSERT INTO t2 VALUES (101);
 ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
+
+Lors de l'insertion, les données sont correctement redirigées vers leurs partitions. 
+
+Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se produit.
 </div>
 
 -----
