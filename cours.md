@@ -2086,11 +2086,11 @@ Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-alterty
 
 <div class="slide-content">
   * Full Text Search sur du json
-  * Nouvelle foncধon XMLTABLE
+  * Nouvelle fonction XMLTABLE
+  * psql, nouvelles méta-commandes
   * Tables de transition
-  * Séquences
+  * Amélioration sur les séquences
   * Nouveau type de colonne identity
-  * Nouveautés pour psql
 </div>
 
 <div class="note">
@@ -2272,6 +2272,8 @@ Pour en savoir plus :
   * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
 
+-----
+
 ### psql, nouvelles méta-commandes
 
 <div class="slide-content">
@@ -2312,17 +2314,17 @@ b | 0
 ```
 
 Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postgresql-10-psql-add-gx-command)
-</div>
 
 **\\if, \\elif, \\else, \\endif**
 
 Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
 
 Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+</div>
 
 -----
 
-## Tables de transition
+### Tables de transition
 
 <div class="slide-content">
   * Pour les triggers de type AFTER et de niveau STATEMENT
@@ -2387,10 +2389,11 @@ UPDATE 1
 Pour en savoir plus :
   * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
   * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
+</div>
 
 -----
 
-## Amélioration sur les séquences
+### Amélioration sur les séquences
 
 <div class="slide-content">
   * Création des catalogues système *pg_sequence* et *pg_sequences*
@@ -2438,7 +2441,7 @@ Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS t
 
 -----
 
-## Colonne identity
+### Colonne identity
 
 <div class="slide-content">
   * Nouveau type de colonne *identity*
@@ -2527,7 +2530,6 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 </div>
 
 -----
-
 
 ## Futur
 
