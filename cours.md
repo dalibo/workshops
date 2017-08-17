@@ -187,15 +187,17 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
 ### Configuration
 
 <div class="slide-content">
-  * Changement des valeurs par défaut
-    * postgresql.conf
-      * log_destination
-      * wal_level
-      * max_wal_senders
-      * max_replication_slots
-	    * hot_standby
-    * pg_hba.conf
-      * connexions de réplication autorisées sur localhost
+Changement des valeurs par défaut
+
+  * postgresql.conf
+    * log_destination
+    * wal_level
+    * max_wal_senders
+    * max_replication_slots
+    * hot_standby
+
+  * pg_hba.conf
+    * connexions de réplication autorisées sur localhost
 </div>
 
 <div class="notes">
@@ -516,8 +518,8 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 ### Performances en insertion
 
 <div class="slide-content">
-
 t1 (non partitionnée) :
+
 ```sql
 INSERT INTO t1 select i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -527,6 +529,7 @@ Time: 501.660 ms
 ```
 
 t2 (partitionnement déclaratif) :
+
 ```sql
 INSERT INTO t2 select i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -536,13 +539,12 @@ Time: 501.212 ms
 ```
 
 t3 (partitionnement par héritage) :
-```sql
-INSERT INTO t3 select i, 'toto'
+
+`INSERT INTO t3 select i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 125351.918 ms (02:05.352)
 CHECKPOINT;
-Time: 802.073 ms
-```
+Time: 802.073 ms`
 </div>
 
 <div class="notes">
@@ -1311,7 +1313,7 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 
 <div class="slide-content">
   * *CREATE STATISTICS* permet de créer des statistiques sur plusieurs colonnes d'une même table
-    * Corrige les erreurs d'estimation en cas de colonnes fortement corrélées
+  * Corrige les erreurs d'estimation en cas de colonnes fortement corrélées
 </div>
 
 <div class="notes">
@@ -1397,16 +1399,16 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 ### Parallélisme - nouvelles opérations supportées
 
 <div class="slide-content">
-  * Nœuds désormais gérés :
-    * Parcours d'index (*Index Scan* et *Index Only Scan*)
-    * Jointure-union (*Merge Join*)
+Nœuds désormais gérés :
+  * Parcours d'index (*Index Scan* et *Index Only Scan*)
+  * Jointure-union (*Merge Join*)
 
-  * Nouveau nœud :
-    * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
+Nouveau nœud :
+  * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
 
-  * Support également des :
-    * requêtes préparées
-    * sous-requêtes non-corrélées
+Support également des :
+  * requêtes préparées
+  * sous-requêtes non-corrélées
 </div>
 
 <div class="notes">
@@ -1434,10 +1436,9 @@ Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l
 ### Parallélisme - paramétrage
 
 <div class="slide-content">
-  * Paramétrage
-    * nouveaux paramètres *min_parallel_table_scan_size* et *min_parallel_index_scan_size*
-    * suppression de *min_parallel_relation_size*, jugé trop générique
-    * *max_parallel_workers* : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
+  * nouveaux paramètres *min_parallel_table_scan_size* et *min_parallel_index_scan_size*
+  * suppression de *min_parallel_relation_size*, jugé trop générique
+  * *max_parallel_workers* : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
 </div>
 
 <div class="notes">
@@ -2075,6 +2076,8 @@ Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgr
 
 <div class="slide-content">
 Il est désormais possible de renommer une valeur d'un type existant.
+
+`ALTER TYPE nom RENAME VALUE valeur_enum_existante TO nouvelle_valeur_enum;`
 </div>
 
 <div class="notes">
@@ -2088,7 +2091,7 @@ postgres=# ALTER TYPE mood RENAME VALUE 'ok' TO 'good' ;
 ALTER TYPE
 ```
 
-Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-altertype.html)
+Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 </div>
 
 -----
@@ -2456,7 +2459,7 @@ Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS t
 
 <div class="slide-content">
   * Nouveau type de colonne *identity*
-  * Similaire au type *serial* mais confirme au standard SQL
+  * Similaire au type *serial* mais conforme au standard SQL
 </div>
 
 <div class="notes">
