@@ -2532,13 +2532,22 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 ## Futur
 
 <div class="slide-content">
-FIXME: PostgreSQL 11
+  * Branche de développement de la version 11 créée le 15 août
+  * Commit fests prévus : 09 et 11/2017, 01 et 03/2018
+  * Axes d'amélioration supposés :
+    * Parallélisme
+    * Partitionnement
+    * Réplication logique
 </div>
 
 <div class="notes">
 Attention, les utilisateurs des versions Beta doivent considérer que les mises à jour concernent des versions majeures. Ceci permettra notamment de pouvoir contourner toutes les incompatibilités ou changements de comportement dû au fait que PostgreSQL 10 est toujours en développement.
 
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines grandes étapes.
+
+Les développements de la version 11 ont déjà commencés. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
+
+Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du partitionnement en version 11 dans cet [article](https://dali.bo/plans-for-partitioning-in-v11).
 </div>
 
 -----
