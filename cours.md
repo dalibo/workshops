@@ -520,7 +520,7 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 <div class="slide-content">
 t1 (non partitionnée) :
 
-```sql
+```
 INSERT INTO t1 select i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 10097.098 ms (00:10.097)
@@ -530,7 +530,7 @@ Time: 501.660 ms
 
 t2 (partitionnement déclaratif) :
 
-```sql
+```
 INSERT INTO t2 select i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 11448.867 ms (00:11.449)
@@ -540,11 +540,13 @@ Time: 501.212 ms
 
 t3 (partitionnement par héritage) :
 
-`INSERT INTO t3 select i, 'toto'
+```
+INSERT INTO t3 select i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 125351.918 ms (02:05.352)
 CHECKPOINT;
-Time: 802.073 ms`
+Time: 802.073 ms
+```
 </div>
 
 <div class="notes">
