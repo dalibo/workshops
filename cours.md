@@ -516,8 +516,8 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 ### Performances en insertion
 
 <div class="slide-content">
-t1 (non partitionnée) :
 
+t1 (non partitionnée) :
 ```sql
 INSERT INTO t1 select i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -527,7 +527,6 @@ Time: 501.660 ms
 ```
 
 t2 (partitionnement déclaratif) :
-
 ```sql
 INSERT INTO t2 select i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -537,7 +536,6 @@ Time: 501.212 ms
 ```
 
 t3 (partitionnement par héritage) :
-
 ```sql
 INSERT INTO t3 select i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -1164,7 +1162,8 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 
 <div class="slide-content">
   * Exécution d'un agrégat par hachage (HashAggregate)
-    * lors de l'utilisation d'un ensemble de regroupement (par exemple, un GROUP BY)
+    * lors de l'utilisation d'un ensemble de regroupement 
+      (par exemple, un GROUP BY)
   * Test avec installation par défaut et disques SSD :
     * 9.6 : 4,9 secondes
     * 10 : 2,6 secondes
@@ -1307,6 +1306,8 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 </div>
 
 -----
+
+### Statistiques multi-colonnes
 
 <div class="slide-content">
   * *CREATE STATISTICS* permet de créer des statistiques sur plusieurs colonnes d'une même table
@@ -1705,6 +1706,7 @@ La version 10 implémente les nouveaux rôles suivants :
   * Changements dans pg_basebackup
   * pg_receivewal
   * Index hash
+  * Renommage d'un enum
 </div>
 
 <div class="notes">
@@ -1846,9 +1848,10 @@ La version 10 permet l'utilisation des locales ICU si le support d'ICU a été c
 ### SQL/MED, Foreign Data Wrappers
 
 <div class="slide-content">
-  * Récupération du résultat d'un programme comme entrée pour *file_fdw*
-  * Support des agrégations et jointures (*FULL JOIN*) sur le serveur distant
-	par *postgres_fdw*
+  * *file_fdw*
+    * Récupération du résultat d'un programme comme entrée
+  * *postgres_fdw*
+    * Support des agrégations et jointures (*FULL JOIN*) sur le serveur distant
 </div>
 
 <div class="notes">
@@ -1995,11 +1998,14 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 
 <div class="slide-content">
   * Possibilité de réplication synchrone sur une liste de plusieurs esclaves
-    * Tous : *synchronous_standby_names = (s1, s2, s3, s4)*
-    * Certains par ordre de priorité : *synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)*
+    * Tous : 
+       `synchronous_standby_names = (s1, s2, s3, s4)`
+    * Certains par ordre de priorité : 
+       `synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)`
 
   * Nouveauté
-    * Certains basé sur un quorum : *synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)*
+    * Certains basé sur un quorum : 
+       `synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)`
 </div>
 
 <div class="notes">
@@ -2071,7 +2077,7 @@ Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgr
 Il est désormais possible de renommer une valeur d'un type existant.
 </div>
 
-<div class="note">
+<div class="notes">
 Exemple :
 
 ```sql
@@ -2110,7 +2116,7 @@ Documentation complète : [ALTER TYPE](https://docs.postgresql.fr/10/sql-alterty
   * Impacte les fonctions *ts_headline()* et *to_tsvector()*
 </div>
 
-<div class="note">
+<div class="notes">
 Les fonctions ts_headline() et to_tsvector() peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
 
 En voici un exemple :
@@ -2226,7 +2232,7 @@ Plus d'information : [Full Text Search support for json and jsonb](https://dali.
   * Nécessite libxml
 </div>
 
-<div class="note">
+<div class="notes">
 La fonction *xmltable()* produit une table basée sur la valeur XML donnée. Cette table pourra ensuite être utilisée par exemple comme table primaire d'une clause *FROM*.
 
 L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec l'option de configuration *--with-libxml*.
@@ -2478,17 +2484,15 @@ Pour en savoir plus : [Identity columns](https://dali.bo/waiting-for-postgresql-
 ### Changements dans les outils
 
 <div class="slide-content">
-Changements de comportement :
+  * Changements de comportement :
+    * *pg_ctl* attend désormais que l'instance soit démarrée avant de rendre la main (identique au comportement à l'arrêt)
 
-  * *pg_ctl* attend désormais que l'instance soit démarrée avant de rendre la main (identique au comportement à l'arrêt)
-
-Fin de support ou suppression :
-
-  * Type *floating point timestamp*
-  * Contribution *tsearch2*
-  * Support des BDD < 8.0 dans *pg_dump*
-  * Protocole client/serveur 1.0
-  * Clause *UNENCRYPTED* pour les mots de passe
+  * Fin de support ou suppression :
+    * Type *floating point timestamp*
+    * Contribution *tsearch2*
+    * Support des BDD < 8.0 dans *pg_dump*
+    * Protocole client/serveur 1.0
+    * Clause *UNENCRYPTED* pour les mots de passe
 </div>
 
 <div class="notes">
@@ -2541,7 +2545,7 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 <div class="slide-content">
   * Branche de développement de la version 11 créée le 15 août
   * Commit fests prévus : 09 et 11/2017, 01 et 03/2018
-  * Axes d'amélioration supposés :
+  * Axes d'amélioration notamment prévus :
     * Parallélisme
     * Partitionnement
     * Réplication logique
@@ -2552,7 +2556,7 @@ Attention, les utilisateurs des versions Beta doivent considérer que les mises 
 
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines grandes étapes.
 
-Les développements de la version 11 ont déjà commencés. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
+Les développements de la version 11 ont commencés. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
 
 Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du partitionnement en version 11 dans cet [article](https://dali.bo/plans-for-partitioning-in-v11).
 </div>
@@ -2562,9 +2566,7 @@ Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du parti
 ## Questions
 
 <div class="slide-content">
-```sql
-SELECT * FROM questions;
-```
+`SELECT * FROM questions;`
 </div>
 
 -----
