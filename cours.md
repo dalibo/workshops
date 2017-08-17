@@ -1749,14 +1749,14 @@ postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, b
 
 On y voit aussi de nouveaux types d'événements pour lesquels un processus peut être en attente. En voici la liste :
 
-  * Activity : The server process is idle. This is used by system processes waiting for activity in their main processing loop.
-  * Extension : The server process is waiting for activity in an extension module. This category is useful for modules to track custom waiting points. 
-  * Client : The server process is waiting for some activity on a socket from user applications, and that the server expects something to happen that is independent from its internal processes.
-  * IPC : The server process is waiting for some activity from another process in the server.
-  * Timeout :  The server process is waiting for a timeout to expire.
-  * IO : The server process is waiting for a IO to complete.
+  * Activity : Le processus serveur est inactif. En attente d'activité d'un processus d'arrière-plan.
+  * Extension : Le processus serveur est en attente d'activité d'une extension. 
+  * Client : Le processus serveur est en attente d'activité sur une connexion utilisateur.
+  * IPC : Le processus serveur est en attente d'activité d'un autre processus serveur.
+  * Timeout : Le processus serveur attend qu'un timeout expire.
+  * IO : Le processus serveur attend qu'une opération I/O se termine.
 
-FIXME: à traduire
+FIXME: traductions à vérifier
 
 Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
 
@@ -1765,7 +1765,7 @@ notamment sur leur sonde. Par exemple, certaines sondes ont pour but de
 compter le nombre de connexions au serveur. Elles font généralement un
 simple *SELECT count* sur la vue *pg_stat_activity*. Sans modification, elles
 vont se retrouver avec un nombre plus important de connexions, vu qu'elles
-inclueront les processus auxiliaires. De ce fait, avant de mettre une version
+incluront les processus auxiliaires. De ce fait, avant de mettre une version
 10 en production, assurez-vous que votre système de supervision ait été mis à
 jour.
 </div>
