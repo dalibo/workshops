@@ -440,6 +440,24 @@ Quand on utilise le partitionnement par intervalle, il est possible de créer le
 
 On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents.
 
+Commençons par créer les tablespaces :
+
+```sql
+postgres=# CREATE TABLESPACE ts0 LOCATION '/tablespaces/ts0';
+CREATE TABLESPACE
+
+postgres=# CREATE TABLESPACE ts1 LOCATION '/tablespaces/ts1';
+CREATE TABLESPACE
+
+postgres=# CREATE TABLESPACE ts2 LOCATION '/tablespaces/ts2';
+CREATE TABLESPACE
+
+postgres=# CREATE TABLESPACE ts3 LOCATION '/tablespaces/ts3';
+CREATE TABLESPACE
+```
+
+Créons maintenant la table partitionnée et deux partitions :
+
 ```sql
 postgres=# CREATE TABLE t2(c1 integer, c2 text, c3 date not null)
        PARTITION BY RANGE (c1, c3);
@@ -485,7 +503,7 @@ DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarées comme suit et permettront d'insérer les lignes qui étaient ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*.
 
 ```sql
-postgres=# CREATE TABLE t2_3 PARTITION OF t2
+postgres=# CREATE TABLE t2_0 PARTITION OF t2
        FOR VALUES FROM (MINVALUE, MINVALUE) TO (1,'2017-08-10')
        TABLESPACE ts0;
 
@@ -505,10 +523,10 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
  relname | relispartition | relkind | reltuples 
 ---------+----------------+---------+-----------
  t2      | f              | p       |         0
- t2_0    | t              | r       |         1
+ t2_0    | t              | r       |         2
  t2_1    | t              | r       |         1
  t2_2    | t              | r       |         1
- t2_3    | t              | r       |         1
+ t2_3    | t              | r       |         0
 (5 lignes)
 ```
 </div>
