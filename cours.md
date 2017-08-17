@@ -22,7 +22,6 @@ Public Domain CC0.
   * Des centaines de contributeurs
 </div>
 
-
 <div class="notes">
 Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue fin septembre / début octobre 2017.
 
@@ -64,6 +63,7 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
 <div class="slide-content">
   * Changement de la numérotation
   * Changement de nommage
+  * Changement de configuration par défaut
 </div>
 
 <div class="notes">
@@ -92,7 +92,7 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
 <div class="notes">
 La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
 
-L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?").  Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparait et les développeurs peuvent se concentrer sur un travail plus productif.
+L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?").  Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent se concentrer sur un travail plus productif.
 
 Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
 
@@ -188,20 +188,25 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
 
 <div class="slide-content">
   * Changement des valeurs par défaut
-  * postgresql.conf
-    * log_destination
-    * wal_level
-    * max_wal_senders
-    * max_replication_slots
-	* hot_standby
-  * pg_hba.conf
-    * connexions de réplication autorisées sur localhost
+    * postgresql.conf
+      * log_destination
+      * wal_level
+      * max_wal_senders
+      * max_replication_slots
+	    * hot_standby
+    * pg_hba.conf
+      * connexions de réplication autorisées sur localhost
 </div>
 
 <div class="notes">
 Certains paramètres ont vu leur valeur par défaut modifié. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
+
+#wal_level minimal à replica
+#max_wal_senders 0 à 10
+#max_replication_slots 0 à 10
+#hot_standby off à on
 </div>
 
 -----
