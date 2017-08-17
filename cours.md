@@ -764,10 +764,32 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
 ### Limitations
 
 <div class="slide-content">
+  * Non répliqué :
+    * Schéma
+    * Séquences
+    * *Large objects*
+
+  * Pas de publication des tables parents du partitionnement
+  
+  * Ne convient pas comme fail-over
 </div>
 
 <div class="notes">
-FIXME : to do
+Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas répliquées, ci-inclus l'ordre *TRUNCATE*. Le schéma initial peut être créé en utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer manuellement les changements de structure.
+
+Il n'est pas obligatoire de conserver strictement la même structure des deux côtés. Afin de conserver sa cohérence, la réplication s'arrêtera en cas de conflit.
+
+Il est d'ailleurs nécessaire d'avoir des contraintes de type *PRIMARY KEY* ou *UNIQUE* et *NOT NULL* pour permettre la propagation des ordres *UPDATE* et *DELETE*.
+
+Les triggers des tables abonnées ne seront pas déclenchés par les modifications reçues via la réplication.
+
+En cas d'utilisation du partitionnement, il n'est pas possible d'ajouter des tables parents dans la publication.
+
+Les séquences et *large objects* ne sont pas répliqués.
+
+De manière générale, il serait possible d'utiliser la réplication logique en cas de fail-over en propageant manuellement les mises à jour de séquences et de schéma. La réplication physique est plus appropriée pour cela.
+
+La réplication logique vise d'autres objectifs, tels la génération de rapports ou la mise à jour de version majeure de PostgreSQL.
 </div>
 
 -----
