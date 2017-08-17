@@ -770,7 +770,7 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
     * *Large objects*
 
   * Pas de publication des tables parents du partitionnement
-  
+
   * Ne convient pas comme fail-over
 </div>
 
@@ -940,9 +940,7 @@ CREATE SUBSCRIPTION
 
 <div class="notes">
 
-FIXME tout ça, c'est très bien, mais ça manque cruellement d'explications.
-
-Dans *pg_stat_replication* :
+De nouvelles colonnes ont été ajoutées à *pg_stat_replication* pour mesurer les délais de réplication :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
@@ -968,7 +966,16 @@ sync_priority    | 0
 sync_state       | async
 ```
 
-Dans *pg_replication_slots* :
+Ces trois nouvelles informations concernent la réplication synchrone.
+
+*write_lag* mesure le délais en cas de *synchronous_commit* à *remote_write*. Cette configuration fera que chaque COMMIT attendra la confirmation de la réception en mémoire de l'enregistrement du COMMIT par le standby et son écriture via la système d'exploitation, sans que les données du cache du système ne soient vidées sur disque au niveau du serveur en standby.
+
+*flush_lag* mesure le délais jusqu'à confirmation que les données modifiées soient bien écrites sur disque au niveau du serveur en standby.
+
+*replay_lag* mesure le délais en cas de *synchronous_commit* à *remote_apply*. Cette configuration fera en sorte que chaque commit devra attendre le retour des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction, la rendant visible aux requêtes des utilisateurs. 
+
+
+*pg_replication_slots* nous permet de savoir si un slot de réplication est temporaire ou non (*temporary*) :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_replication_slots;
@@ -987,7 +994,8 @@ restart_lsn         | 0/9CA63F68
 confirmed_flush_lsn | 0/9CA63FA0
 ```
 
-Dans *pg_publication* :
+
+De nouvelles vues ont été créées afin de connaître l'état et le contenu des publications :
 
 ```
 postgres@bench=# SELECT * FROM pg_publication;
@@ -999,11 +1007,6 @@ pubinsert    | t
 pubupdate    | t
 pubdelete    | t
 
-```
-
-Dans *pg_publication_tables* :
-
-```sql
 postgres@bench=# SELECT * FROM pg_publication_tables;
     pubname     | schemaname |    tablename     
 ----------------+------------+------------------
@@ -1014,7 +1017,7 @@ postgres@bench=# SELECT * FROM pg_publication_tables;
 (4 rows)
 ```
 
-Dans *pg_subscription* :
+De même, une nouvelle vue est disponible pour connaître l'état des abonnements :
 
 ```
 postgres@bench=# SELECT * FROM pg_subscription;
@@ -1030,15 +1033,6 @@ subpublications | {ma_publication}
 
 ```
 
-Dans *pg_replication_origin_status* :
-
-```sql
-postgres@bench=# SELECT * FROM pg_replication_origin_status;
- local_id | external_id | remote_lsn | local_lsn  
-----------+-------------+------------+------------
-        1 | pg_16404    | 0/9CA5C5B0 | 0/BB88AD40
-(1 row)
-```
 
 **Exemple de suivi de l'évolution de la réplication :**
 
@@ -1048,7 +1042,9 @@ Simulation de l'activité :
 $ pgbench -T 300 bench
 ```
 
-Sur l'éditeur :
+On peut suivre l'évolution des *lsn* (*Log Sequence Number* ou *Numéro de Séquence de Journal*, pointeur vers une position dans les journaux de transactions) envoyés et reçus.
+
+Sur l'éditeur grâce à *pg_stat_replication* :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
@@ -1074,7 +1070,7 @@ sync_priority    | 0
 sync_state       | async
 ```
 
-Sur l'abonné :
+Sur l'abonné grâce à *pg_replication_origin_status* :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
