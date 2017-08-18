@@ -1386,7 +1386,7 @@ ANALYZE
 
 La distribution des données est très simple; il n'y a que 100 valeurs différentes dans chaque colonne, distribuées de manière uniforme.
 
-L'exemple suivant montre le résultat de l'estimation d'une condition WHERE sur la colonne a : 
+L'exemple suivant montre le résultat de l'estimation d'une condition `WHERE` sur la colonne a : 
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
