@@ -844,7 +844,7 @@ En cas d'utilisation du partitionnement, il n'est pas possible d'ajouter des tab
 
 Les séquences et *large objects* ne sont pas répliqués.
 
-De manière générale, il serait possible d'utiliser la réplication logique en cas de fail-over en propageant manuellement les mises à jour de séquences et de schéma. La réplication physique est plus appropriée pour cela.
+De manière générale, il serait possible d'utiliser la réplication logique en cas de fail-over en propageant manuellement les mises à jour de séquences et de schéma. La réplication physique est cependant plus appropriée pour cela.
 
 La réplication logique vise d'autres objectifs, tels la génération de rapports ou la mise à jour de version majeure de PostgreSQL.
 </div>
