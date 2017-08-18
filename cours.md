@@ -2058,7 +2058,7 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
        `synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)`
 
   * Nouveauté
-    * Certains basé sur un quorum : 
+    * Certains sur la base d'un quorum : 
        `synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)`
 </div>
 
