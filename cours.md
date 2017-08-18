@@ -461,12 +461,13 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 
   * Créer une table partitionnée avec une clé multi-colonnes :
 
-    `CREATE TABLE t1(c1 integer, c2 text, c3 date) PARTITION BY RANGE (c1, c3);`
+    `CREATE TABLE t1(c1 integer, c2 text, c3 date)`
+    `  PARTITION BY RANGE (c1, c3);`
 
   * Ajouter une partition :
 
-    `CREATE TABLE t1_a PARTITION of t1 FOR VALUES FROM (1,'2017-08-10') `
-    `TO (100, '2017-08-11');`
+    `CREATE TABLE t1_a PARTITION of t1 FOR VALUES`
+    `  FROM (1,'2017-08-10') TO (100, '2017-08-11');`
 </div>
 
 <div class="notes">
@@ -682,12 +683,12 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3 FOR EACH ROW EXECUTE PROCEDURE i
   * La table mère ne peut pas avoir de données
   * La table mère ne peut pas avoir d'index
     * ni PK, ni UK, ni FK pointant vers elle
-  * Les partitions ne peuvent pas avoir de colonnes additionnelles
+  * Pas de colonnes additionnelles dans les partitions
   * L'héritage multiple n'est pas permis
-  * Les partitions n'acceptent les valeurs nulles que si la table partitionnée le permet
-  * Les partitions distantes ne sont pour l'instant pas supportées
+  * Valeurs nulles acceptées dans les partitions uniquement si la table partitionnée le permet
+  * Partitions distantes pour l'instant pas supportées
   * En cas d'attachement d'une partition
-    * vérification du respect de la contrainte avec un parcours complet de la table
+    * vérification du respect de la contrainte (Seq Scan de la table)
     * sauf si ajout au préalable d'une contrainte *CHECK* identique
 </div>
 
@@ -895,6 +896,7 @@ D'autres catalogues déjà existants peuvent également être utiles :
   * Créer une publication pour toutes les tables
 
     `CREATE PUBLICATION ma_publication FOR ALL TABLES;`
+
   * Créer une publication pour une table
 
     `CREATE PUBLICATION ma_publication FOR TABLE t1;`
@@ -950,8 +952,9 @@ GRANT
   * Initialiser une base de données et importer son schéma
   * Créer l'abonnement :
 
-    `CREATE SUBSCRIPTION ma_souscription CONNECTION 'host=127.0.0.1`
-    `port=5433 user=repliuser dbname=bench' PUBLICATION ma_publication;`
+    `CREATE SUBSCRIPTION ma_souscription`
+    `  CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'`
+    `  PUBLICATION ma_publication;`
 </div>
 
 <div class="notes">
@@ -2054,14 +2057,18 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 ### Quorum réplication synchrone
 
 <div class="slide-content">
-  * Possibilité de réplication synchrone sur une liste de plusieurs esclaves
+  * Possibilités existantes de réplication synchrone avec une liste de plusieurs esclaves
     * Tous : 
+
        `synchronous_standby_names = (s1, s2, s3, s4)`
+
     * Certains par ordre de priorité : 
+
        `synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)`
 
   * Nouveauté
     * Certains sur la base d'un quorum : 
+
        `synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)`
 </div>
 
@@ -2133,7 +2140,8 @@ Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgr
 <div class="slide-content">
 Il est désormais possible de renommer une valeur d'un type existant.
 
-`ALTER TYPE nom RENAME VALUE valeur_enum_existante TO nouvelle_valeur_enum;`
+`ALTER TYPE nom RENAME VALUE valeur_enum_existante`
+`  TO nouvelle_valeur_enum;`
 </div>
 
 <div class="notes">
