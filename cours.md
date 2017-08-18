@@ -828,7 +828,6 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
     * *Large objects*
 
   * Pas de publication des tables parents du partitionnement
-
   * Ne convient pas comme fail-over
 </div>
 
