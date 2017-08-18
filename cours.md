@@ -1836,13 +1836,13 @@ jour.
 ### Architecture
 
 <div class="slide-content">
-  * Amélioration des options de connexion
+  * Amélioration des options de connexion de la librairie *libpq*
   * Ajout des slots de réplication temporaires
   * Support de la librairie ICU pour la gestion des collations
 </div>
 
 <div class="notes">
-**Amélioration de la librairie libpq**
+**Amélioration des options de connexion de la librairie *libpq* **
 
 Il est possible de spécifier plusieurs instances aux options de connexions host et port.
 
