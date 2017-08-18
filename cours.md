@@ -190,11 +190,10 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Ren
 Changement des valeurs par défaut
 
   * postgresql.conf
-    * log_destination
-    * wal_level
-    * max_wal_senders
-    * max_replication_slots
-    * hot_standby
+    * wal_level : replica
+    * max_wal_senders : 10
+    * max_replication_slots : 10
+    * hot_standby : on
 
   * pg_hba.conf
     * connexions de réplication autorisées sur localhost
@@ -205,10 +204,12 @@ Certains paramètres ont vu leur valeur par défaut modifiée. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
 
-  * wal_level minimal à replica
-  * max_wal_senders 0 à 10
-  * max_replication_slots 0 à 10
-  * hot_standby off à on
+| Paramètre             | 9.6      | 10.0    |
+| --------------------- | -------- | ------- |
+| wal_level             | minimal  | replica |
+| max_wal_senders       | 0        | 10      |
+| max_replication_slots | 0        | 10      |
+| hot_standby           | off      | on      |
 </div>
 
 -----
