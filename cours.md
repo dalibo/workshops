@@ -352,7 +352,7 @@ Si on souhaite vérifier que la table partitionnée ne contient effectivement pa
 </div>
 
 <div class="notes">
-Exemple complet :
+**Exemple complet :**
 
 Création de la table principale et des partitions :
 
@@ -412,7 +412,7 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 </div>
 
 <div class="notes">
-Exemple complet :
+**Exemple complet :**
 
 Création de la table principale et d'une partition :
 
