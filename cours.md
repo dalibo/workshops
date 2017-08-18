@@ -1873,7 +1873,7 @@ $ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session
 
 Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...) peut désormais être créé temporairement :
 
-```
+```sql
 postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
 pg_create_physical_replication_slot 
 -------------------------------------
