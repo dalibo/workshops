@@ -1399,7 +1399,7 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
  Execution time: 2.570 ms
 (5 rows)
 ```
-L'optimiseur examine la condition et détermine que la sélectivité de cette clause est d'1% (*rows=100* parmi les 10000 lignes insérées).
+L'optimiseur examine la condition et détermine que la sélectivité de cette clause est d'1% (`rows=100` parmi les 10000 lignes insérées).
 
 Une estimation similaire peut être obtenue pour la colonne b.
 
@@ -1417,7 +1417,7 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivité. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre *cost* et *actual*).
+L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
 
 Pour améliorer l'estimation, il est désormais possible de créer des statistiques multi-colonnes :
 
