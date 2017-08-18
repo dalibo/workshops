@@ -2106,7 +2106,7 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 </div>
 
 <div class="notes">
-L'option -Z/--compress active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
+L'option *-Z*/*--compress* active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
 </div>
 
 -----
@@ -2175,7 +2175,7 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 </div>
 
 <div class="notes">
-Les fonctions ts_headline() et to_tsvector() peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
+Les fonctions *ts_headline()* et *to_tsvector()* peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
 
 En voici un exemple :
 
@@ -2337,6 +2337,7 @@ Devrim     | Gündüz      | [null]
 ```
 
 Pour en savoir plus :
+
   * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression)
   * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
@@ -2456,6 +2457,7 @@ UPDATE 1
 ```
 
 Pour en savoir plus :
+
   * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
   * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
 </div>
@@ -2470,7 +2472,7 @@ Pour en savoir plus :
 </div>
 
 <div class="notes">
-- Création des catalogues système *pg_sequence* et *pg_sequences*
+**Création des catalogues système *pg_sequence* et *pg_sequences* *
 
 ```sql
 postgres=# SELECT * FROM pg_sequences;
@@ -2501,7 +2503,7 @@ seqcycle     | f
 
 Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
 
-- Ajout de l'option *CREATE SEQUENCE AS type_donnee*
+**Ajout de l'option *CREATE SEQUENCE AS type_donnee* **
 
 La clause facultative *AS type_donnee* spécifie le type de données de la séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par défaut). Le type de données détermine les valeurs minimales et maximales par défaut pour la séquence. 
 
@@ -2574,8 +2576,6 @@ Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 </div>
 
 <div class="notes">
-FIXME: Barman et autres outils
-
 Voici une grille de compatibilité des outils Dalibo :
 
 | Outil | Compatibilité avec PostgreSQL 10 |
