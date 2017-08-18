@@ -1451,16 +1451,16 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 ### Parallélisme - nouvelles opérations supportées
 
 <div class="slide-content">
-Nœuds désormais gérés :
-  * Parcours d'index (*Index Scan* et *Index Only Scan*)
-  * Jointure-union (*Merge Join*)
+  * Nœuds désormais gérés :
+    * Parcours d'index (*Index Scan* et *Index Only Scan*)
+    * Jointure-union (*Merge Join*)
 
-Nouveau nœud :
-  * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
+  * Nouveau nœud :
+    * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
 
-Support également des :
-  * requêtes préparées
-  * sous-requêtes non-corrélées
+  * Support également des :
+    * requêtes préparées
+    * sous-requêtes non-corrélées
 </div>
 
 <div class="notes">
@@ -1470,6 +1470,7 @@ concerne que les requêtes en lecture : pas les `INSERT`/`UPDATE`/`DELETE`, pas 
 écriture, pas les opérations de maintenance (`CREATE INDEX`, `VACUUM`, `ANALYZE`).
 
 La version 10 propose la parallélisation de nouvelles opérations :
+
   * parcours d'index (*Index Scan* et *Index Only Scan*)
   * jointure-union (*Merge Join*)
   * collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
