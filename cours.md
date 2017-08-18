@@ -201,14 +201,14 @@ Changement des valeurs par défaut
 </div>
 
 <div class="notes">
-Certains paramètres ont vu leur valeur par défaut modifié. Ceci est
+Certains paramètres ont vu leur valeur par défaut modifiée. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
 
-wal_level minimal à replica
-max_wal_senders 0 à 10
-max_replication_slots 0 à 10
-hot_standby off à on
+  * wal_level minimal à replica
+  * max_wal_senders 0 à 10
+  * max_replication_slots 0 à 10
+  * hot_standby off à on
 </div>
 
 -----
