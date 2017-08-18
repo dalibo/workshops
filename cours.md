@@ -1935,7 +1935,8 @@ CREATE SERVER
 Associons ensuite une table étrangère au script bash :
 
 ```sql
-postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10)) SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',') ;
+postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10)) 
+			SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',') ;
 CREATE FOREIGN TABLE
 ```
 
@@ -1985,7 +1986,8 @@ CREATE EXTENSION
 Création du serveur distant (ici notre base *db1* locale) :
 
 ```sql
-postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
+postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw 
+			OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
 CREATE SERVER
 ```
 
