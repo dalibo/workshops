@@ -1054,7 +1054,7 @@ confirmed_flush_lsn | 0/9CA63FA0
 
 De nouvelles vues ont été créées afin de connaître l'état et le contenu des publications :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_publication;
 -[ RECORD 1 ]+---------------
 pubname      | ma_publication
@@ -1076,7 +1076,7 @@ postgres@bench=# SELECT * FROM pg_publication_tables;
 
 De même, une nouvelle vue est disponible pour connaître l'état des abonnements :
 
-```
+```sql
 postgres@bench=# SELECT * FROM pg_subscription;
 -[ RECORD 1 ]---+-----------------------------------------------------
 subdbid         | 16384
