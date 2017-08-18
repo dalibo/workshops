@@ -1025,11 +1025,11 @@ sync_state       | async
 
 Ces trois nouvelles informations concernent la réplication synchrone.
 
-*write_lag* mesure le délais en cas de *synchronous_commit* à *remote_write*. Cette configuration fera que chaque COMMIT attendra la confirmation de la réception en mémoire de l'enregistrement du COMMIT par le standby et son écriture via la système d'exploitation, sans que les données du cache du système ne soient vidées sur disque au niveau du serveur en standby.
+*write_lag* mesure le délais en cas de *synchronous_commit* à *remote_write*. Cette configuration fera que chaque `COMMIT` attendra la confirmation de la réception en mémoire de l'enregistrement du `COMMIT` par le standby et son écriture via la système d'exploitation, sans que les données du cache du système ne soient vidées sur disque au niveau du serveur en standby.
 
 *flush_lag* mesure le délais jusqu'à confirmation que les données modifiées soient bien écrites sur disque au niveau du serveur en standby.
 
-*replay_lag* mesure le délais en cas de *synchronous_commit* à *remote_apply*. Cette configuration fera en sorte que chaque commit devra attendre le retour des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction, la rendant visible aux requêtes des utilisateurs. 
+*replay_lag* mesure le délais en cas de *synchronous_commit* à *remote_apply*. Cette configuration fera en sorte que chaque `COMMIT` devra attendre le retour des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction, la rendant visible aux requêtes des utilisateurs. 
 
 
 *pg_replication_slots* nous permet de savoir si un slot de réplication est temporaire ou non (*temporary*) :
