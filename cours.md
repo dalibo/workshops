@@ -919,7 +919,7 @@ $ pg_dump --schema-only bench > bench-schema.sql
 
 Créer la publication :
 
-```
+```sql
 postgres@bench=# CREATE PUBLICATION ma_publication FOR ALL TABLES;
 CREATE PUBLICATION
 ```
@@ -934,7 +934,7 @@ $ createuser --replication repliuser
 
 Lui autoriser l'accès dans le fichier `pg_hba.conf` du serveur éditeur et lui permettre de visualiser les données dans la base :
 
-```
+```sql
 postgres@bench=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO repliuser;
 GRANT
 ```
@@ -971,7 +971,7 @@ $ createuser --replication repliuser
 
 En tant que super-utilisateur, créer l'abonnement :
 
-```
+```sql
 postgres@bench=# CREATE SUBSCRIPTION ma_souscription
   CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'
   PUBLICATION ma_publication;
