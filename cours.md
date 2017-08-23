@@ -2408,62 +2408,159 @@ Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql sc
 <div class="slide-content">
   * Pour les triggers de type AFTER et de niveau STATEMENT
   * Possibilité de stocker les lignes avant et/ou après modification
+	  * `REFERENCING OLD TABLE`
+	  * `REFERENCING NEW TABLE`
+
+	  * Par exemple
+		```sql
+		CREATE TRIGGER tr1
+		  AFTER DELETE ON t1
+		  REFERENCING OLD TABLE AS oldtable
+		  FOR EACH STATEMENT
+		  EXECUTE PROCEDURE log_delete();
+		```
 </div>
 
+
 <div class="notes">
-Avec un trigger de type AFTER, il est possible d'utiliser des tables de transition utilisables dans les fonctions exécutées.
+Dans le cas d'un trigger en mode instruction, il n'est pas possible d'utiliser
+les variables `OLD` et `NEW` car elles ciblent une seule ligne. Pour cela, le
+standard SQL parle de tables de transition. 
 
-Par exemple :
+La version 10 de PostgreSQL permet donc de rattraper le retard à ce sujet par rapport au standard SQL et SQL Server.
 
-Initialisation d'une table de test :
+Voici un exemple de leur utilisation.
 
-```
-postgres=# CREATE TABLE t1 (id serial, c1 integer);
+Nous allons créer une table t1 qui aura le trigger et une table poubelle qui a
+pour but de récupérer les enregistrements supprimés de la table t1.
+
+```sql
+postgres=# CREATE TABLE t1 (c1 integer, c2 text);
 CREATE TABLE
 
-postgres=# INSERT INTO t1 (c1) SELECT * FROM generate_series(0, 100);
-INSERT 0 101
+postgres=# CREATE TABLE poubelle (id integer GENERATED ALWAYS AS IDENTITY, 
+			dlog timestamp DEFAULT now(),
+  			t1_c1 integer, t1_c2 text);
+CREATE TABLE
 ```
 
-Création du trigger :
+Maintenant, il faut créer le code de la procédure stockée :
 
 ```sql
-postgres=#  CREATE TRIGGER transition_tables 
-			AFTER UPDATE ON t1 
-			REFERENCING 
-				NEW TABLE AS v_new_table 
-				OLD TABLE AS v_old_table 
-			FOR EACH STATEMENT EXECUTE PROCEDURE test_trigger();
-CREATE TRIGGER
-```
-
-Création de la fonction manipulant ces tables de transition :
-
-```sql
-postgres=#  CREATE FUNCTION test_trigger() RETURNS trigger AS $$
-			DECLARE
-    			temprec record;
+postgres=# CREATE OR REPLACE FUNCTION log_delete() RETURNS trigger LANGUAGE plpgsql AS $$
 			BEGIN
-			    FOR temprec in select * from v_old_table LOOP
-			        RAISE NOTICE 'OLD: %', temprec;
-			    END LOOP;
-			    FOR temprec in select * from v_new_table LOOP
-			        RAISE NOTICE 'NEW: %', temprec;
-			    END LOOP;
-			    RETURN NEW;
-			END;
-			$$ language plpgsql;
+			  INSERT INTO poubelle (t1_c1, t1_c2) SELECT c1, c2 FROM oldtable;
+			  RETURN null;
+			END
+			$$;
 CREATE FUNCTION
 ```
 
-Exemple d'application :
+Et ajouter le trigger sur la table t1 :
 
 ```sql
-postgres@postgres=# UPDATE t1 SET c1 = 0 WHERE id = 1;
-NOTICE:  OLD: (1,0)
-NOTICE:  NEW: (1,0)
-UPDATE 1
+postgres=# CREATE TRIGGER tr1
+			AFTER DELETE ON t1
+			REFERENCING OLD TABLE AS oldtable
+			FOR EACH STATEMENT
+			EXECUTE PROCEDURE log_delete();
+CREATE TRIGGER
 ```
+
+Maintenant, insérons un million de ligne dans t1 et supprimons-les :
+
+```sql
+postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+
+postgres=# DELETE FROM t1;
+DELETE 1000000
+Time: 2141.871 ms (00:02.142)
+```
+
+La suppression avec le trigger prend 2 secondes. Il est possible de connaître
+le temps à supprimer les lignes et le temps à exécuter le trigger en utilisant
+l'ordre `EXPLAIN ANALYZE` :
+
+```sql
+postgres=# TRUNCATE poubelle;
+TRUNCATE TABLE
+
+postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+
+postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
+                                                    QUERY PLAN                                                     
+-------------------------------------------------------------------------------------------------------------------
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=781.612..781.612 rows=0 loops=1)
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=0.113..104.328 rows=1000000 loops=1)
+ Planning time: 0.079 ms
+ Trigger tr1: time=1501.688 calls=1
+ Execution time: 2287.907 ms
+(5 rows)
+```
+
+Donc la suppression des lignes met 0,7 secondes alors que l'exécution du
+trigger met 1,5 secondes.
+
+Pour comparer, voici l'ancienne façon de faire (configuration d'un trigger en
+mode ligne) :
+
+```sql
+postgres=# CREATE OR REPLACE FUNCTION log_delete() RETURNS trigger LANGUAGE plpgsql AS $$
+			BEGIN
+			  INSERT INTO poubelle (t1_c1, t1_c2) VALUES (old.c1, old.c2);
+			  RETURN null;
+			END
+			$$;
+CREATE FUNCTION
+
+postgres=# DROP TRIGGER tr1 ON t1;
+DROP TRIGGER
+
+postgres=# CREATE TRIGGER tr1
+			AFTER DELETE ON t1
+			FOR EACH ROW
+			EXECUTE PROCEDURE log_delete();
+CREATE TRIGGER
+
+postgres=# TRUNCATE poubelle;
+TRUNCATE TABLE
+
+postgres=# TRUNCATE t1;
+TRUNCATE TABLE
+
+postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+
+postgres=# DELETE FROM t1;
+DELETE 1000000
+Time: 8445.697 ms (00:08.446)
+
+postgres=# TRUNCATE poubelle;
+TRUNCATE TABLE
+
+postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+
+postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
+                                                    QUERY PLAN                                                     
+-------------------------------------------------------------------------------------------------------------------
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=1049.420..1049.420 rows=0 loops=1)
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=0.061..121.701 rows=1000000 loops=1)
+ Planning time: 0.096 ms
+ Trigger tr1: time=7709.725 calls=1000000
+ Execution time: 8825.958 ms
+(5 rows)
+```
+
+Donc avec un trigger en mode ligne, la suppression du million de lignes met presque 9
+secondes à s'exécuter, dont 7,7 pour l'exécution du trigger. Sur le trigger
+en mode instruction, il faut compter 2,2 secondes, dont 1,5 sur le trigger. Les
+tables de transition nous permettent de gagner en performance.
+
+Le gros intérêt des tables de transition est le gain en performance que cela
+apporte. 
 
 Pour en savoir plus :
 
