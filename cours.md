@@ -2431,14 +2431,14 @@ La version 10 de PostgreSQL permet donc de rattraper le retard à ce sujet par r
 
 Voici un exemple de leur utilisation.
 
-Nous allons créer une table t1 qui aura le trigger et une table poubelle qui a
+Nous allons créer une table t1 qui aura le trigger et une table archives qui a
 pour but de récupérer les enregistrements supprimés de la table t1.
 
 ```sql
 postgres=# CREATE TABLE t1 (c1 integer, c2 text);
 CREATE TABLE
 
-postgres=# CREATE TABLE poubelle (id integer GENERATED ALWAYS AS IDENTITY, 
+postgres=# CREATE TABLE archives (id integer GENERATED ALWAYS AS IDENTITY, 
 			dlog timestamp DEFAULT now(),
   			t1_c1 integer, t1_c2 text);
 CREATE TABLE
@@ -2449,7 +2449,7 @@ Maintenant, il faut créer le code de la procédure stockée :
 ```sql
 postgres=# CREATE OR REPLACE FUNCTION log_delete() RETURNS trigger LANGUAGE plpgsql AS $$
 			BEGIN
-			  INSERT INTO poubelle (t1_c1, t1_c2) SELECT c1, c2 FROM oldtable;
+			  INSERT INTO archives (t1_c1, t1_c2) SELECT c1, c2 FROM oldtable;
 			  RETURN null;
 			END
 			$$;
@@ -2483,7 +2483,7 @@ le temps à supprimer les lignes et le temps à exécuter le trigger en utilisan
 l'ordre `EXPLAIN ANALYZE` :
 
 ```sql
-postgres=# TRUNCATE poubelle;
+postgres=# TRUNCATE archives;
 TRUNCATE TABLE
 
 postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
@@ -2509,7 +2509,7 @@ mode ligne) :
 ```sql
 postgres=# CREATE OR REPLACE FUNCTION log_delete() RETURNS trigger LANGUAGE plpgsql AS $$
 			BEGIN
-			  INSERT INTO poubelle (t1_c1, t1_c2) VALUES (old.c1, old.c2);
+			  INSERT INTO archives (t1_c1, t1_c2) VALUES (old.c1, old.c2);
 			  RETURN null;
 			END
 			$$;
@@ -2524,7 +2524,7 @@ postgres=# CREATE TRIGGER tr1
 			EXECUTE PROCEDURE log_delete();
 CREATE TRIGGER
 
-postgres=# TRUNCATE poubelle;
+postgres=# TRUNCATE archives;
 TRUNCATE TABLE
 
 postgres=# TRUNCATE t1;
@@ -2537,7 +2537,7 @@ postgres=# DELETE FROM t1;
 DELETE 1000000
 Time: 8445.697 ms (00:08.446)
 
-postgres=# TRUNCATE poubelle;
+postgres=# TRUNCATE archives;
 TRUNCATE TABLE
 
 postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
