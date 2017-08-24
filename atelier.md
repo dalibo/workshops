@@ -182,10 +182,11 @@ postgres=# CREATE USER testmd5 WITH PASSWORD 'XXX';
 CREATE ROLE
 ```
 
-Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL, on peut constater que seuls `md5` et `scram-sha-256` sont supportés :
+Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL, on peut constater que seuls `md5` et `scram-sha-256` sont supportés si l'on demande à psql de compléter l'ordre SQL à l'aide
+de la touche tabulation :
 
 ```sql
-postgres=# SET password_encryption TO 
+postgres=# SET password_encryption TO <tab> 
 DEFAULT          md5              "scram-sha-256"
 ```
 
