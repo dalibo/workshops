@@ -27,7 +27,8 @@ Le site postgresql.org propose son propre dépôt RPM, nous allons donc l'utilis
 On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
 
 ```
-# yum install https://dali.bo/TniaH
+# wget https://download.postgresql.org/pub/repos/yum/testing/10/redhat/rhel-7-x86_64/pgdg-redhat10-10-1.noarch.rpm
+# yum install pgdg-redhat10-10-1.noarch.rpm
 Installing:
  pgdg-centos10                     noarch                     10-1
 
