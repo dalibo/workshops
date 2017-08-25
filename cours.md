@@ -18,7 +18,7 @@ Public Domain CC0.
   * Version beta 2 sortie le 13 juillet
   * Version beta 3 sortie le 10 août
   * Sortie de la release prévue deuxième moitié 2017
-  * Plus de 1,4 millions de lignes de code *C*
+  * Plus de 1,4 million de lignes de code *C*
   * Des centaines de contributeurs
 </div>
 
@@ -260,7 +260,7 @@ tant qu'on ne mettait pas à jour les colonnes de la clé de partitionnement.
 Enfin, les suppressions étaient gérées correctement de façon automatique.
 
 Tout ceci générait un gros travail de mise en place. La maintenance n'était
-pas forcément plus aisée car il fallait s'assurer de créer les partitions en
+pas forcément plus aisée, car il fallait s'assurer de créer les partitions en
 avance, à moins de laisser ce travail au trigger sur insertion.
 
 D'autres inconvénients étaient présents, notamment au niveau des index. Comme
@@ -270,7 +270,7 @@ partitionnée. En fait, toute contrainte unique est impossible.
 
 En d'autres termes, ce contournement pouvait être intéressant dans certains
 cas très particuliers et il fallait bien s'assurer que cela ne générait pas
-d'autres soucis, notamment en terme de performances. Dans tous les autres cas,
+d'autres soucis, notamment en termes de performances. Dans tous les autres cas,
 il était préférable de s'en passer.
 </div>
 
@@ -299,7 +299,7 @@ La version *10* apporte un nouveau système de partitionnement se basant sur de 
 
 Le but est de simplifier la mise en place et l'administration des tables
 partitionnées. Des clauses spécialisées ont été ajoutées aux ordres SQL déjà
-existant, comme *CREATE TABLE* et *ALTER TABLE*, pour ajouter, attacher,
+existants, comme *CREATE TABLE* et *ALTER TABLE*, pour ajouter, attacher,
 détacher des partitions.
 
 Au niveau de la simplification de la mise en place, on peut noter qu'il n'est
@@ -752,7 +752,7 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
 </div>
 
 <div class="notes">
-Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes mais le résultat de celles-ci, plus précisément les modifications des blocs de données. Le serveur secondaire se contente de rejouer les journaux de transaction.
+Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes, mais le résultat de celles-ci, plus précisément les modifications des blocs de données. Le serveur secondaire se contente de rejouer les journaux de transaction.
 
 Cela impose certaines limitations. Les journaux de transactions ne contenant
 comme information que le nom des fichiers (pas les noms et/ou type des objets
@@ -848,7 +848,7 @@ Les séquences et *large objects* ne sont pas répliqués.
 
 De manière générale, il serait possible d'utiliser la réplication logique en cas de fail-over en propageant manuellement les mises à jour de séquences et de schéma. La réplication physique est cependant plus appropriée pour cela.
 
-La réplication logique vise d'autres objectifs, tels la génération de rapports ou la mise à jour de version majeure de PostgreSQL.
+La réplication logique vise d'autres objectifs, telles la génération de rapports ou la mise à jour de version majeure de PostgreSQL.
 </div>
 
 -----
@@ -1169,7 +1169,7 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 </div>
 
 <div class="notes">
-Commençons par créer la table de test, peuplons la avec un jeu de données, et
+Commençons par créer la table de test, peuplons-la avec un jeu de données, et
 calculons les statistiques sur ses données :
 
 ```sql
@@ -1421,7 +1421,7 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
+L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au-dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
 
 Pour améliorer l'estimation, il est désormais possible de créer des statistiques multi-colonnes :
 
@@ -2075,9 +2075,9 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 <div class="notes">
 Il est possible d'appliquer arbitrairement une réplication synchrone à un sous-ensemble d'un groupe d'instances grâce au paramètre suivant : *synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
 
-Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur la priorité, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur *num_sync* serveurs secondaires, choisis en fonction de leur priorités. 
+Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur la priorité, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités. 
 
-Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit à attendre la réponse de trois serveurs secondaire de plus haute priorité choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs secondaires actuellement synchrones se déconnecte pour quelque raison que ce soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
+Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit à attendre la réponse de trois serveurs secondaires de plus haute priorité choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs secondaires actuellement synchrones se déconnecte pour quelque raison que ce soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
 
 Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur un quorum, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur au moins *num_sync* des serveurs secondaires listés. 
 
@@ -2128,7 +2128,7 @@ L'option *-Z*/*--compress* active la compression des journaux de transaction, et
 </div>
 
 <div class="notes">
-Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crash et seront utilisables sur un environnement répliqué.
+Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crashs et seront utilisables sur un environnement répliqué.
 
 Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
 </div>
@@ -2500,8 +2500,8 @@ postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
 (5 rows)
 ```
 
-Donc la suppression des lignes met 0,7 secondes alors que l'exécution du
-trigger met 1,5 secondes.
+Donc la suppression des lignes met 0,7 seconde alors que l'exécution du
+trigger met 1,5 seconde.
 
 Pour comparer, voici l'ancienne façon de faire (configuration d'un trigger en
 mode ligne) :
@@ -2699,7 +2699,7 @@ Voici une grille de compatibilité des outils Dalibo :
 | temboard | À venir dans 1.0a3 |
 | ldap2pg | Oui |
 
-La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien que des changements peuvent encore avoir lieu, et que le support de cette version par les outils de l'éco-système est encore jeune.
+La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien que des changements peuvent encore avoir lieu, et que le support de cette version par les outils de l'écosystème est encore jeune.
 </div>
 
 -----
@@ -2720,7 +2720,7 @@ Attention, les utilisateurs des versions Beta doivent considérer que les mises 
 
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines grandes étapes.
 
-Les développements de la version 11 ont commencés. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
+Les développements de la version 11 ont commencé. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
 
 Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du partitionnement en version 11 dans cet [article](https://dali.bo/plans-for-partitioning-in-v11).
 </div>
