@@ -990,13 +990,13 @@ CREATE SUBSCRIPTION
 
 <div class="slide-content">
   * Sur l'éditeur
-    * état de la réplication dans `pg_stat_replication;`
-    * slot de réplication dans `pg_replication_slots;`
-    * état de la publication dans `pg_publication;`
-    * contenu de la publication dans `pg_publication_tables;`
+    * état de la réplication dans `pg_stat_replication`
+    * slot de réplication dans `pg_replication_slots`
+    * état de la publication dans `pg_publication`
+    * contenu de la publication dans `pg_publication_tables`
   * Sur l'abonné
-    * état de l'abonnement dans `pg_subscription;`
-    * état de la réplication dans `pg_replication_origin_status;`
+    * état de l'abonnement dans `pg_subscription`
+    * état de la réplication dans `pg_replication_origin_status`
 </div>
 
 <div class="notes">
