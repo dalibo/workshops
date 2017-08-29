@@ -327,7 +327,8 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
 
-Si on souhaite vérifier que la table partitionnée ne contient effectivement pas de données, on peut utiliser la clause *ONLY*, comme cela se faisait déjà avec l'héritage.
+Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le vérifier en utilisant un SELECT avec la clause *ONLY*.
+
 </div>
 
 -----
@@ -384,6 +385,11 @@ INSERT 0 1
 postgres=# INSERT INTO t1 VALUES (5);
 INSERT 0 1
 
+postgres=# SELECT * FROM ONLY t1;
+ c1 | c2 
+----+----
+(0 ligne)
+
 postgres=# INSERT INTO t1 VALUES (6);
 ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (6).
@@ -391,7 +397,10 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 
 Lors de l'insertion, les données sont correctement redirigées vers leurs partitions. 
 
+On peut remarquer que la table partitionnée est vide.
+
 Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se produit.
+
 </div>
 
 -----
@@ -952,8 +961,8 @@ GRANT
   * Initialiser une base de données et importer son schéma
   * Créer l'abonnement :
 
-    `CREATE SUBSCRIPTION ma_souscription`
-    `  CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'`
+    `CREATE SUBSCRIPTION ma_souscription`  
+    `  CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'`  
     `  PUBLICATION ma_publication;`
 </div>
 
@@ -1230,11 +1239,11 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 <div class="notes">
 L'exemple ci-dessous provient de la formation SQL2.
 
-FIXME
+FIXME faire un script installant pg 9.6 et 10 puis récupérant le dump
+
 ```bash
-$ createdb sql2
-$ createuser anayrat
-$ pg_restore formation/formation/sql2/base_tp_sql2_avec_schemas.dump -d sql2 -1
+postgres$ createdb sql2
+postgres$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
 $ psql
 sql2=# SET search_path TO magasin;
 ```
