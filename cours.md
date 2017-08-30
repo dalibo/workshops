@@ -92,7 +92,7 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
 <div class="notes">
 La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
 
-L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?").  Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent se concentrer sur un travail plus productif.
+L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?"). Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent se concentrer sur un travail plus productif.
 
 Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
 
@@ -466,7 +466,7 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 
 <div class="slide-content">
   * Clé sur plusieurs colonnes acceptée
-    * uniquement pour le partitionnement par intervalle
+    * uniquement pour le partitionnement par intervalles
 
   * Créer une table partitionnée avec une clé multi-colonnes :
 
@@ -480,7 +480,7 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 </div>
 
 <div class="notes">
-Quand on utilise le partitionnement par intervalle, il est possible de créer les partitions en utilisant plusieurs colonnes.
+Quand on utilise le partitionnement par intervalles, il est possible de créer les partitions en utilisant plusieurs colonnes.
 
 On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents.
 
@@ -721,7 +721,7 @@ Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non
 plus possible de faire pointer une clé étrangère vers ce type de table.
 
-Plusieurs articles contiennent des explications et des exemples concrets, comme par exemple :
+Plusieurs articles contiennent des explications et des exemples concrets, par exemple :
 
   * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
   * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
@@ -839,7 +839,7 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
     * *Large objects*
 
   * Pas de publication des tables parents du partitionnement
-  * Ne convient pas comme fail-over
+  * Ne conviens pas comme fail-over
 </div>
 
 <div class="notes">
@@ -1239,8 +1239,6 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 <div class="notes">
 L'exemple ci-dessous provient de la formation SQL2.
 
-FIXME faire un script installant pg 9.6 et 10 puis récupérant le dump
-
 ```bash
 postgres$ createdb sql2
 postgres$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
@@ -1430,7 +1428,7 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1% comme au-dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0.01%, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
+L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1 % comme au-dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0,01 %, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
 
 Pour améliorer l'estimation, il est désormais possible de créer des statistiques multi-colonnes :
 
@@ -1537,7 +1535,7 @@ Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de pr
 <div class="slide-content">
   * Nouvelle méthode d'authentification *SCRAM-SHA-256*
   * Vue *pg_hba_file_rules*
-  * Par défaut, connexion locale de réplication à *trust*
+  * Par défaut, connexion locale de réplication possibles
 </div>
 
 <div class="notes">
@@ -1557,7 +1555,7 @@ postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
 (6 rows)
 ```
 
-Les valeurs par défaut relatives à la réplication, contenues dans le fichier `pg_hba.conf` ont été modifiée. Par défaut, les connexions locales ont comme méthode d'authentification *trust*.
+Les valeurs par défaut relatives à la réplication, contenues dans le fichier `pg_hba.conf` ont été modifiées. En version 9.6, les connexions locales étaient présentes mais commentées. Elles ont été décommentées dans la version 10 et sont donc maintenant possibles par défaut en local.
 
 Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son apparition. Il s'agit de l'implémentation du **Salted Challenge Response Authentication Mechanism**. Ceci est basé sur un schéma de type question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas être supportée par d'anciens clients. 
 </div>
@@ -1830,18 +1828,16 @@ On y voit aussi de nouveaux types d'événements pour lesquels un processus peut
   * Timeout : Le processus serveur attend qu'un timeout expire.
   * IO : Le processus serveur attend qu'une opération I/O se termine.
 
-FIXME: traductions à vérifier
-
 Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
 
 Ce changement va avoir un impact fort sur les outils de supervision et
 notamment sur leur sonde. Par exemple, certaines sondes ont pour but de
 compter le nombre de connexions au serveur. Elles font généralement un
 simple *SELECT count* sur la vue *pg_stat_activity*. Sans modification, elles
-vont se retrouver avec un nombre plus important de connexions, vu qu'elles
-incluront les processus auxiliaires. De ce fait, avant de mettre une version
-10 en production, assurez-vous que votre système de supervision ait été mis à
-jour.
+vont se retrouver avec un nombre plus important de connexions, étant donné
+qu'elles incluront les processus auxiliaires. De ce fait, avant de mettre une
+version 10 en production, assurez-vous que votre système de supervision ait été
+mis à jour.
 </div>
 
 -----
@@ -1908,6 +1904,9 @@ De cette manière, il est certain que le serveur ne supprimera pas les journaux 
 Une collation est un objet du catalogue dont le nom au niveau SQL correspond à une locale fournie par les bibliothèques installées sur le système. Une définition de la collation a un fournisseur spécifiant quelle bibliothèque fournit les données locales. L'un des fournisseurs standards est libc, qui utilise les locales fournies par la bibliothèque C du système. Ce sont les locales les plus utilisées par des outils du système. Cependant, ces locales sont fréquemment modifiées lors de la sortie de nouvelles versions de la libc. Or ces modifications ont parfois des conséquences sur l'ordre de tri des chaînes de caractères, ce qui n'est pas acceptable pour PostgreSQL et ses index.
 
 La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus performantes.
+
+FIXME
+uniquement fonctionnel pour libicu >= 54 ?
 </div>
 
 -----
@@ -2014,7 +2013,7 @@ CREATE USER MAPPING
 Création localement de la table distante :
 
 ```sql
-postgres@postgres=# CREATE FOREIGN TABLE remote_t1 (c1 integer) SERVER fs1 OPTIONS (table_name 't1');
+postgres=# CREATE FOREIGN TABLE remote_t1 (c1 integer) SERVER fs1 OPTIONS (table_name 't1');
 CREATE FOREIGN TABLE
 ```
 
@@ -2137,7 +2136,7 @@ L'option *-Z*/*--compress* active la compression des journaux de transaction, et
 </div>
 
 <div class="notes">
-Les indexes de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crashs et seront utilisables sur un environnement répliqué.
+Les index de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crashs et seront utilisables sur un environnement répliqué.
 
 Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
 </div>
@@ -2180,7 +2179,7 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
   * Nouveau type de colonne identity
 </div>
 
-<div class="note">
+<div class="notes">
 </div>
 
 -----
@@ -2587,7 +2586,7 @@ Pour en savoir plus :
 </div>
 
 <div class="notes">
-**Création des catalogues système *pg_sequence* et *pg_sequences* *
+**Création des catalogues système *pg_sequence* et *pg_sequences**
 
 ```sql
 postgres=# SELECT * FROM pg_sequences;
