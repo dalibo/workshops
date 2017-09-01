@@ -15,16 +15,16 @@ Public Domain CC0.
 <div class="slide-content">
   * Développement depuis août 2016
   * Version beta 1 sortie le 18 mai
-  * Version beta 2 sortie le 13 juillet
-  * Version beta 3 sortie le 10 août
-  * Version beta 4 sortie le 31 août
-  * Sortie de la release prévue deuxième moitié 2017
+    * puis beta 2, beta 3
+    * beta 4 sortie le 31 août
+  * Sortie de la version prévue deuxième moitié 2017
+    * date prévisionnelle le 28 septembre
   * Plus de 1,4 million de lignes de code *C*
   * Des centaines de contributeurs
 </div>
 
 <div class="notes">
-Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue fin septembre / début octobre 2017.
+Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue le 28 septembre 2017.
 
 La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
@@ -292,7 +292,7 @@ il était préférable de s'en passer.
     * sous-partitions possibles
   * Changement du catalogue système
     * nouvelles colonnes dans *pg_class*
-    * nouveau catalogue *pg_partioned_table*
+    * nouveau catalogue *pg_partitioned_table*
 </div>
 
 <div class="notes">
@@ -321,7 +321,7 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | Colonne       | Contenu                                                                                                                |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | partrelid     | OID de la table partitionnée référencé dans *pg_class*                                                                 |
-| partstrat     | Stratégie de partitionnement ; l = partitionnement par liste, r = partitionnement par intervalle                       |
+| partstrat     | Stratégie de partitionnement ; l = par liste, r = par intervalle                                                       |
 | partnatts     | Nombre de colonnes de la clé de partitionnement                                                                        |
 | partattrs     | Tableau de partnatts valeurs indiquant les colonnes de la table faisant partie de la clé de partitionnement            |
 | partclass     | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser                   |
@@ -343,7 +343,7 @@ Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
 
   * Ajouter une partition :
 
-    `CREATE TABLE t1_a PARTITION of t1 FOR VALUES IN (1, 2, 3);`
+    `CREATE TABLE t1_a PARTITION OF t1 FOR VALUES IN (1, 2, 3);`
 
   * Détacher la partition :
 
@@ -798,7 +798,7 @@ des tables de travail, ce qui est bien dommage dans certains cas.
   * Réplique les changements sur une seule base de données
     * d'un ensemble de tables défini
   * Uniquement INSERT / UPDATE / DELETE
-    * Pas les DDL, ni les TRUNCATE
+    * pas les DDL, ni les TRUNCATE
 </div>
 
 <div class="notes">
@@ -844,7 +844,7 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
 </div>
 
 <div class="notes">
-Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas répliquées, ci-inclus l'ordre *TRUNCATE*. Le schéma initial peut être créé en utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer manuellement les changements de structure.
+Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas répliquées, y compris l'ordre *TRUNCATE*. Le schéma initial peut être créé en utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer manuellement les changements de structure.
 
 Il n'est pas obligatoire de conserver strictement la même structure des deux côtés. Afin de conserver sa cohérence, la réplication s'arrêtera en cas de conflit.
 
@@ -885,7 +885,7 @@ De nouveaux catalogues ont été ajoutés pour permettre la supervision de la r�
 | pg_publication_tables        | Correspondance entre les publications et les tables qu'elles contiennent |
 | pg_stat_subscription         | État des journaux de transactions reçus en souscription |
 | pg_subscription              | Informations sur les souscriptions existantes |
-| pg_subscription_rel          | Contient l'état de chaque relation répliquée dans chaque souscription |
+| pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription |
 
 D'autres catalogues déjà existants peuvent également être utiles :
 
@@ -961,10 +961,11 @@ GRANT
 <div class="slide-content">
   * Initialiser une base de données et importer son schéma
   * Créer l'abonnement :
-
-    `CREATE SUBSCRIPTION ma_souscription`  
-    `  CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'`  
-    `  PUBLICATION ma_publication;`
+```
+CREATE SUBSCRIPTION ma_souscription
+CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'
+PUBLICATION ma_publication;
+```
 </div>
 
 <div class="notes">
@@ -1172,8 +1173,8 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 <div class="slide-content">
   * Gains significatifs pour les tris sur disque
-    * noeud *Sort Method: external merge*
-  * Test avec installation par défaut et disques SSD :
+    * nœud *Sort Method: external merge*
+  * Test avec installation par défaut et disques SSD
     * 9.6 : 2,2 secondes
     * 10 : 1,6 secondes
 </div>
@@ -1241,14 +1242,11 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 L'exemple ci-dessous provient de la formation SQL2.
 
 ```bash
-postgres$ createdb sql2
-postgres$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
-$ psql
+$ createdb sql2
+$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+$ psql -q sql2
 sql2=# SET search_path TO magasin;
-```
-
-```sql
-postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT
 GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
@@ -1265,7 +1263,6 @@ GROUPING(type_client,code_pays)::bit(2),
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
 GROUP BY CUBE (type_client, code_pays);
 ```
-
 Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 
 ```sql
@@ -1323,7 +1320,8 @@ Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 (41 rows)
 ```
 
-Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise bien un hachage :
+Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui
+utilise bien un hachage et est deux fois plus rapide :
 
 ```sql
                              QUERY PLAN
@@ -1376,8 +1374,12 @@ Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui utilise
 ### Statistiques multi-colonnes
 
 <div class="slide-content">
-  * *CREATE STATISTICS* permet de créer des statistiques sur plusieurs colonnes d'une même table
+  * *CREATE STATISTICS*
+    * création de statistiques sur plusieurs colonnes d'une même table
   * Corrige les erreurs d'estimation en cas de colonnes fortement corrélées
+  * Deux statistiques calculables
+    * nombre de valeurs distinctes
+	* dépendances fonctionnelles
 </div>
 
 <div class="notes">
@@ -1464,12 +1466,10 @@ Pour compléter ces informations, vous pouvez également consulter : [Implement 
 
 <div class="slide-content">
   * Nœuds désormais gérés :
-    * Parcours d'index (*Index Scan* et *Index Only Scan*)
-    * Jointure-union (*Merge Join*)
-
+    * parcours d'index (*Index Scan* et *Index Only Scan*)
+    * jointure-union (*Merge Join*)
   * Nouveau nœud :
-    * Collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
-
+    * collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
   * Support également des :
     * requêtes préparées
     * sous-requêtes non-corrélées
@@ -1501,8 +1501,11 @@ Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l
 ### Parallélisme - paramétrage
 
 <div class="slide-content">
-  * nouveaux paramètres *min_parallel_table_scan_size* et *min_parallel_index_scan_size*
-  * suppression de *min_parallel_relation_size*, jugé trop générique
+  * nouveaux paramètres
+    * *min_parallel_table_scan_size* : taille minimale d'une table
+	* *min_parallel_index_scan_size* : taille minimale d'un index
+  * suppression de *min_parallel_relation_size*
+    * jugé trop générique
   * *max_parallel_workers* : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
 </div>
 
@@ -1513,7 +1516,7 @@ Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l
 
 *max_parallel_workers* positionne le nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8. Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier *max_parallel_workers_per_gather*.
 
-Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de processus parallèles pouvant être lancé par un seul noeud Gather. La valeur par défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de requête.
+Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de processus parallèles pouvant être lancé par un seul nœud Gather. La valeur par défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de requête.
 </div>
 
 -----
@@ -1580,7 +1583,7 @@ Lorsque la protection des lignes est activée sur une table, tous les accès cla
 
 Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiques de sécurité. Si aucune politique n'existe pour la table, une politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est visible ou ne peut être modifiée.
 
-Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
+Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées, elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
 
 **Remarque** 
 
@@ -1965,7 +1968,7 @@ postgres=# SELECT * FROM tfile1 LIMIT 1;
 
 **postgres_fdw**
 
-postgres_fdw exécute désormais ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
+postgres_fdw peut désormais, dans certains cas, exécuter ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
 
 
 *Exemple :*
@@ -2030,7 +2033,7 @@ postgres=# SELECT * FROM remote_t1 LIMIT 3;
 (3 rows)
 ```
 
-Exécutions d'une opération d’agrégation sur le serveur distant :
+Exécution d'une opération d’agrégation sur le serveur distant :
 
 ```sql
 postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM remote_t1;
