@@ -17,6 +17,7 @@ Public Domain CC0.
   * Version beta 1 sortie le 18 mai
   * Version beta 2 sortie le 13 juillet
   * Version beta 3 sortie le 10 août
+  * Version beta 4 sortie le 31 août
   * Sortie de la release prévue deuxième moitié 2017
   * Plus de 1,4 million de lignes de code *C*
   * Des centaines de contributeurs
