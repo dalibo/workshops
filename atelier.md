@@ -35,11 +35,11 @@ Installing:
 
 # yum install -y postgresql10 postgresql10-server postgresql10-contrib
 Installing:
- postgresql10                        x86_64                10.0-beta2_2PGDG.rhel6
- postgresql10-contrib                x86_64                10.0-beta2_2PGDG.rhel6
- postgresql10-server                 x86_64                10.0-beta2_2PGDG.rhel6
+ postgresql10                        x86_64                10.0-beta4_1PGDG.rhel6
+ postgresql10-contrib                x86_64                10.0-beta4_1PGDG.rhel6
+ postgresql10-server                 x86_64                10.0-beta4_1PGDG.rhel6
 Installing for dependencies:
- postgresql10-libs                   x86_64                10.0-beta2_2PGDG.rhel6
+ postgresql10-libs                   x86_64                10.0-beta4_1PGDG.rhel6
 ```
 
 On peut ensuite initialiser une instance :
@@ -66,12 +66,13 @@ Enfin, on vérifie la version :
 
 ```sql
 postgres=# SELECT version();
-                                    version                                     
+                                      version
 --------------------------------------------------------------------------------
- PostgreSQL 10beta2 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.4.7 2012031.
-.3 (Red Hat 4.4.7-18), 64-bit
-(1 row)
+ PostgreSQL 10beta4 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.4.7 20120313
+ (Red Hat 4.4.7-18), 64-bit
+(1 ligne)
 ```
+
 On répète ensuite le processus d'installation de façon à installer PostgreSQL 9.6 aux côtés de PostgreSQL 10.
 
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
@@ -84,11 +85,11 @@ Installing:
 
 # yum install -y postgresql96 postgresql96-server postgresql96-contrib
 Installing:
- postgresql96                             x86_64                     9.6.3-4PGDG.rhel6
- postgresql96-contrib                     x86_64                     9.6.3-4PGDG.rhel6
- postgresql96-server                      x86_64                     9.6.3-4PGDG.rhel6
+ postgresql96                      x86_64        9.6.5-1PGDG.rhel6
+ postgresql96-contrib              x86_64        9.6.5-1PGDG.rhel6
+ postgresql96-server               x86_64        9.6.5-1PGDG.rhel6
 Installing for dependencies:
- postgresql96-libs                        x86_64                     9.6.3-4PGDG.rhel6
+ postgresql96-libs                 x86_64        9.6.5-1PGDG.rhel6
 
 # service postgresql-9.6 initdb
 Initializing database:                                     [  OK  ]
@@ -869,10 +870,291 @@ query            | EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM p1;
 
 -----
 
-## Partitionnement
+## Partitionnement : création
 
 <div class="notes">
-FIXME: contenu
+
+Nous allons étudier les différences entre la version 9.6 et la version 10 en terme d'utilisation des tables partitionnées.
+
+Nous allons créer une table de mesure des températures suivant le lieu et la date. Nous allons partitionner ces tables pour chaque lieu et chaque mois.
+
+Ordre de création de la table en version 9.6 :
+
+```sql
+CREATE TABLE meteo (
+   t_id serial,
+   lieu text NOT NULL,
+   heure_mesure timestamp DEFAULT now(),
+   temperature real NOT NULL
+ );
+CREATE TABLE meteo_lyon_201709 (
+   CHECK ( lieu = 'Lyon'
+           AND heure_mesure >= TIMESTAMP '2017-09-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-10-01 00:00:00' )
+) INHERITS (meteo);
+CREATE TABLE meteo_lyon_201710 (
+   CHECK ( lieu = 'Lyon'
+           AND heure_mesure >= TIMESTAMP '2017-10-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-11-01 00:00:00' )
+) INHERITS (meteo);
+CREATE TABLE meteo_nantes_201709 (
+   CHECK ( lieu = 'Nantes'
+           AND heure_mesure >= TIMESTAMP '2017-09-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-10-01 00:00:00' )
+) INHERITS (meteo);
+CREATE TABLE meteo_nantes_201710 (
+   CHECK ( lieu = 'Nantes'
+           AND heure_mesure >= TIMESTAMP '2017-10-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-11-01 00:00:00' )
+) INHERITS (meteo);
+CREATE TABLE meteo_paris_201709 (
+   CHECK ( lieu = 'Paris'
+           AND heure_mesure >= TIMESTAMP '2017-09-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-10-01 00:00:00' )
+) INHERITS (meteo);
+CREATE TABLE meteo_paris_201710 (
+   CHECK ( lieu = 'Paris'
+           AND heure_mesure >= TIMESTAMP '2017-10-01 00:00:00'
+	   AND heure_mesure < TIMESTAMP '2017-11-01 00:00:00' )
+) INHERITS (meteo);
+CREATE OR REPLACE FUNCTION meteo_insert_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF ( NEW.lieu = 'Lyon' ) THEN
+      IF ( NEW.heure_mesure >= TIMESTAMP '2017-09-01 00:00:00' AND
+           NEW.heure_mesure < TIMESTAMP '2017-10-01 00:00:00' ) THEN
+          INSERT INTO meteo_lyon_201709 VALUES (NEW.*);
+      ELSIF ( NEW.heure_mesure >= TIMESTAMP '2017-10-01 00:00:00' AND
+              NEW.heure_mesure < TIMESTAMP '2017-11-01 00:00:00' ) THEN
+          INSERT INTO meteo_lyon_201710 VALUES (NEW.*);
+      ELSE
+        RAISE EXCEPTION 'Date non prévue dans meteo_insert_trigger(Lyon)';
+      END IF;
+    ELSIF ( NEW.lieu = 'Nantes' ) THEN
+      IF ( NEW.heure_mesure >= TIMESTAMP '2017-09-01 00:00:00' AND
+           NEW.heure_mesure < TIMESTAMP '2017-10-01 00:00:00' ) THEN
+          INSERT INTO meteo_nantes_201709 VALUES (NEW.*);
+      ELSIF ( NEW.heure_mesure >= TIMESTAMP '2017-10-01 00:00:00' AND
+              NEW.heure_mesure < TIMESTAMP '2017-11-01 00:00:00' ) THEN
+          INSERT INTO meteo_nantes_201710 VALUES (NEW.*);
+      ELSE
+        RAISE EXCEPTION 'Date non prévue dans meteo_insert_trigger(Nantes)';
+      END IF;
+    ELSIF ( NEW.lieu = 'Paris' ) THEN
+      IF ( NEW.heure_mesure >= TIMESTAMP '2017-09-01 00:00:00' AND
+           NEW.heure_mesure < TIMESTAMP '2017-10-01 00:00:00' ) THEN
+          INSERT INTO meteo_paris_201709 VALUES (NEW.*);
+      ELSIF ( NEW.heure_mesure >= TIMESTAMP '2017-10-01 00:00:00' AND
+              NEW.heure_mesure < TIMESTAMP '2017-11-01 00:00:00' ) THEN
+          INSERT INTO meteo_paris_201710 VALUES (NEW.*);
+      ELSE
+        RAISE EXCEPTION 'Date non prévue dans meteo_insert_trigger(Paris)';
+      END IF;
+    ELSE
+        RAISE EXCEPTION 'Lieu non prévu dans meteo_insert_trigger() !';
+    END IF;
+    RETURN NULL;
+END;
+$$
+LANGUAGE plpgsql;
+CREATE TRIGGER insert_meteo_trigger
+    BEFORE INSERT ON meteo
+    FOR EACH ROW EXECUTE PROCEDURE meteo_insert_trigger();
+```
+
+Ordre de création de la table en version 10 ;
+
+```sql
+CREATE TABLE meteo (
+   t_id integer GENERATED BY DEFAULT AS IDENTITY,
+   lieu text NOT NULL,
+   heure_mesure timestamp DEFAULT now(),
+   temperature real NOT NULL
+ ) PARTITION BY RANGE (lieu, heure_mesure);
+CREATE TABLE meteo_lyon_201709 PARTITION of meteo FOR VALUES
+   FROM ('Lyon', '2017-09-01 00:00:00') TO ('Lyon', '2017-10-01 00:00:00');
+CREATE TABLE meteo_lyon_201710 PARTITION of meteo FOR VALUES
+   FROM ('Lyon', '2017-10-01 00:00:00') TO ('Lyon', '2017-11-01 00:00:00');
+CREATE TABLE meteo_nantes_201709 PARTITION of meteo FOR VALUES
+   FROM ('Nantes', '2017-09-01 00:00:00') TO ('Nantes', '2017-10-01 00:00:00');
+CREATE TABLE meteo_nantes_201710 PARTITION of meteo FOR VALUES
+   FROM ('Nantes', '2017-10-01 00:00:00') TO ('Nantes', '2017-11-01 00:00:00');
+CREATE TABLE meteo_paris_201709 PARTITION of meteo FOR VALUES
+   FROM ('Paris', '2017-09-01 00:00:00') TO ('Paris', '2017-10-01 00:00:00');
+CREATE TABLE meteo_paris_201710 PARTITION of meteo FOR VALUES
+   FROM ('Paris', '2017-10-01 00:00:00') TO ('Paris', '2017-11-01 00:00:00');
+```
+
+On remarque que la déclaration est bien plus facile en version 10. Comme nous le verrons le plus fastidieux est de faire évoluer la fonction trigger en version 9.6.
+
+Voici une fonction permettant d'ajouter des entrées aléatoires dans la table :
+
+```sql
+CREATE OR REPLACE FUNCTION peuple_meteo()
+RETURNS TEXT AS $$
+DECLARE
+   lieux text[] := '{}';
+   v_lieu text;
+   v_heure timestamp;
+   v_temperature real;
+   v_nb_insertions integer := 500000;
+   v_insertion integer;
+BEGIN
+   lieux[0]='Lyon';
+   lieux[1]='Nantes';
+   lieux[2]='Paris';
+   FOR v_insertion IN 1 .. v_nb_insertions LOOP
+      v_lieu=lieux[floor((random()*3))::int];
+      v_heure='2017-09-01'::timestamp
+                   + make_interval(days => floor((random()*60))::int,
+                              secs => floor((random()*86400))::int);
+      v_temperature:=round(((random()*14))::numeric+10,2);
+      IF EXTRACT(MONTH FROM v_heure) = 10 THEN
+          v_temperature:=v_temperature-4;
+      END IF;
+      IF EXTRACT(HOUR FROM v_heure) <= 9
+         OR EXTRACT(HOUR FROM v_heure) >= 20 THEN
+          v_temperature:=v_temperature-5;
+      ELSEIF EXTRACT(HOUR FROM v_heure) >= 12
+         AND EXTRACT(HOUR FROM v_heure) <= 17 THEN
+          v_temperature:=v_temperature+5;
+      END IF;
+      INSERT INTO meteo (lieu,heure_mesure,temperature)
+        VALUES (v_lieu,v_heure,v_temperature);
+   END LOOP;
+   RETURN v_nb_insertions||' mesures de température insérées';
+END;
+$$
+LANGUAGE plpgsql;
+```
+
+Insérons des lignes dans les 2 tables :
+
+```sql
+workshop96=# EXPLAIN ANALYSE SELECT peuple_meteo();
+                        QUERY PLAN
+-----------------------------------------------------------
+ Result  (cost=0.00..0.26 rows=1 width=32)
+         (actual time=20154.769..20154.769 rows=1 loops=1)
+ Planning time: 0.031 ms
+ Execution time: 20154.790 ms
+(3 lignes)
+
+workshop10=# EXPLAIN ANALYSE SELECT peuple_meteo();
+                        QUERY PLAN
+-----------------------------------------------------------
+ Result  (cost=0.00..0.26 rows=1 width=32)
+         (actual time=15823.882..15823.882 rows=1 loops=1)
+ Planning time: 0.042 ms
+ Execution time: 15823.920 ms
+(3 lignes)
+```
+
+Nous constatons un gain de 25% en version 10 sur l'insertion de données.
+
+</div>
+
+-----
+
+## Partitionnement : limitations
+
+<div class="notes">
+
+**Index**
+
+La création d'index n'est toujours pas disponible en version 10 :
+
+```sql
+workshop10=# CREATE INDEX meteo_heure_mesure_idx ON meteo (heure_mesure);
+ERROR:  cannot create index on partitioned table "meteo"
+```
+
+Il est donc toujours impossible de créer une clé primaire, une contrainte unique ou une contrainte d'exclusion pouvant s'appliquer sur toutes les partitions.
+De ce fait, il est également impossible de référencer via une clé étrangère une table partitionnée.
+
+Il est cependant possible de créer des index sur chaque partition fille, comme avec la version 9.6 :
+
+```sql
+workshop10=# CREATE INDEX meteo_lyon_201710_heure_idx
+  ON meteo_lyon_201710 (heure_mesure);
+CREATE INDEX
+```
+
+**Mise à jour**
+
+Une mise à jour qui déplacerait des enregistrements d'une partition à une autre n'est pas possible par défaut en version 10 :
+
+```sql
+workshop10=# UPDATE meteo SET lieu='Nantes' WHERE lieu='Lyon';
+ERROR:  new row for relation "meteo_lyon_201709" violates partition constraint
+DÉTAIL : Failing row contains (5, Nantes, 2017-09-15 05:09:23, 9.43).
+```
+
+**Insertion de données hors limite**
+
+Le partitionnement en version 10 permet de déclarer 
+
+```sql
+CREATE TABLE meteo_lyon_ancienne PARTITION of meteo FOR VALUES
+   FROM ('Lyon', MINVALUE) TO ('Lyon', '2017-09-01 00:00:00');
+CREATE TABLE meteo_lyon_ancienne PARTITION of meteo FOR VALUES
+   FROM ('Nantes', MINVALUE) TO ('Nantes', '2017-09-01 00:00:00');
+CREATE TABLE meteo_paris_ancienne PARTITION of meteo FOR VALUES
+   FROM ('Paris', MINVALUE) TO ('Paris', '2017-09-01 00:00:00');
+```
+
+</div>
+
+-----
+
+## Partitionnement : administration
+
+<div class="notes">
+
+Avec les tables partitionnées via l'héritage, il était nécessaire de lister toutes les tables partitionnées pour effectuer des tâches de maintenance.
+
+```sql
+workshop96=# SELECT 'VACUUM ANALYZE '||relname AS operation
+  FROM pg_stat_user_tables WHERE relname LIKE 'meteo_%';
+             operation              
+------------------------------------
+ VACUUM ANALYZE meteo_lyon_201709
+ VACUUM ANALYZE meteo_lyon_201710
+ VACUUM ANALYZE meteo_nantes_201709
+ VACUUM ANALYZE meteo_nantes_201710
+ VACUUM ANALYZE meteo_paris_201709
+ VACUUM ANALYZE meteo_paris_201710
+(6 lignes)
+
+workshop96=# \gexec
+VACUUM
+VACUUM
+VACUUM
+VACUUM
+VACUUM
+VACUUM
+```
+
+Avec la version 10, il est maintenant possible d'effectuer des opérations de VACUUM et ANALYSE sur toutes les tables partitionnées via la table mère.
+
+```sql
+workshop10=# VACUUM ANALYZE meteo;
+VACUUM
+workshop10=# SELECT now() AS date,relname,last_vacuum,last_analyze
+workshop10-#   FROM pg_stat_user_tables WHERE relname LIKE 'meteo_nantes%';
+-[ RECORD 1 ]+------------------------------
+date         | 2017-09-01 08:39:02.052168-04
+relname      | meteo_nantes_201709
+last_vacuum  | 2017-09-01 08:38:54.068208-04
+last_analyze | 2017-09-01 08:38:54.068396-04
+-[ RECORD 2 ]+------------------------------
+date         | 2017-09-01 08:39:02.052168-04
+relname      | meteo_nantes_201710
+last_vacuum  | 2017-09-01 08:38:54.068482-04
+last_analyze | 2017-09-01 08:38:54.068665-04
+```
+
+
 </div>
 
 -----
