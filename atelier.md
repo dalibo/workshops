@@ -1162,7 +1162,122 @@ last_analyze | 2017-09-01 08:38:54.068665-04
 ## Performances
 
 <div class="notes">
-FIXME: contenu / tri / mail de thomas
+Importer le dump de la base SQL2 dans l'instance PostgreSQL 10 :
+```
+$ createdb sql2
+$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+
+Importer également le dump de la base SQL2 dans l'instance PostgreSQL 9.6 :
+$ createdb sql2
+$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+```
+
+Validez toujours les temps d'exécution en exécutant les requêtes plusieurs
+fois. Les temps de réponse peuvent en effet fortement varier en fonction de la
+présence ou non des données dans le cache de PostgreSQL et de Linux.
+
+
+Vérifions le gain de performance sur les tris, en exécutant tout d'abord
+la requête suivante sur l'instance 9.6 :
+```
+$ psql -q sql2 -p 5433
+sql2=# SET search_path TO magasin;
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+ GROUP BY type_client, code_pays
+ ORDER BY type_client, code_pays;
+(...)
+ Planning time: 0.628 ms
+ Execution time: 4097.391 ms
+```
+
+Voyons maintenant le gain avec PostgreSQL 10, en prenant soin de désactiver le
+parallélisme :
+$ psql -q sql2 -p 5432
+sql2=# SET search_path TO magasin;
+sql2=# SET max_parallel_workers = 0;
+sql2=# SET max_parallel_workers_per_gather = 0;
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+ GROUP BY type_client, code_pays
+ ORDER BY type_client, code_pays;
+(...)
+ Planning time: 0.396 ms
+ Execution time: 1985.755 ms
+
+
+Maintenant, vérifions le gain de performance sur les GROUPING SETS.
+
+Exécuter la requête suivante sur l'instance 9.6 :
+```
+$ psql -q sql2 -p 5433
+sql2=# SET search_path TO magasin;
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT GROUPING(type_client,code_pays)::bit(2),
+       GROUPING(type_client)::boolean g_type_cli,
+       GROUPING(code_pays)::boolean g_code_pays,
+       type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+GROUP BY CUBE (type_client, code_pays);
+(...)
+ Planning time: 0.724 ms
+ Execution time: 7121.247 ms
+```
+
+Exécuter la requête suivante sur l'instance 10 :
+```
+$ psql -q sql2 -p 5432
+sql2=# SET search_path TO magasin;
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT GROUPING(type_client,code_pays)::bit(2),
+       GROUPING(type_client)::boolean g_type_cli,
+       GROUPING(code_pays)::boolean g_code_pays,
+       type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+GROUP BY CUBE (type_client, code_pays);
+(...)
+ Planning time: 0.995 ms
+ Execution time: 1704.987 ms
+```
+
 </div>
 
 -----
