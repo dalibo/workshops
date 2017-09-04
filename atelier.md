@@ -1182,10 +1182,9 @@ la requête suivante sur l'instance 9.6 :
 ```
 $ psql -q sql2 -p 5433
 sql2=# SET search_path TO magasin;
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+sql3=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT type_client,
-       code_pays,
-       SUM(quantite*prix_unitaire) AS montant
+       code_pays
   FROM commandes c
   JOIN lignes_commandes l
     ON (c.numero_commande = l.numero_commande)
@@ -1194,23 +1193,27 @@ SELECT type_client,
   JOIN contacts co
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
- GROUP BY type_client, code_pays
  ORDER BY type_client, code_pays;
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Sort (actual time=3121.067..3868304.446 rows=1226456 loops=1)
+   Sort Key: cl.type_client, co.code_pays
+   Sort Method: external merge  Disk: 17944kB
 (...)
- Planning time: 0.628 ms
- Execution time: 4097.391 ms
+ Planning time: 0.743 ms
+ Execution time: 3875.253 ms
 ```
 
 Voyons maintenant le gain avec PostgreSQL 10, en prenant soin de désactiver le
 parallélisme :
+```
 $ psql -q sql2 -p 5432
 sql2=# SET search_path TO magasin;
 sql2=# SET max_parallel_workers = 0;
 sql2=# SET max_parallel_workers_per_gather = 0;
 sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT type_client,
-       code_pays,
-       SUM(quantite*prix_unitaire) AS montant
+       code_pays
   FROM commandes c
   JOIN lignes_commandes l
     ON (c.numero_commande = l.numero_commande)
@@ -1219,11 +1222,19 @@ SELECT type_client,
   JOIN contacts co
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
- GROUP BY type_client, code_pays
  ORDER BY type_client, code_pays;
+                                                     QUERY PLAN                                                      
+---------------------------------------------------------------------------------------------------------------------
+ Sort (actual time=1850.503..2045.610 rows=1226456 loops=1)
+   Sort Key: cl.type_client, co.code_pays
+   Sort Method: external merge  Disk: 18024kB
 (...)
- Planning time: 0.396 ms
- Execution time: 1985.755 ms
+ Planning time: 0.890 ms
+ Execution time: 2085.996 ms
+```
+
+Le temps d'exécution de cette requête est quasi doublé en 10. On observe que
+le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms en 9.6.
 
 
 Maintenant, vérifions le gain de performance sur les GROUPING SETS.
