@@ -886,7 +886,8 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 logique](medias/z100-schema-repli-logique.png)
 </div>
 
-<div class="notes"> Schéma obtenu sur
+<div class="notes">
+Schéma obtenu sur
 [blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
 
   * Une publication est créée sur le serveur éditeur
