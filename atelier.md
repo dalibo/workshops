@@ -1163,13 +1163,17 @@ last_analyze | 2017-09-01 08:38:54.068665-04
 
 <div class="notes">
 Importer le dump de la base SQL2 dans l'instance PostgreSQL 10 :
+
 ```
 $ createdb sql2
 $ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+```
 
 Importer également le dump de la base SQL2 dans l'instance PostgreSQL 9.6 :
-$ createdb sql2
-$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+
+```
+$ createdb -p 5433 sql2
+$ pg_restore -p 5433 -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
 ```
 
 Validez toujours les temps d'exécution en exécutant les requêtes plusieurs
@@ -1179,7 +1183,8 @@ présence ou non des données dans le cache de PostgreSQL et de Linux.
 
 Vérifions le gain de performance sur les tris, en exécutant tout d'abord
 la requête suivante sur l'instance 9.6 :
-```
+
+```sql
 $ psql -q sql2 -p 5433
 sql2=# SET search_path TO magasin;
 sql3=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
@@ -1194,8 +1199,8 @@ SELECT type_client,
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
  ORDER BY type_client, code_pays;
-                                                     QUERY PLAN                                                      
----------------------------------------------------------------------------------------------------------------------
+                         QUERY PLAN
+---------------------------------------------------------------
  Sort (actual time=3121.067..3868304.446 rows=1226456 loops=1)
    Sort Key: cl.type_client, co.code_pays
    Sort Method: external merge  Disk: 17944kB
@@ -1223,8 +1228,8 @@ SELECT type_client,
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
  ORDER BY type_client, code_pays;
-                                                     QUERY PLAN                                                      
----------------------------------------------------------------------------------------------------------------------
+                         QUERY PLAN
+-------------------------------------------------------------
  Sort (actual time=1850.503..2045.610 rows=1226456 loops=1)
    Sort Key: cl.type_client, co.code_pays
    Sort Method: external merge  Disk: 18024kB
@@ -1233,14 +1238,14 @@ SELECT type_client,
  Execution time: 2085.996 ms
 ```
 
-Le temps d'exécution de cette requête est quasi doublé en 10. On observe que
-le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms en 9.6.
+Le temps d'exécution de cette requête est quasi doublé en version 9.6. On observe que le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms en 9.6.
 
 
 Maintenant, vérifions le gain de performance sur les GROUPING SETS.
 
 Exécuter la requête suivante sur l'instance 9.6 :
-```
+
+```sql
 $ psql -q sql2 -p 5433
 sql2=# SET search_path TO magasin;
 sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
@@ -1259,13 +1264,66 @@ SELECT GROUPING(type_client,code_pays)::bit(2),
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
 GROUP BY CUBE (type_client, code_pays);
+                           QUERY PLAN
+----------------------------------------------------------------------
+ GroupAggregate (actual time=2565.848..5344.539 rows=40 loops=1)
+   Group Key: cl.type_client, co.code_pays
+   Group Key: cl.type_client
+   Group Key: ()
+   Sort Key: co.code_pays
+     Group Key: co.code_pays
+   Buffers: shared hit=14678 read=41752, temp read=32236 written=32218
+   ->  Sort (actual time=4066.492..4922.885 rows=1226456 loops=1)
+         Sort Key: cl.type_client, co.code_pays
+         Sort Method: external merge  Disk: 34664kB
 (...)
- Planning time: 0.724 ms
- Execution time: 7121.247 ms
+ Planning time: 1.868 ms
+ Execution time: 8177.263 ms
 ```
 
-Exécuter la requête suivante sur l'instance 10 :
+On remarque que l'opération de tri est effectué sur disque. Vérifions le temps d'exécution avec un tri en mémoire : 
+
+```sql
+$ psql -q sql2 -p 5433
+sql2=# SET search_path TO magasin;
+sql2=# set work_mem='128MB';
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT GROUPING(type_client,code_pays)::bit(2),
+       GROUPING(type_client)::boolean g_type_cli,
+       GROUPING(code_pays)::boolean g_code_pays,
+       type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+GROUP BY CUBE (type_client, code_pays);
+                             QUERY PLAN
+------------------------------------------------------------------
+ GroupAggregate (actual time=2389.425..4398.910 rows=40 loops=1)
+   Group Key: cl.type_client, co.code_pays
+   Group Key: cl.type_client
+   Group Key: ()
+   Sort Key: co.code_pays
+     Group Key: co.code_pays
+   Buffers: shared hit=14806 read=41624
+   ->  Sort (actual time=2387.920..2538.658 rows=1226456 loops=1)
+         Sort Key: cl.type_client, co.code_pays
+         Sort Method: quicksort  Memory: 126065kB
+(...)
+ Planning time: 1.298 ms
+ Execution time: 4412.666 ms
 ```
+
+
+Exécutons la requête suivante sur l'instance 10 :
+
+```sql
 $ psql -q sql2 -p 5432
 sql2=# SET search_path TO magasin;
 sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
@@ -1284,9 +1342,45 @@ SELECT GROUPING(type_client,code_pays)::bit(2),
     ON (cl.contact_id = co.contact_id)
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
 GROUP BY CUBE (type_client, code_pays);
+                           QUERY PLAN
+-----------------------------------------------------------------
+ MixedAggregate (actual time=3014.902..3014.928 rows=40 loops=1)
+   Hash Key: cl.type_client, co.code_pays
+   Hash Key: cl.type_client
+   Hash Key: co.code_pays
+   Group Key: ()
 (...)
- Planning time: 0.995 ms
- Execution time: 1704.987 ms
+ Planning time: 2.207 ms
+ Execution time: 3728.788 ms
+```
+
+L'amélioration des performances provient du noeud `MixedAggregate` qui fait son appartion en version 10. Il permet de peupler plusieurs tables de hachages en même temps qu'est effectué le tri des groupes.
+
+Les performances sont évidemment améliorées si suffisamment de mémoire est allouée pour l'opération :
+
+```sql
+$ psql -q sql2 -p 5432
+sql2=# SET search_path TO magasin;
+sql2=# SET work_mem = '24MB';
+sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+SELECT GROUPING(type_client,code_pays)::bit(2),
+       GROUPING(type_client)::boolean g_type_cli,
+       GROUPING(code_pays)::boolean g_code_pays,
+       type_client,
+       code_pays,
+       SUM(quantite*prix_unitaire) AS montant
+  FROM commandes c
+  JOIN lignes_commandes l
+    ON (c.numero_commande = l.numero_commande)
+  JOIN clients cl
+    ON (c.client_id = cl.client_id)
+  JOIN contacts co
+    ON (cl.contact_id = co.contact_id)
+ WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
+GROUP BY CUBE (type_client, code_pays);
+(...)
+ Planning time: 2.205 ms
+ Execution time: 3018.079 ms
 ```
 
 </div>
@@ -1296,7 +1390,169 @@ GROUP BY CUBE (type_client, code_pays);
 ## Collations ICU
 
 <div class="notes">
-FIXME: contenu / mail d'Adrien
+
+La version 10 supporte la librairie [ICU](http://site.icu-project.org/).
+
+
+
+Certaines fonctionnalités ne sont cependant disponibles que pour des versions de la librairie ICU supérieures ou égales à la version 5.4. La version 4.2 est utilisée par défaut :
+
+
+```bash
+# ldd /usr/pgsql-10/bin/postgres  | grep icu
+	libicui18n.so.42 => /usr/lib64/libicui18n.so.42 (0x00007f9351222000)
+	libicuuc.so.42 => /usr/lib64/libicuuc.so.42 (0x00007f9350ed0000)
+	libicudata.so.42 => /usr/lib64/libicudata.so.42 (0x00007f934d1e1000)
+```
+
+Pour permettre le test des fonctionnalités liées au collations ICU, nous allons télécharger les sources de la librairie ICU en version 5.8 et recompiler PostgreSQL en utilisant cette version de la librairie :
+
+```bash
+yum groupinstall -y "Development Tools"
+yum install -y wget tar flex bison readline-devel zlib-devel git
+mkdir test_icu
+cd test_icu
+wget https://kent.dl.sourceforge.net/project/icu/ICU4C/58.1/icu4c-58_1-src.tgz
+tar xf icu4c-58_1-src.tgz
+cd icu/source
+./configure
+make -j3
+make install
+echo '/usr/local/lib/' > /etc/ld.so.conf.d/local-libs.conf
+ldconfig
+mkdir ~/pg_src
+cd ~/pg_src
+git clone git://git.postgresql.org/git/postgresql.git
+cd postgresql
+./configure ICU_CFLAGS='-I/usr/local/include/unicode/' \
+  ICU_LIBS='-L/usr/local/lib -licui18n -licuuc -licudata' --with-icu
+make -j3
+make install
+sudo -iu postgres mkdir -p /var/lib/pgsql/10_icu58/data
+sudo -iu postgres /usr/local/pgsql/bin/initdb --data /var/lib/pgsql/10_icu58/data
+sed -i "s/#port = 5432/port = 5458/" /var/lib/pgsql/10_icu58/data/postgresql.conf
+sudo -iu postgres /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/10_icu58/data -l logfile start
+```
+
+Il est maintenant possible de se connecter à la nouvelle instance via la commande :
+
+```bash
+sudo -iu postgres /usr/local/pgsql/bin/psql -p 5458
+psql (11devel)
+Type "help" for help.
+```
+
+Voici un premier exemple de changement de collationnement : nous voulons que les chiffres soient placés après les lettres :
+
+```sql
+postgres=# SELECT * FROM (
+      SELECT '1a' i UNION SELECT '1b' UNION SELECT '1c'
+      UNION SELECT 'a1' UNION SELECT 'b2' UNION SELECT 'c3'
+   ) j ORDER BY i COLLATE "en-x-icu";
+ i  
+----
+ 1a
+ 1b
+ 1c
+ a1
+ b2
+ c3
+(6 rows)
+
+postgres=# CREATE COLLATION digitlast (provider=icu, locale='en-u-kr-latn-digit');
+CREATE COLLATION
+postgres=# SELECT * FROM (
+     SELECT '1a' i UNION SELECT '1b' UNION SELECT '1c' 
+     UNION SELECT 'a1' UNION SELECT 'b2' UNION SELECT 'c3'
+  ) j ORDER BY i COLLATE "digitlast";
+ i  
+----
+ a1
+ b2
+ c3
+ 1a
+ 1b
+ 1c
+(6 rows)
+```
+
+Nous pouvons également effectuer un changement de collationnement pour classe les majuscules après les minuscules :
+```sql
+postgres=# SELECT * FROM (
+    SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
+  ) j ORDER BY i COLLATE "en-x-icu";
+ i 
+---
+ a
+ A
+ b
+ B
+(4 rows)
+
+postgres=# CREATE COLLATION capitalfirst (provider=icu, locale='en-u-kf-upper');
+CREATE COLLATION
+postgres=# SELECT * FROM (
+    SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
+  ) j ORDER BY i COLLATE "capitalfirst";
+ i 
+---
+ A
+ a
+ B
+ b
+(4 rows)
+```
+
+Nous travaillons en UTF, nous pouvons donc aussi changer l'ordre de classement des émoticône  :-)
+
+```sql
+postgres=# SELECT chr(x) FROM generate_series(x'1F634'::int, x'1F643'::int)
+    AS _(x) ORDER BY chr(x) COLLATE "en-x-icu";
+ chr 
+-----
+ 😴
+ 😵
+ 😶
+ 😷
+ 😸
+ 😹
+ 😺
+ 😻
+ 😼
+ 😽
+ 😾
+ 😿
+ 🙀
+ 🙁
+ 🙂
+ 🙃
+(16 rows)
+postgres=# CREATE COLLATION "und-u-co-emoji-x-icu" (provider = icu, locale = 'und-u-co-emoji');
+CREATE COLLATION
+postgres=# SELECT chr(x) FROM generate_series(x'1F634'::int, x'1F643'::int)
+    AS _(x) ORDER BY chr(x) COLLATE "und-u-co-emoji-x-icu";
+ chr 
+-----
+ 🙂
+ 😶
+ 😴
+ 🙃
+ 🙁
+ 😵
+ 😷
+ 😺
+ 😸
+ 😹
+ 😻
+ 😼
+ 😽
+ 🙀
+ 😿
+ 😾
+(16 rows)
+```
+
+
 </div>
 
 -----

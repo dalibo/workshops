@@ -1957,8 +1957,18 @@ Une collation est un objet du catalogue dont le nom au niveau SQL correspond à 
 
 La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus performantes.
 
-FIXME
-uniquement fonctionnel pour libicu >= 54 ?
+Attention, certaines fonctionnalités ne sont disponibles que pour les versions de la librairie ICU supérieures ou égales à la 5.4.
+Vous pouvez vérifier la version de la librairie ICU utilisée par PostgreSQL avec la commande `ldd` :
+
+```
+# ldd /usr/pgsql-10/bin/postgres  | grep icu
+	libicui18n.so.42 => /usr/lib64/libicui18n.so.42 (0x00007f9351222000)
+	libicuuc.so.42 => /usr/lib64/libicuuc.so.42 (0x00007f9350ed0000)
+	libicudata.so.42 => /usr/lib64/libicudata.so.42 (0x00007f934d1e1000)
+```
+
+Sur Centos 6 et 7, la version utilisée sont respectivement les versions 4.2 et 5.0. Sur ces systèmes d'exploitation, avant d'utiliser une fonctionnalité liée au collationnement, pensez à vérifier son bon fonctionnement.
+
 </div>
 
 -----
