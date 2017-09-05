@@ -61,12 +61,9 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont
 d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers
 des articles en anglais :
 
-  * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet
-    PostgreSQL
-  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10)
-    de *Robert Haas*
-  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10)
-    de *HP*
+  * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet PostgreSQL
+  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
+  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10) de *HP*
 </div>
 
 -----
@@ -143,7 +140,7 @@ Vous trouverez plus de détails dans cet
 <div class="notes">
 Afin de clarifier le rôle des répertoires *pg_xlog* et *pg_clog* qui contiennent
 non pas des *logs* mais des journaux de transaction ou de commits, les deux
-renommages ont été effectués dans $PGDATA. Les fonctions dont les noms y
+renommages ont été effectués dans `$PGDATA`. Les fonctions dont les noms y
 faisaient référence ont également été renommées.
 
 Ainsi, voici le contenu actuel d'un répertoire de données PostgreSQL après son
@@ -2854,8 +2851,10 @@ séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
 défaut). Le type de données détermine les valeurs minimales et maximales par
 défaut pour la séquence. 
 
-Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS
-type_donnee*.  </div>
+Il est possible de changer le type de données avec l'ordre
+*ALTER SEQUENCE AS type_donnee*.
+
+</div>
 
 -----
 
