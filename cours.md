@@ -337,7 +337,7 @@ Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
 
 -----
 
-### Exemple de partitionnement liste
+### Exemple de partitionnement par liste
 
 <div class="slide-content">
   * Créer une table partitionnée :
@@ -409,7 +409,7 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 
 -----
 
-### Exemple de partitionnement intervalle
+### Exemple de partitionnement par intervalle
 
 <div class="slide-content">
   * Créer une table partitionnée :
@@ -548,7 +548,7 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 ```
 
-Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarées comme suit et permettront d'insérer les lignes qui étaient ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils utilisent la valeur spéciale *UNBOUNDED* qui a été remplacée par *MINVALUE* et *MAXVALUE*.
+Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarées comme suit et permettront d'insérer les lignes qui étaient ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils mentionnent la valeur spéciale *UNBOUNDED* qui a depuis été remplacée par *MINVALUE* et *MAXVALUE*.
 
 ```sql
 postgres=# CREATE TABLE t2_0 PARTITION OF t2
