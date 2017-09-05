@@ -2066,17 +2066,33 @@ automatiquement supprimé.
 
 Remarque pour *pg_basebackup* :
 
-Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les supporte, un slot de réplication temporaire sera utilisé.
-De cette manière, il est certain que le serveur ne supprimera pas les journaux nécessaires entre le début et la fin de la sauvegarde (ce qui peut arriver sans archivage et sans configuration assez forte du paramètre *wal_keep_segments*).
+Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de
+réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les
+supporte, un slot de réplication temporaire sera utilisé.  De cette manière, il
+est certain que le serveur ne supprimera pas les journaux nécessaires entre le
+début et la fin de la sauvegarde (ce qui peut arriver sans archivage et sans
+configuration assez forte du paramètre *wal_keep_segments*).
 
 **Support de la librairie ICU**
 
-Une collation est un objet du catalogue dont le nom au niveau SQL correspond à une locale fournie par les bibliothèques installées sur le système. Une définition de la collation a un fournisseur spécifiant quelle bibliothèque fournit les données locales. L'un des fournisseurs standards est libc, qui utilise les locales fournies par la bibliothèque C du système. Ce sont les locales les plus utilisées par des outils du système. Cependant, ces locales sont fréquemment modifiées lors de la sortie de nouvelles versions de la libc. Or ces modifications ont parfois des conséquences sur l'ordre de tri des chaînes de caractères, ce qui n'est pas acceptable pour PostgreSQL et ses index.
+Une collation est un objet du catalogue dont le nom au niveau SQL correspond à
+une locale fournie par les bibliothèques installées sur le système. Une
+définition de la collation a un fournisseur spécifiant quelle bibliothèque
+fournit les données locales. L'un des fournisseurs standards est libc, qui
+utilise les locales fournies par la bibliothèque C du système. Ce sont les
+locales les plus utilisées par des outils du système. Cependant, ces locales
+sont fréquemment modifiées lors de la sortie de nouvelles versions de la libc.
+Or ces modifications ont parfois des conséquences sur l'ordre de tri des chaînes
+de caractères, ce qui n'est pas acceptable pour PostgreSQL et ses index.
 
-La version 10 permet l'utilisation des locales ICU si le support d'ICU a été configuré lors de la construction de PostgreSQL via l'option de configuration *--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus performantes.
+La version 10 permet l'utilisation des locales ICU si le support d'ICU a été
+configuré lors de la construction de PostgreSQL via l'option de configuration
+*--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus
+performantes.
 
-Attention, certaines fonctionnalités ne sont disponibles que pour les versions de la librairie ICU supérieures ou égales à la 5.4.
-Vous pouvez vérifier la version de la librairie ICU utilisée par PostgreSQL avec la commande `ldd` :
+Attention, certaines fonctionnalités ne sont disponibles que pour les versions
+de la librairie ICU supérieures ou égales à la 5.4.  Vous pouvez vérifier la
+version de la librairie ICU utilisée par PostgreSQL avec la commande `ldd` :
 
 ```
 # ldd /usr/pgsql-10/bin/postgres  | grep icu
@@ -2085,8 +2101,9 @@ Vous pouvez vérifier la version de la librairie ICU utilisée par PostgreSQL av
 	libicudata.so.42 => /usr/lib64/libicudata.so.42 (0x00007f934d1e1000)
 ```
 
-Sur Centos 6 et 7, la version utilisée sont respectivement les versions 4.2 et 5.0. Sur ces systèmes d'exploitation, avant d'utiliser une fonctionnalité liée au collationnement, pensez à vérifier son bon fonctionnement.
-
+Sur Centos 6 et 7, la version utilisée sont respectivement les versions 4.2 et
+5.0. Sur ces systèmes d'exploitation, avant d'utiliser une fonctionnalité liée
+au collationnement, pensez à vérifier son bon fonctionnement.
 </div>
 
 -----
@@ -2144,8 +2161,9 @@ postgres=# SELECT * FROM tfile1 LIMIT 1;
 
 **postgres_fdw**
 
-postgres_fdw peut désormais, dans certains cas, exécuter ses agrégations et jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les données et les traiter localement.
-
+postgres_fdw peut désormais, dans certains cas, exécuter ses agrégations et
+jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les
+données et les traiter localement.
 
 *Exemple :*
 
@@ -2237,7 +2255,8 @@ postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM r
 ```
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
-[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
+[postgres_fdw: Push down aggregates to remote
+servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
 </div>
 
 -----
@@ -2261,15 +2280,29 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 </div>
 
 <div class="notes">
-Il est possible d'appliquer arbitrairement une réplication synchrone à un sous-ensemble d'un groupe d'instances grâce au paramètre suivant : *synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
+Il est possible d'appliquer arbitrairement une réplication synchrone à un
+sous-ensemble d'un groupe d'instances grâce au paramètre suivant :
+*synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
 
-Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur la priorité, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités. 
+Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone
+basée sur la priorité, si bien que chaque validation de transaction attendra
+jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
+sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités. 
 
-Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit à attendre la réponse de trois serveurs secondaires de plus haute priorité choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs secondaires actuellement synchrones se déconnecte pour quelque raison que ce soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
+Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit
+à attendre la réponse de trois serveurs secondaires de plus haute priorité
+choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs
+secondaires actuellement synchrones se déconnecte pour quelque raison que ce
+soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
 
-Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone basée sur un quorum, si bien que chaque validation de transaction attendra jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone sur au moins *num_sync* des serveurs secondaires listés. 
+Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone
+basée sur un quorum, si bien que chaque validation de transaction attendra
+jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
+sur au moins *num_sync* des serveurs secondaires listés. 
 
-Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 et s4 aient répondu, quels qu'ils soient. 
+Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque
+commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 et s4
+aient répondu, quels qu'ils soient. 
 </div>
 
 -----
@@ -2288,7 +2321,10 @@ Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque comm
 </div>
 
 <div class="notes">
-Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le choix par défaut.
+Le projet PostgreSQL a considéré que dans la majeure partie des cas, les
+utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des
+données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le
+choix par défaut.
 </div>
 
 -----
@@ -2302,7 +2338,10 @@ Le projet PostgreSQL a considéré que dans la majeure partie des cas, les utili
 </div>
 
 <div class="notes">
-L'option *-Z*/*--compress* active la compression des journaux de transaction, et spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à tous les noms de fichiers.
+L'option *-Z*/*--compress* active la compression des journaux de transaction, et
+spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et
+9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à
+tous les noms de fichiers.
 </div>
 
 -----
@@ -2316,9 +2355,12 @@ L'option *-Z*/*--compress* active la compression des journaux de transaction, et
 </div>
 
 <div class="notes">
-Les index de type Hash sont désormais journalisés. Ils résisteront donc désormais aux éventuels crashs et seront utilisables sur un environnement répliqué.
+Les index de type Hash sont désormais journalisés. Ils résisteront donc
+désormais aux éventuels crashs et seront utilisables sur un environnement
+répliqué.
 
-Pour en savoir plus : [hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
+Pour en savoir plus : [hash indexing vs.
+WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
 </div>
 
 -----
@@ -2372,7 +2414,8 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 </div>
 
 <div class="notes">
-Les fonctions *ts_headline()* et *to_tsvector()* peuvent désormais être utilisées sur des colonnes de type *JSON* et *JSONB*.
+Les fonctions *ts_headline()* et *to_tsvector()* peuvent désormais être
+utilisées sur des colonnes de type *JSON* et *JSONB*.
 
 En voici un exemple :
 
@@ -2475,7 +2518,8 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
 (1 row)
 ```
 
-Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+Plus d'information : [Full Text Search support for json and
+jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
 </div>
 
 -----
@@ -2488,9 +2532,12 @@ Plus d'information : [Full Text Search support for json and jsonb](https://dali.
 </div>
 
 <div class="notes">
-La fonction *xmltable()* produit une table basée sur la valeur XML donnée. Cette table pourra ensuite être utilisée par exemple comme table primaire d'une clause *FROM*.
+La fonction *xmltable()* produit une table basée sur la valeur XML donnée. Cette
+table pourra ensuite être utilisée par exemple comme table primaire d'une clause
+*FROM*.
 
-L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec l'option de configuration *--with-libxml*.
+L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec
+l'option de configuration *--with-libxml*.
 
 Exemple :
 
@@ -2584,9 +2631,13 @@ Pour en savoir plus : [psql: Add \\gx command](https://dali.bo/waiting-for-postg
 
 **\\if, \\elif, \\else, \\endif**
 
-Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies facultativement par une unique clause \\else.
+Ce groupe de commandes implémente les blocs conditionnels imbriqués. Un bloc
+conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les
+deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies
+facultativement par une unique clause \\else.
 
-Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql
+scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
 </div>
 
 -----
@@ -2615,7 +2666,8 @@ Dans le cas d'un trigger en mode instruction, il n'est pas possible d'utiliser
 les variables `OLD` et `NEW` car elles ciblent une seule ligne. Pour cela, le
 standard SQL parle de tables de transition. 
 
-La version 10 de PostgreSQL permet donc de rattraper le retard à ce sujet par rapport au standard SQL et SQL Server.
+La version 10 de PostgreSQL permet donc de rattraper le retard à ce sujet par
+rapport au standard SQL et SQL Server.
 
 Voici un exemple de leur utilisation.
 
@@ -2752,8 +2804,10 @@ apporte.
 
 Pour en savoir plus :
 
-  * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
-  * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
+  * [Implement syntax for transition tables in AFTER
+    triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
+  * [Cool Stuff in PostgreSQL 10: Transition Table
+    Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
 </div>
 
 -----
@@ -2799,10 +2853,13 @@ Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-fo
 
 **Ajout de l'option *CREATE SEQUENCE AS type_donnee* **
 
-La clause facultative *AS type_donnee* spécifie le type de données de la séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par défaut). Le type de données détermine les valeurs minimales et maximales par défaut pour la séquence. 
+La clause facultative *AS type_donnee* spécifie le type de données de la
+séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
+défaut). Le type de données détermine les valeurs minimales et maximales par
+défaut pour la séquence. 
 
-Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS type_donnee*.
-</div>
+Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS
+type_donnee*.  </div>
 
 -----
 
@@ -2814,7 +2871,8 @@ Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS t
 </div>
 
 <div class="notes">
-La contrainte *GENERATED AS IDENTITY* a été ajoutée à l'ordre *CREATE TABLE* pour assigner automatiquement une valeur unique à une colonne.
+La contrainte *GENERATED AS IDENTITY* a été ajoutée à l'ordre *CREATE TABLE*
+pour assigner automatiquement une valeur unique à une colonne.
 
 Comme le type *serial*, une colonne d'identité utilisera une séquence.
 
@@ -2850,7 +2908,9 @@ Pour en savoir plus : [Identity columns](https://dali.bo/waiting-for-postgresql-
 </div>
 
 <div class="notes">
-Chaque version majeure introduit son lot d'incompatibilités, et il demeure important d'opérer régulièrement, en fonction des contraintes métier, des mises à jour de PostgreSQL.
+Chaque version majeure introduit son lot d'incompatibilités, et il demeure
+important d'opérer régulièrement, en fonction des contraintes métier, des mises
+à jour de PostgreSQL.
 </div>
 
 -----
@@ -2887,7 +2947,9 @@ Voici une grille de compatibilité des outils Dalibo :
 | temboard | À venir dans 1.0a3 |
 | ldap2pg | Oui |
 
-La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien que des changements peuvent encore avoir lieu, et que le support de cette version par les outils de l'écosystème est encore jeune.
+La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
+que des changements peuvent encore avoir lieu, et que le support de cette
+version par les outils de l'écosystème est encore jeune.
 </div>
 
 -----
@@ -2904,13 +2966,21 @@ La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 </div>
 
 <div class="notes">
-Attention, les utilisateurs des versions Beta doivent considérer que les mises à jour concernent des versions majeures. Ceci permettra notamment de pouvoir contourner toutes les incompatibilités ou changements de comportement dû au fait que PostgreSQL 10 est toujours en développement.
+Attention, les utilisateurs des versions Beta doivent considérer que les mises à
+jour concernent des versions majeures. Ceci permettra notamment de pouvoir
+contourner toutes les incompatibilités ou changements de comportement dû au fait
+que PostgreSQL 10 est toujours en développement.
 
-La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines grandes étapes.
+La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
+grandes étapes.
 
-Les développements de la version 11 ont commencé. Le premier commit fest nous laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants : parallélisme, partitionnement et réplication logique.
+Les développements de la version 11 ont commencé. Le premier commit fest nous
+laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants
+: parallélisme, partitionnement et réplication logique.
 
-Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du partitionnement en version 11 dans cet [article](https://dali.bo/plans-for-partitioning-in-v11).
+Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du
+partitionnement en version 11 dans cet
+[article](https://dali.bo/plans-for-partitioning-in-v11).
 </div>
 
 -----
