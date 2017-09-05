@@ -2851,9 +2851,8 @@ séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
 défaut). Le type de données détermine les valeurs minimales et maximales par
 défaut pour la séquence. 
 
-Il est possible de changer le type de données avec l'ordre
-*ALTER SEQUENCE AS type_donnee*.
-
+Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS
+type_donnee*.
 </div>
 
 -----
