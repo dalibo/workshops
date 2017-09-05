@@ -63,10 +63,8 @@ des articles en anglais :
 
   * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet
     PostgreSQL
-  * [New Features Coming in PostgreSQL
-    10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
-  * [PostgreSQL 10 New Features With
-    examples](https://dali.bo/hp-new-features-pg10) de *HP*
+  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
+  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10) de *HP*
 </div>
 
 -----
@@ -214,8 +212,7 @@ maintenance et de supervision ont bien été rendus compatibles avec cette
 version.
 
 Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé
-[Rename “pg_xlog” directory to
-“pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
+[Rename “pg_xlog” directory to pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
 
 -----
@@ -2519,8 +2516,7 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
 (1 row)
 ```
 
-Plus d'information : [Full Text Search support for json and
-jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
 </div>
 
 -----
@@ -2637,8 +2633,7 @@ conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les
 deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies
 facultativement par une unique clause \\else.
 
-Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql
-scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
 </div>
 
 -----
@@ -2805,10 +2800,8 @@ apporte.
 
 Pour en savoir plus :
 
-  * [Implement syntax for transition tables in AFTER
-    triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
-  * [Cool Stuff in PostgreSQL 10: Transition Table
-    Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
+  * [Implement syntax for transition tables in AFTER triggers](https://dali.bo/waiting-for-postgresql-10-implement-syntax-for-transition-tables-in-after-triggers)
+  * [Cool Stuff in PostgreSQL 10: Transition Table Triggers](https://dali.bo/cool-stuff-in-postgresql-10-transition)
 </div>
 
 -----
