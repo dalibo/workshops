@@ -711,26 +711,29 @@ contraire, la donnée ne sera pas placée dans la table mère (contrairement au
 partitionnement traditionnel). À la place, une erreur sera générée :
 
 ```
-ERROR:  no partition of relation "t2" found for row
-```
+ERROR:  no partition of relation "t2" found for row ```
 
-De même, il n'est pas possible d'ajouter un index à la table mère, sous peine
-de voir l'erreur suivante apparaître :
+De même, il n'est pas possible d'ajouter un index à la table mère, sous peine de
+voir l'erreur suivante apparaître :
 
-```
-ERROR:  cannot create index on partitioned table "t1"
-```
+``` ERROR:  cannot create index on partitioned table "t1" ```
 
 Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
-et une contrainte unique sur ce type de table. De ce fait, il n'est pas non
-plus possible de faire pointer une clé étrangère vers ce type de table.
+et une contrainte unique sur ce type de table. De ce fait, il n'est pas non plus
+possible de faire pointer une clé étrangère vers ce type de table.
 
-Plusieurs articles contiennent des explications et des exemples concrets, par exemple :
+Plusieurs articles contiennent des explications et des exemples concrets, comme
+par exemple :
 
-  * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
-  * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
+  * [Partitionnement et transaction autonomes avec
+    PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
+  * [Cool Stuff in PostgreSQL 10: Partitioned Audit
+    Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
 
-Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut néanmoins être également pertinent d'utiliser les extensions [pg_partman](https://dali.bo/pg-partman) et / ou [pg_pathman](https://dali.bo/pg-pathman).
+Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut
+néanmoins être également pertinent d'utiliser les extensions
+[pg_partman](https://dali.bo/pg-partman) ou
+[pg_pathman](https://dali.bo/pg-pathman).
 </div>
 
 -----
@@ -765,27 +768,29 @@ Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut 
 </div>
 
 <div class="notes">
-Dans le cas de la réplication dite « physique », le moteur ne réplique pas les requêtes, mais le résultat de celles-ci, plus précisément les modifications des blocs de données. Le serveur secondaire se contente de rejouer les journaux de transaction.
+Dans le cas de la réplication dite « physique », le moteur ne réplique pas les
+requêtes, mais le résultat de celles-ci, et plus précisément les modifications
+des blocs de données. Le serveur secondaire se contente de rejouer les journaux
+de transaction.
 
 Cela impose certaines limitations. Les journaux de transactions ne contenant
-comme information que le nom des fichiers (pas les noms et/ou type des objets
-SQL impliqués), il n'est pas possible de ne rejouer qu'une partie. De ce fait,
-on réplique l'intégralité de l'instance.
+comme information que le nom des fichiers (et pas les noms et / ou type des
+objets SQL impliqués), il n'est pas possible de ne rejouer qu'une partie. De ce
+fait, on réplique l'intégralité de l'instance.
 
-La façon dont les données sont codées dans les fichiers dépend de
-l'architecture matérielle (32/64 bits, little/big endian) et des composants
-logiciels du système d'exploitation (tri des données, pour les index). De
-ceci, il en découle que chaque instance du cluster de réplication doit
-fonctionner sur un matériel dont l'architecture est identique à celle des
-autres instances et sur un système d'exploitation qui trie les données de la
-même façon.
+La façon dont les données sont codées dans les fichiers dépend de l'architecture
+matérielle (32 / 64 bits, little / big endian) et des composants logiciels du
+système d'exploitation (tri des données, pour les index). De ceci, il en découle
+que chaque instance du cluster de réplication doit fonctionner sur un matériel
+dont l'architecture est identique à celle des autres instances et sur un système
+d'exploitation qui trie les données de la même façon.
 
 Les versions majeures ne codent pas forcément les données de la même façon,
 notamment dans les journaux de transactions. Chaque instance du cluster de
 réplication doit donc être de la même version majeure.
 
-Enfin, les secondaires sont en lecture seule. Cela signifie (et c'est bien)
-qu'on ne peut pas insérer/modifier/supprimer de données sur les tables
+Enfin, les serveurs secondaires sont en lecture seule. Cela signifie (et c'est
+bien) qu'on ne peut pas insérer / modifier / supprimer de données sur les tables
 répliquées. Mais on ne peut pas non plus ajouter des index supplémentaires ou
 des tables de travail, ce qui est bien dommage dans certains cas.
 </div>
@@ -805,31 +810,44 @@ des tables de travail, ce qui est bien dommage dans certains cas.
 </div>
 
 <div class="notes">
-Contrairement à la réplication physique, la réplication logique ne réplique pas les blocs de données. Elle décode le résultat des requêtes qui sont transmis au secondaire. Celui-ci applique les modifications SQL issues du flux de réplication logique.
+Contrairement à la réplication physique, la réplication logique ne réplique pas
+les blocs de données. Elle décode le résultat des requêtes qui sont transmis au
+secondaire. Celui-ci applique les modifications SQL issues du flux de
+réplication logique.
 
-La réplication logique utilise un système de publication/abonnement avec un ou plusieurs abonnés qui s'abonnent à une ou plusieurs publications d'un nœud particulier.
+La réplication logique utilise un système de publication / abonnement avec un ou
+plusieurs abonnés qui s'abonnent à une ou plusieurs publications d'un nœud
+particulier.
 
-Une publication peut être définie sur n'importe quel serveur primaire de réplication physique. Le nœud sur laquelle la publication est définie est nommé éditeur. Le nœud où un abonnement a été défini est nommé abonné.
+Une publication peut être définie sur n'importe quel serveur primaire de
+réplication physique. Le nœud sur laquelle la publication est définie est nommé
+éditeur. Le nœud où un abonnement a été défini est nommé abonné.
 
-Une publication est un ensemble de modifications générées par une table ou un groupe de table. Chaque publication existe au sein d'une seule base de données.
+Une publication est un ensemble de modifications générées par une table ou un
+groupe de table. Chaque publication existe au sein d'une seule base de données.
 
-Un abonnement définit la connexion à une autre base de données et un ensemble de publications (une ou plus) auxquelles l'abonné veut souscrire.
-</div>
+Un abonnement définit la connexion à une autre base de données et un ensemble de
+publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 
 -----
 
 ### Fonctionnement
 
-![Schema du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
+<div class="slide-content">
+![Schema du fonctionnement de la réplication
+logique](medias/z100-schema-repli-logique.png)
+</div>
 
-<div class="notes">
-Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
+<div class="notes"> Schéma obtenu sur
+[blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
 
-  * Une publication est créée sur le serveur éditeur.
-  * L'abonné souscrit à cette publication, c’est un « souscripteur ».
-  * Un processus spécial est lancé : le  « bgworker logical replication ». Il va se connecter à un slot de réplication sur le serveur éditeur.
-  * Le serveur éditeur va procéder à un décodage logique des journaux de transaction pour extraire les résultats des ordres SQL.
-  * Le flux logique est transmis à l'abonné qui les applique sur les tables.
+  * Une publication est créée sur le serveur éditeur
+  * L'abonné souscrit à cette publication, c’est un « souscripteur »
+  * Un processus spécial est lancé : le  « bgworker logical replication ». Il va
+    se connecter à un slot de réplication sur le serveur éditeur
+  * Le serveur éditeur va procéder à un décodage logique des journaux de
+    transaction pour extraire les résultats des ordres SQL
+  * Le flux logique est transmis à l'abonné qui les applique sur les tables
 </div>
 
 -----
@@ -847,21 +865,33 @@ Schéma obtenu sur [blog.anayrat.info](https://blog.anayrat.info/wp-content/uplo
 </div>
 
 <div class="notes">
-Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas répliquées, y compris l'ordre *TRUNCATE*. Le schéma initial peut être créé en utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer manuellement les changements de structure.
+Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas
+répliquées, y compris l'ordre *TRUNCATE*. Le schéma initial peut être créé en
+utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer
+manuellement les changements de structure.
 
-Il n'est pas obligatoire de conserver strictement la même structure des deux côtés. Afin de conserver sa cohérence, la réplication s'arrêtera en cas de conflit.
+Il n'est pas obligatoire de conserver strictement la même structure des deux
+côtés. Afin de conserver sa cohérence, la réplication s'arrêtera en cas de
+conflit.
 
-Il est d'ailleurs nécessaire d'avoir des contraintes de type *PRIMARY KEY* ou *UNIQUE* et *NOT NULL* pour permettre la propagation des ordres *UPDATE* et *DELETE*.
+Il est d'ailleurs nécessaire d'avoir des contraintes de type *PRIMARY KEY* ou
+*UNIQUE* et *NOT NULL* pour permettre la propagation des ordres *UPDATE* et
+*DELETE*.
 
-Les triggers des tables abonnées ne seront pas déclenchés par les modifications reçues via la réplication.
+Les triggers des tables abonnées ne seront pas déclenchés par les modifications
+reçues via la réplication.
 
-En cas d'utilisation du partitionnement, il n'est pas possible d'ajouter des tables parents dans la publication.
+En cas d'utilisation du partitionnement, il n'est pas possible d'ajouter des
+tables parents dans la publication.
 
 Les séquences et *large objects* ne sont pas répliqués.
 
-De manière générale, il serait possible d'utiliser la réplication logique en cas de fail-over en propageant manuellement les mises à jour de séquences et de schéma. La réplication physique est cependant plus appropriée pour cela.
+De manière générale, il serait possible d'utiliser la réplication logique en cas
+de fail-over en propageant manuellement les mises à jour de séquences et de
+schéma. La réplication physique est cependant plus appropriée pour cela.
 
-La réplication logique vise d'autres objectifs, tels la génération de rapports ou la mise à jour de version majeure de PostgreSQL.
+La réplication logique vise d'autres objectifs, tels que la génération de
+rapports ou la mise à jour de version majeure de PostgreSQL.
 </div>
 
 -----
@@ -880,7 +910,8 @@ La réplication logique vise d'autres objectifs, tels la génération de rapport
 </div>
 
 <div class="notes">
-De nouveaux catalogues ont été ajoutés pour permettre la supervision de la réplication logique. En voici la liste :
+De nouveaux catalogues ont été ajoutés pour permettre la supervision de la
+réplication logique. En voici la liste :
 
 | Catalogue                    | Commentaires                                                      |
 | ---------------------------- | ----------------------------------------------------------------- |
@@ -918,7 +949,8 @@ D'autres catalogues déjà existants peuvent également être utiles :
 <div class="notes">
 **Exemple complet :**
 
-Définir le paramètre `wal_level` à la valeur `logical` dans le fichier `postgresql.conf` des serveurs éditeur et abonné.
+Définir le paramètre `wal_level` à la valeur `logical` dans le fichier
+`postgresql.conf` des serveurs éditeur et abonné.
 
 Initialiser une base de données :
 
@@ -940,7 +972,10 @@ postgres@bench=# CREATE PUBLICATION ma_publication FOR ALL TABLES;
 CREATE PUBLICATION
 ```
 
-Une publication doit être créée par base de données. Elle liste les tables dont la réplication est souhaitée. L'attribut `FOR ALL TABLES` permet de ne pas spécifier cette liste. Pour utiliser cet attribut, il faut être super-utilisateur.
+Une publication doit être créée par base de données. Elle liste les tables dont
+la réplication est souhaitée. L'attribut `FOR ALL TABLES` permet de ne pas
+spécifier cette liste. Pour utiliser cet attribut, il faut être
+super-utilisateur.
 
 Créer ensuite l'utilisateur qui servira pour la réplication :
 
@@ -948,14 +983,14 @@ Créer ensuite l'utilisateur qui servira pour la réplication :
 $ createuser --replication repliuser
 ```
 
-Lui autoriser l'accès dans le fichier `pg_hba.conf` du serveur éditeur et lui permettre de visualiser les données dans la base :
+Lui autoriser l'accès dans le fichier `pg_hba.conf` du serveur éditeur et lui
+permettre de visualiser les données dans la base :
 
 ```sql
 postgres@bench=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO repliuser;
 GRANT
 ```
 </div>
-
 
 -----
 
@@ -964,7 +999,8 @@ GRANT
 <div class="slide-content">
   * Initialiser une base de données et importer son schéma
   * Créer l'abonnement :
-```
+
+```sql
 CREATE SUBSCRIPTION ma_souscription
 CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'
 PUBLICATION ma_publication;
@@ -1014,8 +1050,8 @@ CREATE SUBSCRIPTION
 </div>
 
 <div class="notes">
-
-De nouvelles colonnes ont été ajoutées à *pg_stat_replication* pour mesurer les délais de réplication :
+De nouvelles colonnes ont été ajoutées à *pg_stat_replication* pour mesurer les
+délais de réplication :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
@@ -1043,14 +1079,22 @@ sync_state       | async
 
 Ces trois nouvelles informations concernent la réplication synchrone.
 
-*write_lag* mesure le délai en cas de *synchronous_commit* à *remote_write*. Cette configuration fera que chaque `COMMIT` attendra la confirmation de la réception en mémoire de l'enregistrement du `COMMIT` par le standby et son écriture via le système d'exploitation, sans que les données du cache du système ne soient vidées sur disque au niveau du serveur en standby.
+*write_lag* mesure le délai en cas de *synchronous_commit* à *remote_write*.
+Cette configuration fera que chaque `COMMIT` attendra la confirmation de la
+réception en mémoire de l'enregistrement du `COMMIT` par le standby et son
+écriture via le système d'exploitation, sans que les données du cache du système
+ne soient vidées sur disque au niveau du serveur en standby.
 
-*flush_lag* mesure le délai jusqu'à confirmation que les données modifiées soient bien écrites sur disque au niveau du serveur standby.
+*flush_lag* mesure le délai jusqu'à confirmation que les données modifiées
+soient bien écrites sur disque au niveau du serveur standby.
 
-*replay_lag* mesure le délai en cas de *synchronous_commit* à *remote_apply*. Cette configuration fera en sorte que chaque `COMMIT` devra attendre le retour des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction, la rendant visible aux requêtes des utilisateurs. 
+*replay_lag* mesure le délai en cas de *synchronous_commit* à *remote_apply*.
+Cette configuration fera en sorte que chaque `COMMIT` devra attendre le retour
+des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction,
+la rendant visible aux requêtes des utilisateurs. 
 
-
-*pg_replication_slots* nous permet de savoir si un slot de réplication est temporaire ou non (*temporary*) :
+*pg_replication_slots* nous permet de savoir si un slot de réplication est
+temporaire ou non (*temporary*) :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_replication_slots;
@@ -1069,8 +1113,8 @@ restart_lsn         | 0/9CA63F68
 confirmed_flush_lsn | 0/9CA63FA0
 ```
 
-
-De nouvelles vues ont été créées afin de connaître l'état et le contenu des publications :
+De nouvelles vues ont été créées afin de connaître l'état et le contenu des
+publications :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_publication;
@@ -1108,7 +1152,6 @@ subpublications | {ma_publication}
 
 ```
 
-
 **Exemple de suivi de l'évolution de la réplication :**
 
 Simulation de l'activité :
@@ -1117,7 +1160,9 @@ Simulation de l'activité :
 $ pgbench -T 300 bench
 ```
 
-On peut suivre l'évolution des *lsn* (*Log Sequence Number* ou *Numéro de Séquence de Journal*, pointeur vers une position dans les journaux de transactions) envoyés et reçus.
+On peut suivre l'évolution des *lsn* (*Log Sequence Number* ou *Numéro de
+Séquence de Journal*, pointeur vers une position dans les journaux de
+transactions) envoyés et reçus.
 
 Sur l'éditeur grâce à *pg_stat_replication* :
 
