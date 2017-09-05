@@ -24,11 +24,18 @@ Public Domain CC0.
 </div>
 
 <div class="notes">
-Le développement de la version 10 a suivi l'organisation habituelle : un démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en mars, une première version beta mi-mai. Le travail est actuellement à la stabilisation du code, la suppression des bugs, l'amélioration de la documentation. La version finale est prévue le 28 septembre 2017.
+Le développement de la version 10 a suivi l'organisation habituelle : un
+démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en
+mars, une première version beta mi-mai. Le travail est actuellement à la
+stabilisation du code, la suppression des bugs, l'amélioration de la
+documentation. La version finale est prévue le 28 septembre 2017.
 
-La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
+La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*.
+Son développement est assuré par des centaines de contributeurs répartis partout
+dans le monde.
 
-Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL, une présentation récente de *Daniel Vérité* est disponible en ligne :
+Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL,
+une présentation récente de *Daniel Vérité* est disponible en ligne :
 
   * [Vidéo](https://youtu.be/NPRw0oJETGQ)
   * [Slides](https://dali.bo/daniel-verite-communaute-dev-pgday)
@@ -50,11 +57,16 @@ Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL
 </div>
 
 <div class="notes">
-PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers des articles en anglais :
+PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont
+d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers
+des articles en anglais :
 
-  * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet PostgreSQL
-  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
-  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10) de *HP*
+  * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet
+    PostgreSQL
+  * [New Features Coming in PostgreSQL
+    10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
+  * [PostgreSQL 10 New Features With
+    examples](https://dali.bo/hp-new-features-pg10) de *HP*
 </div>
 
 -----
@@ -91,15 +103,26 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
 </div>
 
 <div class="notes">
-La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme par exemple *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
+La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des
+versions. Auparavant, chaque version était désignée par 3 nombres, comme par
+exemple *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres,
+*10.3* sera par exemple la troisième version mineure de la version majeure *10*.
 
-L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs.
+L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux
+développeurs.
 
-Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?"). Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent ainsi se concentrer sur un travail plus productif.
+Pour les développeurs, à chaque nouvelle version majeure, la question se posait
+de changer les deux premiers nombres ou seulement le second ("Est-ce une version
+9.6 ou 10.0 ?"). Ceci générait de grosses discussions et beaucoup de
+frustrations. En passant à un seul nombre pour la version majeure, ce problème
+disparaît et les développeurs peuvent ainsi se concentrer sur un travail plus
+productif.
 
-Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile notamment lors des mises à jour.
+Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion
+peu utile notamment lors des mises à jour.
 
-Vous trouverez plus de détails dans cet [article](https://dali.bo/changing-postgresql-version-numbering) de Josh Berkus.
+Vous trouverez plus de détails dans cet
+[article](https://dali.bo/changing-postgresql-version-numbering) de Josh Berkus.
 </div>
 
 -----
@@ -118,9 +141,13 @@ Vous trouverez plus de détails dans cet [article](https://dali.bo/changing-post
 </div>
 
 <div class="notes">
-Afin de clarifier le rôle des répertoires *pg_xlog* et *pg_clog* qui contiennent non pas des *logs* mais des journaux de transaction ou de commits, les deux renommages ont été effectués dans $PGDATA. Les fonctions dont les noms y faisaient référence ont également été renommées.
+Afin de clarifier le rôle des répertoires *pg_xlog* et *pg_clog* qui contiennent
+non pas des *logs* mais des journaux de transaction ou de commits, les deux
+renommages ont été effectués dans $PGDATA. Les fonctions dont les noms y
+faisaient référence ont également été renommées.
 
-Ainsi, voici le contenu actuel d'un répertoire de données PostgreSQL après son initialisation :
+Ainsi, voici le contenu actuel d'un répertoire de données PostgreSQL après son
+initialisation :
 
 ```
 drwx------. 5 postgres postgres  4096 Aug  3 17:24 base
@@ -180,9 +207,15 @@ $ ls -l *wal*
 -rwxr-xr-x. 1 postgres postgres 482344 Aug  2 11:09 pg_waldump
 ```
 
-L'ensemble des contributions de l'écosystème PostgreSQL va également devoir s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer sur cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles avec cette version.
+L'ensemble des contributions de l'écosystème PostgreSQL va également devoir
+s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer
+sur cette nouvelle version de vérifier que les outils d'administration, de
+maintenance et de supervision ont bien été rendus compatibles avec cette
+version.
 
-Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
+Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé
+[Rename “pg_xlog” directory to
+“pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
 
 -----
@@ -299,7 +332,8 @@ il était préférable de s'en passer.
 </div>
 
 <div class="notes">
-La version *10* apporte un nouveau système de partitionnement se basant sur de l'infrastructure qui existait déjà dans PostgreSQL.
+La version *10* apporte un nouveau système de partitionnement se basant sur de
+l'infrastructure qui existait déjà dans PostgreSQL.
 
 Le but est de simplifier la mise en place et l'administration des tables
 partitionnées. Des clauses spécialisées ont été ajoutées aux ordres SQL déjà
@@ -331,8 +365,8 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
 
-Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le vérifier en utilisant un SELECT avec la clause *ONLY*.
-
+Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
+vérifier en utilisant un SELECT avec la clause *ONLY*.
 </div>
 
 -----
@@ -399,12 +433,13 @@ ERROR:  no PARTITION OF relation "t1" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (6).
 ```
 
-Lors de l'insertion, les données sont correctement redirigées vers leurs partitions. 
+Lors de l'insertion, les données sont correctement redirigées vers leurs
+partitions. 
 
 On peut remarquer que la table partitionnée est vide.
 
-Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se produit.
-
+Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se
+produit.
 </div>
 
 -----
@@ -459,9 +494,11 @@ ERROR:  no PARTITION OF relation "t2" found for row
 DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
 
-Lors de l'insertion, les données sont correctement redirigées vers leurs partitions. 
+Lors de l'insertion, les données sont correctement redirigées vers leurs
+partitions. 
 
-Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se produit.
+Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se
+produit.
 </div>
 
 -----
@@ -484,9 +521,11 @@ Si aucune partition correspondant à la clé insérée n'est trouvée, une erreu
 </div>
 
 <div class="notes">
-Quand on utilise le partitionnement par intervalles, il est possible de créer les partitions en utilisant plusieurs colonnes.
+Quand on utilise le partitionnement par intervalles, il est possible de créer
+les partitions en utilisant plusieurs colonnes.
 
-On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de tablespaces différents.
+On profitera de l'exemple ci-dessous pour montrer l'utilisation conjointe de
+tablespaces différents.
 
 Commençons par créer les tablespaces :
 
@@ -548,7 +587,12 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 ```
 
-Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple être déclarées comme suit et permettront d'insérer les lignes qui étaient ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant la sortie de la version *beta3* et ils mentionnent la valeur spéciale *UNBOUNDED* qui a depuis été remplacée par *MINVALUE* et *MAXVALUE*.
+Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de
+valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple
+être déclarées comme suit et permettront d'insérer les lignes qui étaient
+ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant
+la sortie de la version *beta3* et ils mentionnent la valeur spéciale
+*UNBOUNDED* qui a depuis été remplacée par *MINVALUE* et *MAXVALUE*.
 
 ```sql
 postgres=# CREATE TABLE t2_0 PARTITION OF t2
@@ -560,7 +604,8 @@ postgres=# CREATE TABLE t2_3 PARTITION OF t2
        TABLESPACE ts3;
 ```
 
-Enfin, on peut consulter la table `pg_class` afin de vérifier la présence des différentes partitions :
+Enfin, on peut consulter la table `pg_class` afin de vérifier la présence des
+différentes partitions :
 
 ```sql
 postgres=# ANALYZE t2;
@@ -1431,7 +1476,9 @@ utilise bien un hachage et est deux fois plus rapide :
 </div>
 
 <div class="notes">
-Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une même table. Cela améliore les estimations des plans d'exécution dans le cas de colonnes fortement corrélées.
+Il est désormais possible de créer des statistiques sur plusieurs colonnes d'une
+même table. Cela améliore les estimations des plans d'exécution dans le cas de
+colonnes fortement corrélées.
 
 Par exemple :
 
@@ -1446,9 +1493,11 @@ postgres=# ANALYZE t;
 ANALYZE
 ```
 
-La distribution des données est très simple; il n'y a que 100 valeurs différentes dans chaque colonne, distribuées de manière uniforme.
+La distribution des données est très simple; il n'y a que 100 valeurs
+différentes dans chaque colonne, distribuées de manière uniforme.
 
-L'exemple suivant montre le résultat de l'estimation d'une condition `WHERE` sur la colonne a : 
+L'exemple suivant montre le résultat de l'estimation d'une condition `WHERE` sur
+la colonne a : 
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
@@ -1461,11 +1510,13 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
  Execution time: 2.570 ms
 (5 rows)
 ```
-L'optimiseur examine la condition et détermine que la sélectivité de cette clause est d'1% (`rows=100` parmi les 10000 lignes insérées).
+L'optimiseur examine la condition et détermine que la sélectivité de cette
+clause est d'1% (`rows=100` parmi les 10000 lignes insérées).
 
 Une estimation similaire peut être obtenue pour la colonne b.
 
-Appliquons maintenant la même condition sur chacune des colonnes en les combinant avec *AND* :
+Appliquons maintenant la même condition sur chacune des colonnes en les
+combinant avec *AND* :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
@@ -1479,9 +1530,14 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-L'optimiseur estime la sélectivité pour chaque condition individuellement, en arrivant à la même estimation d'1 % comme au-dessus. Puis, il part du principe que les conditions sont indépendantes et multiple donc leurs sélectivités. L'estimation de sélectivité finale est donc d'uniquement 0,01 %, ce qui est une sous-estimation importante (différence entre `cost` et `actual`).
+L'optimiseur estime la sélectivité pour chaque condition individuellement, en
+arrivant à la même estimation d'1 % comme au-dessus. Puis, il part du principe
+que les conditions sont indépendantes et multiple donc leurs sélectivités.
+L'estimation de sélectivité finale est donc d'uniquement 0,01 %, ce qui est une
+sous-estimation importante (différence entre `cost` et `actual`).
 
-Pour améliorer l'estimation, il est désormais possible de créer des statistiques multi-colonnes :
+Pour améliorer l'estimation, il est désormais possible de créer des statistiques
+multi-colonnes :
 
 ```sql
 postgres=# CREATE STATISTICS s1 (dependencies) ON a, b FROM t;
@@ -1505,7 +1561,9 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-Pour compléter ces informations, vous pouvez également consulter : [Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
+Pour compléter ces informations, vous pouvez également consulter : [Implement
+multivariate n-distinct
+coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
 </div>
 
 -----
@@ -1537,11 +1595,16 @@ La version 10 propose la parallélisation de nouvelles opérations :
   * requêtes préparées
   * sous-requêtes non-corrélées
 
-La jointure-union (*Merge Join*) est fondée sur le principe d'ordonner les tables gauche et droite et ensuite de les comparer en parallèle.
+La jointure-union (*Merge Join*) est fondée sur le principe d'ordonner les
+tables gauche et droite et ensuite de les comparer en parallèle.
 
-Le nœud *Gather* introduit en 9.6 collecte les résultats de tous les *workers* dans un ordre arbitraire. Si chaque *worker* retourne des résultats triés, le nœud *Gather Merge* préservera l'ordre de ces résultats déjà triés.
+Le nœud *Gather* introduit en 9.6 collecte les résultats de tous les *workers*
+dans un ordre arbitraire. Si chaque *worker* retourne des résultats triés, le
+nœud *Gather Merge* préservera l'ordre de ces résultats déjà triés.
 
-Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert Haas*.
+Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter
+l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert
+Haas*.
 </div>
 
 -----
@@ -1558,13 +1621,21 @@ Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter l
 </div>
 
 <div class="notes">
-*min_parallel_table_scan_size* spécifie la quantité minimale de données de la table qui doit être parcourue pour qu'un parcours parallèle soit envisagé. 
+*min_parallel_table_scan_size* spécifie la quantité minimale de données de la
+table qui doit être parcourue pour qu'un parcours parallèle soit envisagé. 
 
-*min_parallel_index_scan_size* spécifie la quantité minimale de données d'index qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
+*min_parallel_index_scan_size* spécifie la quantité minimale de données d'index
+qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 
-*max_parallel_workers* positionne le nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8. Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier *max_parallel_workers_per_gather*.
+*max_parallel_workers* positionne le nombre maximum de workers que le système
+peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est
+8. Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier
+*max_parallel_workers_per_gather*.
 
-Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de processus parallèles pouvant être lancé par un seul nœud Gather. La valeur par défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de requête.
+Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de
+processus parallèles pouvant être lancé par un seul nœud Gather. La valeur par
+défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de
+requête.
 </div>
 
 -----
@@ -1591,7 +1662,10 @@ Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de pr
 </div>
 
 <div class="notes">
-La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne non vide et qui n'est pas un commentaire, avec des annotations indiquant si la règle a pu être appliquée avec succès.
+La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de
+configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne
+non vide et qui n'est pas un commentaire, avec des annotations indiquant si la
+règle a pu être appliquée avec succès.
 
 ```sql
 postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
@@ -1607,9 +1681,17 @@ postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
 (6 rows)
 ```
 
-Les valeurs par défaut relatives à la réplication, contenues dans le fichier `pg_hba.conf` ont été modifiées. En version 9.6, les connexions locales étaient présentes mais commentées. Elles ont été décommentées dans la version 10 et sont donc maintenant possibles par défaut en local.
+Les valeurs par défaut relatives à la réplication, contenues dans le fichier
+`pg_hba.conf` ont été modifiées. En version 9.6, les connexions locales étaient
+présentes mais commentées. Elles ont été décommentées dans la version 10 et sont
+donc maintenant possibles par défaut en local.
 
-Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son apparition. Il s'agit de l'implémentation du **Salted Challenge Response Authentication Mechanism**. Ceci est basé sur un schéma de type question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas être supportée par d'anciens clients. 
+Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son
+apparition. Il s'agit de l'implémentation du **Salted Challenge Response
+Authentication Mechanism**. Ceci est basé sur un schéma de type
+question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions
+non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas
+être supportée par d'anciens clients. 
 </div>
 
 -----
@@ -1625,23 +1707,38 @@ Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son a
 </div>
 
 <div class="notes">
-Les tables peuvent avoir des politiques de sécurité pour l'accès aux lignes qui restreignent, utilisateur par utilisateur, les lignes qui peuvent être renvoyées par les requêtes d'extraction ou les commandes d'insertions, de mises à jour ou de suppressions. Cette fonctionnalité est aussi connue sous le nom de `Row-Level Security`.
+Les tables peuvent avoir des politiques de sécurité pour l'accès aux lignes qui
+restreignent, utilisateur par utilisateur, les lignes qui peuvent être renvoyées
+par les requêtes d'extraction ou les commandes d'insertions, de mises à jour ou
+de suppressions. Cette fonctionnalité est aussi connue sous le nom de `Row-Level
+Security`.
 
-Lorsque la protection des lignes est activée sur une table, tous les accès classiques à la table pour sélectionner ou modifier des lignes doivent être autorisés par une politique de sécurité. 
+Lorsque la protection des lignes est activée sur une table, tous les accès
+classiques à la table pour sélectionner ou modifier des lignes doivent être
+autorisés par une politique de sécurité. 
 
-Cependant, le propriétaire de la table n'est typiquement pas soumis aux politiques de sécurité. Si aucune politique n'existe pour la table, une politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est visible ou ne peut être modifiée.
+Cependant, le propriétaire de la table n'est typiquement pas soumis aux
+politiques de sécurité. Si aucune politique n'existe pour la table, une
+politique de rejet est utilisé par défaut, ce qui signifie qu'aucune ligne n'est
+visible ou ne peut être modifiée.
 
-Par défaut, les politiques sont permissives, ce qui veut dire que quand plusieurs politiques sont appliquées, elles sont combinées en utilisant l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des politiques permissives avec des politiques restrictives (combinées en utilisant l'opérateur booléen *AND*).
+Par défaut, les politiques sont permissives, ce qui veut dire que quand
+plusieurs politiques sont appliquées, elles sont combinées en utilisant
+l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des
+politiques permissives avec des politiques restrictives (combinées en utilisant
+l'opérateur booléen *AND*).
 
 **Remarque** 
 
-Afin de rendre l'exemple suivant plus lisible, le prompt psql a été modifié avec la commande suivante :
+Afin de rendre l'exemple suivant plus lisible, le prompt psql a été modifié avec
+la commande suivante :
 
 ```
 \set PROMPT1 '%n@%/%R%# '
 ```
 
-Il est possible de rendre ce changement permanent en ajoutant la commande ci-dessus dans le fichier *~/.psqlrc*.
+Il est possible de rendre ce changement permanent en ajoutant la commande
+ci-dessus dans le fichier *~/.psqlrc*.
 
 **Exemple**
 
@@ -1655,7 +1752,8 @@ postgres@postgres=# CREATE ROLE u2 WITH LOGIN;
 CREATE ROLE
 ```
 
-Créons une table *comptes*, insérons-y des données et permettons aux utilisateurs d'accéder à ces données :
+Créons une table *comptes*, insérons-y des données et permettons aux
+utilisateurs d'accéder à ces données :
 
 ```sql
 u1@db1=> CREATE TABLE comptes (admin text, societe text, contact_email text);
@@ -1692,7 +1790,8 @@ u1@db1=> SELECT * FROM comptes;
 (3 rows)
 ```
 
-Connectons-nous avec l'utilisateur *u2* et vérifions que la politique est bien appliquée :
+Connectons-nous avec l'utilisateur *u2* et vérifions que la politique est bien
+appliquée :
 
 ```sql
 u1@db1=> \c db1 u2
@@ -1730,9 +1829,11 @@ u2@db1=> SELECT * FROM comptes;
 
 ```
 
-*u1* étant propriétaire de cette table, les politiques ne s'appliquent pas à lui, au contraire de *u2*.
+*u1* étant propriétaire de cette table, les politiques ne s'appliquent pas à
+lui, au contraire de *u2*.
 
-Comme le montre ce plan d'exécution, les deux politiques permissives se combinent bien en utilisant l'opérateur booléen *OR* :
+Comme le montre ce plan d'exécution, les deux politiques permissives se
+combinent bien en utilisant l'opérateur booléen *OR* :
 
 ```sql
 u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
@@ -1743,7 +1844,8 @@ u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
 (2 rows)
 ```
 
-Remplaçons maintenant l'une de ces politiques permissives par une politique restrictive :
+Remplaçons maintenant l'une de ces politiques permissives par une politique
+restrictive :
 
 ```sql
 u2@db1=> \c db1 u1
@@ -1797,9 +1899,16 @@ Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
 </div>
 
 <div class="notes">
-PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines informations et fonctionnalités privilégiées, pour lesquelles il est habituellement nécessaire d'être super-utilisateur pour en profiter. Les administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres rôles de leurs environnements, fournissant à ces utilisateurs les fonctionnalités et les informations spécifiées. 
+PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines
+informations et fonctionnalités privilégiées, pour lesquelles il est
+habituellement nécessaire d'être super-utilisateur pour en profiter. Les
+administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres
+rôles de leurs environnements, fournissant à ces utilisateurs les
+fonctionnalités et les informations spécifiées. 
 
-Ils accordent un ensemble de privilèges permettant au rôle de lire les paramètres de configuration, les statistiques et les informations systèmes normalement réservés aux super-utilisateurs. 
+Ils accordent un ensemble de privilèges permettant au rôle de lire les
+paramètres de configuration, les statistiques et les informations systèmes
+normalement réservés aux super-utilisateurs. 
 
 La version 10 implémente les nouveaux rôles suivants :
 
@@ -1854,7 +1963,9 @@ l'exécution des requêtes SQL. En version 10, cette vue affiche en plus les
 processus auxiliaires. Il est possible de différencier les processus avec
 la nouvelle colonne *backend_type*.
 
-Les types possibles sont : autovacuum launcher, autovacuum worker, background worker, background writer, client backend, checkpointer, startup, walreceiver, walsender et walwriter.
+Les types possibles sont : autovacuum launcher, autovacuum worker, background
+worker, background writer, client backend, checkpointer, startup, walreceiver,
+walsender et walwriter.
 
 Voici ce que pourrait donner une lecture de cette vue sur une version 10 :
 
@@ -1871,7 +1982,8 @@ postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, b
  4937 |                  | Activity        | WalWriterMain       | walwriter
 ```
 
-On y voit aussi de nouveaux types d'événements pour lesquels un processus peut être en attente. En voici la liste :
+On y voit aussi de nouveaux types d'événements pour lesquels un processus peut
+être en attente. En voici la liste :
 
   * Activity : Le processus serveur est inactif. En attente d'activité d'un processus d'arrière-plan.
   * Extension : Le processus serveur est en attente d'activité d'une extension. 
@@ -1919,9 +2031,14 @@ could not connect to server: Connection refused
   TCP/IP connections on port 5433?
 ```
 
-Il est également désormais possible de fournir l'attribut target_session_attrs à l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion dans laquelle une transaction *read-write* est possible ou n'importe quel type de transaction (*any*).
+Il est également désormais possible de fournir l'attribut target_session_attrs à
+l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion
+dans laquelle une transaction *read-write* est possible ou n'importe quel type
+de transaction (*any*).
 
-Cela peut s'avérer utile pour établir une chaîne de connexion entre plusieurs instances en réplication et permettre l'exécution des requêtes en écriture sur le serveur primaire.
+Cela peut s'avérer utile pour établir une chaîne de connexion entre plusieurs
+instances en réplication et permettre l'exécution des requêtes en écriture sur
+le serveur primaire.
 
 Exemple avec psql :
 
@@ -1932,7 +2049,8 @@ $ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session
 
 **Slots de réplication temporaires**
 
-Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...) peut désormais être créé temporairement :
+Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...)
+peut désormais être créé temporairement :
 
 ```sql
 postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
