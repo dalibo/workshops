@@ -75,7 +75,7 @@ PostgreSQL 10 apporte un grand nombre de nouvelles fonctionnalités, qui sont d'
 ### Numérotation des versions
 
 <div class="slide-content">
-Ancienne numérotation composée de 3 nombres :
+Ancienne numérotation exprimée sur 3 nombres :
 
 ```
   9 . 6 . 3 
@@ -91,11 +91,13 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
 </div>
 
 <div class="notes">
-La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
+La sortie de PostgreSQL 10 inaugure un nouveau système de numérotation des versions. Auparavant, chaque version était désignée par 3 nombres, comme par exemple *9.6.3*. La nouvelle numérotation sera désormais exprimée sur 2 nombres, *10.3* sera par exemple la troisième version mineure de la version majeure *10*.
 
-L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs. Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?"). Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent se concentrer sur un travail plus productif.
+L'ancienne numérotation posait problème aux utilisateurs, mais aussi aux développeurs.
 
-Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile sur les mises à jour.
+Pour les développeurs, à chaque nouvelle version majeure, la question se posait de changer les deux premiers nombres ou seulement le second ("Est-ce une version 9.6 ou 10.0 ?"). Ceci générait de grosses discussions et beaucoup de frustrations. En passant à un seul nombre pour la version majeure, ce problème disparaît et les développeurs peuvent ainsi se concentrer sur un travail plus productif.
+
+Pour les utilisateurs, principalement les nouveaux, cela apportait une confusion peu utile notamment lors des mises à jour.
 
 Vous trouverez plus de détails dans cet [article](https://dali.bo/changing-postgresql-version-numbering) de Josh Berkus.
 </div>
@@ -148,7 +150,7 @@ drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_xact
 Si on regarde les fonctions contenant le mot clé *wal* :
 
 ```
-postgres=# select proname from pg_proc where proname like '%wal%' order by proname;
+postgres=# SELECT proname FROM pg_proc WHERE proname LIKE '%wal%' ORDER BY proname;
           proname
 ---------------------------
  pg_current_wal_flush_lsn
@@ -178,7 +180,7 @@ $ ls -l *wal*
 -rwxr-xr-x. 1 postgres postgres 482344 Aug  2 11:09 pg_waldump
 ```
 
-L'ensemble des contributions de l'écosystème PostgreSQL devra également s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer sur cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles pour cette version.
+L'ensemble des contributions de l'écosystème PostgreSQL va également devoir s'adapter à ces changements de nommage. Il sera donc nécessaire avant de migrer sur cette nouvelle version de vérifier que les outils d'administration, de maintenance et de supervision ont bien été rendus compatibles avec cette version.
 
 Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé [Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
@@ -244,29 +246,30 @@ poussée du partitionnement.
 </div>
 
 <div class="notes">
-L'ancien partitionnement dans PostgreSQL se base sur un contournement de la
-fonctionnalité d'héritage. L'idée est de créer des tables filles d'une table
-parent par le biais de l'héritage. De ce fait, une lecture de la table mère
-provoquera une lecture des données des tables filles. Un ajout ultérieur à
-PostgreSQL a permis de faire en sorte que certaines tables filles ne soient
-pas lues si une contrainte CHECK permet de s'assurer qu'elles ne contiennent
-pas les données recherchées. Les lectures étaient donc assurées par le biais
-de l'optimiseur.
+L'ancienne méthode de partitionnement dans PostgreSQL se base sur un
+contournement de la fonctionnalité d'héritage. L'idée est de créer des 
+tables filles d'une table parent par le biais de l'héritage. De ce fait,
+une lecture de la table mère provoquera une lecture des données des tables
+filles. Un ajout ultérieur à PostgreSQL a permis de faire en sorte que 
+certaines tables filles ne soient pas lues si une contrainte CHECK permet
+de s'assurer qu'elles ne contiennent pas les données recherchées. Les
+lectures sont donc assurées par le biais de l'optimiseur.
 
-Il n'en allait pas de même pour les écritures. Une insertion dans la table
-mère n'était pas redirigée automatiquement dans la bonne table fille. Pour
-cela, il fallait ajouter un trigger qui annulait l'insertion sur la table mère
-pour la réaliser sur la bonne table fille. Les mises à jour étaient gérées
-tant qu'on ne mettait pas à jour les colonnes de la clé de partitionnement.
-Enfin, les suppressions étaient gérées correctement de façon automatique.
+Il n'en va pas de même pour les écritures. Une insertion dans la table
+mère n'est pas redirigée automatiquement dans la bonne table fille. Pour
+cela, il faut ajouter un trigger qui annule l'insertion sur la table mère
+pour la réaliser sur la bonne table fille. Les mises à jour sont gérées
+tant qu'on ne met pas à jour les colonnes de la clé de partitionnement.
+Enfin, les suppressions sont gérées correctement de façon automatique.
 
-Tout ceci générait un gros travail de mise en place. La maintenance n'était
-pas forcément plus aisée, car il fallait s'assurer de créer les partitions en
-avance, à moins de laisser ce travail au trigger sur insertion.
+Tout ceci génère un gros travail de mise en place. La maintenance n'est
+pas forcément plus aisée, car il est nécessaire de s'assurer que les 
+partitions sont bien créées en avance, à moins de laisser ce travail
+au trigger sur insertion.
 
-D'autres inconvénients étaient présents, notamment au niveau des index. Comme
-il n'est pas possible de créer un index global (ie, sur plusieurs tables), il
-n'est pas possible d'ajouter une clé primaire globale pour la table
+D'autres inconvénients sont également présents, notamment au niveau des index.
+Comme il n'est pas possible de créer un index global (ie, sur plusieurs tables),
+il n'est pas possible d'ajouter une clé primaire globale pour la table
 partitionnée. En fait, toute contrainte unique est impossible.
 
 En d'autres termes, ce contournement pouvait être intéressant dans certains
@@ -301,11 +304,11 @@ La version *10* apporte un nouveau système de partitionnement se basant sur de 
 Le but est de simplifier la mise en place et l'administration des tables
 partitionnées. Des clauses spécialisées ont été ajoutées aux ordres SQL déjà
 existants, comme *CREATE TABLE* et *ALTER TABLE*, pour ajouter, attacher,
-détacher des partitions.
+et détacher des partitions.
 
 Au niveau de la simplification de la mise en place, on peut noter qu'il n'est
 plus nécessaire de créer une fonction trigger et d'ajouter des triggers pour
-gérer les insertions et mises à jour. Le routage est géré de façon automatique
+gérer les insertions et les mises à jour. Le routage est géré de façon automatique
 en fonction de la définition des partitions. Si les données insérées ne
 trouvent pas de partition cible, l'insertion est tout simplement en erreur.
 Du fait de ce routage automatique, les insertions se révèlent aussi plus rapides.
@@ -314,7 +317,7 @@ Le catalogue *pg_class* a été modifié et indique désormais :
 
   * si une table est une partition (dans ce cas : *relispartition = 't'*)
   * si une table est partitionnée (*relkind = 'p'*) ou si elle est ordinaire (*relkind = 'r'*)
-  * la représentation interne des bornes de partitionnement (relpartbound)
+  * la représentation interne des bornes de partitionnement (*relpartbound*)
 
 Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes :
 
@@ -584,7 +587,7 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 t1 (non partitionnée) :
 
 ```
-INSERT INTO t1 select i, 'toto'
+INSERT INTO t1 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 10097.098 ms (00:10.097)
 CHECKPOINT;
@@ -594,7 +597,7 @@ Time: 501.660 ms
 t2 (partitionnement déclaratif) :
 
 ```
-INSERT INTO t2 select i, 'toto'
+INSERT INTO t2 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 11448.867 ms (00:11.449)
 CHECKPOINT;
@@ -604,7 +607,7 @@ Time: 501.212 ms
 t3 (partitionnement par héritage) :
 
 ```
-INSERT INTO t3 select i, 'toto'
+INSERT INTO t3 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 125351.918 ms (02:05.352)
 CHECKPOINT;
