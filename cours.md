@@ -756,12 +756,15 @@ contraire, la donnée ne sera pas placée dans la table mère (contrairement au
 partitionnement traditionnel). À la place, une erreur sera générée :
 
 ```
-ERROR:  no partition of relation "t2" found for row ```
+ERROR:  no partition of relation "t2" found for row
+```
 
 De même, il n'est pas possible d'ajouter un index à la table mère, sous peine de
 voir l'erreur suivante apparaître :
 
-``` ERROR:  cannot create index on partitioned table "t1" ```
+```
+ERROR:  cannot create index on partitioned table "t1"
+```
 
 Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non plus
