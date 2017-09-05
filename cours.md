@@ -63,8 +63,10 @@ des articles en anglais :
 
   * [New in postgres 10](https://dali.bo/new-in-postgres-10) du projet
     PostgreSQL
-  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10) de *Robert Haas*
-  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10) de *HP*
+  * [New Features Coming in PostgreSQL 10](https://dali.bo/new-features-coming-in-postgresql-10)
+    de *Robert Haas*
+  * [PostgreSQL 10 New Features With examples](https://dali.bo/hp-new-features-pg10)
+    de *HP*
 </div>
 
 -----
@@ -212,7 +214,7 @@ maintenance et de supervision ont bien été rendus compatibles avec cette
 version.
 
 Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé
-[Rename “pg_xlog” directory to pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
+[Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
 
 -----
@@ -1559,9 +1561,8 @@ postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
 (5 rows)
 ```
 
-Pour compléter ces informations, vous pouvez également consulter : [Implement
-multivariate n-distinct
-coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
+Pour compléter ces informations, vous pouvez également consulter :
+[Implement multivariate n-distinct coefficients](https://dali.bo/waiting-for-postgresql-10-implement-multivariate-n-distinct-coefficients).
 </div>
 
 -----
@@ -2253,8 +2254,7 @@ postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM r
 ```
 
 Pour plus d'information à ce sujet, vous pouvez consulter : 
-[postgres_fdw: Push down aggregates to remote
-servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
+[postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
 </div>
 
 -----
@@ -2357,8 +2357,8 @@ Les index de type Hash sont désormais journalisés. Ils résisteront donc
 désormais aux éventuels crashs et seront utilisables sur un environnement
 répliqué.
 
-Pour en savoir plus : [hash indexing vs.
-WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
+Pour en savoir plus :
+[hash indexing vs. WAL](https://dali.bo/waiting-for-postgresql-10-hash-indexing-vs-wal)
 </div>
 
 -----
@@ -2462,7 +2462,6 @@ postgres=# SELECT jsonb_pretty(document) FROM stock_jsonb;
  }
 (1 row)
 
-
 postgres=# SELECT to_tsvector('french', document) FROM stock_jsonb;
                              to_tsvector                                                                  
 --------------------------------------------------------------------------------
@@ -2516,7 +2515,8 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
 (1 row)
 ```
 
-Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+Plus d'information :
+[Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
 </div>
 
 -----
@@ -2633,7 +2633,8 @@ conditionnel doit commencer par un \\if et se terminer par un \\endif. Entre les
 deux, il peut y avoir plusieurs clauses \\elif, pouvant être suivies
 facultativement par une unique clause \\else.
 
-Pour en savoir plus : [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+Pour en savoir plus :
+[Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
 </div>
 
 -----
@@ -2843,7 +2844,8 @@ seqcache     | 1
 seqcycle     | f
 ```
 
-Plus d'information : [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
+Plus d'information :
+[Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
 
 **Ajout de l'option *CREATE SEQUENCE AS type_donnee* **
 
@@ -2870,7 +2872,8 @@ pour assigner automatiquement une valeur unique à une colonne.
 
 Comme le type *serial*, une colonne d'identité utilisera une séquence.
 
-Pour en savoir plus : [Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
+Pour en savoir plus :
+[Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
 </div>
 
 -----
