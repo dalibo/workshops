@@ -882,9 +882,7 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 
 ### Fonctionnement
 
-<div class="slide-content">
 ![Schema du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
-</div>
 
 <div class="notes">
 Schéma obtenu sur
