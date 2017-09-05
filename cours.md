@@ -773,10 +773,8 @@ possible de faire pointer une clé étrangère vers ce type de table.
 Plusieurs articles contiennent des explications et des exemples concrets, comme
 par exemple :
 
-  * [Partitionnement et transaction autonomes avec
-    PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
-  * [Cool Stuff in PostgreSQL 10: Partitioned Audit
-    Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
+  * [Partitionnement et transaction autonomes avec PostgreSQL](https://dali.bo/pgday-2017-partitionnement)
+  * [Cool Stuff in PostgreSQL 10: Partitioned Audit Table](https://dali.bo/cool-stuff-in-postgresql-10-partitioned)
 
 Enfin, si PostgreSQL apporte de nombreuses fonctionnalités nativement, il peut
 néanmoins être également pertinent d'utiliser les extensions
@@ -882,8 +880,7 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 ### Fonctionnement
 
 <div class="slide-content">
-![Schema du fonctionnement de la réplication
-logique](medias/z100-schema-repli-logique.png)
+![Schema du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
 </div>
 
 <div class="notes">
