@@ -50,7 +50,7 @@ On peut ensuite initialiser une instance :
 Initializing database:                                     [  OK  ]
 ```
 
-Enfin, on démarre l'instance car ce n'est par défaut pas automatique sous RedHat et CentOS :
+Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous RedHat et CentOS :
 
 ```
 # service postgresql-10 start
@@ -353,7 +353,7 @@ is_cycled     | f
 is_called     | t
 ```
 
-Pour avoir une vue aggrégée, il est nécessaire d'utiliser une requête SQL adaptée :
+Pour avoir une vue agrégée, il est nécessaire d'utiliser une requête SQL adaptée :
 
 ```sql
 workshop96=#  SELECT * FROM t1_id_seq UNION ALL SELECT * FROM t2_id_seq;
@@ -381,7 +381,7 @@ is_cycled     | f
 is_called     | t
 ```
 
-Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des séquences mais on constate qu'il y a moins d'informations :
+Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des séquences, mais on constate qu'il y a moins d'informations :
 
 ```sql
 workshop10=# SELECT * FROM t1_id_seq;
@@ -397,7 +397,7 @@ log_cnt    | 13
 is_called  | t
 ```
 
-Une requête avec un UNION ALL reste possible pour aggréger les résultats mais la table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à de telles informations :
+Une requête avec un UNION ALL reste possible pour agréger les résultats mais la table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à de telles informations :
 
 ```sql
 workshop10=# SELECT * FROM pg_sequence;
@@ -877,7 +877,7 @@ query            | EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM p1;
 
 <div class="notes">
 
-Nous allons étudier les différences entre la version 9.6 et la version 10 en terme d'utilisation des tables partitionnées.
+Nous allons étudier les différences entre la version 9.6 et la version 10 en termes d'utilisation des tables partitionnées.
 
 Nous allons créer une table de mesure des températures suivant le lieu et la date. Nous allons partitionner ces tables pour chaque lieu et chaque mois.
 
@@ -1359,7 +1359,7 @@ GROUP BY CUBE (type_client, code_pays);
  Execution time: 3728.788 ms
 ```
 
-L'amélioration des performances provient du noeud `MixedAggregate` qui fait son appartion en version 10. Il permet de peupler plusieurs tables de hachages en même temps qu'est effectué le tri des groupes.
+L'amélioration des performances provient du noeud `MixedAggregate` qui fait son apparition en version 10. Il permet de peupler plusieurs tables de hachages en même temps qu'est effectué le tri des groupes.
 
 Les performances sont évidemment améliorées si suffisamment de mémoire est allouée pour l'opération :
 
@@ -1400,7 +1400,9 @@ La version 10 supporte la librairie [ICU](http://site.icu-project.org/).
 
 
 
-Certaines fonctionnalités ne sont cependant disponibles que pour des versions de la librairie ICU supérieures ou égales à la version 5.4. La version 4.2 est utilisée par défaut :
+Certaines fonctionnalités ne sont cependant disponibles que pour des versions de
+la librairie ICU supérieures ou égales à la version 5.4. La version 4.2 est
+utilisée par défaut :
 
 
 ```bash
@@ -1410,7 +1412,9 @@ Certaines fonctionnalités ne sont cependant disponibles que pour des versions d
 	libicudata.so.42 => /usr/lib64/libicudata.so.42 (0x00007f934d1e1000)
 ```
 
-Pour permettre le test des fonctionnalités liées au collations ICU, nous allons télécharger les sources de la librairie ICU en version 5.8 et recompiler PostgreSQL en utilisant cette version de la librairie :
+Pour permettre le test des fonctionnalités liées aux collations ICU, nous allons
+télécharger les sources de la librairie ICU en version 5.8 et recompiler
+PostgreSQL en utilisant cette version de la librairie :
 
 ```bash
 yum groupinstall -y "Development Tools"
@@ -1509,7 +1513,8 @@ postgres=# SELECT * FROM (
 (4 rows)
 ```
 
-Nous travaillons en UTF, nous pouvons donc aussi changer l'ordre de classement des émoticône  :-)
+Nous travaillons en UTF, nous pouvons donc aussi changer l'ordre de classement
+des émoticônes  :-)
 
 ```sql
 SELECT chr(x) FROM generate_series(x'1F634'::int, x'1F643'::int)
@@ -1656,7 +1661,7 @@ Maintenant que la réplication logique est établie, nous allons étudier les
 possibilités offertes par cette dernière.
 
 Contrairement à la réplication physique, il est possible de modifier les données
-de l'instance souscrivante :
+de l'instance en souscription :
 
 ```sql
 souscription=# SELECT * FROM meteo LIMIT 1;
