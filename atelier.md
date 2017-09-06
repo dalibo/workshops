@@ -1144,7 +1144,7 @@ Avec la version 10, il est maintenant possible d'effectuer des opérations de VA
 workshop10=# VACUUM ANALYZE meteo;
 VACUUM
 workshop10=# SELECT now() AS date,relname,last_vacuum,last_analyze
-workshop10-#   FROM pg_stat_user_tables WHERE relname LIKE 'meteo_nantes%';
+  FROM pg_stat_user_tables WHERE relname LIKE 'meteo_nantes%';
 -[ RECORD 1 ]+------------------------------
 date         | 2017-09-01 08:39:02.052168-04
 relname      | meteo_nantes_201709
