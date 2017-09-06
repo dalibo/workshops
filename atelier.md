@@ -700,7 +700,7 @@ Les requêtes parallèles sont maintenant disponibles pour les scan d'index.
 Regardons les plans d'exécution renvoyés par :
 
 ```sql
-EXPLAIN SELECT count(*) FROM p1 WHERE id > 10 AND id < 500000;
+EXPLAIN ANALYSE SELECT count(*) FROM p1 WHERE id > 10 AND id < 500000;
 ```
 
 Sur les deux instances, on observe la présence d'un noeud `Gather`.
