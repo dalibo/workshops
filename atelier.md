@@ -695,7 +695,7 @@ workshop10=# EXPLAIN ANALYSE VERBOSE SELECT count(*), c_100 FROM p1
 
 Les requêtes parallèles sont maintenant disponibles pour les scan d'index.
 
-** Parallel Index-Only Scan **
+**Parallel Index-Only Scan**
 
 Regardons les plans d'exécution renvoyés par :
 
@@ -746,7 +746,7 @@ workshop10=# EXPLAIN ANALYSE SELECT count(*) FROM p1 WHERE id > 10 AND id < 5000
 ```
 
 
-** Parallel Index Scan **
+**Parallel Index Scan**
 
 Regardons les plans d'exécution renvoyés par :
 
