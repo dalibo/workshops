@@ -97,7 +97,6 @@ Nouvelle numérotation exprimée sur 2 nombres uniquement :
   10 . 2
   Majeure . Mineure
 ```
-
 </div>
 
 <div class="notes">
@@ -386,7 +385,6 @@ vérifier en utilisant un SELECT avec la clause *ONLY*.
   * Attacher la partition :
 
     `ALTER TABLE t1 ATTACH PARTITION t1_a FOR VALUES IN (1, 2, 3);`
-
 </div>
 
 <div class="notes">
@@ -456,7 +454,6 @@ produit.
   * Détacher une partition :
 
     `ALTER TABLE t2 DETACH PARTITION t2_1;`
-
 </div>
 
 <div class="notes">
@@ -517,7 +514,6 @@ produit.
 
     `CREATE TABLE t1_a PARTITION of t1 FOR VALUES`
     `  FROM (1,'2017-08-10') TO (100, '2017-08-11');`
-
 </div>
 
 <div class="notes">
@@ -622,7 +618,6 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
  t2_3    | t              | r       |         0
 (5 lignes)
 ```
-
 </div>
 
 -----
@@ -659,7 +654,6 @@ Time: 125351.918 ms (02:05.352)
 CHECKPOINT;
 Time: 802.073 ms
 ```
-
 </div>
 
 <div class="notes">
@@ -733,7 +727,6 @@ $FUNC$;
 
 CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3 FOR EACH ROW EXECUTE PROCEDURE insert_into();
 ```
-
 </div>
 
 -----
@@ -991,7 +984,6 @@ D'autres catalogues déjà existants peuvent également être utiles :
   * Créer une publication pour une table
 
     `CREATE PUBLICATION ma_publication FOR TABLE t1;`
-
 </div>
 
 <div class="notes">
@@ -1038,7 +1030,6 @@ permettre de visualiser les données dans la base :
 postgres@bench=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO repliuser;
 GRANT
 ```
-
 </div>
 
 -----
@@ -1054,7 +1045,6 @@ CREATE SUBSCRIPTION ma_souscription
 CONNECTION 'host=127.0.0.1 port=5433 user=repliuser dbname=bench'
 PUBLICATION ma_publication;
 ```
-
 </div>
 
 <div class="notes">
@@ -1082,7 +1072,6 @@ postgres@bench=# CREATE SUBSCRIPTION ma_souscription
 NOTICE:  created replication slot "ma_souscription" on publisher
 CREATE SUBSCRIPTION
 ```
-
 </div>
 
 -----
@@ -1098,7 +1087,6 @@ CREATE SUBSCRIPTION
   * Sur l'abonné
     * état de l'abonnement dans `pg_subscription`
     * état de la réplication dans `pg_replication_origin_status`
-
 </div>
 
 <div class="notes">
@@ -1251,7 +1239,6 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
         1 | pg_16404    | 0/A6A96110 | 0/C730EBB8
 (1 row)
 ```
-
 </div>
 
 -----
@@ -1324,7 +1311,6 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
  Execution time: 1691.378 ms
 (8 rows)
 ```
-
 </div>
 
 -----
@@ -1469,7 +1455,6 @@ utilise bien un hachage et est deux fois plus rapide :
  Execution time: 2642.349 ms
 (36 rows)
 ```
-
 </div>
 
 -----
@@ -2285,7 +2270,6 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
     * Certains sur la base d'un quorum : 
 
        `synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)`
-
 </div>
 
 <div class="notes">
@@ -2381,7 +2365,6 @@ Il est désormais possible de renommer une valeur d'un type existant.
 
 `ALTER TYPE nom RENAME VALUE valeur_enum_existante`
 `  TO nouvelle_valeur_enum;`
-
 </div>
 
 <div class="notes">
@@ -2667,7 +2650,6 @@ Pour en savoir plus :
 		  FOR EACH STATEMENT
 		  EXECUTE PROCEDURE log_delete();
 		```
-
 </div>
 
 
@@ -3000,7 +2982,6 @@ partitionnement en version 11 dans cet
 
 <div class="slide-content">
 `SELECT * FROM questions;`
-
 </div>
 
 -----
