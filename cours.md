@@ -1612,8 +1612,8 @@ dans un ordre arbitraire. Si chaque *worker* retourne des résultats triés, le
 nœud *Gather Merge* préservera l'ordre de ces résultats déjà triés.
 
 Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter
-l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de
-*Robert Haas*.
+l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert
+Haas*.
 </div>
 
 -----
