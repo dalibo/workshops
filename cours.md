@@ -2722,10 +2722,12 @@ postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000)
 INSERT 0 1000000
 
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
-                                                    QUERY PLAN                                                     
--------------------------------------------------------------------------------------------------------------------
- Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=781.612..781.612 rows=0 loops=1)
-   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=0.113..104.328 rows=1000000 loops=1)
+                                QUERY PLAN                           
+--------------------------------------------------------------------------
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+               (actual time=781.612..781.612 rows=0 loops=1)
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+                       (actual time=0.113..104.328 rows=1000000 loops=1)
  Planning time: 0.079 ms
  Trigger tr1: time=1501.688 calls=1
  Execution time: 2287.907 ms
@@ -2776,10 +2778,12 @@ postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000)
 INSERT 0 1000000
 
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
-                                                    QUERY PLAN                                                     
--------------------------------------------------------------------------------------------------------------------
- Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=1049.420..1049.420 rows=0 loops=1)
-   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) (actual time=0.061..121.701 rows=1000000 loops=1)
+                                QUERY PLAN                           
+--------------------------------------------------------------------------
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+               (actual time=1049.420..1049.420 rows=0 loops=1)
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+                       (actual time=0.061..121.701 rows=1000000 loops=1)
  Planning time: 0.096 ms
  Trigger tr1: time=7709.725 calls=1000000
  Execution time: 8825.958 ms
