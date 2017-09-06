@@ -725,7 +725,8 @@ BEGIN
 END;
 $FUNC$;
 
-CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3 FOR EACH ROW EXECUTE PROCEDURE insert_into();
+CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
+  FOR EACH ROW EXECUTE PROCEDURE insert_into();
 ```
 </div>
 
@@ -1367,42 +1368,42 @@ Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
          Sort Key: cl.type_client, co.code_pays
          Sort Method: external merge  Disk: 34664kB
          Buffers: shared hit=8551 read=47879, temp read=25050 written=25032
-         ->  Hash Join  (actual time=525.656..1862.380 rows=1226456 loops=1)
-               Hash Cond: (l.numero_commande = c.numero_commande)
-               Buffers: shared hit=8551 read=47879, temp read=17777 written=17759
-               ->  Seq Scan on lignes_commandes l  
-                     (actual time=0.091..438.819 rows=3141967 loops=1)
-                     Buffers: shared hit=2241 read=39961
-               ->  Hash  (actual time=523.476..523.476 rows=390331 loops=1)
-                     Buckets: 131072  Batches: 8  Memory Usage: 3162kB
-                     Buffers: shared hit=6310 read=7918, temp read=1611 written=2979
-                     ->  Hash Join  
-                           (actual time=152.778..457.347 rows=390331 loops=1)
-                           Hash Cond: (c.client_id = cl.client_id)
-                           Buffers: shared hit=6310 read=7918, temp read=1611 written=1607
-                           ->  Seq Scan on commandes c  
-                                 (actual time=10.810..132.984 rows=390331 loops=1)
-                                 Filter: ((date_commande >= '2014-01-01'::date)
-                                           AND (date_commande <= '2014-12-31'::date))
-                                 Rows Removed by Filter: 609669
-                                 Buffers: shared hit=2241 read=7918
-                           ->  Hash  (actual time=139.381..139.381 rows=100000 loops=1)
-                                 Buckets: 131072  Batches: 2  Memory Usage: 3522kB
-                                 Buffers: shared hit=4069, temp read=515 written=750
-                                 ->  Hash Join  
-                                     (actual time=61.976..119.724 rows=100000 loops=1)
-                                     Hash Cond: (co.contact_id = cl.contact_id)
-                                     Buffers: shared hit=4069, temp read=515 written=513
-                                     ->  Seq Scan on contacts co  
-                                           (actual time=0.051..18.025 rows=110005 loops=1)
-                                           Buffers: shared hit=3043
-                                     ->  Hash  
-                                           (actual time=57.926..57.926 rows=100000 loops=1)
-                                           Buckets: 65536  Batches: 2  Memory Usage: 3242kB
-                                           Buffers: shared hit=1026, temp written=269
-                                           ->  Seq Scan on clients cl  
-                                                 (actual time=0.060..21.896 rows=100000 loops=1)
-                                                 Buffers: shared hit=1026
+     ->  Hash Join  (actual time=525.656..1862.380 rows=1226456 loops=1)
+           Hash Cond: (l.numero_commande = c.numero_commande)
+           Buffers: shared hit=8551 read=47879, temp read=17777 written=17759
+       ->  Seq Scan on lignes_commandes l  
+             (actual time=0.091..438.819 rows=3141967 loops=1)
+             Buffers: shared hit=2241 read=39961
+       ->  Hash  (actual time=523.476..523.476 rows=390331 loops=1)
+             Buckets: 131072  Batches: 8  Memory Usage: 3162kB
+             Buffers: shared hit=6310 read=7918, temp read=1611 written=2979
+         ->  Hash Join  
+               (actual time=152.778..457.347 rows=390331 loops=1)
+               Hash Cond: (c.client_id = cl.client_id)
+               Buffers: shared hit=6310 read=7918, temp read=1611 written=1607
+           ->  Seq Scan on commandes c  
+                 (actual time=10.810..132.984 rows=390331 loops=1)
+                 Filter: ((date_commande >= '2014-01-01'::date)
+                           AND (date_commande <= '2014-12-31'::date))
+                 Rows Removed by Filter: 609669
+                 Buffers: shared hit=2241 read=7918
+           ->  Hash  (actual time=139.381..139.381 rows=100000 loops=1)
+                 Buckets: 131072  Batches: 2  Memory Usage: 3522kB
+                 Buffers: shared hit=4069, temp read=515 written=750
+                 ->  Hash Join  
+                     (actual time=61.976..119.724 rows=100000 loops=1)
+                     Hash Cond: (co.contact_id = cl.contact_id)
+                     Buffers: shared hit=4069, temp read=515 written=513
+                   ->  Seq Scan on contacts co  
+                         (actual time=0.051..18.025 rows=110005 loops=1)
+                         Buffers: shared hit=3043
+                   ->  Hash  
+                         (actual time=57.926..57.926 rows=100000 loops=1)
+                         Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                         Buffers: shared hit=1026, temp written=269
+                     ->  Seq Scan on clients cl  
+                           (actual time=0.060..21.896 rows=100000 loops=1)
+                           Buffers: shared hit=1026
  Planning time: 1.739 ms
  Execution time: 4985.385 ms
 (41 rows)
@@ -1423,34 +1424,37 @@ utilise bien un hachage et est deux fois plus rapide :
    ->  Hash Join  (actual time=494.339..1813.743 rows=1226456 loops=1)
        Hash Cond: (l.numero_commande = c.numero_commande)
        Buffers: shared hit=8418 read=48015, temp read=17777 written=17759
-       ->  Seq Scan on lignes_commandes l  (actual time=0.019..417.992 rows=3141967 loops=1)
+       ->  Seq Scan on lignes_commandes l
+             (actual time=0.019..417.992 rows=3141967 loops=1)
              Buffers: shared hit=2137 read=40065
        ->  Hash  (actual time=493.558..493.558 rows=390331 loops=1)
              Buckets: 131072  Batches: 8  Memory Usage: 3162kB
              Buffers: shared hit=6278 read=7950, temp read=1611 written=2979
-             ->  Hash Join  (actual time=159.207..429.528 rows=390331 loops=1)
-                   Hash Cond: (c.client_id = cl.client_id)
-                   Buffers: shared hit=6278 read=7950, temp read=1611 written=1607
-                   ->  Seq Scan on commandes c  (actual time=2.562..103.812 rows=390331 loops=1)
-                         Filter: ((date_commande >= '2014-01-01'::date)
-                                   AND (date_commande <= '2014-12-31'::date))
-                         Rows Removed by Filter: 609669
-                         Buffers: shared hit=2209 read=7950
-                   ->  Hash  (actual time=155.728..155.728 rows=100000 loops=1)
-                         Buckets: 131072  Batches: 2  Memory Usage: 3522kB
-                         Buffers: shared hit=4069, temp read=515 written=750
-                         ->  Hash Join  (actual time=73.906..135.779 rows=100000 loops=1)
-                               Hash Cond: (co.contact_id = cl.contact_id)
-                               Buffers: shared hit=4069, temp read=515 written=513
-                               ->  Seq Scan on contacts co  
-                                     (actual time=0.011..18.347 rows=110005 loops=1)
-                                     Buffers: shared hit=3043
-                               ->  Hash  (actual time=70.006..70.006 rows=100000 loops=1)
-                                     Buckets: 65536  Batches: 2  Memory Usage: 3242kB
-                                     Buffers: shared hit=1026, temp written=269
-                                     ->  Seq Scan on clients cl  
-                                           (actual time=0.014..26.689 rows=100000 loops=1)
-                                           Buffers: shared hit=1026
+           ->  Hash Join  (actual time=159.207..429.528 rows=390331 loops=1)
+                 Hash Cond: (c.client_id = cl.client_id)
+                 Buffers: shared hit=6278 read=7950, temp read=1611 written=1607
+               ->  Seq Scan on commandes c
+	             (actual time=2.562..103.812 rows=390331 loops=1)
+                     Filter: ((date_commande >= '2014-01-01'::date)
+                               AND (date_commande <= '2014-12-31'::date))
+                     Rows Removed by Filter: 609669
+                     Buffers: shared hit=2209 read=7950
+               ->  Hash  (actual time=155.728..155.728 rows=100000 loops=1)
+                     Buckets: 131072  Batches: 2  Memory Usage: 3522kB
+                     Buffers: shared hit=4069, temp read=515 written=750
+                   ->  Hash Join
+		         (actual time=73.906..135.779 rows=100000 loops=1)
+                         Hash Cond: (co.contact_id = cl.contact_id)
+                         Buffers: shared hit=4069, temp read=515 written=513
+                       ->  Seq Scan on contacts co  
+                             (actual time=0.011..18.347 rows=110005 loops=1)
+                             Buffers: shared hit=3043
+                       ->  Hash  (actual time=70.006..70.006 rows=100000 loops=1)
+                             Buckets: 65536  Batches: 2  Memory Usage: 3242kB
+                             Buffers: shared hit=1026, temp written=269
+                           ->  Seq Scan on clients cl  
+                                 (actual time=0.014..26.689 rows=100000 loops=1)
+                                 Buffers: shared hit=1026
  Planning time: 1.910 ms
  Execution time: 2642.349 ms
 (36 rows)
@@ -1772,7 +1776,8 @@ Activons maintenant une première politique permissive :
 u1@db1=> ALTER TABLE comptes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE
 
-u1@db1=> CREATE POLICY compte_admins ON comptes USING (admin = current_user);
+u1@db1=> CREATE POLICY compte_admins ON comptes
+   USING (admin = current_user);
 CREATE POLICY
 
 u1@db1=> SELECT * FROM comptes;
@@ -1964,7 +1969,7 @@ walsender et walwriter.
 Voici ce que pourrait donner une lecture de cette vue sur une version 10 :
 
 ```sql
-postgres@postgres=# SELECT pid, application_name, wait_event_type, wait_event, backend_type
+postgres@postgres=# SELECT pid,application_name,wait_event_type,wait_event,backend_type
   FROM pg_stat_activity ;
  pid  | application_name | wait_event_type |     wait_event      |    backend_type     
 ------+------------------+-----------------+---------------------+---------------------

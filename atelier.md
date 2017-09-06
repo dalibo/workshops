@@ -229,7 +229,11 @@ postgres=# SELECT pg_reload_conf();
 (1 row)
 ```
 
-Attention, la méthode d'authentification précisée dans le fichier `pg_hba.conf` doit être égale ou supérieure à la méthode de stockage. Par exemple, un utilisateur disposant d'un mot de passe en `scram-sha-256` ne pourra pas se connecter si l'entrée correspondante dans `pg_hba.conf` mentionne `md5` ou `password`.
+Attention, la méthode d'authentification précisée dans le fichier `pg_hba.conf`
+doit être égale ou supérieure à la méthode de stockage. Par exemple, un
+utilisateur disposant d'un mot de passe en `scram-sha-256` ne pourra pas se
+connecter si l'entrée correspondante dans `pg_hba.conf` mentionne `md5` ou
+`password`.
 </div>
 
 -----
@@ -571,10 +575,6 @@ pg_basebackup: could not send replication command "START_REPLICATION":
 
 ## Parallélisation
 
-FIXME
-Tiré de :
-https://postgrespro.co.il/blog/whats-new-in-postgresql-10-part-1-additional-parallelism/
-
 <div class="notes">
 Dans les 2 instances, on crée les tables `p1` et `p2` :
 
@@ -587,7 +587,8 @@ workshopXX=# ALTER TABLE p1 ADD CONSTRAINT pk_p1 PRIMARY KEY (id);
 ALTER TABLE 
 workshopXX=# CREATE INDEX idx_p1 ON p1 (c_100); 
 CREATE INDEX
-workshopXX=# CREATE TABLE p2 AS                                                                  SELECT row_number() OVER() AS id, generate_series%100 AS c_100,
+workshopXX=# CREATE TABLE p2 AS
+   SELECT row_number() OVER() AS id, generate_series%100 AS c_100,
           generate_series%500 AS c_500 FROM generate_series(1,200000);
 SELECT 200000
 workshopXX=# ALTER TABLE p2 ADD CONSTRAINT pk_p2 PRIMARY KEY (id); 
@@ -1166,14 +1167,16 @@ Importer le dump de la base SQL2 dans l'instance PostgreSQL 10 :
 
 ```
 $ createdb sql2
-$ pg_restore -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+$ pg_restore -1 -O -d sql2  \
+     formation/formation/sql2/base_tp_sql2_avec_schemas.dump
 ```
 
 Importer également le dump de la base SQL2 dans l'instance PostgreSQL 9.6 :
 
 ```
 $ createdb -p 5433 sql2
-$ pg_restore -p 5433 -1 -O -d sql2 formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+$ pg_restore -p 5433 -1 -O -d sql2 \
+     formation/formation/sql2/base_tp_sql2_avec_schemas.dump
 ```
 
 Validez toujours les temps d'exécution en exécutant les requêtes plusieurs
@@ -1431,7 +1434,8 @@ make install
 sudo -iu postgres mkdir -p /var/lib/pgsql/10_icu58/data
 sudo -iu postgres /usr/local/pgsql/bin/initdb --data /var/lib/pgsql/10_icu58/data
 sed -i "s/#port = 5432/port = 5458/" /var/lib/pgsql/10_icu58/data/postgresql.conf
-sudo -iu postgres /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/10_icu58/data -l logfile start
+sudo -iu postgres /usr/local/pgsql/bin/pg_ctl -D /var/lib/pgsql/10_icu58/data \
+    -l logfile start
 ```
 
 Il est maintenant possible de se connecter à la nouvelle instance via la commande :
@@ -1729,9 +1733,11 @@ souscription=# SELECT count(*) FROM meteo WHERE temperature<15;
 La mise à jour ne semble pas s'être réalisée. Vérifions dans les logs applicatifs :
 
 ```
-LOG:  logical replication apply worker for subscription "souscription" has started
+LOG:  logical replication apply worker for subscription "souscription"
+      has started
 LOG:  starting logical decoding for slot "local_souscription"
-DETAIL:  streaming transactions committing after 0/F4FFF450, reading WAL from 0/F33E5B18
+DETAIL:  streaming transactions committing after 0/F4FFF450, 
+         reading WAL from 0/F33E5B18
 LOG:  logical decoding found consistent point at 0/F33E5B18
 DETAIL:  There are no running transactions.
 ERROR:  logical replication target relation "public.meteo_lyon_201709" has
@@ -1749,17 +1755,23 @@ toujours penser à appliquer tous les changements effectués sur l'instance
 principale sur l'instance en réplication.
 
 ```sql
-souscription=# CREATE UNIQUE INDEX meteo_lyon_201709_pkey ON meteo_lyon_201709 (t_id);
+souscription=# CREATE UNIQUE INDEX meteo_lyon_201709_pkey
+   ON meteo_lyon_201709 (t_id);
 CREATE INDEX
-souscription=# CREATE UNIQUE INDEX meteo_nantes_201709_pkey ON meteo_nantes_201709 (t_id);
+souscription=# CREATE UNIQUE INDEX meteo_nantes_201709_pkey 
+   ON meteo_nantes_201709 (t_id);
 CREATE INDEX
-souscription=# CREATE UNIQUE INDEX meteo_paris_201709_pkey ON meteo_paris_201709 (t_id);
+souscription=# CREATE UNIQUE INDEX meteo_paris_201709_pkey 
+   ON meteo_paris_201709 (t_id);
 CREATE INDEX
-souscription=# ALTER TABLE meteo_lyon_201709 REPLICA IDENTITY USING INDEX meteo_lyon_201709_pkey;
+souscription=# ALTER TABLE meteo_lyon_201709 REPLICA IDENTITY 
+   USING INDEX meteo_lyon_201709_pkey;
 ALTER TABLE
-souscription=# ALTER TABLE meteo_nantes_201709 REPLICA IDENTITY USING INDEX meteo_nantes_201709_pkey;
+souscription=# ALTER TABLE meteo_nantes_201709 REPLICA IDENTITY 
+   USING INDEX meteo_nantes_201709_pkey;
 ALTER TABLE
-souscription=# ALTER TABLE meteo_paris_201709 REPLICA IDENTITY USING INDEX meteo_paris_201709_pkey;
+souscription=# ALTER TABLE meteo_paris_201709 REPLICA IDENTITY 
+   USING INDEX meteo_paris_201709_pkey;
 ALTER TABLE
 ```
 
