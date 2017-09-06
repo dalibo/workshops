@@ -304,7 +304,7 @@ workshopXX=# INSERT INTO t2 (data) SELECT 'test' || i FROM generate_series(1,20)
 INSERT 0 20
 ```
 
-et on vérifier leurs schémas :
+et on vérifie leurs schémas :
 
 ```sql
 workshopXX=# \d t1
