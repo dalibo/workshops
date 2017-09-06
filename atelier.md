@@ -13,6 +13,7 @@
   * Partitionnement
   * Performances
   * Collations ICU
+  * Réplication logique
 </div>
 
 -----
@@ -615,7 +616,7 @@ postgres=# SELECT pg_reload_conf();
 
 -----
 
-## Parallel Bitmap Heap Scan
+## Parallélisation : Parallel Bitmap Heap Scan
 
 <div class="notes">
 
@@ -688,7 +689,7 @@ workshop10=# EXPLAIN ANALYSE VERBOSE SELECT count(*), c_100 FROM p1
 
 -----
 
-## Parallel Index-Only Scan et Parallel Index Scan
+## Parallélisation : Parallel Index-Only Scan et Parallel Index Scan
 
 <div class="notes">
 
@@ -795,35 +796,36 @@ workshop10=# EXPLAIN ANALYSE SELECT count(c_100) FROM p1 WHERE id < 5000000;
 
 -----
 
-## Transmission des requêtes aux workers
+## Parallélisation : transmission des requêtes aux workers
 
 <div class="notes">
 
 En effectuant une requête sur une autre session, il est possible en version 10 de lire le texte des requêtes effectuées par les différents workers dans la vue pg_stat_activity :
 
 ```sql
-workshop96=# SELECT pid,application_name,backend_start,query FROM pg_stat_activity ;
--[ RECORD 1 ]----+------------------------------------------------------------------------
+workshop96=# SELECT pid,application_name,backend_start,query FROM pg_stat_activity;
+-[ RECORD 1 ]----+--------------------------------------------------------------
 pid              | 1071
 application_name | psql
 backend_start    | 2017-08-30 09:50:15.376798-04
 query            | EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM p1;
--[ RECORD 2 ]----+------------------------------------------------------------------------
+-[ RECORD 2 ]----+--------------------------------------------------------------
 pid              | 1832
 application_name | psql
 backend_start    | 2017-08-30 10:42:46.235495-04
-query            | SELECT pid,application_name,backend_start,query FROM pg_stat_activity ;
--[ RECORD 3 ]----+------------------------------------------------------------------------
+query            | SELECT pid,application_name,backend_start,query
+                 | FROM pg_stat_activity ;
+-[ RECORD 3 ]----+--------------------------------------------------------------
 pid              | 1855
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.902368-04
 query            | 
--[ RECORD 4 ]----+------------------------------------------------------------------------
+-[ RECORD 4 ]----+--------------------------------------------------------------
 pid              | 1856
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.902921-04
 query            | 
--[ RECORD 5 ]----+------------------------------------------------------------------------
+-[ RECORD 5 ]----+--------------------------------------------------------------
 pid              | 1857
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.903122-04

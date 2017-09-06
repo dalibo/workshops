@@ -174,7 +174,8 @@ drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_xact
 Si on regarde les fonctions contenant le mot clé *wal* :
 
 ```
-postgres=# SELECT proname FROM pg_proc WHERE proname LIKE '%wal%' ORDER BY proname;
+postgres=# SELECT proname FROM pg_proc WHERE proname LIKE '%wal%'
+     ORDER BY proname;
           proname
 ---------------------------
  pg_current_wal_flush_lsn
@@ -1856,7 +1857,8 @@ DROP POLICY
 u1@db1=> DROP POLICY pol_societe ON comptes;
 DROP POLICY
 
-u1@db1=> CREATE POLICY compte_admins ON comptes AS RESTRICTIVE USING (admin = current_user);
+u1@db1=> CREATE POLICY compte_admins ON comptes AS RESTRICTIVE
+  USING (admin=current_user);
 CREATE POLICY
 
 u1@db1=> CREATE POLICY pol_societe ON comptes USING (societe = 'dalibo');
@@ -2144,7 +2146,7 @@ Associons ensuite une table étrangère au script bash :
 
 ```sql
 postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10)) 
-			SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',') ;
+             SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',');
 CREATE FOREIGN TABLE
 ```
 
@@ -2196,7 +2198,7 @@ Création du serveur distant (ici notre base *db1* locale) :
 
 ```sql
 postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw 
-			OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
+	     OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
 CREATE SERVER
 ```
 
@@ -2210,7 +2212,8 @@ CREATE USER MAPPING
 Création localement de la table distante :
 
 ```sql
-postgres=# CREATE FOREIGN TABLE remote_t1 (c1 integer) SERVER fs1 OPTIONS (table_name 't1');
+postgres=# CREATE FOREIGN TABLE remote_t1 (c1 integer)
+             SERVER fs1 OPTIONS (table_name 't1');
 CREATE FOREIGN TABLE
 ```
 
