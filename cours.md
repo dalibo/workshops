@@ -431,7 +431,7 @@ DETAIL:  Partition key of the failing row contains (c1) = (6).
 ```
 
 Lors de l'insertion, les données sont correctement redirigées vers leurs
-partitions. 
+partitions.
 
 On peut remarquer que la table partitionnée est vide.
 
@@ -441,7 +441,7 @@ produit.
 
 -----
 
-### Exemple de partitionnement par intervalle
+### Exemple de partitionnement par intervalles
 
 <div class="slide-content">
   * Créer une table partitionnée :
@@ -492,7 +492,7 @@ DETAIL:  Partition key of the failing row contains (c1) = (101).
 ```
 
 Lors de l'insertion, les données sont correctement redirigées vers leurs
-partitions. 
+partitions.
 
 Si aucune partition correspondant à la clé insérée n'est trouvée, une erreur se
 produit.
@@ -1133,7 +1133,7 @@ soient bien écrites sur disque au niveau du serveur standby.
 *replay_lag* mesure le délai en cas de *synchronous_commit* à *remote_apply*.
 Cette configuration fera en sorte que chaque `COMMIT` devra attendre le retour
 des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction,
-la rendant visible aux requêtes des utilisateurs. 
+la rendant visible aux requêtes des utilisateurs.
 
 *pg_replication_slots* nous permet de savoir si un slot de réplication est
 temporaire ou non (*temporary*) :
@@ -1284,7 +1284,7 @@ Requête avec PostgreSQL 9.6 :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i DESC;
-                                QUERY PLAN                                
+                                QUERY PLAN
 --------------------------------------------------------------------------
  Sort (actual time=1506.804..2093.048 rows=4000000 loops=1)
    Sort Key: i DESC
@@ -1301,7 +1301,7 @@ Requête avec PostgreSQL 10 :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i DESC;
-                                QUERY PLAN                                
+                                QUERY PLAN
 --------------------------------------------------------------------------
  Sort (actual time=1170.566..1547.257 rows=4000000 loops=1)
    Sort Key: i DESC
@@ -1501,7 +1501,7 @@ la colonne a :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
-                                  QUERY PLAN                                   
+                                  QUERY PLAN
 -------------------------------------------------------------------------------
  Seq Scan on t  (cost=0.00..170.00 rows=100 width=8) (actual rows=100 loops=1)
    Filter: (a = 1)
@@ -1520,7 +1520,7 @@ combinant avec *AND* :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
-                                 QUERY PLAN                                  
+                                 QUERY PLAN
 -----------------------------------------------------------------------------
  Seq Scan on t  (cost=0.00..195.00 rows=1 width=8) (actual rows=100 loops=1)
    Filter: ((a = 1) AND (b = 1))
@@ -1551,7 +1551,7 @@ Vérifions ensuite :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
-                                  QUERY PLAN                                   
+                                  QUERY PLAN
 -------------------------------------------------------------------------------
  Seq Scan on t  (cost=0.00..195.00 rows=100 width=8) (actual rows=100 loops=1)
    Filter: ((a = 1) AND (b = 1))
@@ -1621,7 +1621,7 @@ Haas*.
 
 <div class="notes">
 *min_parallel_table_scan_size* spécifie la quantité minimale de données de la
-table qui doit être parcourue pour qu'un parcours parallèle soit envisagé. 
+table qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 
 *min_parallel_index_scan_size* spécifie la quantité minimale de données d'index
 qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
@@ -1690,7 +1690,7 @@ apparition. Il s'agit de l'implémentation du **Salted Challenge Response
 Authentication Mechanism**. Ceci est basé sur un schéma de type
 question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions
 non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas
-être supportée par d'anciens clients. 
+être supportée par d'anciens clients.
 </div>
 
 -----
@@ -1714,7 +1714,7 @@ Security`.
 
 Lorsque la protection des lignes est activée sur une table, tous les accès
 classiques à la table pour sélectionner ou modifier des lignes doivent être
-autorisés par une politique de sécurité. 
+autorisés par une politique de sécurité.
 
 Cependant, le propriétaire de la table n'est typiquement pas soumis aux
 politiques de sécurité. Si aucune politique n'existe pour la table, une
@@ -1837,7 +1837,7 @@ combinent bien en utilisant l'opérateur booléen *OR* :
 
 ```sql
 u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
-                               QUERY PLAN                                
+                               QUERY PLAN
 -------------------------------------------------------------------------
  Seq Scan on comptes
    Filter: ((societe = 'paris'::text) OR (admin = (CURRENT_USER)::text))
@@ -1877,7 +1877,7 @@ u2@db1=> SELECT * FROM comptes;
 (1 row)
 
 u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
-                                QUERY PLAN                                 
+                                QUERY PLAN
 ---------------------------------------------------------------------------
  Seq Scan on comptes
    Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
@@ -1905,11 +1905,11 @@ informations et fonctionnalités privilégiées, pour lesquelles il est
 habituellement nécessaire d'être super-utilisateur pour en profiter. Les
 administrateurs peuvent autoriser ces rôles à des utilisateurs et/ou à d'autres
 rôles de leurs environnements, fournissant à ces utilisateurs les
-fonctionnalités et les informations spécifiées. 
+fonctionnalités et les informations spécifiées.
 
 Ils accordent un ensemble de privilèges permettant au rôle de lire les
 paramètres de configuration, les statistiques et les informations systèmes
-normalement réservés aux super-utilisateurs. 
+normalement réservés aux super-utilisateurs.
 
 La version 10 implémente les nouveaux rôles suivants :
 
@@ -1987,7 +1987,7 @@ On y voit aussi de nouveaux types d'événements pour lesquels un processus peut
 être en attente. En voici la liste :
 
   * Activity : Le processus serveur est inactif. En attente d'activité d'un processus d'arrière-plan.
-  * Extension : Le processus serveur est en attente d'activité d'une extension. 
+  * Extension : Le processus serveur est en attente d'activité d'une extension.
   * Client : Le processus serveur est en attente d'activité sur une connexion utilisateur.
   * IPC : Le processus serveur est en attente d'activité d'un autre processus serveur.
   * Timeout : Le processus serveur attend qu'un timeout expire.
@@ -2233,7 +2233,7 @@ Exécution d'une opération d’agrégation sur le serveur distant :
 
 ```sql
 postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM remote_t1;
-                           QUERY PLAN                           
+                           QUERY PLAN
 ----------------------------------------------------------------
  Foreign Scan
    Output: (count(*)), (avg(c1)), (sum(c1))
@@ -2246,7 +2246,7 @@ Même requête sur PostgreSQL 9.6 :
 
 ```sql
 postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM remote_t1;
-                  QUERY PLAN                  
+                  QUERY PLAN
 ----------------------------------------------
  Aggregate
    Output: count(*), avg(c1), sum(c1)
@@ -2288,7 +2288,7 @@ sous-ensemble d'un groupe d'instances grâce au paramètre suivant :
 Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone
 basée sur la priorité, si bien que chaque validation de transaction attendra
 jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
-sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités. 
+sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités.
 
 Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit
 à attendre la réponse de trois serveurs secondaires de plus haute priorité
@@ -2299,11 +2299,11 @@ soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
 Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone
 basée sur un quorum, si bien que chaque validation de transaction attendra
 jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
-sur au moins *num_sync* des serveurs secondaires listés. 
+sur au moins *num_sync* des serveurs secondaires listés.
 
 Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque
 commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 et s4
-aient répondu, quels qu'ils soient. 
+aient répondu, quels qu'ils soient.
 </div>
 
 -----
@@ -2598,7 +2598,7 @@ Pour en savoir plus :
 <div class="notes">
 **\\gx**
 
-\\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête. 
+\\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête.
 
 Exemple :
 
@@ -2664,7 +2664,7 @@ Pour en savoir plus :
 <div class="notes">
 Dans le cas d'un trigger en mode instruction, il n'est pas possible d'utiliser
 les variables `OLD` et `NEW` car elles ciblent une seule ligne. Pour cela, le
-standard SQL parle de tables de transition. 
+standard SQL parle de tables de transition.
 
 La version 10 de PostgreSQL permet donc de rattraper le retard à ce sujet par
 rapport au standard SQL et SQL Server.
@@ -2730,7 +2730,7 @@ postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000)
 INSERT 0 1000000
 
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
-                                QUERY PLAN                           
+                                QUERY PLAN
 --------------------------------------------------------------------------
  Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
                (actual time=781.612..781.612 rows=0 loops=1)
@@ -2786,7 +2786,7 @@ postgres=# INSERT INTO t1 SELECT i, 'Ligne '||i FROM generate_series(1, 1000000)
 INSERT 0 1000000
 
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
-                                QUERY PLAN                           
+                                QUERY PLAN
 --------------------------------------------------------------------------
  Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
                (actual time=1049.420..1049.420 rows=0 loops=1)
@@ -2804,7 +2804,7 @@ en mode instruction, il faut compter 2,2 secondes, dont 1,5 sur le trigger. Les
 tables de transition nous permettent de gagner en performance.
 
 Le gros intérêt des tables de transition est le gain en performance que cela
-apporte. 
+apporte.
 
 Pour en savoir plus :
 
@@ -2859,7 +2859,7 @@ Plus d'information :
 La clause facultative *AS type_donnee* spécifie le type de données de la
 séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
 défaut). Le type de données détermine les valeurs minimales et maximales par
-défaut pour la séquence. 
+défaut pour la séquence.
 
 Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS
 type_donnee*.
