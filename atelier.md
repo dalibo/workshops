@@ -502,7 +502,7 @@ Connection options:
 Report bugs to <pgsql-bugs@postgresql.org>.
 ```
 
-L'option `-X` a bien disparu.
+L'option `-x` a bien disparu.
 
 On créé à présent un slot de réplication permanent :
 
