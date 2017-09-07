@@ -1165,20 +1165,20 @@ last_analyze | 2017-09-01 08:38:54.068665-04
 ## Performances
 
 <div class="notes">
-Importer le dump de la base SQL2 dans l'instance PostgreSQL 10 :
+Importer le dump tp_workshop10.dump dans l'instance PostgreSQL 10 :
 
 ```
-$ createdb sql2
-$ pg_restore -1 -O -d sql2  \
-     formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+$ createdb tp
+$ pg_restore -1 -O -d tp  \
+     http://192.168.1.3/dumps/tp_workshop10.dump
 ```
 
-Importer également le dump de la base SQL2 dans l'instance PostgreSQL 9.6 :
+Importer également le dump tp_workshop10.dump dans l'instance PostgreSQL 9.6 :
 
 ```
-$ createdb -p 5433 sql2
-$ pg_restore -p 5433 -1 -O -d sql2 \
-     formation/formation/sql2/base_tp_sql2_avec_schemas.dump
+$ createdb -p 5433 tp
+$ pg_restore -p 5433 -1 -O -d tp \
+     http://192.168.1.3/dumps/tp_workshop10.dump
 ```
 
 Validez toujours les temps d'exécution en exécutant les requêtes plusieurs
@@ -1190,9 +1190,9 @@ Vérifions le gain de performance sur les tris, en exécutant tout d'abord
 la requête suivante sur l'instance 9.6 :
 
 ```sql
-$ psql -q sql2 -p 5433
-sql2=# SET search_path TO magasin;
-sql3=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5433
+tp=# SET search_path TO magasin;
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT type_client,
        code_pays
   FROM commandes c
@@ -1217,11 +1217,11 @@ SELECT type_client,
 Voyons maintenant le gain avec PostgreSQL 10, en prenant soin de désactiver le
 parallélisme :
 ```
-$ psql -q sql2 -p 5432
-sql2=# SET search_path TO magasin;
-sql2=# SET max_parallel_workers = 0;
-sql2=# SET max_parallel_workers_per_gather = 0;
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5432
+tp=# SET search_path TO magasin;
+tp=# SET max_parallel_workers = 0;
+tp=# SET max_parallel_workers_per_gather = 0;
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT type_client,
        code_pays
   FROM commandes c
@@ -1251,9 +1251,9 @@ Maintenant, vérifions le gain de performance sur les GROUPING SETS.
 Exécuter la requête suivante sur l'instance 9.6 :
 
 ```sql
-$ psql -q sql2 -p 5433
-sql2=# SET search_path TO magasin;
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5433
+tp=# SET search_path TO magasin;
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
@@ -1289,10 +1289,10 @@ GROUP BY CUBE (type_client, code_pays);
 On remarque que l'opération de tri est effectué sur disque. Vérifions le temps d'exécution avec un tri en mémoire : 
 
 ```sql
-$ psql -q sql2 -p 5433
-sql2=# SET search_path TO magasin;
-sql2=# set work_mem='128MB';
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5433
+tp=# SET search_path TO magasin;
+tp=# set work_mem='128MB';
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
@@ -1329,9 +1329,9 @@ GROUP BY CUBE (type_client, code_pays);
 Exécutons la requête suivante sur l'instance 10 :
 
 ```sql
-$ psql -q sql2 -p 5432
-sql2=# SET search_path TO magasin;
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5432
+tp=# SET search_path TO magasin;
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
@@ -1364,10 +1364,10 @@ L'amélioration des performances provient du noeud `MixedAggregate` qui fait son
 Les performances sont évidemment améliorées si suffisamment de mémoire est allouée pour l'opération :
 
 ```sql
-$ psql -q sql2 -p 5432
-sql2=# SET search_path TO magasin;
-sql2=# SET work_mem = '24MB';
-sql2=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
+$ psql -q tp -p 5432
+tp=# SET search_path TO magasin;
+tp=# SET work_mem = '24MB';
+tp=# EXPLAIN (ANALYZE, BUFFERS, COSTS off)
 SELECT GROUPING(type_client,code_pays)::bit(2),
        GROUPING(type_client)::boolean g_type_cli,
        GROUPING(code_pays)::boolean g_code_pays,
