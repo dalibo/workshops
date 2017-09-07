@@ -1168,9 +1168,10 @@ last_analyze | 2017-09-01 08:38:54.068665-04
 Importer le dump tp_workshop10.dump dans l'instance PostgreSQL 10 :
 
 ```
+$ wget http://192.168.1.3/dumps/tp_workshop10.dump -P /tmp
 $ createdb tp
 $ pg_restore -1 -O -d tp  \
-     http://192.168.1.3/dumps/tp_workshop10.dump
+     /tmp/tp_workshop10.dump
 ```
 
 Importer également le dump tp_workshop10.dump dans l'instance PostgreSQL 9.6 :
@@ -1178,7 +1179,7 @@ Importer également le dump tp_workshop10.dump dans l'instance PostgreSQL 9.6 :
 ```
 $ createdb -p 5433 tp
 $ pg_restore -p 5433 -1 -O -d tp \
-     http://192.168.1.3/dumps/tp_workshop10.dump
+     /tmp/tp_workshop10.dump
 ```
 
 Validez toujours les temps d'exécution en exécutant les requêtes plusieurs
