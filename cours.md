@@ -2369,8 +2369,7 @@ Pour en savoir plus :
 ### Renommage d'un enum
 
 <div class="slide-content">
-Il est désormais possible de renommer une valeur d'un type existant.
-
+  * Renommage possible de la valeur d'un enum
 `ALTER TYPE nom RENAME VALUE valeur_enum_existante`
 `  TO nouvelle_valeur_enum;`
 </div>
@@ -2647,10 +2646,10 @@ Pour en savoir plus :
 <div class="slide-content">
   * Pour les triggers de type AFTER et de niveau STATEMENT
   * Possibilité de stocker les lignes avant et/ou après modification
-	  * `REFERENCING OLD TABLE`
-	  * `REFERENCING NEW TABLE`
+    * `REFERENCING OLD TABLE`
+    * `REFERENCING NEW TABLE`
 
-	  * Par exemple
+  * Par exemple
 		```sql
 		CREATE TRIGGER tr1
 		  AFTER DELETE ON t1
@@ -2822,7 +2821,7 @@ Pour en savoir plus :
 </div>
 
 <div class="notes">
-**Création des catalogues système *pg_sequence* et *pg_sequences**
+**Catalogues système pg_sequence et pg_sequences**
 
 ```sql
 postgres=# SELECT * FROM pg_sequences;
@@ -2854,7 +2853,7 @@ seqcycle     | f
 Plus d'information :
 [Add pg_sequence system catalog](https://dali.bo/waiting-for-postgresql-10-add-pg_sequence-system-catalog)
 
-**Ajout de l'option *CREATE SEQUENCE AS type_donnee* **
+**Nouvelle option pour CREATE SEQUENCE**
 
 La clause facultative *AS type_donnee* spécifie le type de données de la
 séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
@@ -2907,7 +2906,7 @@ Pour en savoir plus :
   * Fin de support ou suppression :
     * Type *floating point timestamp*
     * Contribution *tsearch2*
-    * Support des BDD < 8.0 dans *pg_dump*
+    * Support des versions < 8.0 dans *pg_dump*
     * Protocole client/serveur 1.0
     * Clause *UNENCRYPTED* pour les mots de passe
 </div>
@@ -2963,11 +2962,13 @@ version par les outils de l'écosystème est encore jeune.
 
 <div class="slide-content">
   * Branche de développement de la version 11 créée le 15 août
-  * Commit fests prévus : 09 et 11/2017, 01 et 03/2018
-  * Axes d'amélioration notamment prévus :
-    * Parallélisme
-    * Partitionnement
-    * Réplication logique
+  * 4 commit fests prévus
+    * septembre et novembre 2017
+	* janvier et mars 2018
+  * Axes d'amélioration notamment prévus
+    * parallélisme
+    * partitionnement
+    * réplication logique
 </div>
 
 <div class="notes">
