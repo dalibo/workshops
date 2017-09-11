@@ -220,8 +220,7 @@ Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé
 ### Configuration
 
 <div class="slide-content">
-Changement des valeurs par défaut
-
+  * Changement des valeurs par défaut
   * postgresql.conf
     * wal_level : replica
     * max_wal_senders : 10
@@ -626,8 +625,7 @@ postgres=# SELECT relname,relispartition,relkind,reltuples
 ### Performances en insertion
 
 <div class="slide-content">
-t1 (non partitionnée) :
-
+Table non partitionnée
 ```
 INSERT INTO t1 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -636,8 +634,7 @@ CHECKPOINT;
 Time: 501.660 ms
 ```
 
-t2 (partitionnement déclaratif) :
-
+Nouveau partitionnement
 ```
 INSERT INTO t2 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -646,8 +643,7 @@ CHECKPOINT;
 Time: 501.212 ms
 ```
 
-t3 (partitionnement par héritage) :
-
+Ancien partitionnement
 ```
 INSERT INTO t3 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
@@ -877,7 +873,7 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 
 ### Fonctionnement
 
-![Schema du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
+![Schéma du fonctionnement de la réplication logique](medias/z100-schema-repli-logique.png)
 
 <div class="notes">
 Schéma obtenu sur
@@ -903,7 +899,7 @@ Schéma obtenu sur
     * *Large objects*
 
   * Pas de publication des tables parents du partitionnement
-  * Ne conviens pas comme fail-over
+  * Ne convient pas comme fail-over
 </div>
 
 <div class="notes">
@@ -1082,13 +1078,13 @@ CREATE SUBSCRIPTION
 
 <div class="slide-content">
   * Sur l'éditeur
-    * état de la réplication dans `pg_stat_replication`
-    * slot de réplication dans `pg_replication_slots`
-    * état de la publication dans `pg_publication`
-    * contenu de la publication dans `pg_publication_tables`
+    * `pg_stat_replication` pour l'état de la réplication
+    * `pg_replication_slots` pour la définition des slots de réplication
+    * `pg_publication` pour la définition des publications
+    * `pg_publication_tables` pour la liste des tables publiées par publication
   * Sur l'abonné
-    * état de l'abonnement dans `pg_subscription`
-    * état de la réplication dans `pg_replication_origin_status`
+    * `pg_subscription` pour la définition des abonnements
+    * `pg_replication_origin_status` pour l'état de la réplication
 </div>
 
 <div class="notes">
