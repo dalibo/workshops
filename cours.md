@@ -212,7 +212,7 @@ maintenance et de supervision ont bien été rendus compatibles avec cette
 version.
 
 Pour en savoir plus sur le sujet, vous pouvez consulter l'article intitulé
-[Rename “pg_xlog” directory to “pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
+[Rename “pg_xlog” directory to pg_wal](https://dali.bo/waiting-for-postgresql-10-rename-pg_xlog-directory-to-pg_wal).
 </div>
 
 -----
@@ -2513,8 +2513,8 @@ postgres=# SELECT jsonb_pretty(ts_headline(document, 'jeroboam'::tsquery))
 (1 row)
 ```
 
-Plus d'information :
-[Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+Plus d'information : [Full Text Search support for json and jsonb](https://dali.bo/waiting-for-postgresql-10-full-text-search-support-for-json-and-jsonb)
+
 </div>
 
 -----
@@ -2633,6 +2633,7 @@ facultativement par une unique clause \\else.
 
 Pour en savoir plus :
 [Support \\if … \\elif … \\else … \\endif in psql scripting](https://dali.bo/waiting-for-postgresql-10-support-if-elif-else-endif-in-psql-scripting)
+
 </div>
 
 -----
