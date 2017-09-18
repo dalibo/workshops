@@ -879,6 +879,9 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 Schéma obtenu sur
 [blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
 
+Source : Adrien Nayrat -
+[Série sur la réplication logique](https://blog.anayrat.info/2017/07/29/postgresql-10-et-la-replication-logique-fonctionnement/)
+
   * Une publication est créée sur le serveur éditeur
   * L'abonné souscrit à cette publication, c’est un « souscripteur »
   * Un processus spécial est lancé : le  « bgworker logical replication ». Il va
@@ -2647,13 +2650,13 @@ Pour en savoir plus :
     * `REFERENCING NEW TABLE`
 
   * Par exemple
-		```sql
-		CREATE TRIGGER tr1
-		  AFTER DELETE ON t1
-		  REFERENCING OLD TABLE AS oldtable
-		  FOR EACH STATEMENT
-		  EXECUTE PROCEDURE log_delete();
-		```
+```sql
+CREATE TRIGGER tr1
+AFTER DELETE ON t1
+REFERENCING OLD TABLE AS oldtable
+FOR EACH STATEMENT
+EXECUTE PROCEDURE log_delete();
+```
 </div>
 
 
