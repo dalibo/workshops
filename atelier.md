@@ -1678,7 +1678,7 @@ Contrairement à la réplication physique, il est possible de modifier les donn�
 de l'instance en souscription :
 
 ```sql
-souscription=# SELECT * FROM meteo LIMIT 1;
+souscription=# SELECT * FROM meteo WHERE t_id=1;
  t_id | lieu |    heure_mesure     | temperature 
 ------+------+---------------------+-------------
     1 | Lyon | 2017-09-24 04:10:59 |       18.59
