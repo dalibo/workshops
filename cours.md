@@ -2584,6 +2584,7 @@ Devrim     | Gündüz      | [null]
 Pour en savoir plus :
 
   * [Support XMLTABLE query expression](https://dali.bo/waiting-for-postgresql-10-support-xmltable-query-expression)
+  * [Xmltable-intro](https://dali.bo/xmltable-intro)
   * [xmltable](https://docs.postgresql.fr/10/functions-xml.html#functions-xml-processing-xmltable)
 </div>
 
