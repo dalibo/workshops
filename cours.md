@@ -2884,7 +2884,8 @@ pour assigner automatiquement une valeur unique à une colonne.
 Comme le type *serial*, une colonne d'identité utilisera une séquence.
 
 Pour en savoir plus :
-[Identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
+[Waiting for identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
+[Identity columns](https://dali.bo/postgresql-10-identity-columns)
 </div>
 
 -----
