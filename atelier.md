@@ -79,6 +79,7 @@ On répète ensuite le processus d'installation de façon à installer PostgreSQ
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
 
 ```
+# export pgdg_yum=https://download.postgresql.org/pub/repos/yum/
 # wget $pgdg_yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
 # yum install -y pgdg-centos96-9.6-3.noarch.rpm
 Installing:
