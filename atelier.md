@@ -1500,7 +1500,7 @@ postgres=# SELECT * FROM (
 (6 rows)
 ```
 
-Nous pouvons également effectuer un changement de collationnement pour classe les majuscules après les minuscules :
+Nous pouvons également effectuer un changement de collationnement pour classer les majuscules après les minuscules :
 ```sql
 postgres=# SELECT * FROM (
     SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
