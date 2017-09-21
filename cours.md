@@ -903,6 +903,7 @@ Source : Adrien Nayrat -
 
   * Pas de publication des tables parents du partitionnement
   * Ne convient pas comme fail-over
+  * Contrainte d'unicité nécessaire pour *UPDATE* et *DELETE*
 </div>
 
 <div class="notes">
