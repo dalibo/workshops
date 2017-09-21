@@ -1690,6 +1690,9 @@ Authentication Mechanism**. Ceci est basé sur un schéma de type
 question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions
 non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas
 être supportée par d'anciens clients.
+
+Pour plus d'information à ce sujet, vous pouvez consulter : 
+[SCRAM-SHA-256](https://dali.bo/support-scram-sha-256-authentication)
 </div>
 
 -----
