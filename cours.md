@@ -656,19 +656,26 @@ communication avec le client, mais des fils du processus `postmaster`.
 
 
 ```sql
-EXPLAIN SELECT * FROM big b1 JOIN big bg2 USING (id);
-                  QUERY PLAN
--------------------------------------------------------
- Hash Join  [...]
-   Hash Cond: (b1.id = bg2.id)
-   ->  Gather  [...]
-         Workers Planned: 2
-         ->  Parallel Seq Scan on big b1  [...]
-   ->  Hash  [...]
-         ->  Gather  [...]
-               Workers Planned: 2
-               ->  Parallel Seq Scan on big bg2  [...]
-(9 rows)
+EXPLAIN ANALYZE SELECT * FROM big b1 JOIN big b2 USING (id) WHERE b1.id < 400000;
+ Gather  [...]
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Hash Join  [...]
+         Hash Cond: (b1.id = b2.id)
+         Worker 0: [...]
+         Worker 1: [...]
+         ->  Parallel Seq Scan on b1  [...]
+               Filter: (b1.id < 400000)
+               Rows Removed by Filter: 16903334
+               Worker 0: [...]
+               Worker 1: [...]
+         ->  Hash  [...]
+               Buckets: 4194304  Batches: 1  Memory Usage: 141753kB
+               Worker 0: [...]
+               Worker 1: [...]
+               ->  Seq Scan on public.t3  [...]
+                     Worker 0: [...]
+                     Worker 1: [...]
 ```
 
 
