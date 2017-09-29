@@ -630,8 +630,6 @@ Table non partitionnée
 INSERT INTO t1 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 10097.098 ms (00:10.097)
-CHECKPOINT;
-Time: 501.660 ms
 ```
 
 Nouveau partitionnement
@@ -639,8 +637,6 @@ Nouveau partitionnement
 INSERT INTO t2 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 11448.867 ms (00:11.449)
-CHECKPOINT;
-Time: 501.212 ms
 ```
 
 Ancien partitionnement
@@ -648,8 +644,6 @@ Ancien partitionnement
 INSERT INTO t3 SELECT i, 'toto'
   FROM generate_series(0, 9999999) i;
 Time: 125351.918 ms (02:05.352)
-CHECKPOINT;
-Time: 802.073 ms
 ```
 </div>
 
