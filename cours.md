@@ -734,7 +734,7 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
   * Valeurs nulles acceptées dans les partitions uniquement si la table partitionnée le permet
   * Partitions distantes pour l'instant pas supportées
   * En cas d'attachement d'une partition
-    * vérification du respect de la contrainte (Seq Scan de la table)
+    * vérification du respect de la contrainte (verrou bloquant sur la partition)
     * sauf si ajout au préalable d'une contrainte *CHECK* identique
 </div>
 
