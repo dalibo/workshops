@@ -236,12 +236,15 @@ Certains paramètres ont vu leur valeur par défaut modifiée. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
 
-| Paramètre             | 9.6      | 10.0    |
-| --------------------- | -------- | ------- |
-| wal_level             | minimal  | replica |
-| max_wal_senders       | 0        | 10      |
-| max_replication_slots | 0        | 10      |
-| hot_standby           | off      | on      |
++-----------------------+----------+---------+                                  
+| Paramètre             | 9.6      | 10.0    |                                  
++=======================+==========+=========+                                  
+| wal_level             | minimal  | replica |                                  
+| max_wal_senders       | 0        | 10      |                                  
+| max_replication_slots | 0        | 10      |                                  
+| hot_standby           | off      | on      |                                  
++-----------------------+----------+---------+  
+
 </div>
 
 -----
@@ -351,8 +354,9 @@ Le catalogue *pg_class* a été modifié et indique désormais :
 
 Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes :
 
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | Colonne       | Contenu                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
++===============+========================================================================================================================+
 | partrelid     | OID de la table partitionnée référencé dans *pg_class*                                                                 |
 | partstrat     | Stratégie de partitionnement ; l = par liste, r = par intervalle                                                       |
 | partnatts     | Nombre de colonnes de la clé de partitionnement                                                                        |
@@ -360,6 +364,7 @@ Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes
 | partclass     | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser                   |
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
++===============+========================================================================================================================+
 
 Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
 vérifier en utilisant un SELECT avec la clause *ONLY*.
@@ -949,21 +954,27 @@ rapports ou la mise à jour de version majeure de PostgreSQL.
 De nouveaux catalogues ont été ajoutés pour permettre la supervision de la
 réplication logique. En voici la liste :
 
-| Catalogue                    | Commentaires                                                      |
-| ---------------------------- | ----------------------------------------------------------------- |
-| pg_publication               | Informations sur les publications |
++------------------------------+--------------------------------------------------------------------------+
+| Catalogue                    | Commentaires                                                             |
++==============================+==========================================================================+
+| pg_publication               | Informations sur les publications                                        |
 | pg_publication_tables        | Correspondance entre les publications et les tables qu'elles contiennent |
-| pg_stat_subscription         | État des journaux de transactions reçus en souscription |
-| pg_subscription              | Informations sur les souscriptions existantes |
-| pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription |
+| pg_stat_subscription         | État des journaux de transactions reçus en souscription                  |
+| pg_subscription              | Informations sur les souscriptions existantes                            |
+| pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription               |
++------------------------------+--------------------------------------------------------------------------+
 
 D'autres catalogues déjà existants peuvent également être utiles :
 
-| Catalogue                    | Commentaires                                                      |
-| ---------------------------- | ----------------------------------------------------------------- |
++------------------------------+--------------------------------------------------------------------------+
+| Catalogue                    | Commentaires                                                             |
++==============================+==========================================================================+
 | pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
 | pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
 | pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
++------------------------------+--------------------------------------------------------------------------+
+
+
 </div>
 
 -----
@@ -1910,12 +1921,15 @@ normalement réservés aux super-utilisateurs.
 
 La version 10 implémente les nouveaux rôles suivants :
 
-| Rôle | Accès autorisé |
-| ------------------------ | ------------------------------------------------ |
-| pg_monitor | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
++----------------------+------------------------------------------------------+
+| Rôle                 | Accès autorisé                                       |
++======================+======================================================+
+| pg_monitor           | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
 | pg_read_all_settings | Lit toutes les variables de configuration, y compris celles normalement visibles des seuls super-utilisateurs. |
-| pg_read_all_stats | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
-| pg_stat_scan_tables | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
+| pg_read_all_stats    | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
+| pg_stat_scan_tables  | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
++----------------------+------------------------------------------------------+ 
+
 </div>
 
 -----
@@ -2923,21 +2937,23 @@ important d'opérer régulièrement, en fonction des contraintes métier, des mi
 
 <div class="slide-content">
 Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
-
-| Outil | Compatibilité avec PostgreSQL 10 |
-| ------------ | ------------------------------------ |
++----------------------+------------------------------------------------------+ 
+| Outil                | Compatibilité avec PostgreSQL 10 |
++======================+======================================================+
 | pgBadger| Oui |
 | pgCluu| Oui, depuis 2.6 |
 | ora2Pg| Oui (support du partitionnement déclaratif) |
 | pg_stat_kcache | Oui, depuis 2.0.3 |
 | ldap2pg | Oui |
++----------------------+------------------------------------------------------+ 
 </div>
 
 <div class="notes">
 Voici une grille de compatibilité des outils Dalibo :
 
-| Outil | Compatibilité avec PostgreSQL 10 |
-| ------------ | ------------------------------------ |
++----------------------+------------------------------------------------------+ 
+| Outil                | Compatibilité avec PostgreSQL 10 |
++======================+======================================================+ 
 | pg_activity | À venir dans 1.3.2 |
 | check_pgactivity | À venir dans 2.3 (plusieurs PR ont été intégrées) |
 | pgBadger| Oui |
@@ -2950,6 +2966,7 @@ Voici une grille de compatibilité des outils Dalibo :
 | PAF | À venir dans 2.2 (beta1 sortie) |
 | temboard | À venir dans 1.0a3 |
 | ldap2pg | Oui |
++----------------------+------------------------------------------------------+ 
 
 La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 que des changements peuvent encore avoir lieu, et que le support de cette
