@@ -1977,7 +1977,7 @@ La version 10 implémente les nouveaux rôles suivants :
 
 <div class="slide-content">
   * Affichage des processus auxiliaires
-    * nouvelle colonne *backend_type*
+    * nouvelle colonne `backend_type`
   * Nouveaux types d'événements pour lesquels le processus est en attente
     * Activity
     * Extension
@@ -2403,9 +2403,13 @@ Pour en savoir plus :
 ### Renommage d'un enum
 
 <div class="slide-content">
-  * Renommage possible de la valeur d'un enum
-`ALTER TYPE nom RENAME VALUE valeur_enum_existante`
-`  TO nouvelle_valeur_enum;`
+
+Renommage possible de la valeur d'un enum
+
+```sql
+ALTER TYPE nom RENAME VALUE valeur_enum_existante
+TO nouvelle_valeur_enum;
+```
 </div>
 
 <div class="notes">
@@ -2964,15 +2968,15 @@ Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 +----------------------+------------------------------------------------------+ 
 | Outil                | Compatibilité avec PostgreSQL 10 |
 +======================+======================================================+
-| pgBadger| Oui |
+| pgBadger             | Oui |
 +----------------------+------------------------------------------------------+
-| pgCluu| Oui, depuis 2.6 |
+| pgCluu               | Oui, depuis 2.6 |
 +----------------------+------------------------------------------------------+
-| ora2Pg| Oui (support du partitionnement déclaratif) |
+| ora2Pg               | Oui (support du partitionnement déclaratif) |
 +----------------------+------------------------------------------------------+
-| pg_stat_kcache | Oui, depuis 2.0.3 |
+| pg_stat_kcache       | Oui, depuis 2.0.3 |
 +----------------------+------------------------------------------------------+
-| ldap2pg | Oui |
+| ldap2pg              | Oui |
 +----------------------+------------------------------------------------------+ 
 
 </div>
