@@ -62,7 +62,12 @@ else
  EPUB_FLAGS=
 endif
 
-SRCS=$(shell find . -name '*.md' -and -not -name 'README.md' -and -not -path './themes/*')
+#
+# SRCS is the list of all the source markdown files
+# README files and other documentation markdown files are not compiled
+#
+EXCLUDE_FILES=\./\(LICENSE\|QUICKSTART\|CONTRIBUTING\|SYNTAX\|INSTALL\|AUTHORS\)\.md
+SRCS=$(shell find . -name '*.md' -and -not -name README.md -and -not -regex '$(EXCLUDE_FILES)' -and -not -path './themes/*')
 
 REVEAL_OBJS=$(SRCS:.md=.html)
 TEX_OBJS=$(SRCS:.md=.tex)
