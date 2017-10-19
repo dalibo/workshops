@@ -237,12 +237,15 @@ principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
 
 +-----------------------+----------+---------+                                  
-| Paramètre             | 9.6      | 10.0    |                                  
+| Paramètre             | 9.6      | 10      |                                  
 +=======================+==========+=========+                                  
-| wal_level             | minimal  | replica |                                  
-| max_wal_senders       | 0        | 10      |                                  
-| max_replication_slots | 0        | 10      |                                  
-| hot_standby           | off      | on      |                                  
+| wal_level             | minimal  | replica |
++-----------------------+----------+---------+  
+| max_wal_senders       | 0        | 10      |
++-----------------------+----------+---------+ 
+| max_replication_slots | 0        | 10      | 
++-----------------------+----------+---------+ 
+| hot_standby           | off      | on      | 
 +-----------------------+----------+---------+  
 
 </div>
@@ -358,13 +361,20 @@ Le catalogue `pg_partitioned_table` contient quant à lui les colonnes suivantes
 | Colonne       | Contenu                                                                                                                |
 +===============+========================================================================================================================+
 | partrelid     | OID de la table partitionnée référencé dans `pg_class`                                                                 |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partstrat     | Stratégie de partitionnement ; l = par liste, r = par intervalle                                                       |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partnatts     | Nombre de colonnes de la clé de partitionnement                                                                        |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partattrs     | Tableau de partnatts valeurs indiquant les colonnes de la table faisant partie de la clé de partitionnement            |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partclass     | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser                   |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
-+===============+========================================================================================================================+
++---------------+------------------------------------------------------------------------------------------------------------------------+
+
 
 Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
 vérifier en utilisant un SELECT avec la clause `ONLY`.
@@ -958,9 +968,13 @@ réplication logique. En voici la liste :
 | Catalogue                    | Commentaires                                                             |
 +==============================+==========================================================================+
 | pg_publication               | Informations sur les publications                                        |
++------------------------------+--------------------------------------------------------------------------+
 | pg_publication_tables        | Correspondance entre les publications et les tables qu'elles contiennent |
++------------------------------+--------------------------------------------------------------------------+
 | pg_stat_subscription         | État des journaux de transactions reçus en souscription                  |
++------------------------------+--------------------------------------------------------------------------+
 | pg_subscription              | Informations sur les souscriptions existantes                            |
++------------------------------+--------------------------------------------------------------------------+
 | pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription               |
 +------------------------------+--------------------------------------------------------------------------+
 
@@ -970,7 +984,9 @@ D'autres catalogues déjà existants peuvent également être utiles :
 | Catalogue                    | Commentaires                                                             |
 +==============================+==========================================================================+
 | pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
++------------------------------+--------------------------------------------------------------------------+
 | pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
++------------------------------+--------------------------------------------------------------------------+
 | pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
 +------------------------------+--------------------------------------------------------------------------+
 
@@ -1924,9 +1940,14 @@ La version 10 implémente les nouveaux rôles suivants :
 +----------------------+------------------------------------------------------+
 | Rôle                 | Accès autorisé                                       |
 +======================+======================================================+
-| pg_monitor           | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
+| pg_monitor           | Lit et exécute plusieurs vues et fonctions de        |
+|                      | monitoring. Ce rôle est membre de                    |
+|                      | pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
++----------------------+------------------------------------------------------+
 | pg_read_all_settings | Lit toutes les variables de configuration, y compris celles normalement visibles des seuls super-utilisateurs. |
++----------------------+------------------------------------------------------+ 
 | pg_read_all_stats    | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
++----------------------+------------------------------------------------------+ 
 | pg_stat_scan_tables  | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
 +----------------------+------------------------------------------------------+ 
 
@@ -2944,9 +2965,13 @@ Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 | Outil                | Compatibilité avec PostgreSQL 10 |
 +======================+======================================================+
 | pgBadger| Oui |
++----------------------+------------------------------------------------------+
 | pgCluu| Oui, depuis 2.6 |
++----------------------+------------------------------------------------------+
 | ora2Pg| Oui (support du partitionnement déclaratif) |
++----------------------+------------------------------------------------------+
 | pg_stat_kcache | Oui, depuis 2.0.3 |
++----------------------+------------------------------------------------------+
 | ldap2pg | Oui |
 +----------------------+------------------------------------------------------+ 
 
@@ -2959,18 +2984,29 @@ Voici une grille de compatibilité des outils Dalibo :
 +----------------------+------------------------------------------------------+ 
 | Outil                | Compatibilité avec PostgreSQL 10 |
 +======================+======================================================+ 
-| pg_activity | À venir dans 1.3.2 |
-| check_pgactivity | À venir dans 2.3 (plusieurs PR ont été intégrées) |
-| pgBadger| Oui |
-| pgCluu| Oui, depuis 2.6 |
-| ora2Pg| Oui (support du partitionnement déclaratif) |
-| powa-archivist | À venir dans 3.1.1 |
-| pg_qualstats | À venir dans 1.0.3 |
-| pg_stat_kcache | Oui, depuis 2.0.3 |
-| hypopg | À venir dans 1.1.0 |
-| PAF | À venir dans 2.2 (beta1 sortie) |
-| temboard | À venir dans 1.0a3 |
-| ldap2pg | Oui |
+| pg_activity          | À venir dans 1.3.2 |
++----------------------+------------------------------------------------------+
+| check_pgactivity     | À venir dans 2.3 (plusieurs PR ont été intégrées) |
++----------------------+------------------------------------------------------+
+| pgBadger             | Oui |
++----------------------+------------------------------------------------------+
+| pgCluu               | Oui, depuis 2.6 |
++----------------------+------------------------------------------------------+
+| ora2Pg               | Oui (support du partitionnement déclaratif) |
++----------------------+------------------------------------------------------+
+| powa-archivist       | À venir dans 3.1.1 |
++----------------------+------------------------------------------------------+
+| pg_qualstats         | À venir dans 1.0.3 |
++----------------------+------------------------------------------------------+
+| pg_stat_kcache       | Oui, depuis 2.0.3 |
++----------------------+------------------------------------------------------+
+| hypopg               | À venir dans 1.1.0 |
++----------------------+------------------------------------------------------+
+| PAF                  | À venir dans 2.2 (beta1 sortie) |
++----------------------+------------------------------------------------------+
+| temboard             | À venir dans 1.0a3 |
++----------------------+------------------------------------------------------+
+| ldap2pg              | Oui |
 +----------------------+------------------------------------------------------+ 
 
 La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
