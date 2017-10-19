@@ -232,19 +232,19 @@ Vous trouverez plus de détails dans cet
 ### Nommage
 
 <div class="slide-content">
-  * Au niveau des répertoires
-    * *pg_xlog* -> *pg_wal*
-    * *pg_clog* -> *pg_xact*
-  * Au niveau des fonctions
-    * *xlog* -> *wal*
-    * *location* -> *lsn*
-  * Au niveau des outils
-    * *xlog* -> *wal*
+  * Au niveau des répertoires                                                   
+    * `pg_xlog` -> `pg_wal`                                                     
+    * `pg_clog` -> `pg_xact`                                                    
+  * Au niveau des fonctions                                                     
+    * `xlog` -> `wal`                                                           
+    * `location` -> `lsn`                                                       
+  * Au niveau des outils                                                        
+    * `xlog` -> `wal`    
 </div>
 
 <div class="notes">
-Afin de clarifier le rôle des répertoires *pg_xlog* et *pg_clog* qui contiennent
-non pas des *logs* mais des journaux de transaction ou de commits, les deux
+Afin de clarifier le rôle des répertoires `pg_xlog` et `pg_clog` qui contiennent
+non pas des *logs* mais des *journaux de transaction* ou de commits, les deux
 renommages ont été effectués dans `$PGDATA`. Les fonctions dont les noms y
 faisaient référence ont également été renommées.
 
@@ -276,7 +276,7 @@ drwx------. 2 postgres postgres  4096 Aug  3 17:24 pg_xact
 -rw-------. 1 postgres postgres 22746 Aug  3 17:24 postgresql.conf
 ```
 
-Si on regarde les fonctions contenant le mot clé *wal* :
+Si on regarde les fonctions contenant le mot clé `wal` :
 
 ```
 postgres=# SELECT proname FROM pg_proc WHERE proname LIKE '%wal%'
@@ -341,12 +341,18 @@ Certains paramètres ont vu leur valeur par défaut modifiée. Ceci est
 principalement en relation avec la réplication, l'idée étant qu'il ne soit
 plus nécessaire de redémarrer l'instance pour activer la réplication.
 
-| Paramètre             | 9.6      | 10.0    |
-| --------------------- | -------- | ------- |
++-----------------------+----------+---------+                                  
+| Paramètre             | 9.6      | 10      |                                  
++=======================+==========+=========+                                  
 | wal_level             | minimal  | replica |
++-----------------------+----------+---------+  
 | max_wal_senders       | 0        | 10      |
-| max_replication_slots | 0        | 10      |
-| hot_standby           | off      | on      |
++-----------------------+----------+---------+ 
+| max_replication_slots | 0        | 10      | 
++-----------------------+----------+---------+ 
+| hot_standby           | off      | on      | 
++-----------------------+----------+---------+  
+
 </div>
 
 -----
@@ -428,8 +434,8 @@ il était préférable de s'en passer.
     * expression possible pour la clé de partitionnement
     * sous-partitions possibles
   * Changement du catalogue système
-    * nouvelles colonnes dans *pg_class*
-    * nouveau catalogue *pg_partitioned_table*
+    * nouvelles colonnes dans `pg_class`
+    * nouveau catalogue `pg_partitioned_table`
 </div>
 
 <div class="notes">
@@ -438,7 +444,7 @@ l'infrastructure qui existait déjà dans PostgreSQL.
 
 Le but est de simplifier la mise en place et l'administration des tables
 partitionnées. Des clauses spécialisées ont été ajoutées aux ordres SQL déjà
-existants, comme *CREATE TABLE* et *ALTER TABLE*, pour ajouter, attacher,
+existants, comme `CREATE TABLE` et `ALTER TABLE` , pour ajouter, attacher,
 et détacher des partitions.
 
 Au niveau de la simplification de la mise en place, on peut noter qu'il n'est
@@ -448,26 +454,35 @@ en fonction de la définition des partitions. Si les données insérées ne
 trouvent pas de partition cible, l'insertion est tout simplement en erreur.
 Du fait de ce routage automatique, les insertions se révèlent aussi plus rapides.
 
-Le catalogue *pg_class* a été modifié et indique désormais :
+Le catalogue `pg_class` a été modifié et indique désormais :
 
-  * si une table est une partition (dans ce cas : *relispartition = 't'*)
-  * si une table est partitionnée (*relkind = 'p'*) ou si elle est ordinaire (*relkind = 'r'*)
-  * la représentation interne des bornes de partitionnement (*relpartbound*)
+* si une table est une partition (dans ce cas : `relispartition = 't'`)
+* si une table est partitionnée (`relkind = 'p'`) ou si elle est ordinaire (`relkind = 'r'`)
+* la représentation interne des bornes de partitionnement (`relpartbound`)
 
-Le catalogue *pg_partitioned_table* contient quant à lui les colonnes suivantes :
+Le catalogue `pg_partitioned_table` contient quant à lui les colonnes suivantes :
 
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | Colonne       | Contenu                                                                                                                |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| partrelid     | OID de la table partitionnée référencé dans *pg_class*                                                                 |
++===============+========================================================================================================================+
+| partrelid     | OID de la table partitionnée référencé dans `pg_class`                                                                 |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partstrat     | Stratégie de partitionnement ; l = par liste, r = par intervalle                                                       |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partnatts     | Nombre de colonnes de la clé de partitionnement                                                                        |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partattrs     | Tableau de partnatts valeurs indiquant les colonnes de la table faisant partie de la clé de partitionnement            |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partclass     | Pour chaque colonne de la clé de partitionnement, contient l'OID de la classe d'opérateur à utiliser                   |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partcollation | Pour chaque colonne de la clé de partitionnement, contient l'OID du collationnement à utiliser pour le partitionnement |
++---------------+------------------------------------------------------------------------------------------------------------------------+
 | partexprs     | Arbres d'expression pour les colonnes de la clé de partitionnement qui ne sont pas des simples références de colonne   |
++---------------+------------------------------------------------------------------------------------------------------------------------+
+
 
 Aucune donnée n'est stockée dans la table partitionnée. Il est possible de le
-vérifier en utilisant un SELECT avec la clause *ONLY*.
+vérifier en utilisant un SELECT avec la clause `ONLY`.
 </div>
 
 -----
@@ -688,12 +703,12 @@ ERROR:  no partition of relation "t2" found for row
 DÉTAIL : Partition key of the failing row contains (c1, c3) = (1, 2017-08-09).
 ```
 
-Les valeurs spéciales  *MINVALUE* et *MAXVALUE* permettent de ne pas indiquer de
+Les valeurs spéciales  `MINVALUE` et `MAXVALUE` permettent de ne pas indiquer de
 valeur de seuil limite. Les partitions `t2_0` et `t2_3` pourront par exemple
 être déclarées comme suit et permettront d'insérer les lignes qui étaient
 ci-dessus en erreur. Attention, certains articles en ligne ont été créés avant
 la sortie de la version *beta3* et ils mentionnent la valeur spéciale
-*UNBOUNDED* qui a depuis été remplacée par *MINVALUE* et *MAXVALUE*.
+`UNBOUNDED` qui a depuis été remplacée par `MINVALUE` et `MAXVALUE`.
 
 ```sql
 postgres=# CREATE TABLE t2_0 PARTITION OF t2
@@ -840,7 +855,7 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
   * Partitions distantes pour l'instant pas supportées
   * En cas d'attachement d'une partition
     * vérification du respect de la contrainte (verrou bloquant sur la partition)
-    * sauf si ajout au préalable d'une contrainte *CHECK* identique
+    * sauf si ajout au préalable d'une contrainte `CHECK` identique
 </div>
 
 <div class="notes">
@@ -1002,22 +1017,22 @@ Source : Adrien Nayrat -
 
   * Pas de publication des tables parents du partitionnement
   * Ne convient pas comme fail-over
-  * Contrainte d'unicité nécessaire pour *UPDATE* et *DELETE*
+  * Contrainte d'unicité nécessaire pour `UPDATE` et `DELETE`
 </div>
 
 <div class="notes">
-Le schéma de la base de données ainsi que les commandes *DDL* ne sont pas
-répliquées, y compris l'ordre *TRUNCATE*. Le schéma initial peut être créé en
-utilisant par exemple *pg_dump --schema-only*. Il faudra dès lors répliquer
+Le schéma de la base de données ainsi que les commandes `DDL` ne sont pas
+répliquées, y compris l'ordre `TRUNCATE`. Le schéma initial peut être créé en
+utilisant par exemple `pg_dump --schema-only`. Il faudra dès lors répliquer
 manuellement les changements de structure.
 
 Il n'est pas obligatoire de conserver strictement la même structure des deux
 côtés. Afin de conserver sa cohérence, la réplication s'arrêtera en cas de
 conflit.
 
-Il est d'ailleurs nécessaire d'avoir des contraintes de type *PRIMARY KEY* ou
-*UNIQUE* et *NOT NULL* pour permettre la propagation des ordres *UPDATE* et
-*DELETE*.
+Il est d'ailleurs nécessaire d'avoir des contraintes de type `PRIMARY KEY` ou
+`UNIQUE` et `NOT NULL` pour permettre la propagation des ordres `UPDATE` et
+`DELETE`.
 
 Les triggers des tables abonnées ne seront pas déclenchés par les modifications
 reçues via la réplication.
@@ -1041,8 +1056,8 @@ rapports ou la mise à jour de version majeure de PostgreSQL.
 
 <div class="slide-content">
   * Nouveaux catalogues
-    * pg_publication*
-    * pg_subscription*
+    * pg_publication
+    * pg_subscription
     * pg_stat_subscription
   * Anciens catalogues
     * pg_stat_replication
@@ -1054,21 +1069,33 @@ rapports ou la mise à jour de version majeure de PostgreSQL.
 De nouveaux catalogues ont été ajoutés pour permettre la supervision de la
 réplication logique. En voici la liste :
 
-| Catalogue                    | Commentaires                                                      |
-| ---------------------------- | ----------------------------------------------------------------- |
-| pg_publication               | Informations sur les publications |
++------------------------------+--------------------------------------------------------------------------+
+| Catalogue                    | Commentaires                                                             |
++==============================+==========================================================================+
+| pg_publication               | Informations sur les publications                                        |
++------------------------------+--------------------------------------------------------------------------+
 | pg_publication_tables        | Correspondance entre les publications et les tables qu'elles contiennent |
-| pg_stat_subscription         | État des journaux de transactions reçus en souscription |
-| pg_subscription              | Informations sur les souscriptions existantes |
-| pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription |
++------------------------------+--------------------------------------------------------------------------+
+| pg_stat_subscription         | État des journaux de transactions reçus en souscription                  |
++------------------------------+--------------------------------------------------------------------------+
+| pg_subscription              | Informations sur les souscriptions existantes                            |
++------------------------------+--------------------------------------------------------------------------+
+| pg_subscription_rel          | État de chaque relation répliquée dans chaque souscription               |
++------------------------------+--------------------------------------------------------------------------+
 
 D'autres catalogues déjà existants peuvent également être utiles :
 
-| Catalogue                    | Commentaires                                                      |
-| ---------------------------- | ----------------------------------------------------------------- |
++------------------------------+--------------------------------------------------------------------------+
+| Catalogue                    | Commentaires                                                             |
++==============================+==========================================================================+
 | pg_stat_replication          | Une ligne par processus d'envoi de WAL, montrant les statistiques sur la réplication vers le serveur standby connecté au processus |
++------------------------------+--------------------------------------------------------------------------+
 | pg_replication_slot          | Liste des slots de réplication qui existent actuellement sur l'instance, avec leur état courant |
++------------------------------+--------------------------------------------------------------------------+
 | pg_replication_origin_status | Informations sur l'avancement du rejeu des transactions sur l'instance répliquée |
++------------------------------+--------------------------------------------------------------------------+
+
+
 </div>
 
 -----
@@ -1191,7 +1218,7 @@ CREATE SUBSCRIPTION
 </div>
 
 <div class="notes">
-De nouvelles colonnes ont été ajoutées à *pg_stat_replication* pour mesurer les
+De nouvelles colonnes ont été ajoutées à `pg_stat_replication` pour mesurer les
 délais de réplication :
 
 ```sql
@@ -1220,22 +1247,22 @@ sync_state       | async
 
 Ces trois nouvelles informations concernent la réplication synchrone.
 
-*write_lag* mesure le délai en cas de *synchronous_commit* à *remote_write*.
+* `write_lag` mesure le délai en cas de `synchronous_commit` à `remote_write`.
 Cette configuration fera que chaque `COMMIT` attendra la confirmation de la
 réception en mémoire de l'enregistrement du `COMMIT` par le standby et son
 écriture via le système d'exploitation, sans que les données du cache du système
 ne soient vidées sur disque au niveau du serveur en standby.
 
-*flush_lag* mesure le délai jusqu'à confirmation que les données modifiées
+* `flush_lag` mesure le délai jusqu'à confirmation que les données modifiées
 soient bien écrites sur disque au niveau du serveur standby.
 
-*replay_lag* mesure le délai en cas de *synchronous_commit* à *remote_apply*.
+* `replay_lag`  mesure le délai en cas de `synchronous_commit` à `remote_apply`.
 Cette configuration fera en sorte que chaque `COMMIT` devra attendre le retour
 des standbys synchrones actuels indiquant qu'ils ont bien rejoué la transaction,
 la rendant visible aux requêtes des utilisateurs.
 
-*pg_replication_slots* nous permet de savoir si un slot de réplication est
-temporaire ou non (*temporary*) :
+`pg_replication_slots` nous permet de savoir si un slot de réplication est
+temporaire ou non (`temporary`) :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_replication_slots;
@@ -1301,11 +1328,11 @@ Simulation de l'activité :
 $ pgbench -T 300 bench
 ```
 
-On peut suivre l'évolution des *lsn* (*Log Sequence Number* ou *Numéro de
+On peut suivre l'évolution des `LSN` (*Log Sequence Number* ou *Numéro de
 Séquence de Journal*, pointeur vers une position dans les journaux de
 transactions) envoyés et reçus.
 
-Sur l'éditeur grâce à *pg_stat_replication* :
+Sur l'éditeur grâce à `pg_stat_replication` :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_stat_replication;
@@ -1331,7 +1358,7 @@ sync_priority    | 0
 sync_state       | async
 ```
 
-Sur l'abonné grâce à *pg_replication_origin_status* :
+Sur l'abonné grâce à `pg_replication_origin_status` :
 
 ```sql
 postgres@bench=# SELECT * FROM pg_replication_origin_status;
@@ -1362,7 +1389,7 @@ postgres@bench=# SELECT * FROM pg_replication_origin_status;
 
 <div class="slide-content">
   * Gains significatifs pour les tris sur disque
-    * nœud *Sort Method: external merge*
+    * nœud `Sort Method: external merge`
   * Test avec installation par défaut et disques SSD
     * 9.6 : 2,2 secondes
     * 10 : 1,6 secondes
@@ -1452,7 +1479,7 @@ GROUPING(type_client,code_pays)::bit(2),
  WHERE date_commande BETWEEN '2014-01-01' AND '2014-12-31'
 GROUP BY CUBE (type_client, code_pays);
 ```
-Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
+Avec PostgreSQL 9.6, on termine par un nœud de type `GroupAggregate` :
 
 ```sql
                              QUERY PLAN
@@ -1509,7 +1536,7 @@ Avec PostgreSQL 9.6, on termine par un nœud de type *GroupAggregate* :
 (41 rows)
 ```
 
-Avec PostgreSQL 10, on note l'apparition d'un nœud *MixedAggregate* qui
+Avec PostgreSQL 10, on note l'apparition d'un nœud `MixedAggregate` qui
 utilise bien un hachage et est deux fois plus rapide :
 
 ```sql
@@ -1566,7 +1593,7 @@ utilise bien un hachage et est deux fois plus rapide :
 ### Statistiques multi-colonnes
 
 <div class="slide-content">
-  * *CREATE STATISTICS*
+  * `CREATE STATISTICS`
     * création de statistiques sur plusieurs colonnes d'une même table
   * Corrige les erreurs d'estimation en cas de colonnes fortement corrélées
   * Deux statistiques calculables
@@ -1615,7 +1642,7 @@ clause est d'1% (`rows=100` parmi les 10000 lignes insérées).
 Une estimation similaire peut être obtenue pour la colonne b.
 
 Appliquons maintenant la même condition sur chacune des colonnes en les
-combinant avec *AND* :
+combinant avec `AND` :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1 AND b = 1;
@@ -1670,10 +1697,10 @@ Pour compléter ces informations, vous pouvez également consulter :
 
 <div class="slide-content">
   * Nœuds désormais gérés :
-    * parcours d'index (*Index Scan* et *Index Only Scan*)
-    * jointure-union (*Merge Join*)
+    * parcours d'index (`Index Scan` et `Index Only Scan`)
+    * jointure-union (`Merge Join`)
   * Nouveau nœud :
-    * collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
+    * collecte de résultats en préservant l'ordre de tri (`Gather Merge`)
   * Support également des :
     * requêtes préparées
     * sous-requêtes non-corrélées
@@ -1687,18 +1714,18 @@ concerne que les requêtes en lecture : pas les `INSERT`/`UPDATE`/`DELETE`, pas 
 
 La version 10 propose la parallélisation de nouvelles opérations :
 
-  * parcours d'index (*Index Scan* et *Index Only Scan*)
-  * jointure-union (*Merge Join*)
-  * collecte de résultats en préservant l'ordre de tri (*Gather Merge*)
+  * parcours d'index (`Index Scan` et `Index Only Scan`)
+  * jointure-union (`Merge Join`)
+  * collecte de résultats en préservant l'ordre de tri (`Gather Merge`)
   * requêtes préparées
   * sous-requêtes non-corrélées
 
-La jointure-union (*Merge Join*) est fondée sur le principe d'ordonner les
+La jointure-union (`Merge Join`) est fondée sur le principe d'ordonner les
 tables gauche et droite et ensuite de les comparer en parallèle.
 
-Le nœud *Gather* introduit en 9.6 collecte les résultats de tous les *workers*
+Le nœud `Gather` introduit en 9.6 collecte les résultats de tous les *workers*
 dans un ordre arbitraire. Si chaque *worker* retourne des résultats triés, le
-nœud *Gather Merge* préservera l'ordre de ces résultats déjà triés.
+nœud `Gather Merge` préservera l'ordre de ces résultats déjà triés.
 
 Pour en savoir plus sur le sujet du parallélisme, le lecteur pourra consulter
 l'article [Parallel Query v2](https://dali.bo/parallel-query-v2) de *Robert
@@ -1711,26 +1738,26 @@ Haas*.
 
 <div class="slide-content">
   * nouveaux paramètres
-    * *min_parallel_table_scan_size* : taille minimale d'une table
-	* *min_parallel_index_scan_size* : taille minimale d'un index
-  * suppression de *min_parallel_relation_size*
+    * `min_parallel_table_scan_size` : taille minimale d'une table
+	* `min_parallel_index_scan_size` : taille minimale d'un index
+  * suppression de `min_parallel_relation_size`
     * jugé trop générique
-  * *max_parallel_workers* : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
+  * `max_parallel_workers` : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
 </div>
 
 <div class="notes">
-*min_parallel_table_scan_size* spécifie la quantité minimale de données de la
+`min_parallel_table_scan_size` spécifie la quantité minimale de données de la
 table qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 
-*min_parallel_index_scan_size* spécifie la quantité minimale de données d'index
+`min_parallel_index_scan_size` spécifie la quantité minimale de données d'index
 qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 
-*max_parallel_workers* positionne le nombre maximum de workers que le système
-peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est
-8. Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier
-*max_parallel_workers_per_gather*.
+`max_parallel_workers` positionne le nombre maximum de workers que le système
+peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8. 
+Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier
+`max_parallel_workers_per_gather`.
 
-Pour rappel, *max_parallel_workers_per_gather* configure le nombre maximum de
+Pour rappel, `max_parallel_workers_per_gather` configure le nombre maximum de
 processus parallèles pouvant être lancé par un seul nœud Gather. La valeur par
 défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de
 requête.
@@ -1754,8 +1781,8 @@ requête.
 ### pg_hba.conf
 
 <div class="slide-content">
-  * Nouvelle méthode d'authentification *SCRAM-SHA-256*
-  * Vue *pg_hba_file_rules*
+  * Nouvelle méthode d'authentification `SCRAM-SHA-256`
+  * Vue `pg_hba_file_rules`
   * Par défaut, connexion locale de réplication possibles
 </div>
 
@@ -1784,7 +1811,7 @@ Les valeurs par défaut relatives à la réplication, contenues dans le fichier
 présentes mais commentées. Elles ont été décommentées dans la version 10 et sont
 donc maintenant possibles par défaut en local.
 
-Une nouvelle méthode d'authentification, *SCRAM-SHA-256*, fait également son
+Une nouvelle méthode d'authentification, `SCRAM-SHA-256`, fait également son
 apparition. Il s'agit de l'implémentation du **Salted Challenge Response
 Authentication Mechanism**. Ceci est basé sur un schéma de type
 question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions
@@ -1801,10 +1828,10 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 
 <div class="slide-content">
   * Politique de sécurité pour l'accès aux lignes d'une table
-  * Nouvel attribut pour l'instruction *CREATE POLICY*
-    * *PERMISSIVE* : politiques d’une table reliées par des *OR*
-    * *RESTRICTIVE* : politiques d’une table reliées par des *AND*
-  * *PERMISSIVE* par défaut
+  * Nouvel attribut pour l'instruction `CREATE POLICY`
+    * `PERMISSIVE` : politiques d’une table reliées par des `OR`
+    * `RESTRICTIVE` : politiques d’une table reliées par des `AND`
+  * `PERMISSIVE` par défaut
 </div>
 
 <div class="notes">
@@ -1825,9 +1852,9 @@ visible ou ne peut être modifiée.
 
 Par défaut, les politiques sont permissives, ce qui veut dire que quand
 plusieurs politiques sont appliquées, elles sont combinées en utilisant
-l'opérateur booléen *OR*. Depuis la version 10, il est possible de combiner des
+l'opérateur booléen `OR`. Depuis la version 10, il est possible de combiner des
 politiques permissives avec des politiques restrictives (combinées en utilisant
-l'opérateur booléen *AND*).
+l'opérateur booléen `AND`).
 
 **Remarque** 
 
@@ -1839,7 +1866,7 @@ la commande suivante :
 ```
 
 Il est possible de rendre ce changement permanent en ajoutant la commande
-ci-dessus dans le fichier *~/.psqlrc*.
+ci-dessus dans le fichier `~/.psqlrc`.
 
 **Exemple**
 
@@ -1935,7 +1962,7 @@ u2@db1=> SELECT * FROM comptes;
 lui, au contraire de *u2*.
 
 Comme le montre ce plan d'exécution, les deux politiques permissives se
-combinent bien en utilisant l'opérateur booléen *OR* :
+combinent bien en utilisant l'opérateur booléen `OR` :
 
 ```sql
 u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
@@ -1985,7 +2012,7 @@ u2@db1=> EXPLAIN(COSTS off) SELECT * FROM comptes;
    Filter: ((societe = 'dalibo'::text) AND (admin = (CURRENT_USER)::text))
 (2 rows)
 ```
-Le plan d'exécution indique bien l'application de l'opérateur booléen *AND*.
+Le plan d'exécution indique bien l'application de l'opérateur booléen `AND`.
 </div>
 
 -----
@@ -2015,12 +2042,20 @@ normalement réservés aux super-utilisateurs.
 
 La version 10 implémente les nouveaux rôles suivants :
 
-| Rôle | Accès autorisé |
-| ------------------------ | ------------------------------------------------ |
-| pg_monitor | Lit et exécute plusieurs vues et fonctions de monitoring. Ce rôle est membre de pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
++----------------------+------------------------------------------------------+
+| Rôle                 | Accès autorisé                                       |
++======================+======================================================+
+| pg_monitor           | Lit et exécute plusieurs vues et fonctions de        |
+|                      | monitoring. Ce rôle est membre de                    |
+|                      | pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
++----------------------+------------------------------------------------------+
 | pg_read_all_settings | Lit toutes les variables de configuration, y compris celles normalement visibles des seuls super-utilisateurs. |
-| pg_read_all_stats | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
-| pg_stat_scan_tables | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
++----------------------+------------------------------------------------------+ 
+| pg_read_all_stats    | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
++----------------------+------------------------------------------------------+ 
+| pg_stat_scan_tables  | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
++----------------------+------------------------------------------------------+ 
+
 </div>
 
 -----
@@ -2047,7 +2082,7 @@ La version 10 implémente les nouveaux rôles suivants :
 
 <div class="slide-content">
   * Affichage des processus auxiliaires
-    * nouvelle colonne *backend_type*
+    * nouvelle colonne `backend_type`
   * Nouveaux types d'événements pour lesquels le processus est en attente
     * Activity
     * Extension
@@ -2060,11 +2095,11 @@ La version 10 implémente les nouveaux rôles suivants :
 </div>
 
 <div class="notes">
-*pg_stat_activity* n'affichait que les processus backend, autrement dit les
+`pg_stat_activity` n'affichait que les processus backend, autrement dit les
 processus gérant la communication avec les clients, et donc responsables de
 l'exécution des requêtes SQL. En version 10, cette vue affiche en plus les
 processus auxiliaires. Il est possible de différencier les processus avec
-la nouvelle colonne *backend_type*.
+la nouvelle colonne `backend_type`.
 
 Les types possibles sont : autovacuum launcher, autovacuum worker, background
 worker, background writer, client backend, checkpointer, startup, walreceiver,
@@ -2095,12 +2130,13 @@ On y voit aussi de nouveaux types d'événements pour lesquels un processus peut
   * Timeout : Le processus serveur attend qu'un timeout expire.
   * IO : Le processus serveur attend qu'une opération I/O se termine.
 
-Les types d'événements *LWLockNamed* et *LWLockTranche* ont été renommés en *LWLock*.
+Les types d'événements `LWLockNamed` et `LWLockTranche` ont été renommés en
+`LWLock`.
 
 Ce changement va avoir un impact fort sur les outils de supervision et
 notamment sur leur sonde. Par exemple, certaines sondes ont pour but de
 compter le nombre de connexions au serveur. Elles font généralement un
-simple *SELECT count* sur la vue *pg_stat_activity*. Sans modification, elles
+simple `SELECT count` sur la vue `pg_stat_activity`. Sans modification, elles
 vont se retrouver avec un nombre plus important de connexions, étant donné
 qu'elles incluront les processus auxiliaires. De ce fait, avant de mettre une
 version 10 en production, assurez-vous que votre système de supervision ait été
@@ -2118,7 +2154,7 @@ mis à jour.
 </div>
 
 <div class="notes">
-**Amélioration des options de connexion de la librairie *libpq* **
+**Amélioration des options de connexion de la librairie libpq **
 
 Il est possible de spécifier plusieurs instances aux options de connexions host et port.
 
@@ -2136,8 +2172,8 @@ could not connect to server: Connection refused
 
 Il est également désormais possible de fournir l'attribut target_session_attrs à
 l'URI de connexion afin de spécifier si l'on souhaite seulement une connexion
-dans laquelle une transaction *read-write* est possible ou n'importe quel type
-de transaction (*any*).
+dans laquelle une transaction `read-write` est possible ou n'importe quel type
+de transaction (`any`).
 
 Cela peut s'avérer utile pour établir une chaîne de connexion entre plusieurs
 instances en réplication et permettre l'exécution des requêtes en écriture sur
@@ -2152,7 +2188,7 @@ $ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session
 
 **Slots de réplication temporaires**
 
-Un slot de réplication (utilisation par la réplication, par *pg_basebackup*,...)
+Un slot de réplication (utilisation par la réplication, par `pg_basebackup`,...)
 peut désormais être créé temporairement :
 
 ```sql
@@ -2170,11 +2206,11 @@ automatiquement supprimé.
 Remarque pour *pg_basebackup* :
 
 Par défaut, l'envoi des journaux dans le flux de réplication utilise un slot de
-réplication. Si l'option *-S* n'est pas spécifiée et que le serveur les
+réplication. Si l'option `-S` n'est pas spécifiée et que le serveur les
 supporte, un slot de réplication temporaire sera utilisé.  De cette manière, il
 est certain que le serveur ne supprimera pas les journaux nécessaires entre le
 début et la fin de la sauvegarde (ce qui peut arriver sans archivage et sans
-configuration assez forte du paramètre *wal_keep_segments*).
+configuration assez forte du paramètre `wal_keep_segments`).
 
 **Support de la librairie ICU**
 
@@ -2190,7 +2226,7 @@ de caractères, ce qui n'est pas acceptable pour PostgreSQL et ses index.
 
 La version 10 permet l'utilisation des locales ICU si le support d'ICU a été
 configuré lors de la construction de PostgreSQL via l'option de configuration
-*--with-icu*. Les locales ICU sont beaucoup plus stables et sont aussi bien plus
+`--with-icu`. Les locales ICU sont beaucoup plus stables et sont aussi bien plus
 performantes.
 
 Attention, certaines fonctionnalités ne sont disponibles que pour les versions
@@ -2214,10 +2250,10 @@ au collationnement, pensez à vérifier son bon fonctionnement.
 ### SQL/MED, Foreign Data Wrappers
 
 <div class="slide-content">
-  * *file_fdw*
+  * `file_fdw`
     * Récupération du résultat d'un programme comme entrée
-  * *postgres_fdw*
-    * Support des agrégations et jointures (*FULL JOIN*) sur le serveur distant
+  * `postgres_fdw`
+    * Support des agrégations et jointures (`FULL JOIN`) sur le serveur distant
 </div>
 
 <div class="notes">
@@ -2265,7 +2301,7 @@ postgres=# SELECT * FROM tfile1 LIMIT 1;
 **postgres_fdw**
 
 postgres_fdw peut désormais, dans certains cas, exécuter ses agrégations et
-jointures (*FULL JOIN*) sur le serveur distant au lieu de ramener toutes les
+jointures (`FULL JOIN`) sur le serveur distant au lieu de ramener toutes les
 données et les traiter localement.
 
 *Exemple :*
@@ -2385,25 +2421,26 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 <div class="notes">
 Il est possible d'appliquer arbitrairement une réplication synchrone à un
 sous-ensemble d'un groupe d'instances grâce au paramètre suivant :
-*synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)*.
 
-Le mot-clé *FIRST*, utilisé avec *num_sync*, spécifie une réplication synchrone
+`synchronous_standby_names = [FIRST]|[ANY] num_sync (node1, node2,...)`.
+
+Le mot-clé `FIRST`, utilisé avec `num_sync`, spécifie une réplication synchrone
 basée sur la priorité, si bien que chaque validation de transaction attendra
 jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
-sur *num_sync* serveurs secondaires, choisis en fonction de leurs priorités.
+sur `num_sync` serveurs secondaires, choisis en fonction de leurs priorités.
 
-Par exemple, utiliser la valeur *FIRST 3 (s1, s2, s3, s4)* forcera chaque commit
+Par exemple, utiliser la valeur `FIRST 3 (s1, s2, s3, s4)` forcera chaque commit
 à attendre la réponse de trois serveurs secondaires de plus haute priorité
 choisis parmi les serveurs secondaires s1, s2, s3 et s4. Si l'un des serveurs
 secondaires actuellement synchrones se déconnecte pour quelque raison que ce
 soit, il sera remplacé par le serveur secondaire de priorité la plus proche.
 
-Le mot-clé *ANY*, utilisé avec *num_sync*, spécifie une réplication synchrone
+Le mot-clé `ANY`, utilisé avec `num_sync`, spécifie une réplication synchrone
 basée sur un quorum, si bien que chaque validation de transaction attendra
 jusqu'à ce que les enregistrements des WAL soient répliqués de manière synchrone
-sur au moins *num_sync* des serveurs secondaires listés.
+sur au moins `num_sync` des serveurs secondaires listés.
 
-Par exemple, utiliser la valeur *ANY 3 (s1, s2, s3, s4)* ne bloquera chaque
+Par exemple, utiliser la valeur `ANY 3 (s1, s2, s3, s4)` ne bloquera chaque
 commit que le temps qu'au moins trois des serveurs de la liste s1, s2, s3 et s4
 aient répondu, quels qu'ils soient.
 </div>
@@ -2413,11 +2450,11 @@ aient répondu, quels qu'ils soient.
 ### Changements dans pg_basebackup
 
 <div class="slide-content">
-  * Suppression de l'option *-x*
+  * Suppression de l'option `-x`
   * Modification de la méthode de transfert des WAL par défaut
-    * *none* : pas de récupération des WAL
-    * *fetch* : récupération des WAL à la fin de la copie des données
-    * *stream* : streaming (par défaut)
+    * `none` : pas de récupération des WAL
+    * `fetch` : récupération des WAL à la fin de la copie des données
+    * `stream` : streaming (par défaut)
   * Nommage des arguments longs
     * --xlog-method -> --wal-method
     * --xlogdir -> --waldir
@@ -2425,8 +2462,8 @@ aient répondu, quels qu'ils soient.
 
 <div class="notes">
 Le projet PostgreSQL a considéré que dans la majeure partie des cas, les
-utilisateurs de *pg_basebackup* souhaitaient obtenir une copie cohérente des
-données, sans dépendre de l'archivage. La méthode *stream* est donc devenue le
+utilisateurs de `pg_basebackup` souhaitaient obtenir une copie cohérente des
+données, sans dépendre de l'archivage. La méthode `stream` est donc devenue le
 choix par défaut.
 </div>
 
@@ -2435,13 +2472,13 @@ choix par défaut.
 ### pg_receivewal
 
 <div class="slide-content">
-  * Gestion de la compression dans *pg_receivewal*
+  * Gestion de la compression dans `pg_receivewal`
     * niveau 0 : pas de compression
     * niveau 9 : meilleure compression possible
 </div>
 
 <div class="notes">
-L'option *-Z*/*--compress* active la compression des journaux de transaction, et
+L'option `-Z`/`--compress` active la compression des journaux de transaction, et
 spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et
 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à
 tous les noms de fichiers.
@@ -2471,9 +2508,13 @@ Pour en savoir plus :
 ### Renommage d'un enum
 
 <div class="slide-content">
-  * Renommage possible de la valeur d'un enum
-`ALTER TYPE nom RENAME VALUE valeur_enum_existante`
-`  TO nouvelle_valeur_enum;`
+
+Renommage possible de la valeur d'un enum
+
+```sql
+ALTER TYPE nom RENAME VALUE valeur_enum_existante
+TO nouvelle_valeur_enum;
+```
 </div>
 
 <div class="notes">
@@ -2511,12 +2552,12 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 ### Full Text Search sur du json
 
 <div class="slide-content">
-  * Type *json* et *jsonb*
-  * Impacte les fonctions *ts_headline()* et *to_tsvector()*
+  * Type `json` et `jsonb`
+  * Impacte les fonctions `ts_headline()` et `to_tsvector()`
 </div>
 
 <div class="notes">
-Les fonctions *ts_headline()* et *to_tsvector()* peuvent désormais être
+Les fonctions `ts_headline()` et `to_tsvector()` peuvent désormais être
 utilisées sur des colonnes de type *JSON* et *JSONB*.
 
 En voici un exemple :
@@ -2633,12 +2674,12 @@ Plus d'information : [Full Text Search support for json and jsonb](https://dali.
 </div>
 
 <div class="notes">
-La fonction *xmltable()* produit une table basée sur la valeur XML donnée. Cette
+La fonction `xmltable()` produit une table basée sur la valeur XML donnée. Cette
 table pourra ensuite être utilisée par exemple comme table primaire d'une clause
-*FROM*.
+`FROM`.
 
 L'utilisation de cette fonctionnalité nécessite d'installer PostgreSQL avec
-l'option de configuration *--with-libxml*.
+l'option de configuration `--with-libxml`.
 
 Exemple :
 
@@ -2920,8 +2961,8 @@ Pour en savoir plus :
 ### Amélioration sur les séquences
 
 <div class="slide-content">
-  * Création des catalogues système *pg_sequence* et *pg_sequences*
-  * Ajout de l'option *CREATE SEQUENCE AS type_donnee*
+  * Création des catalogues système `pg_sequence` et `pg_sequences`
+  * Ajout de l'option `CREATE SEQUENCE AS type_donnee`
 </div>
 
 <div class="notes">
@@ -2959,13 +3000,13 @@ Plus d'information :
 
 **Nouvelle option pour CREATE SEQUENCE**
 
-La clause facultative *AS type_donnee* spécifie le type de données de la
-séquence. Les types valides sont *smallint*, *integer*, et *bigint* (par
+La clause facultative `AS type_donnee` spécifie le type de données de la
+séquence. Les types valides sont `smallint`, `integer`, et `bigint` (par
 défaut). Le type de données détermine les valeurs minimales et maximales par
 défaut pour la séquence.
 
-Il est possible de changer le type de données avec l'ordre *ALTER SEQUENCE AS
-type_donnee*.
+Il est possible de changer le type de données avec l'ordre `ALTER SEQUENCE AS
+type_donnee`.
 </div>
 
 -----
@@ -2973,15 +3014,15 @@ type_donnee*.
 ### Colonne identity
 
 <div class="slide-content">
-  * Nouveau type de colonne *identity*
-  * Similaire au type *serial* mais conforme au standard SQL
+  * Nouveau type de colonne `identity`
+  * Similaire au type `serial` mais conforme au standard SQL
 </div>
 
 <div class="notes">
-La contrainte *GENERATED AS IDENTITY* a été ajoutée à l'ordre *CREATE TABLE*
+La contrainte `GENERATED AS IDENTITY` a été ajoutée à l'ordre `CREATE TABLE`
 pour assigner automatiquement une valeur unique à une colonne.
 
-Comme le type *serial*, une colonne d'identité utilisera une séquence.
+Comme le type `serial`, une colonne d'identité utilisera une séquence.
 
 Pour en savoir plus :
 [Waiting for identity columns](https://dali.bo/waiting-for-postgresql-10-identity-columns)
@@ -3006,14 +3047,14 @@ Pour en savoir plus :
 
 <div class="slide-content">
   * Changements de comportement :
-    * *pg_ctl* attend désormais que l'instance soit démarrée avant de rendre la main (identique au comportement à l'arrêt)
+    * `pg_ctl` attend désormais que l'instance soit démarrée avant de rendre la main (identique au comportement à l'arrêt)
 
   * Fin de support ou suppression :
-    * Type *floating point timestamp*
-    * Contribution *tsearch2*
-    * Support des versions < 8.0 dans *pg_dump*
+    * Type `floating point timestamp`
+    * Contribution `tsearch2`
+    * Support des versions < 8.0 dans `pg_dump`
     * Protocole client/serveur 1.0
-    * Clause *UNENCRYPTED* pour les mots de passe
+    * Clause `UNENCRYPTED` pour les mots de passe
 </div>
 
 <div class="notes">
@@ -3029,32 +3070,53 @@ important d'opérer régulièrement, en fonction des contraintes métier, des mi
 <div class="slide-content">
 Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 
-| Outil | Compatibilité avec PostgreSQL 10 |
-| ------------ | ------------------------------------ |
-| pgBadger| Oui |
-| pgCluu| Oui, depuis 2.6 |
-| ora2Pg| Oui (support du partitionnement déclaratif) |
-| pg_stat_kcache | Oui, depuis 2.0.3 |
-| ldap2pg | Oui |
++----------------------+------------------------------------------------------+ 
+| Outil                | Compatibilité avec PostgreSQL 10 |
++======================+======================================================+
+| pgBadger             | Oui |
++----------------------+------------------------------------------------------+
+| pgCluu               | Oui, depuis 2.6 |
++----------------------+------------------------------------------------------+
+| ora2Pg               | Oui (support du partitionnement déclaratif) |
++----------------------+------------------------------------------------------+
+| pg_stat_kcache       | Oui, depuis 2.0.3 |
++----------------------+------------------------------------------------------+
+| ldap2pg              | Oui |
++----------------------+------------------------------------------------------+ 
+
 </div>
 
 <div class="notes">
+
 Voici une grille de compatibilité des outils Dalibo :
 
-| Outil | Compatibilité avec PostgreSQL 10 |
-| ------------ | ------------------------------------ |
-| pg_activity | À venir dans 1.3.2 |
-| check_pgactivity | À venir dans 2.3 (plusieurs PR ont été intégrées) |
-| pgBadger| Oui |
-| pgCluu| Oui, depuis 2.6 |
-| ora2Pg| Oui (support du partitionnement déclaratif) |
-| powa-archivist | À venir dans 3.1.1 |
-| pg_qualstats | À venir dans 1.0.3 |
-| pg_stat_kcache | Oui, depuis 2.0.3 |
-| hypopg | À venir dans 1.1.0 |
-| PAF | À venir dans 2.2 (beta1 sortie) |
-| temboard | À venir dans 1.0a3 |
-| ldap2pg | Oui |
++----------------------+------------------------------------------------------+ 
+| Outil                | Compatibilité avec PostgreSQL 10 |
++======================+======================================================+ 
+| pg_activity          | À venir dans 1.3.2 |
++----------------------+------------------------------------------------------+
+| check_pgactivity     | À venir dans 2.3 (plusieurs PR ont été intégrées) |
++----------------------+------------------------------------------------------+
+| pgBadger             | Oui |
++----------------------+------------------------------------------------------+
+| pgCluu               | Oui, depuis 2.6 |
++----------------------+------------------------------------------------------+
+| ora2Pg               | Oui (support du partitionnement déclaratif) |
++----------------------+------------------------------------------------------+
+| powa-archivist       | À venir dans 3.1.1 |
++----------------------+------------------------------------------------------+
+| pg_qualstats         | À venir dans 1.0.3 |
++----------------------+------------------------------------------------------+
+| pg_stat_kcache       | Oui, depuis 2.0.3 |
++----------------------+------------------------------------------------------+
+| hypopg               | À venir dans 1.1.0 |
++----------------------+------------------------------------------------------+
+| PAF                  | À venir dans 2.2 (beta1 sortie) |
++----------------------+------------------------------------------------------+
+| temboard             | À venir dans 1.0a3 |
++----------------------+------------------------------------------------------+
+| ldap2pg              | Oui |
++----------------------+------------------------------------------------------+ 
 
 La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
 que des changements peuvent encore avoir lieu, et que le support de cette
