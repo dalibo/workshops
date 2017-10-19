@@ -1,0 +1,12 @@
+_build/*
+exports/*
+*.sw?
+.~lock.*
+*.html
+*.reveal.html
+*.tex
+*.beamer.pdf
+*.pdf
+*.odt
+*.doc
+*.epub
