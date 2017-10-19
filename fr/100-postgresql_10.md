@@ -1,3 +1,108 @@
+---
+subtitle : 'Workshop 10'
+title : 'Nouveautés de PostgreSQL 10'
+keywords:
+- postgres
+- postgresql
+- features
+- news
+- 10
+- workshop
+linkcolor:
+
+                                                                      
+licence : PostgreSQL                                                            
+author: Dalibo & Contributors                                                   
+url : http://dalibo.github.io/workshops  
+
+revision: 17.09
+licence : "CC BY-NC-SA"
+author: Dalibo SCOP
+url : http://dalibo.com/formations
+
+#
+# PDF Options
+#
+
+toc: true
+
+## Limiter la profondeur de la table des matiÃ¨res
+toc-depth: 2
+
+## Mettre les lien http en pieds de page
+links-as-notes: true
+
+## Police plus petite dans un bloc de code
+
+code-blocks-fontsize: small
+
+## Filtre : pandoc-latex-env = cadres de couleurs
+## OBSOLETE voir pandoc-latex-admonition                         
+latex-environment:
+  importantframe: [important]
+  warningframe: [warning]
+  tipframe: [tip]
+  noteframe: [note]
+  frshaded: [slide-content]
+
+## Filtre : pandoc-latex-admonition
+## order of definition is important
+latex-admonition:
+  - color: LightPink4 
+    classes: [important]
+    linewidth: 4
+  - color: Khaki4                                                           
+    classes: [warning]                                                        
+    linewidth: 4 
+  - color: DarkSeaGreen4                                                            
+    classes: [tip]                                                        
+    linewidth: 4 
+  - color: Ivory4                                                           
+    classes: [note]                                                        
+    linewidth: 4 
+  - color: DodgerBlue4                                                     
+    classes: [slide-content]                                                        
+    linewidth: 4 
+
+
+#
+# Reveal Options
+#
+
+# Taille affichage
+width: 1200
+height: 768
+
+## beige/blood/moon/simple/solarized/black/league/night/serif/sky/white
+theme: white
+
+## None - Fade - Slide - Convex - Concave - Zoom
+transition: Convex
+
+transition-speed: fast
+
+# Barre de progression
+progress: true
+
+# Affiche N° de slide
+slideNumber: true
+
+# Le numero de slide apparait dans la barre d'adresse
+history: true
+
+# Defilement des slides avec la roulette
+mouseWheel: true
+
+# Annule la transformation uppercase de certains thÃ¨mes
+title-transform : none
+
+# Cache l'auteur sur la premiÃ¨re slide
+# Mettre en commentaire pour dÃ©sactiver
+hide_author_in_slide: true
+
+
+---
+
 # Nouveautés de PostgreSQL 10
 
 ![PostgreSQL](medias/elephant-rock-valley-of-fire.jpg)
