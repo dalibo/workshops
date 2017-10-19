@@ -1,0 +1,35 @@
+before_script:
+  ## Prepare for Deploy Keys
+  ## see https://docs.gitlab.com/ee/ci/ssh_keys/README.html#ssh-keys-when-using-the-docker-executor
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - mkdir -p ~/.ssh
+  - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+
+
+pandocker:
+  stage: build
+  image: dalibo/pandocker:no-entrypoint
+  script:
+    #
+    # The dalibo themes are not mandatory
+    # CI should be able to run without it
+    # You can comment the 7 lines below to build without it
+    #
+    - ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
+    - git clone git@gitlab.dalibo.info:marketing/themes.git
+    - cd themes
+    - git checkout stable
+    - make
+    - make install
+    - cd ..
+    #
+    # pandoc
+    # 
+    - make all
+
+  artifacts:
+    paths:
+      - fr/
+      - en/
+    expire_in: 1 day
