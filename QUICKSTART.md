@@ -2,8 +2,7 @@ QUICKSTART
 ===============================================================================
 
 Installing the full pandoc compilation stack is long and complex. Before doing
-it you can try it easly with our [pandoc docker
-image](https://hub.docker.com/r/dalibo/pandocker/) ! 
+it, you can try it easly with our [pandoc docker image](https://hub.docker.com/r/dalibo/pandocker/) ! 
 
 1. Install docker : https://docs.docker.com/engine/installation/
 
@@ -13,6 +12,5 @@ image](https://hub.docker.com/r/dalibo/pandocker/) !
 If you want to use it permanently you can add an alias to your `~/.bashrc` file:
 
 ```sh
-alias pandoc="docker run --volume ~/.dalibo:/root/.dalibo --volume
-\`pwd\`:/pandoc dalibo/pandocker $@"
+alias pandoc="docker run --volume ~/.dalibo:/root/.dalibo --volume \`pwd\`:/pandoc dalibo/pandocker $@"
 ```
