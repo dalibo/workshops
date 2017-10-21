@@ -1,3 +1,33 @@
+###############################################################################
+#
+# How To Use this Makefile
+#------------------------------------------------------------------------------
+# Let's say you have a markdown source file named foo.md in the 'fr' directory
+#
+#  - `make fr/foo.pdf` will build a PDF from fr/foo.md
+#  - `make fr/foo.epub` will build an EPUB from fr/foo.md
+#  - `make all` will build all source files in all formats
+#  - `make clean` will remove all build artifacts
+#
+# Pandoc or docker ?
+#------------------------------------------------------------------------------
+#  
+#  - by default, we use pandoc to compile documents
+#  - if pandoc is not install, we use a docker image instead
+#  - use `DOCKER=latest make all` to force make to use docker 
+#
+#
+# Dalibo Themes or not ?
+#-------------------------------------------------------------------------------
+#
+#   - dalibo themes are not open source but they're optionnal
+#   - you can compile the docs without them
+#   - use `LOCAL_DLB=/tmp/dalibo make all` to change the dalibo themes location
+#
+#
+###############################################################################
+
+
 ECHO=$(info Compiling $^ into $@)
 
 #
@@ -9,38 +39,55 @@ DIR=`dirname $^`
 
 
 #
-# Dalibo's themes are not open source
-# but they're optionnal
+# LOCAL_DLB is a directory containing dalibo themes
+# by default it's ~/.dalibo/themes/
 #
+# dalibo themes are not open source but they're optionnal
+# you can compile the docs without them
+#
+ifeq ($(LOCAL_DLB),)
 LOCAL_DLB=$(HOME)/.dalibo/themes/
+endif
+
+# Normally DLB == LOCAL_DLB, but this will change when we'll use docker
 DLB=$(LOCAL_DLB)
 
 #
-# Pandoc
+# Pandoc binary
 #
 
 P=pandoc --metadata=dlb:$(DLB)
 
-# if pandoc is not installed, let's use pandocker
+#
+# If pandoc is not installed, 
+# Then let's use the docker image by setting DOCKER_TAG
+#
 ifeq (, $(shell which $P))
 	DOCKER_TAG=latest
 endif
 
+# If make was launched with DOCKER=latest 
+# Then we force usage of docker by setting DOCKER_TAG
 ifneq ($(DOCKER),)
 	DOCKER_TAG=$(DOCKER)
 endif
 
+# If DOCKER_TAG is defined
+# Then we replace $P with a docker call
 ifneq ($(DOCKER_TAG),)
 	DOCKER_DLB=/root/dalibo/themes
-	P=docker run -it --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
+	P=docker run --rm -it --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
 	DLB=$(DOCKER_DLB)
 endif
 
 #
-# Flags
+# Pandoc Compilation Flags
 #
 ifeq ("$(wildcard $(LOCAL_DLB))","")
- # Default Compilation Flags
+ #####
+ # dalibo themes are not available
+ # Let's use default compilation flags
+ ####
 
  #  self-contained mode is currently buggy with the official revealjs css file
  #  REVEAL_FLAGS=-t revealjs --self-contained --standalone -V revealjs-url:http://lab.hakim.se/reveal-js/
@@ -52,7 +99,9 @@ ifeq ("$(wildcard $(LOCAL_DLB))","")
  DOC_FLAGS=
  EPUB_FLAGS=
 else
+ ####
  # Dalibo's Compilation Flags
+ ####
  REVEAL_FLAGS=-t revealjs --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs" --self-contained --standalone -V revealjs-url="$(DLB)/reveal.js/"
  TEX_FLAGS= -st beamer -V theme=Dalibo
  BEAMER_FLAGS= -st beamer -V theme=Dalibo
@@ -89,6 +138,9 @@ install:
 uninstall:
 	rm themes
 
+#
+# Supported formats
+#
 #all: reveal tex beamer pdf odt doc epub
 all: reveal pdf epub doc
 
