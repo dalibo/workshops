@@ -1,6 +1,9 @@
 PostgreSQL Workshops
 ===============================================================================
 
+[![Build
+Status](https://travis-ci.org/dalibo/workshops.svg?branch=master)](https://travis-ci.org/dalibo/workshops)
+
 This project contains various PostgreSQL workshops including slides, handouts or
 exercises. This was initially produced by [dalibo](https://dalibo.com) and it's 
 now available to everyone under the [PostgreSQL License](LICENSE.md). 
