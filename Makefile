@@ -105,7 +105,7 @@ else
  REVEAL_FLAGS=-t revealjs --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs" --self-contained --standalone -V revealjs-url="$(DLB)/reveal.js/"
  TEX_FLAGS= -st beamer -V theme=Dalibo
  BEAMER_FLAGS= -st beamer -V theme=Dalibo
- PDF_FLAGS=--latex-engine=xelatex --template=$(DLB)/tex/book1/template.tex
+ PDF_FLAGS=--latex-engine=xelatex --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition
  ODT_FLAGS=--reference-odt=$(DLB)/odt/template_conference.dokuwiki.odt
  DOC_FLAGS=--reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
  EPUB_FLAGS=
@@ -171,6 +171,10 @@ epub: $(EPUB_OBJS)
 %.pdf: %.md
 	$(ECHO)	
 	cd $(DIR) && $P $(PDF_FLAGS) $(IN) -o $(OUT)
+
+%.peecho.pdf: %.pdf
+	$(ECHO)
+	cd $(DIR) && ~/.dalibo/themes/tex/book1/postprod.peecho.py -b ~/dev/dalibo/marketing/themes/_build/tex/book1/backcover.pdf -n ~/dev/dalibo/marketing/themes/_build/tex/book1/note.pdf -p ~/dev/dalibo/marketing/themes/_build/tex/book1/publications.pdf $(IN) -o $(OUT) 
 
 %.odt: %.md
 	$(ECHO)
