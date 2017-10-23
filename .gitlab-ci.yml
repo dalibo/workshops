@@ -33,3 +33,19 @@ pandocker:
       - fr/
       - en/
     expire_in: 1 day
+
+#
+# Publish the master branch
+#    
+publish:
+  stage: deploy
+  image: dalibo/pandocker:no-entrypoint
+  script:
+    ## Install Deploy Key
+    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
+    ## Push
+    - rsync -avp _build/ $CLOUD_DEPLOY_DEST 
+  only:
+    - master@formation/workshops
+
+
