@@ -44,7 +44,8 @@ publish:
     ## Install Deploy Key
     - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
     ## Push
-    - rsync -avp _build/ $CLOUD_DEPLOY_DEST 
+    - rsync -avp fr $CLOUD_DEPLOY_DEST 
+    - rsync -avp en $CLOUD_DEPLOY_DEST
   only:
     - master@formation/workshops
 
