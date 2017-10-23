@@ -3047,7 +3047,8 @@ Pour en savoir plus :
 
 <div class="slide-content">
   * Changements de comportement :
-    * `pg_ctl` attend désormais que l'instance soit démarrée avant de rendre la main (identique au comportement à l'arrêt)
+    * `pg_ctl` attend désormais que l'instance soit démarrée avant de rendre 
+      la main (identique au comportement à l'arrêt)
 
   * Fin de support ou suppression :
     * Type `floating point timestamp`
@@ -3188,9 +3189,11 @@ partitionnement en version 11 dans cet
 ## Installation
 
 <div class="notes">
-Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo peut utiliser sudo pour les opérations système.
+Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo 
+peut utiliser sudo pour les opérations système.
 
-Le site postgresql.org propose son propre dépôt RPM, nous allons donc l'utiliser pour installer PostgreSQL 10.
+Le site postgresql.org propose son propre dépôt RPM, nous allons donc 
+l'utiliser pour installer PostgreSQL 10.
 
 On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
 
@@ -3217,7 +3220,8 @@ On peut ensuite initialiser une instance :
 Initializing database:                                     [  OK  ]
 ```
 
-Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous RedHat et CentOS :
+Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous 
+RedHat et CentOS :
 
 ```
 # service postgresql-10 start
@@ -3241,7 +3245,8 @@ postgres=# SELECT version();
 (1 ligne)
 ```
 
-On répète ensuite le processus d'installation de façon à installer PostgreSQL 9.6 aux côtés de PostgreSQL 10.
+On répète ensuite le processus d'installation de façon à installer PostgreSQL 
+9.6 aux côtés de PostgreSQL 10.
 
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
 
@@ -3325,7 +3330,8 @@ drwx------.  2 postgres postgres  4096 Jul 25 14:43 pg_xact
 
 On peut constater la présence des répertoires `pg_wal` et `pg_xact`.
 
-Au niveau des fonctions, on peut également constater les effets des différents renommages. Par exemple :
+Au niveau des fonctions, on peut également constater les effets des différents 
+renommages. Par exemple :
 
 ```sql
 postgres=# \df *switch_xlog*
@@ -3355,8 +3361,9 @@ postgres=# CREATE USER testmd5 WITH PASSWORD 'XXX';
 CREATE ROLE
 ```
 
-Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL, on peut constater que seuls `md5` et `scram-sha-256` sont supportés si l'on demande à psql de compléter l'ordre SQL à l'aide
-de la touche tabulation :
+Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL, 
+on peut constater que seuls `md5` et `scram-sha-256` sont supportés si l'on 
+demande à psql de compléter l'ordre SQL à l'aide de la touche tabulation :
 
 ```sql
 postgres=# SET password_encryption TO <tab> 
@@ -3373,7 +3380,8 @@ postgres=#  CREATE USER testscram WITH PASSWORD 'YYY';
 CREATE ROLE
 ```
 
-Si on regarde la vue `pg_shadow`, on peut constater que l'algorithme est bien différent :
+Si on regarde la vue `pg_shadow`, on peut constater que l'algorithme est bien 
+différent :
 
 ```sql
 postgres=# SELECT usename, passwd FROM pg_shadow WHERE usename ~ '^test';
@@ -3398,7 +3406,8 @@ postgres=# SELECT pg_reload_conf();
 (1 row)
 ```
 
-Il est possible d'utiliser une authentification `md5` (dans le fichier `pg_hba.conf`) avec un mot de passe `scram-sha-256`, mais pas l'inverse.
+Il est possible d'utiliser une authentification `md5` (dans le fichier 
+`pg_hba.conf`) avec un mot de passe `scram-sha-256`, mais pas l'inverse.
 </div>
 
 -----
@@ -3406,7 +3415,8 @@ Il est possible d'utiliser une authentification `md5` (dans le fichier `pg_hba.c
 ## Vue pg_hba_file_rules
 
 <div class="notes">
-La vue `pg_hba_file_rules` permet de consulter en lecture les règles d'accès qui sont configurées :
+La vue `pg_hba_file_rules` permet de consulter en lecture les règles d'accès 
+qui sont configurées :
 
 ```sql
 postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
@@ -3421,7 +3431,8 @@ postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
 (6 rows)
 ```
 
-Attention, on voit les lignes dès lors qu'elles sont présentes dans le fichier `pg_hba.conf`, même si elles ne sont pas en application.
+Attention, on voit les lignes dès lors qu'elles sont présentes dans le fichier
+ `pg_hba.conf`, même si elles ne sont pas en application.
 </div>
 
 -----
@@ -3429,7 +3440,8 @@ Attention, on voit les lignes dès lors qu'elles sont présentes dans le fichier
 ## Vue pg_sequence
 
 <div class="notes">
-On commence par se connecter à PostgreSQL de façon à créer une base de données de test sur les 2 instances en version 9.6 (`workshop96`) et 10 (`workshop10`) :
+On commence par se connecter à PostgreSQL de façon à créer une base de données 
+de test sur les 2 instances en version 9.6 (`workshop96`) et 10 (`workshop10`) :
 
 ```sql
 postgres=# CREATE DATABASE workshopXX;
@@ -3439,7 +3451,8 @@ postgres=# \c workshopXX
 You are now connected to database "workshopXX" as user "postgres".
 ```
 
-On peut alors créer deux tables `t1` et `t2` dans l'instance de la version 10 en utilisant une colonne d'identité :
+On peut alors créer deux tables `t1` et `t2` dans l'instance de la version 10 
+en utilisant une colonne d'identité :
 
 ```sql
 workshop10=# CREATE TABLE t1 (id int GENERATED BY DEFAULT AS IDENTITY, data text);
@@ -3503,7 +3516,8 @@ workshop96=# \d t2
  data   | text    | 
 ```
 
-Dans l'instance utilisant PostgreSQL 9.6, on a uniquement accès aux contenus des séquences :
+Dans l'instance utilisant PostgreSQL 9.6, on a uniquement accès aux contenus 
+des séquences :
 
 ```sql
 workshop96=# SELECT * FROM t1_id_seq;
@@ -3561,7 +3575,8 @@ is_cycled     | f
 is_called     | t
 ```
 
-Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des séquences, mais on constate qu'il y a moins d'informations :
+Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des 
+séquences, mais on constate qu'il y a moins d'informations :
 
 ```sql
 workshop10=# SELECT * FROM t1_id_seq;
@@ -3577,7 +3592,9 @@ log_cnt    | 13
 is_called  | t
 ```
 
-Une requête avec un UNION ALL reste possible pour agréger les résultats mais la table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à de telles informations :
+Une requête avec un UNION ALL reste possible pour agréger les résultats mais la 
+table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à 
+de telles informations :
 
 ```sql
 workshop10=# SELECT * FROM pg_sequence;
@@ -3727,7 +3744,9 @@ pg_basebackup: waiting for background process to finish streaming ...
 pg_basebackup: base backup completed
 ```
 
-Il faut noter que les slots de réplication temporaires sont incompatibles par nature. En effet, le slot sera supprimé après le transfert des données, et il ne sera donc plus utilisable pour les WAL :
+Il faut noter que les slots de réplication temporaires sont incompatibles par 
+nature. En effet, le slot sera supprimé après le transfert des données, et il 
+ne sera donc plus utilisable pour les WAL :
 
 ```sql
 workshop10=# SELECT pg_create_physical_replication_slot('reptest2', 't', 't');
@@ -3779,7 +3798,8 @@ CREATE INDEX
 
 ```
 
-On modifie également le paramètre `max_parallel_workers_per_gather` afin de permettre la parallélisation :
+On modifie également le paramètre `max_parallel_workers_per_gather` afin de 
+permettre la parallélisation :
 
 ```sql
 postgres=# ALTER SYSTEM SET max_parallel_workers_per_gather TO 3;
@@ -3800,9 +3820,16 @@ postgres=# SELECT pg_reload_conf();
 
 <div class="notes">
 
-Pour déclencher la parallélisation d'une requête, le table doit être lue avec une technique permettant la parallélisation. En PostgreSQL 9.6, la seule lecture permettant la parallélisation était le `parallel sequential scan`. Le planificateur devait donc choisir entre utiliser la parallélisation et utiliser les index.
+Pour déclencher la parallélisation d'une requête, le table doit être lue avec 
+une technique permettant la parallélisation. En PostgreSQL 9.6, la seule lecture 
+permettant la parallélisation était le `parallel sequential scan`. Le 
+planificateur devait donc choisir entre utiliser la parallélisation et utiliser
+ les index.
 
-En PostgreSQL 10, grâce au `parallel bitmap heap scan`, un processus scanne les index et construit une structure de donnée en mémoire partagée indiquant toutes les pages de la pile devant être lues. Les workers peuvent alors lire les données de façon parallèle.
+En PostgreSQL 10, grâce au `parallel bitmap heap scan`, un processus scanne les
+ index et construit une structure de donnée en mémoire partagée indiquant 
+toutes les pages de la pile devant être lues. Les workers peuvent alors lire 
+les données de façon parallèle.
 
 
 ```sql
@@ -3980,7 +4007,9 @@ workshop10=# EXPLAIN ANALYSE SELECT count(c_100) FROM p1 WHERE id < 5000000;
 
 <div class="notes">
 
-En effectuant une requête sur une autre session, il est possible en version 10 de lire le texte des requêtes effectuées par les différents workers dans la vue pg_stat_activity :
+En effectuant une requête sur une autre session, il est possible en version 10 
+de lire le texte des requêtes effectuées par les différents workers dans la vue 
+`pg_stat_activity` :
 
 ```sql
 workshop96=# SELECT pid,application_name,backend_start,query FROM pg_stat_activity;
@@ -4057,9 +4086,11 @@ query            | EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM p1;
 
 <div class="notes">
 
-Nous allons étudier les différences entre la version 9.6 et la version 10 en termes d'utilisation des tables partitionnées.
+Nous allons étudier les différences entre la version 9.6 et la version 10 en 
+termes d'utilisation des tables partitionnées.
 
-Nous allons créer une table de mesure des températures suivant le lieu et la date. Nous allons partitionner ces tables pour chaque lieu et chaque mois.
+Nous allons créer une table de mesure des températures suivant le lieu et la 
+date. Nous allons partitionner ces tables pour chaque lieu et chaque mois.
 
 Ordre de création de la table en version 9.6 :
 
@@ -4168,7 +4199,9 @@ CREATE TABLE meteo_paris_201710 PARTITION of meteo FOR VALUES
    FROM ('Paris', '2017-10-01 00:00:00') TO ('Paris', '2017-11-01 00:00:00');
 ```
 
-On remarque que la déclaration est bien plus facile en version 10. Comme nous le verrons le plus fastidieux est de faire évoluer la fonction trigger en version 9.6.
+On remarque que la déclaration est bien plus facile en version 10. Comme nous 
+le verrons le plus fastidieux est de faire évoluer la fonction trigger en 
+version 9.6.
 
 Voici une fonction permettant d'ajouter des entrées aléatoires dans la table :
 
@@ -4252,10 +4285,14 @@ workshop10=# CREATE INDEX meteo_heure_mesure_idx ON meteo (heure_mesure);
 ERROR:  cannot create index on partitioned table "meteo"
 ```
 
-Il est donc toujours impossible de créer une clé primaire, une contrainte unique ou une contrainte d'exclusion pouvant s'appliquer sur toutes les partitions.
-De ce fait, il est également impossible de référencer via une clé étrangère une table partitionnée.
+Il est donc toujours impossible de créer une clé primaire, une contrainte unique 
+ou une contrainte d'exclusion pouvant s'appliquer sur toutes les partitions.
 
-Il est cependant possible de créer des index sur chaque partition fille, comme avec la version 9.6 :
+De ce fait, il est également impossible de référencer via une clé étrangère 
+une table partitionnée.
+
+Il est cependant possible de créer des index sur chaque partition fille, comme 
+avec la version 9.6 :
 
 ```sql
 workshop10=# CREATE INDEX meteo_lyon_201710_heure_idx
@@ -4265,7 +4302,8 @@ CREATE INDEX
 
 **Mise à jour**
 
-Une mise à jour qui déplacerait des enregistrements d'une partition à une autre n'est pas possible par défaut en version 10 :
+Une mise à jour qui déplacerait des enregistrements d'une partition à une autre
+ n'est pas possible par défaut en version 10 :
 
 ```sql
 workshop10=# UPDATE meteo SET lieu='Nantes' WHERE lieu='Lyon';
@@ -4294,7 +4332,8 @@ CREATE TABLE meteo_paris_ancienne PARTITION of meteo FOR VALUES
 
 <div class="notes">
 
-Avec les tables partitionnées via l'héritage, il était nécessaire de lister toutes les tables partitionnées pour effectuer des tâches de maintenance.
+Avec les tables partitionnées via l'héritage, il était nécessaire de lister 
+toutes les tables partitionnées pour effectuer des tâches de maintenance.
 
 ```sql
 workshop96=# SELECT 'VACUUM ANALYZE '||relname AS operation
@@ -4318,7 +4357,8 @@ VACUUM
 VACUUM
 ```
 
-Avec la version 10, il est maintenant possible d'effectuer des opérations de VACUUM et ANALYSE sur toutes les tables partitionnées via la table mère.
+Avec la version 10, il est maintenant possible d'effectuer des opérations de 
+VACUUM et ANALYSE sur toutes les tables partitionnées via la table mère.
 
 ```sql
 workshop10=# VACUUM ANALYZE meteo;
@@ -4424,7 +4464,9 @@ SELECT type_client,
  Execution time: 2085.996 ms
 ```
 
-Le temps d'exécution de cette requête est quasi doublé en version 9.6. On observe que le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms en 9.6.
+Le temps d'exécution de cette requête est quasi doublé en version 9.6. On 
+observe que le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms 
+en 9.6.
 
 
 Maintenant, vérifions le gain de performance sur les GROUPING SETS.
@@ -4467,7 +4509,8 @@ GROUP BY CUBE (type_client, code_pays);
  Execution time: 8177.263 ms
 ```
 
-On remarque que l'opération de tri est effectué sur disque. Vérifions le temps d'exécution avec un tri en mémoire : 
+On remarque que l'opération de tri est effectué sur disque. Vérifions le temps 
+d'exécution avec un tri en mémoire : 
 
 ```sql
 $ psql -q tp -p 5433
@@ -4540,9 +4583,12 @@ GROUP BY CUBE (type_client, code_pays);
  Execution time: 3728.788 ms
 ```
 
-L'amélioration des performances provient du noeud `MixedAggregate` qui fait son apparition en version 10. Il permet de peupler plusieurs tables de hachages en même temps qu'est effectué le tri des groupes.
+L'amélioration des performances provient du noeud `MixedAggregate` qui fait son 
+apparition en version 10. Il permet de peupler plusieurs tables de hachages 
+en même temps qu'est effectué le tri des groupes.
 
-Les performances sont évidemment améliorées si suffisamment de mémoire est allouée pour l'opération :
+Les performances sont évidemment améliorées si suffisamment de mémoire est 
+allouée pour l'opération :
 
 ```sql
 $ psql -q tp -p 5432
@@ -4633,7 +4679,8 @@ psql (11devel)
 Type "help" for help.
 ```
 
-Voici un premier exemple de changement de collationnement : nous voulons que les chiffres soient placés après les lettres :
+Voici un premier exemple de changement de collationnement : nous voulons que 
+les chiffres soient placés après les lettres :
 
 ```sql
 postgres=# SELECT * FROM (
@@ -4667,7 +4714,9 @@ postgres=# SELECT * FROM (
 (6 rows)
 ```
 
-Nous pouvons également effectuer un changement de collationnement pour classer les majuscules après les minuscules :
+Nous pouvons également effectuer un changement de collationnement pour classer 
+les majuscules après les minuscules :
+
 ```sql
 postgres=# SELECT * FROM (
     SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
@@ -4918,7 +4967,8 @@ souscription=# SELECT count(*) FROM meteo WHERE temperature<15;
 (1 ligne)
 ```
 
-La mise à jour ne semble pas s'être réalisée. Vérifions dans les logs applicatifs :
+La mise à jour ne semble pas s'être réalisée. Vérifions dans les logs 
+applicatifs :
 
 ```
 LOG:  logical replication apply worker for subscription "souscription"
