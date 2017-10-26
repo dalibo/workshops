@@ -12,6 +12,7 @@ How To Submit a Bug
 If you're facing a compilation bug, please do the following before submitting:
 
 * Read the [INSTALL](INSTALL.md) doc and check that you're using the right 
+  compilation toolchain
 
 * Read the [SYNTAX](SYNTAX.md) specs and check that you used the correct
   markdown syntax
