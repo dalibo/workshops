@@ -13,11 +13,7 @@ linkcolor:
                                                                       
 licence : PostgreSQL                                                            
 author: Dalibo & Contributors                                                   
-url : http://dalibo.github.io/workshops  
-
 revision: 17.09
-licence : "CC BY-NC-SA"
-author: Dalibo SCOP
 url : http://dalibo.com/formations
 
 #
