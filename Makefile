@@ -172,9 +172,10 @@ epub: $(EPUB_OBJS)
 	$(ECHO)	
 	cd $(DIR) && $P $(PDF_FLAGS) $(IN) -o $(OUT)
 
+
 %.peecho.pdf: %.pdf
 	$(ECHO)
-	cd $(DIR) && ~/.dalibo/themes/tex/book1/postprod.peecho.py -b ~/dev/dalibo/marketing/themes/_build/tex/book1/backcover.pdf -n ~/dev/dalibo/marketing/themes/_build/tex/book1/note.pdf -p ~/dev/dalibo/marketing/themes/_build/tex/book1/publications.pdf $(IN) -o $(OUT) 
+	cd $(DIR) && $(LOCAL_DLB)/tex/book1/postprod.peecho.py -b $(LOCAL_DLB)/_build/tex/book1/backcover.pdf -n $(LOCAL_DLB)/_build/tex/book1/note.pdf -p $(LOCAL_DLB)/_build/tex/book1/publications.pdf $(IN) -o $(OUT) 
 
 %.odt: %.md
 	$(ECHO)
