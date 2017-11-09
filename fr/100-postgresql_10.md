@@ -116,10 +116,7 @@ Public Domain CC0.
 <div class="slide-content">
   * Développement depuis août 2016
   * Version beta 1 sortie le 18 mai
-    * puis beta 2, beta 3
-    * beta 4 sortie le 31 août
-  * Sortie de la version prévue deuxième moitié 2017
-    * date prévisionnelle le 28 septembre
+  * Sortie de la version finale le 5 octobre 2017
   * Plus de 1,4 million de lignes de code *C*
   * Des centaines de contributeurs
 </div>
@@ -127,9 +124,9 @@ Public Domain CC0.
 <div class="notes">
 Le développement de la version 10 a suivi l'organisation habituelle : un
 démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en
-mars, une première version beta mi-mai. Le travail est actuellement à la
-stabilisation du code, la suppression des bugs, l'amélioration de la
-documentation. La version finale est prévue le 28 septembre 2017.
+mars, une première version beta mi-mai.
+
+La version finale est sortie le 5 octobre 2017.
 
 La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*.
 Son développement est assuré par des centaines de contributeurs répartis partout
