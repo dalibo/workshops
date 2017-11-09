@@ -3136,11 +3136,6 @@ version par les outils de l'écosystème est encore jeune.
 </div>
 
 <div class="notes">
-Attention, les utilisateurs des versions Beta doivent considérer que les mises à
-jour concernent des versions majeures. Ceci permettra notamment de pouvoir
-contourner toutes les incompatibilités ou changements de comportement dû au fait
-que PostgreSQL 10 est toujours en développement.
-
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
