@@ -20,7 +20,7 @@ url : http://dalibo.com/formations
 # PDF Options
 #
 
-toc: true
+#toc: true
 
 ## Limiter la profondeur de la table des matiÃ¨res
 toc-depth: 2

@@ -19,8 +19,6 @@ url : http://dalibo.github.io/workshops
 # PDF Options
 #
 
-toc: true
-
 ## Limiter la profondeur de la table des matiÃ¨res
 toc-depth: 2
 
