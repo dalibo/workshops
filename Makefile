@@ -98,6 +98,7 @@ ifeq ("$(wildcard $(LOCAL_DLB))","")
  ODT_FLAGS=
  DOC_FLAGS=
  EPUB_FLAGS=
+ HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone
 else
  ####
  # Dalibo's Compilation Flags
@@ -109,6 +110,7 @@ else
  ODT_FLAGS=--reference-odt=$(DLB)/odt/template_conference.dokuwiki.odt
  DOC_FLAGS=--reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
  EPUB_FLAGS=
+ HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone --template=$(DLB)/html/uikit/dalibo.html 
 endif
 
 #
@@ -118,13 +120,15 @@ endif
 EXCLUDE_FILES=\./\(LICENSE\|QUICKSTART\|CONTRIBUTING\|SYNTAX\|INSTALL\|AUTHORS\)\.md
 SRCS=$(shell find . -name '*.md' -and -not -name README.md -and -not -regex '$(EXCLUDE_FILES)' -and -not -path './themes/*')
 
-REVEAL_OBJS=$(SRCS:.md=.html)
+JSON_OBJS=$(SRCS:.md=.json)
+REVEAL_OBJS=$(SRCS:.md=.slides.html)
 TEX_OBJS=$(SRCS:.md=.tex)
 BEAMER_OBJS=$(SRCS:.md=.beamer.pdf)
 PDF_OBJS=$(SRCS:.md=.pdf)
 ODT_OBJS=$(SRCS:.md=.odt)
 DOC_OBJS=$(SRCS:.md=.doc)
 EPUB_OBJS=$(SRCS:.md=.epub)
+HANDOUT_HTML_OBJS=$(SRCS:.md=.handout.html)	
 
 _PHONY: all
 
@@ -142,8 +146,10 @@ uninstall:
 # Supported formats
 #
 #all: reveal tex beamer pdf odt doc epub
-all: reveal pdf epub doc
+all: reveal handout_html pdf epub
 
+json: $(JSON_OBJS)
+handout_html: $(HANDOUT_HTML_OBJS)
 reveal: $(REVEAL_OBJS)
 tex: $(TEX_OBJS)
 beamer: $(BEAMER_OBJS)
@@ -156,9 +162,17 @@ epub: $(EPUB_OBJS)
 %.all:  %.html %.tex %.beamer.pdf %.pdf %.odt %.doc %.epub
 	$(ECHO)
 
-%.html: %.md
+%.json: %.md
+	$(ECHO)
+	cd $(DIR) && $P $(JSON_FLAGS) $(IN) -o $(OUT)
+
+%.slides.html: %.md
 	$(ECHO)
 	cd $(DIR) && $P $(REVEAL_FLAGS) $(IN) -o $(OUT)
+
+%.handout.html: %.md
+	$(ECHO)
+	cd $(DIR) && $P $(HANDOUT_HTML_FLAGS) $(IN) -o $(OUT)
 
 %.tex: %.md
 	$(ECHO)
@@ -193,10 +207,11 @@ epub: $(EPUB_OBJS)
 
 clean:
 	rm -fr $(REVEAL_OBJS)
+	rm -fr $(REVEAL_OBJS)
 	rm -fr $(TEX_OBJS)
 	rm -fr $(BEAMER_OBJS)
 	rm -fr $(PDF_OBJS)
 	rm -fr $(ODT_OBJS)
 	rm -fr $(DOC_OBJS)
 	rm -fr $(EPUB_OBJS)
-
+	rm -fr $(HTML_HANDOUT_OBJS)
