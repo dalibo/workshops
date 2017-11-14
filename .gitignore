@@ -2,6 +2,7 @@ _build/*
 exports/*
 *.sw?
 .~lock.*
+*.json
 *.html
 *.reveal.html
 *.tex
@@ -10,3 +11,4 @@ exports/*
 *.odt
 *.doc
 *.epub
+*.handout.html
