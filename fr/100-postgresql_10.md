@@ -984,7 +984,7 @@ publications (une ou plus) auxquelles l'abonné veut souscrire.  </div>
 
 <div class="notes">
 Schéma obtenu sur
-[blog.anayrat.info](https://blog.anayrat.info/wp-content/uploads/2017/07/schema-repli-logique.png).
+[blog.anayrat.info](https://blog.anayrat.info/img/2017/schema-repli-logique.png).
 
 Source : Adrien Nayrat -
 [Série sur la réplication logique](https://blog.anayrat.info/2017/07/29/postgresql-10-et-la-replication-logique-fonctionnement/)
