@@ -76,7 +76,7 @@ endif
 # Then we replace $P with a docker call
 ifneq ($(DOCKER_TAG),)
 	DOCKER_DLB=/root/dalibo/themes
-	P=docker run --rm -it --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
+	P=docker run --rm -it --privileged --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
 	DLB=$(DOCKER_DLB)
 endif
 
