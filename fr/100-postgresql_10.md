@@ -3127,26 +3127,36 @@ version par les outils de l'écosystème est encore jeune.
 
 <div class="slide-content">
   * Branche de développement de la version 11 créée le 15 août
-  * 4 commit fests prévus
-    * septembre et novembre 2017
-	* janvier et mars 2018
-  * Axes d'amélioration notamment prévus
-    * parallélisme
-    * partitionnement
-    * réplication logique
+    * ... quelques améliorations déjà présentes
+  * Nouvelle fonctionnalité de préchauffage automatique du cache pour
+	pg_prewarm
+  * Améliorations du partitionnement
+    * partition par défaut
+    * par hachage
+	* possibilité de mise à jour de la clé de partitionnement
+  * Améliorations de la parallélisation
+    * pour les InitPlan
+	* pour les hachages
+  * Améliorations de la réplication logique
+    * Fast Forward
 </div>
 
 <div class="notes">
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
-Les développements de la version 11 ont commencé. Le premier commit fest nous
-laisse entrevoir une continuité dans l'évolution des thèmes principaux suivants
-: parallélisme, partitionnement et réplication logique.
+Les développements de la version 11 ont commencé. Les premiers commit fests
+nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
+suivants : parallélisme, partitionnement et réplication logique.
 
 Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du
 partitionnement en version 11 dans cet
 [article](https://dali.bo/plans-for-partitioning-in-v11).
+
+Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter sur :
+  * septembre, https://commitfest.postgresql.org/14/?status=4
+  * novembre, https://commitfest.postgresql.org/15/?status=4
+  * janvier, https://commitfest.postgresql.org/16/?status=4
 </div>
 
 -----
