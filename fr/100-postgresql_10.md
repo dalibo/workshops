@@ -2091,8 +2091,12 @@ La version 10 implémente les nouveaux rôles suivants :
 `pg_stat_activity` n'affichait que les processus backend, autrement dit les
 processus gérant la communication avec les clients, et donc responsables de
 l'exécution des requêtes SQL. En version 10, cette vue affiche en plus les
-processus auxiliaires. Il est possible de différencier les processus avec
-la nouvelle colonne `backend_type`.
+processus auxiliaires connectés à la mémoire partagée. Ceci ne concerne donc
+pas les processus d'archivage de journaux de transactions (`archiver process`)
+et de récupération des traces (`logger process`).
+
+Comme il est nécessaire de pouvoir différencier les types de processus dans la
+vue `pg_stat_activity`, une nouvelle colonne `backend_type` a été ajoutée.
 
 Les types possibles sont : autovacuum launcher, autovacuum worker, background
 worker, background writer, client backend, checkpointer, startup, walreceiver,
