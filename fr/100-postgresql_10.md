@@ -842,10 +842,11 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
   * La table mère ne peut pas avoir de données
   * La table mère ne peut pas avoir d'index
     * ni PK, ni UK, ni FK pointant vers elle
+  * Pas d'UPDATE impliquant un changement de partition
   * Pas de colonnes additionnelles dans les partitions
   * L'héritage multiple n'est pas permis
   * Valeurs nulles acceptées dans les partitions uniquement si la table partitionnée le permet
-  * Partitions distantes pour l'instant pas supportées
+  * Partitions distantes uniquement en lecture
   * En cas d'attachement d'une partition
     * vérification du respect de la contrainte (verrou bloquant sur la partition)
     * sauf si ajout au préalable d'une contrainte `CHECK` identique
@@ -860,6 +861,13 @@ partitionnement traditionnel). À la place, une erreur sera générée :
 ERROR:  no partition of relation "t2" found for row
 ```
 
+Un `UPDATE` ne peut provoquer une migration de ligne entre deux partitions, il
+faudra faire un `DELETE` puis un `INSERT`. Il est prévu que ce soit corrigé
+en version 11. Pour le moment cela provoque cette erreur : 
+```
+ERROR:  new row for relation "t1" violates partition constrain
+```
+
 De même, il n'est pas possible d'ajouter un index à la table mère, sous peine de
 voir l'erreur suivante apparaître :
 
@@ -869,7 +877,11 @@ ERROR:  cannot create index on partitioned table "t1"
 
 Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non plus
-possible de faire pointer une clé étrangère vers ce type de table.
+possible de faire pointer une clé étrangère vers ce type de table. Cela aussi
+devrait être amélioré en version 11.
+
+Il est possible d'attacher une table distante (notamment connectée
+avec `postgres_fdw`) à une partition, mais l'accès ne se fera qu'en lecture.
 
 Plusieurs articles contiennent des explications et des exemples concrets, comme
 par exemple :
@@ -1027,8 +1039,9 @@ Il est d'ailleurs nécessaire d'avoir des contraintes de type `PRIMARY KEY` ou
 `UNIQUE` et `NOT NULL` pour permettre la propagation des ordres `UPDATE` et
 `DELETE`.
 
-Les triggers des tables abonnées ne seront pas déclenchés par les modifications
-reçues via la réplication.
+Les triggers des tables abonnées ne seront pas défaut pas déclenchés
+par les modifications reçues via la réplication. Il est possible de le demander
+explicitement trigger par trigger (`ENABLE REPLICA TRIGGER`).
 
 En cas d'utilisation du partitionnement, il n'est pas possible d'ajouter des
 tables parents dans la publication.
@@ -1731,8 +1744,8 @@ Haas*.
 
 <div class="slide-content">
   * nouveaux paramètres
-    * `min_parallel_table_scan_size` : taille minimale d'une table
-	* `min_parallel_index_scan_size` : taille minimale d'un index
+    * `min_parallel_table_scan_size` : taille minimale d'une table (8 Mo)
+	* `min_parallel_index_scan_size` : taille minimale d'un index (512 ko)
   * suppression de `min_parallel_relation_size`
     * jugé trop générique
   * `max_parallel_workers` : nombre maximum de workers que le système peut supporter pour le besoin des requêtes parallèles
@@ -1753,7 +1766,7 @@ Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier
 Pour rappel, `max_parallel_workers_per_gather` configure le nombre maximum de
 processus parallèles pouvant être lancé par un seul nœud Gather. La valeur par
 défaut est 2. Positionner cette valeur à 0 désactive l'exécution parallélisée de
-requête.
+requête (c'était le défaut en 9.6).
 </div>
 
 -----
@@ -1783,7 +1796,8 @@ requête.
 La vue `pg_hba_file_rules` fournit un résumé du contenu du fichier de
 configuration `pg_hba.conf`. Une ligne apparaît dans cette vue pour chaque ligne
 non vide et qui n'est pas un commentaire, avec des annotations indiquant si la
-règle a pu être appliquée avec succès.
+règle est interprétée sans erreur. Attention, il s'agit bien d'afficher le contenu
+du fichier présent sur le disque et non de la configuration en cours !
 
 ```sql
 postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
@@ -2145,7 +2159,10 @@ mis à jour.
 ### Architecture
 
 <div class="slide-content">
-  * Amélioration des options de connexion de la librairie *libpq*
+  * Amélioration des options de connexion de la librairie *libpq* :
+```
+psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session_attrs=any"
+```
   * Ajout des slots de réplication temporaires
   * Support de la librairie ICU pour la gestion des collations
 </div>
@@ -2294,6 +2311,9 @@ postgres=# SELECT * FROM tfile1 LIMIT 1;
   0 | test
 (1 row)
 ```
+
+Seul le superutilisateur peut définir la clause `OPTIONS` et donc le script,
+ce qui est préférable car le script a un accès en écriture au PGDATA !
 
 **postgres_fdw**
 
@@ -2492,8 +2512,8 @@ tous les noms de fichiers.
 </div>
 
 <div class="notes">
-Les index de type Hash sont désormais journalisés. Ils résisteront donc
-désormais aux éventuels crashs et seront utilisables sur un environnement
+Les index de type Hash sont désormais journalisés. Ils résistent donc
+désormais aux éventuels crashs et sont utilisables sur un environnement
 répliqué.
 
 Pour en savoir plus :
@@ -2799,6 +2819,8 @@ REFERENCING OLD TABLE AS oldtable
 FOR EACH STATEMENT
 EXECUTE PROCEDURE log_delete();
 ```
+  * Gain en performance
+
 </div>
 
 
@@ -2861,7 +2883,7 @@ Time: 2141.871 ms (00:02.142)
 
 La suppression avec le trigger prend 2 secondes. Il est possible de connaître
 le temps à supprimer les lignes et le temps à exécuter le trigger en utilisant
-l'ordre `EXPLAIN ANALYZE` :
+l'ordre `EXPLAIN ANALYZE` :
 
 ```sql
 postgres=# TRUNCATE archives;
@@ -3011,8 +3033,14 @@ type_donnee`.
 ### Colonne identity
 
 <div class="slide-content">
-  * Nouveau type de colonne `identity`
+  * Nouvelle contrainte `IDENTITY`
   * Similaire au type `serial` mais conforme au standard SQL
+  * Géré par PostgreSQL ou modifiable :
+```sql
+CREATE TABLE t1 (id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY) ;
+CREATE TABLE t2 (id int PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY) ;
+```
+
 </div>
 
 <div class="notes">
@@ -3066,7 +3094,7 @@ important d'opérer régulièrement, en fonction des contraintes métier, des mi
 ### Les outils de la sphère Dalibo
 
 <div class="slide-content">
-Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
+Les outils Dalibo sont à présent compatibles :
 
 +----------------------+------------------------------------------------------+ 
 | Outil                | Compatibilité avec PostgreSQL 10 |
@@ -3086,14 +3114,14 @@ Quelques outils Dalibo d'ores et déjà compatibles. **Patches are welcome !**
 
 <div class="notes">
 
-Voici une grille de compatibilité des outils Dalibo :
+Voici une grille de compatibilité des outils Dalibo au 31 janvier 2017 :
 
 +----------------------+------------------------------------------------------+ 
 | Outil                | Compatibilité avec PostgreSQL 10 |
 +======================+======================================================+ 
-| pg_activity          | À venir dans 1.3.2 |
+| pg_activity          | Oui, depuis 1.4.0 |
 +----------------------+------------------------------------------------------+
-| check_pgactivity     | À venir dans 2.3 (plusieurs PR ont été intégrées) |
+| check_pgactivity     | Oui, depuis 2.3 |
 +----------------------+------------------------------------------------------+
 | pgBadger             | Oui |
 +----------------------+------------------------------------------------------+
@@ -3101,24 +3129,21 @@ Voici une grille de compatibilité des outils Dalibo :
 +----------------------+------------------------------------------------------+
 | ora2Pg               | Oui (support du partitionnement déclaratif) |
 +----------------------+------------------------------------------------------+
-| powa-archivist       | À venir dans 3.1.1 |
+| powa-archivist       | Oui, depuis 3.1.1 |
 +----------------------+------------------------------------------------------+
-| pg_qualstats         | À venir dans 1.0.3 |
+| pg_qualstats         | Oui, depuis 1.0.3 |
 +----------------------+------------------------------------------------------+
 | pg_stat_kcache       | Oui, depuis 2.0.3 |
 +----------------------+------------------------------------------------------+
-| hypopg               | À venir dans 1.1.0 |
+| hypopg               | Oui, depuis 1.1.0 |
 +----------------------+------------------------------------------------------+
-| PAF                  | À venir dans 2.2 (beta1 sortie) |
+| PAF                  | Oui, depuis 2.2 |
 +----------------------+------------------------------------------------------+
 | temboard             | À venir dans 1.0a3 |
 +----------------------+------------------------------------------------------+
 | ldap2pg              | Oui |
 +----------------------+------------------------------------------------------+ 
 
-La version 10 de PostgreSQL n'étant pas encore terminée, on imagine très bien
-que des changements peuvent encore avoir lieu, et que le support de cette
-version par les outils de l'écosystème est encore jeune.
 </div>
 
 -----
