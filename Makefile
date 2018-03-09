@@ -94,7 +94,7 @@ ifeq ("$(wildcard $(LOCAL_DLB))","")
  REVEAL_FLAGS=-t revealjs --standalone -V revealjs-url:http://lab.hakim.se/reveal-js/
  TEX_FLAGS= -st beamer 
  BEAMER_FLAGS= -st beamer 
- PDF_FLAGS=--toc --latex-engine=xelatex --no-tex-ligatures
+ PDF_FLAGS=--toc --latex-engine=xelatex
  ODT_FLAGS=-t odt --toc
  DOC_FLAGS=-t doc --toc
  EPUB_FLAGS=-t epub --toc
@@ -106,7 +106,7 @@ else
  REVEAL_FLAGS=-t revealjs --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs" --self-contained --standalone -V revealjs-url="$(DLB)/reveal.js/"
  TEX_FLAGS= -st beamer -V theme=Dalibo
  BEAMER_FLAGS= -st beamer -V theme=Dalibo
- PDF_FLAGS=--latex-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --no-tex-ligatures --filter pandoc-latex-admonition
+ PDF_FLAGS=--latex-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition
  ODT_FLAGS=-t odt --toc --reference-odt=$(DLB)/odt/template_conference.dokuwiki.odt
  DOC_FLAGS=-t doc --toc --reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
  EPUB_FLAGS=
