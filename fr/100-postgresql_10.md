@@ -861,9 +861,9 @@ partitionnement traditionnel). À la place, une erreur sera générée :
 ERROR:  no partition of relation "t2" found for row
 ```
 
-Un `UPDATE` ne peut provoquer une migration de ligne entre deux partitions, il
-faudra faire un `DELETE` puis un `INSERT`. Il est prévu que ce soit corrigé
-en version 11. Pour le moment cela provoque cette erreur : 
+Un `UPDATE` ne peut pas encore provoquer une migration de ligne entre deux partitions, il
+faudra faire un `DELETE` puis un `INSERT`.
+Pour le moment cela provoque cette erreur :
 ```
 ERROR:  new row for relation "t1" violates partition constrain
 ```
@@ -875,10 +875,9 @@ voir l'erreur suivante apparaître :
 ERROR:  cannot create index on partitioned table "t1"
 ```
 
-Ceci sous-entend qu'il n'est toujours pas possible de mettre une clé primaire,
+Ceci sous-entend qu'il n'est pas encore possible de mettre une clé primaire,
 et une contrainte unique sur ce type de table. De ce fait, il n'est pas non plus
-possible de faire pointer une clé étrangère vers ce type de table. Cela aussi
-devrait être amélioré en version 11.
+possible de faire pointer une clé étrangère vers ce type de table.
 
 Il est possible d'attacher une table distante (notamment connectée
 avec `postgres_fdw`) à une partition, mais l'accès ne se fera qu'en lecture.
@@ -3179,9 +3178,10 @@ partitionnement en version 11 dans cet
 [article](https://dali.bo/plans-for-partitioning-in-v11).
 
 Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter sur :
-  * septembre, https://commitfest.postgresql.org/14/?status=4
-  * novembre, https://commitfest.postgresql.org/15/?status=4
-  * janvier, https://commitfest.postgresql.org/16/?status=4
+  * septembre 2017  : <https://commitfest.postgresql.org/14/?status=4>
+  * novembre : <https://commitfest.postgresql.org/15/?status=4>
+  * janvier 2018 : <https://commitfest.postgresql.org/16/?status=4>
+  * mars : <https://commitfest.postgresql.org/17/?status=4>
 </div>
 
 -----
@@ -4330,7 +4330,7 @@ CREATE INDEX
 **Mise à jour**
 
 Une mise à jour qui déplacerait des enregistrements d'une partition à une autre
- n'est pas possible par défaut en version 10 :
+ n'est pas encore possible en version 10 :
 
 ```sql
 workshop10=# UPDATE meteo SET lieu='Nantes' WHERE lieu='Lyon';
