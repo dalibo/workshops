@@ -40,22 +40,22 @@ latex-environment:
 
 ## Filtre : pandoc-latex-admonition
 ## order of definition is important
-latex-admonition:
-  - color: LightPink4 
+pandoc-latex-admonition:
+  - color: LightPink
     classes: [important]
     linewidth: 4
-  - color: Khaki4                                                           
+  - color: Khaki
     classes: [warning]                                                        
     linewidth: 4 
-  - color: DarkSeaGreen4                                                            
-    classes: [tip]                                                        
-    linewidth: 4 
-  - color: Ivory4                                                           
-    classes: [note]                                                        
-    linewidth: 4 
-  - color: DodgerBlue4                                                     
-    classes: [slide-content]                                                        
-    linewidth: 4 
+  - color: DarkSeaGreen
+    classes: [tip]
+    linewidth: 4
+  - color: Ivory
+    classes: [note]
+    linewidth: 4
+  - color: DodgerBlue
+    classes: [slide-content]
+    linewidth: 4
 
 
 #

@@ -49,7 +49,7 @@ pandoc-latex-admonition:
     linewidth: 4
   - color: Khaki
     classes: [warning]
-    linewidth: 4 
+    linewidth: 4
   - color: DarkSeaGreen
     classes: [tip]
     linewidth: 4
