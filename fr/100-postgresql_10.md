@@ -3177,11 +3177,13 @@ Robert Haas détaille d'ailleurs quels sont les plans pour l'évolution du
 partitionnement en version 11 dans cet
 [article](https://dali.bo/plans-for-partitioning-in-v11).
 
-Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter sur :
+Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
+
   * septembre 2017  : <https://commitfest.postgresql.org/14/?status=4>
   * novembre : <https://commitfest.postgresql.org/15/?status=4>
   * janvier 2018 : <https://commitfest.postgresql.org/16/?status=4>
   * mars : <https://commitfest.postgresql.org/17/?status=4>
+
 </div>
 
 -----
