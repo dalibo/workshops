@@ -13,7 +13,7 @@ linkcolor:
                                                                       
 licence : PostgreSQL                                                            
 author: Dalibo & Contributors                                                   
-revision: 17.09
+revision: 18.03
 url : http://dalibo.com/formations
 
 #
