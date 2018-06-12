@@ -14,15 +14,13 @@ pandocker:
     #
     # The dalibo themes are not mandatory
     # CI should be able to run without it
-    # You can comment the 7 lines below to build without it
     #
-    - ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
-    - git clone git@gitlab.dalibo.info:marketing/themes.git
-    - cd themes
-    - git checkout stable
-    - make
-    - make install
-    - cd ..
+    - > 
+        if [[ $GITLAB_DEPLOY_PRIVATE_KEY ]] ; then 
+                ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
+                git clone -b stable git@gitlab.dalibo.info:marketing/themes.git
+                make --directory=themes install
+        fi
     #
     # pandoc
     # 
