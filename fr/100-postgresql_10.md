@@ -843,7 +843,8 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
     * ni PK, ni UK, ni FK pointant vers elle
   * Pas d'UPDATE impliquant un changement de partition
   * Pas de colonnes additionnelles dans les partitions
-  * L'héritage multiple n'est pas permis
+  * Pas de mélange des deux types de partitionnement
+  * Une partition ne peut faire partie que d'une seule table partitionnée
   * Valeurs nulles acceptées dans les partitions uniquement si la table partitionnée le permet
   * Partitions distantes uniquement en lecture
   * En cas d'attachement d'une partition
