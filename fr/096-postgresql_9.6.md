@@ -45,8 +45,8 @@ pandoc-latex-admonition:
     classes: [important]
     linewidth: 4
   - color: Khaki
-    classes: [warning]                                                        
-    linewidth: 4 
+    classes: [warning]
+    linewidth: 4
   - color: DarkSeaGreen
     classes: [tip]
     linewidth: 4
@@ -56,7 +56,6 @@ pandoc-latex-admonition:
   - color: DodgerBlue
     classes: [slide-content]
     linewidth: 4
-
 
 #
 # Reveal Options

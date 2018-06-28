@@ -13,7 +13,7 @@ linkcolor:
                                                                       
 licence : PostgreSQL                                                            
 author: Dalibo & Contributors                                                   
-revision: 17.09
+revision: 18.03
 url : http://dalibo.com/formations
 
 #
@@ -59,7 +59,6 @@ pandoc-latex-admonition:
   - color: DodgerBlue
     classes: [slide-content]
     linewidth: 4
-
 
 #
 # Reveal Options
@@ -844,7 +843,8 @@ CREATE TRIGGER tr_insert_t3 BEFORE INSERT ON t3
     * ni PK, ni UK, ni FK pointant vers elle
   * Pas d'UPDATE impliquant un changement de partition
   * Pas de colonnes additionnelles dans les partitions
-  * L'héritage multiple n'est pas permis
+  * Pas de mélange des deux types de partitionnement
+  * Une partition ne peut faire partie que d'une seule table partitionnée
   * Valeurs nulles acceptées dans les partitions uniquement si la table partitionnée le permet
   * Partitions distantes uniquement en lecture
   * En cas d'attachement d'une partition
