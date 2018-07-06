@@ -114,8 +114,8 @@ Public Domain CC0.
 
 <div class="slide-content">
   * Développement depuis...
-  * Version beta 1 sortie ... FIXME
-  * Sortie de la version finale...
+  * Version beta 1 sortie 24 Mai 2018
+  * Sortie de la version finale fin 2018
   * Plus de FIXME million de lignes de code *C*
   * Des centaines de contributeurs
 </div>
@@ -123,13 +123,13 @@ Public Domain CC0.
 <div class="notes">
 
 FIXME
-Le développement de la version 10 a suivi l'organisation habituelle : un
+Le développement de la version 11 a suivi l'organisation habituelle : un
 démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en
 mars, une première version beta mi-mai.
 
 La version finale est sortie le 5 octobre 2017.
 
-La version 10 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*.
+La version 11 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*.
 Son développement est assuré par des centaines de contributeurs répartis partout
 dans le monde.
 
@@ -146,9 +146,8 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 
 <div class="slide-content">
   * FIXME
-  * Changements importants
   * Partitionnement
-  * Réplication logique
+  * JIT
   * Performances
   * Sécurité
   * Autres nouveautés
@@ -167,6 +166,17 @@ des articles en anglais :
 
 -----
 
+## Partitionnement
+<div class="slide-content">
+  * FIXME
+  * Partitionnment par hachage
+  * Partitionnmenet par défaut
+  * Mise à jour de la clé de partition
+  * Support de clé primaires et clé étrangères
+</div>
+
+
+## JIT
 
 ## Performances
 
@@ -174,7 +184,6 @@ des articles en anglais :
   * FIXME
   * Tris
   * Agrégats
-  * Parallélisme
 </div>
 
 <div class="notes">
