@@ -10,9 +10,9 @@ keywords:
 - workshop
 linkcolor:
 
-                                                                      
-licence : PostgreSQL                                                            
-author: Dalibo & Contributors                                                   
+
+licence : PostgreSQL
+author: Dalibo & Contributors
 revision: 18.09
 url : https://dalibo.com/formations
 
@@ -33,7 +33,7 @@ links-as-notes: true
 code-blocks-fontsize: small
 
 ## Filtre : pandoc-latex-env = cadres de couleurs
-## OBSOLETE voir pandoc-latex-admonition                         
+## OBSOLETE voir pandoc-latex-admonition
 latex-environment:
   importantframe: [important]
   warningframe: [warning]
@@ -115,8 +115,9 @@ Public Domain CC0.
 <div class="slide-content">
   * Développement depuis...
   * Version beta 1 sortie 24 Mai 2018
-  * Sortie de la version finale fin 2018
-  * Plus de FIXME million de lignes de code *C*
+  * 2e bêta sortie le 28 Juin 2018
+  * Sortie de la version final : Fin 2018
+  * Est composé de plus de 1,5 millions de lige de code (1,509,660)
   * Des centaines de contributeurs
 </div>
 
@@ -124,12 +125,12 @@ Public Domain CC0.
 
 FIXME
 Le développement de la version 11 a suivi l'organisation habituelle : un
-démarrage mi 2016, des Commit Fests tous les deux mois, un Feature Freeze en
-mars, une première version beta mi-mai.
+démarrage mi 2017, des Commit Fests tous les deux mois, un Feature Freeze en
+mars, une première version beta fin mai.
 
-La version finale est sortie le 5 octobre 2017.
+La version finale est sortie le XX octobre 2018.
 
-La version 11 de PostgreSQL contient plus de 1,4 millions de lignes de code *C*.
+La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
 Son développement est assuré par des centaines de contributeurs répartis partout
 dans le monde.
 
@@ -145,13 +146,13 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 ### Au menu
 
 <div class="slide-content">
-  * FIXME
-  * Partitionnement
-  * JIT
   * Performances
+  * Partitionnement
   * Sécurité
+  * Instructions SQL
+  * Outils
   * Autres nouveautés
-  * Compatibilité
+  * Compatibilité FIXME à garder ???
   * Futur
 </div>
 
@@ -166,6 +167,35 @@ des articles en anglais :
 
 -----
 
+## Performances
+
+### JIT
+
+<div class="slide-content">
+
+**Support de JIT(Just In Time)**
+  * Diminue le temps d’exécution des requêtes
+
+
+</div>
+
+### Parallélisation
+<div class="slide-content">
+
+**Améliorations du parallélisme**
+    * Parallélisation sur les types de jointures Hash
+    * Parallélisation des types de noeud Append
+    * CREATE TABLE AS SELECT statement
+    * CREATE MATERIALIZED VIEW
+    * SELECT INTO statement
+    * CREATE INDEX statement
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
 ## Partitionnement
 <div class="slide-content">
   * FIXME
@@ -175,26 +205,124 @@ des articles en anglais :
   * Support de clé primaires et clé étrangères
 </div>
 
-
-## JIT
-
-## Performances
-
 <div class="slide-content">
-  * FIXME
-  * Tris
-  * Agrégats
+PostgreSQL 11 apporte plusieurs améliorations au niveau du partitionnement et corrige certaines limites impactant la version 10.
+
+    * **Partitionnement par hachage**
+      * Le partitionnement par hachage permet de répartir les données sur plusieurs partitions selon la valeur de hachage de la clé de partition.
+      * Il va être utile pour les partitions destinées à s’agrandir et pour rendre plus rapide les opérations de VACUUM.
+        * ''CREATE TABLE t1(c1 int) PARTITION BY HASH (c1);''
+        * ''CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);''
+
+    * **Partition par défaut**
+        * En version 10 PostgreSQL générait une erreur lorsque les données n'appartenaient a aucune partitions.
+        * La partition par défaut contiendra toutes les données n'appartenant a aucune des autres partitions.
+          * ''CREATE TABLE articles_default PARTITION OF articles DEFAULT;''
+    * **Mise à jour de la clé de partition**
+        * En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
+        * En version 11 La mise à jour fonctionne avec la commande UPDATE
+    * **Création automatique d'INDEX**
+        * En version 10 Il n'était pas possible de créer un index sur une table partitionnée
+        * La version 11 permet de créer un index sur une table partitionnée
+```sql
+b1=# \d articles_a
+                  Table "public.articles_a"
+ Column  |       Type        | Collation | Nullable | Default
+---------+-------------------+-----------+----------+---------
+ title   | character varying |           |          |
+ content | text              |           |          |
+Partition of: articles FOR VALUES IN ('title1', 'title2', 'title3')
+Indexes:
+    "articles_a_title_idx" btree (title)
+
+```
+
+    * **Création de contrainte unique sur une table partitionnée**
+```sql
+\d logs
+                            Table "public.logs"
+   Column   |            Type             | Collation | Nullable | Default
+------------+-----------------------------+-----------+----------+---------
+ created_at | timestamp without time zone |           |          |
+ content    | text                        |           |          |
+Partition key: RANGE (created_at)
+Indexes:
+    "logs_created_at_content_key" UNIQUE CONSTRAINT, btree (created_at, content)
+Number of partitions: 0
+
+```
+
+    * **INSERT ON CONFLICT**
+      * En version 10, la clause **ON CONFLICT** n'était pas supporté sur le partitionnement :
+```sql
+b1=# insert into articles values ('title2') on conflict do nothing;
+ERREUR:  la clause ON CONFLICT n'est pas supporté avec les tables partitionnées
+```
+
+      * En version 11 la clause fonctionne :
+```sql
+b1=# insert into articles values ('title2') on conflict do nothing;
+INSERT 0 1
+```
+
+    * Partition-Wise Aggragate
+    * FOR EACH ROW trigger
+    * Support de clé étrangère
+      * En version 10 les clés étrangères ne sont pas supportées dans une partition :
+```sql
+
+CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+ERROR:  foreign key constraints are not supported on partitioned tables
+LIGNE 1 : CREATE TABLE auteur (nom text, num_livre int REFERENCES livr...
+
+```
+
+       * La version 11 supporte les clées étrangères sur les partitions.
+```sql
+CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+CREATE TABLE
+```
+
+
+    * Elimination dynamique des partitions
+    * Control Partition Pruning
+
 </div>
 
-<div class="notes">
-</div>
 
 -----
 
 ## Sécurité
 
 <div class="slide-content">
-  * FIXME
+
+  * SCRAM
+  * Nouveaux rôles
+
+</div>
+
+### SCRAM
+<div class="slide-content">
+
+  * Agrégation de canaux sur l'authentification **SCRAM**
+    * Permet d'éviter des attaques de type **Man in the midddle**
+
+</div>
+<div class="notes">
+</div>
+
+
+### Nouveaux rôles
+<div class="slide-content">
+**Ajout de nouveaux rôles :**
+
+  * **pg_read_server_files**
+    * Rôle autorisé à la lecture de fichier sur le serveur
+  * **pg_write_server_files**
+    * Rôle autorisé a la modification de fichier sur le serveur
+  * **pg_execute_server_program **
+    * Rôle autorisé a l'execution de fichier sur le serveur
+
 </div>
 
 <div class="notes">
@@ -202,11 +330,123 @@ des articles en anglais :
 
 -----
 
-## Administration
+
+## Instructions SQL
+<div class="slide-content">
+
+    * Ajout de la clause **INCLUDE** pour l'ordre **CREATE INDEX** permettant d'ajouter une contrainte sur une colonne qui ne fait par partie de la clé primaire.
+    * Possibilité de spécifier plusieurs tables avec les ordres **VACUUM** ou **ANALYSE**
+      *  ''VACUUM t1, t2;''
+    * Possibilité de définir le seuil de conversion en **TOAST** depuis l'ordre **CREATE TABLE**
+    * Opérateur **^@** similaire à **LIKE**
+
+
+</div>
+
+
+### Fonctions de fenêtrage
 
 <div class="slide-content">
-  * FIXME
-<div class="notes">
+    * Support de l'intégralité des fonctions de fenêtrage de la norme **SQL:2011**
+      * https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
+</div>
+
+-----
+
+
+
+## PL/pgSQL
+<div class="slide-content">
+    * Création d'objets **PROCEDURES**
+      * Similaires au fonctions mais ne retournant aucune valeur.
+    * Ajout d'une clause **CONSTANT** à une variable
+    * Contrainte **NOT NULL** à une variable
+
+</div>
+
+
+-----
+
+
+## Outils
+<div class="slide-content">
+
+  * PSQL
+  * initdb
+  * pl/pgSQL
+  * ...
+
+</div>
+
+### PSQL
+
+<div class="slide-content">
+      * **\sf**
+        * retourne la définition d'une fonction entrée en paramètre.
+      * **\gdesc**
+        * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
+      * **exit** et **quit** peuvent être utiliser a la place de **\q** pour quitter le terminal psql
+
+</div>
+
+### initdb
+<div class="slide-content">
+      * option **--wal-segsize**
+        * cette option permet de spécifier la taille des fichier WAL lors de l'initialisation de l'instance (Par défaut a 16MB).
+      * option **--allow-group-access**
+          * Autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
+          * Droit sur les fichiers : **drwxr-x---**
+</div>
+
+### autres
+<div class="slide-content">
+   * **pg_dumpall**
+        * option **--encoding** afin de spécifier l'encodage de sortie.
+   * **pg_basebackup**
+        * option **--create-slot** pour créer un slot de réplication.
+   * **compilation postgreSQL**
+        * option **--with-llvm** afin de fournir la compilation JIT
+   * **pg_rewind** : Suppression de la dépendance du super utilisateur pour pg_rewind - peut être utiliser par un utilisateur classique.
+
+</div>
+
+-----
+
+## Autres nouveautés
+
+
+<div class="slide-content">
+
+  * WAL et checkpoint
+  * Réplication logique
+  * JSON
+
+</div>
+
+
+### WAL et Checkpoint
+
+<div class="slide-content">
+    * Suppression du second checkpoint
+      * https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/
+</div>
+
+
+### Réplication Logique
+
+<div class="slide-content">
+
+    * La commande **TRUNCATE** est supporté par la réplication logique.
+
+</div>
+
+
+### JSON
+
+<div class="slide-content">
+    * Index Surjectif
+    * TRANSFORM FOR TYPE Json
+    * LOCK TABLE view
 </div>
 
 -----
@@ -220,81 +460,6 @@ des articles en anglais :
 </div>
 
 <div class="notes">
-</div>
-
------
-
-### Changements dans les outils
-
-<div class="slide-content">
-  * Changements de comportement :
-    * FIXME
-
-  * Fin de support ou suppression :
-    * FIXME
-</div>
-
-<div class="notes">
-Chaque version majeure introduit son lot d'incompatibilités, et il demeure
-important d'opérer régulièrement, en fonction des contraintes métier, des mises
-à jour de PostgreSQL.
-</div>
-
------
-
-### Les outils de la sphère Dalibo
-
-<div class="slide-content">
-Les outils Dalibo sont en cours de mise à jour :
-
-+----------------------+------------------------------------------------------+ 
-| Outil                | Compatibilité avec PostgreSQL 11 |
-+======================+======================================================+
-| pgBadger             | ? |
-+----------------------+------------------------------------------------------+
-| pgCluu               | ? |
-+----------------------+-----------------------------------------------------+
-| ora2Pg               | ? |
-+----------------------+------------------------------------------------------+
-| pg_stat_kcache       | ? |
-+----------------------+------------------------------------------------------+
-| ldap2pg              | ? |
-+----------------------+------------------------------------------------------+ 
-
-</div>
-
-<div class="notes">
-
-Voici une grille de compatibilité des outils Dalibo au FIXME :
-
-+----------------------+------------------------------------------------------+ 
-| Outil                | Compatibilité avec PostgreSQL 11 |
-+======================+======================================================+ 
-| pg_activity          | ? |
-+----------------------+------------------------------------------------------+
-| check_pgactivity     | ? |
-+----------------------+------------------------------------------------------+
-| pgBadger             | ? |
-+----------------------+------------------------------------------------------+
-| pgCluu               | ? |
-+----------------------+------------------------------------------------------+
-| ora2Pg               | ? |
-+----------------------+------------------------------------------------------+
-| powa-archivist       | ? |
-+----------------------+------------------------------------------------------+
-| pg_qualstats         | ? |
-+----------------------+------------------------------------------------------+
-| pg_stat_kcache       | ? |
-+----------------------+------------------------------------------------------+
-| hypopg               | ? |
-+----------------------+------------------------------------------------------+
-| PAF                  | ? |
-+----------------------+------------------------------------------------------+
-| temboard             | ? |
-+----------------------+------------------------------------------------------+
-| ldap2pg              | ? |
-+----------------------+------------------------------------------------------+ 
-
 </div>
 
 -----
@@ -316,10 +481,10 @@ nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et réplication logique. FIXME ?
 
 Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
- FIXME 
-  * septembre 2017  : <https://commitfest.postgresql.org/14/?status=4>
+ FIXME
+  * septembre 2018 : <https://commitfest.postgresql.org/14/?status=4>
   * novembre : <https://commitfest.postgresql.org/15/?status=4>
-  * janvier 2018 : <https://commitfest.postgresql.org/16/?status=4>
+  * janvier 2019 : <https://commitfest.postgresql.org/16/?status=4>
   * mars : <https://commitfest.postgresql.org/17/?status=4>
 
 </div>
@@ -339,8 +504,17 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 À présent, place à l'atelier...
 
   * Installation
-  * Découverte de PostgreSQL 11
-  * TODO
+  * Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique.
+  * Mise à jour d'une partition avec un **UPDATE**.
+  * Tester le support de **TRUNCATE** avec la réplication logique.
+  * Création d'un partitionnement par **hachage**.
+  * Tester les nouveaux rôles
+  * Création de slot avec pg_basebackup
+  * Parallélisation
+  * Index couvrant
+  * Élagage de partition
+  * pg_rewind sans super-utilisateur
+
 </div>
 
 -----
@@ -348,12 +522,12 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 ## Installation
 
 <div class="notes">
-Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo 
+Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
 
 FIXME
 
-Le site postgresql.org propose son propre dépôt RPM, nous allons donc 
+Le site postgresql.org propose son propre dépôt RPM, nous allons donc
 l'utiliser pour installer PostgreSQL 11.
 
 On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
@@ -381,7 +555,7 @@ On peut ensuite initialiser une instance :
 Initializing database:                                     [  OK  ]
 ```
 
-Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous 
+Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
 RedHat et CentOS :
 
 ```
@@ -406,7 +580,7 @@ postgres=# SELECT version();
 (1 ligne)
 ```
 
-On répète ensuite le processus d'installation de façon à installer PostgreSQL 
+On répète ensuite le processus d'installation de façon à installer PostgreSQL
 9.6 aux côtés de PostgreSQL 10.
 
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
@@ -442,16 +616,26 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 ```
 \pset columns 80
-\pset format wrapped 
+\pset format wrapped
 ```
 </div>
 
 -----
 
-## Ici un TP...
+## pg_rewind sans super-utilisateur
 
 <div class="notes">
 
+
+  * **pg_rewind** peut être utiliser par un utilisateur classique.
+
+```sql
+CREATE USER rewind_user LOGIN;
+GRANT EXECUTE ON function pg_catalog.pg_ls_dir(text, boolean, boolean) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_stat_file(text, boolean) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text) TO rewind_user;
+GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean) TO rewind_user;
+```
 
 
 </div>
