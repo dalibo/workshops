@@ -176,8 +176,12 @@ des articles en anglais :
 **Support de JIT(Just In Time)**
   * Diminue le temps d’exécution des requêtes
 
-
 </div>
+
+<div class="notes">
+</div>
+
+-----
 
 ### Parallélisation
 <div class="slide-content">
@@ -196,34 +200,89 @@ des articles en anglais :
 
 -----
 
-## Partitionnement
+## Nouveautés sur le partitionnement
 <div class="slide-content">
-  * FIXME
+ 
   * Partitionnment par hachage
-  * Partitionnmenet par défaut
   * Mise à jour de la clé de partition
+  * Création d'index automatique
+  * Partitionnement par défaut
+  * INSERT ON CONFLICT
+  * Partition-Wise Join / Aggregate
+  * FOR EACH ROW trigger
   * Support de clé primaires et clé étrangères
+  * Elimination dynamique des partitions (Partition pruning)
+
 </div>
 
+<div class="notes">
+Le partitionnement natif était une fonctionnalité très attendu de PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient dissuader de l'utilisation de celui ci.
+La version 11 apporte plusieurs améliorations au niveau du partitionnement et corrige certaines limites impactant la version 10.
+
+</div>
+
+-----
+
+### Partitionnement par hachage
 <div class="slide-content">
-PostgreSQL 11 apporte plusieurs améliorations au niveau du partitionnement et corrige certaines limites impactant la version 10.
+  * nouveau type de partitionnement :
+  * répartition des données suivant la valeur de hachage de la clé de partition
+  * très utile pour les partitions destinées à grandir
+  * accéleration des `VACUUM`
+</div>
 
-    * **Partitionnement par hachage**
-      * Le partitionnement par hachage permet de répartir les données sur plusieurs partitions selon la valeur de hachage de la clé de partition.
-      * Il va être utile pour les partitions destinées à s’agrandir et pour rendre plus rapide les opérations de VACUUM.
-        * ''CREATE TABLE t1(c1 int) PARTITION BY HASH (c1);''
-        * ''CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);''
+### Exemple de partitionnement
+<div class="slide-content">
+  * Créer une table partitionnée : 
+  * CREATE TABLE t1(c1 int) PARTITION BY HASH (c1);
+  * Ajouter une partition :
+  * CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);
+</div>
 
-    * **Partition par défaut**
-        * En version 10 PostgreSQL générait une erreur lorsque les données n'appartenaient a aucune partitions.
-        * La partition par défaut contiendra toutes les données n'appartenant a aucune des autres partitions.
-          * ''CREATE TABLE articles_default PARTITION OF articles DEFAULT;''
-    * **Mise à jour de la clé de partition**
-        * En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
-        * En version 11 La mise à jour fonctionne avec la commande UPDATE
-    * **Création automatique d'INDEX**
-        * En version 10 Il n'était pas possible de créer un index sur une table partitionnée
-        * La version 11 permet de créer un index sur une table partitionnée
+<div class="note">
+Le partitionnement par hachage permet de répartir les données sur plusieurs partitions selon la valeur de hachage de la clé de partition.
+Il va être utile pour les partitions destinées à s’agrandir et pour rendre plus rapide les opérations de VACUUM.
+FIXME précision sur si et comment on peut étendre davantage les données en créant une nouvelle partition ?
+</div>
+
+-----
+
+### Mise à jour d'une valeur de la clé de partition
+
+<div class="slide-content">
+
+  * En version 10 : `DELETE` puis `INSERT`
+  * En version 11, la mise à jour fonctionne avec la commande UPDATE
+  * la ligne est alors déplacée dans une nouvelle partition
+
+</div>
+
+<div class="notes">
+
+En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
+
+</div>
+
+-----
+
+### Création d'INDEX automatique
+<div class="slide-content">
+  * création d'un index sur une table partitionnée possible
+  * l'index est créé sur chaque partition
+  * création automatique sur toute nouvelle partition
+  * mise à jour de l'index possible (???)
+  * permet la création de contrainte unique (???est-ce vraiment lié???)
+
+</div>
+
+<div class="notes">
+En version 10 Il n'était pas possible de créer un index sur une table partitionnée.
+
+FIXME ajout d'un exemple en version 10
+
+En version 11 FIXME
+
+Création d'index sur une table partitionnée :
 ```sql
 b1=# \d articles_a
                   Table "public.articles_a"
@@ -236,8 +295,88 @@ Indexes:
     "articles_a_title_idx" btree (title)
 
 ```
+</div>
 
-    * **Création de contrainte unique sur une table partitionnée**
+-----
+
+### Support des clés étrangères
+
+<div class="slide-content">
+  * Support de clé étrangère vers une table non partitionnée
+  * Une clé étrangère d'une colonne d'une table partitionnée est toujours
+  impossible
+
+</div>
+
+<div class="notes">
+
+FIXME définition de la table livre ?
+
+En version 10 les clés étrangères ne sont pas supportées dans une partition :
+```sql
+
+CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+ERROR:  foreign key constraints are not supported on partitioned tables
+LIGNE 1 : CREATE TABLE auteur (nom text, num_livre int REFERENCES livr...
+
+```
+
+La version 11 supporte les clées étrangères sur les partitions.
+```sql
+CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+CREATE TABLE
+```
+
+
+FIXME clés étrangères vers une table partitionnée toujours impossible
+
+</div>
+
+-----
+
+### Partition par défaut
+<div class="slide-content">
+
+  * contiendra toutes les données n'appartenant à aucune des autres partitions
+  ```CREATE TABLE articles_default PARTITION OF articles DEFAULT;```
+
+</div>
+
+<div class="notes">
+
+En version 10 PostgreSQL générait une erreur lorsque les données n'appartenaient à aucune partitions.
+
+FIXME que se passe-t-il quand on crée une partition correspondant à des lignescontenues dans la parition par défaut ?
+
+
+</div>
+
+-----
+
+### Élagage des partitions
+
+<div class="slide-content">
+    * Elimination dynamique des partitions
+    * Control Partition Pruning
+</div>
+
+<div class="notes">
+FIXME
+</div>
+
+-----
+
+### Autres nouveautés du partitionnement
+<div class="slide-content">
+  * Clause `INSERT ON CONFLICT`
+  * _Partition-Wise Aggregate_
+  * `FOR EACH ROW trigger`
+</div>
+
+
+<div class="notes">
+Création de contrainte unique sur une table partitionnée :
+FIXME comparaison v10 et ordre de création ?
 ```sql
 \d logs
                             Table "public.logs"
@@ -250,45 +389,18 @@ Indexes:
     "logs_created_at_content_key" UNIQUE CONSTRAINT, btree (created_at, content)
 Number of partitions: 0
 
-```
-
-    * **INSERT ON CONFLICT**
-      * En version 10, la clause **ON CONFLICT** n'était pas supporté sur le partitionnement :
+En version 10, la clause **ON CONFLICT** n'était pas supporté sur le partitionnement :
 ```sql
 b1=# insert into articles values ('title2') on conflict do nothing;
 ERREUR:  la clause ON CONFLICT n'est pas supporté avec les tables partitionnées
 ```
 
-      * En version 11 la clause fonctionne :
+En version 11 la clause fonctionne :
 ```sql
 b1=# insert into articles values ('title2') on conflict do nothing;
 INSERT 0 1
 ```
-
-    * Partition-Wise Aggragate
-    * FOR EACH ROW trigger
-    * Support de clé étrangère
-      * En version 10 les clés étrangères ne sont pas supportées dans une partition :
-```sql
-
-CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
-ERROR:  foreign key constraints are not supported on partitioned tables
-LIGNE 1 : CREATE TABLE auteur (nom text, num_livre int REFERENCES livr...
-
-```
-
-       * La version 11 supporte les clées étrangères sur les partitions.
-```sql
-CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
-CREATE TABLE
-```
-
-
-    * Elimination dynamique des partitions
-    * Control Partition Pruning
-
 </div>
-
 
 -----
 
