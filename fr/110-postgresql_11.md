@@ -476,6 +476,7 @@ INSERT 0 1
       * Similaires au fonctions mais ne retournant aucune valeur.
     * Ajout d'une clause **CONSTANT** à une variable
     * Contrainte **NOT NULL** à une variable
+    * ordre `SET TRANSACTION` dans un bloc
 
 </div>
 
