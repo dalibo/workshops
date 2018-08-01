@@ -169,11 +169,23 @@ des articles en anglais :
 
 ## Performances
 
+<div class="slide-content">
+  * compilation Just In Time (JIT)
+  * parallélisme
+
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+
 ### JIT
 
 <div class="slide-content">
 
-**Support de JIT(Just In Time)**
+  * Support de la compilation Just In Time
   * Diminue le temps d’exécution des requêtes
 
 </div>
