@@ -446,12 +446,15 @@ INSERT 0 1
 ## Instructions SQL
 <div class="slide-content">
 
-    * Ajout de la clause **INCLUDE** pour l'ordre **CREATE INDEX** permettant d'ajouter une contrainte sur une colonne qui ne fait par partie de la clé primaire.
-    * Possibilité de spécifier plusieurs tables avec les ordres **VACUUM** ou **ANALYSE**
-      *  ''VACUUM t1, t2;''
-    * Possibilité de définir le seuil de conversion en **TOAST** depuis l'ordre **CREATE TABLE**
-    * Opérateur **^@** similaire à **LIKE**
-
+  * Index couvrant
+    * Ajout de la clause INCLUDE pour l'ordre CREATE INDEX permettant d'ajouter une contrainte sur une colonne qui ne fait par partie de la clé primaire.
+  * VACUUM tables multiples
+    * VACUUM t1, t2;
+  * support fonction fenêtrage SQL:2011
+  * LOCK VIEW
+  * objets PROCEDURES
+  * Définir le seuil de conversion en TOAST depuis l'ordre CREATE TABLE
+  * Opérateur ^@ similaire à LIKE
 
 </div>
 
