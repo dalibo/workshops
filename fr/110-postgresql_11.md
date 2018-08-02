@@ -144,14 +144,13 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 -----
 
 ### Au menu
-
 <div class="slide-content">
   * Performances
   * Partitionnement
-  * Sécurité
+  * Sécurité et intégrité
   * Instructions SQL
   * Outils
-  * Autres nouveautés
+  * Réplication
   * Compatibilité FIXME à garder ???
   * Futur
 </div>
@@ -182,7 +181,6 @@ des articles en anglais :
 
 
 ### JIT
-
 <div class="slide-content">
 
   * Support de la compilation Just In Time
@@ -199,12 +197,13 @@ des articles en anglais :
 <div class="slide-content">
 
 **Améliorations du parallélisme**
-    * Parallélisation sur les types de jointures Hash
-    * Parallélisation des types de noeud Append
-    * CREATE TABLE AS SELECT statement
-    * CREATE MATERIALIZED VIEW
-    * SELECT INTO statement
-    * CREATE INDEX statement
+
+  * Parallélisation sur les types de jointures Hash
+  * Parallélisation des types de noeud Append
+  * CREATE TABLE AS SELECT statement
+  * CREATE MATERIALIZED VIEW
+  * SELECT INTO statement
+  * CREATE INDEX statement
 </div>
 
 <div class="notes">
@@ -216,14 +215,13 @@ des articles en anglais :
 <div class="slide-content">
  
   * Partitionnment par hachage
-  * Mise à jour de la clé de partition
   * Création d'index automatique
-  * Partitionnement par défaut
-  * INSERT ON CONFLICT
-  * Partition-Wise Join / Aggregate
-  * FOR EACH ROW trigger
   * Support de clé primaires et clé étrangères
-  * Elimination dynamique des partitions (Partition pruning)
+  * Mise à jour de la clé de partition
+  * Partitionnement par défaut
+  * Amélioration des performances
+  * Clause `INSERT ON CONFLICT`
+  * Trigger `FOR EACH ROW`
 
 </div>
 
@@ -237,42 +235,30 @@ La version 11 apporte plusieurs améliorations au niveau du partitionnement et c
 
 ### Partitionnement par hachage
 <div class="slide-content">
-  * nouveau type de partitionnement :
   * répartition des données suivant la valeur de hachage de la clé de partition
   * très utile pour les partitions destinées à grandir
   * accéleration des `VACUUM`
 </div>
 
-### Exemple de partitionnement
-<div class="slide-content">
-  * Créer une table partitionnée : 
-  * CREATE TABLE t1(c1 int) PARTITION BY HASH (c1);
-  * Ajouter une partition :
-  * CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);
-</div>
-
-<div class="note">
+<div class="notes">
 Le partitionnement par hachage permet de répartir les données sur plusieurs partitions selon la valeur de hachage de la clé de partition.
 Il va être utile pour les partitions destinées à s’agrandir et pour rendre plus rapide les opérations de VACUUM.
+
 FIXME précision sur si et comment on peut étendre davantage les données en créant une nouvelle partition ?
+
 </div>
 
 -----
 
-### Mise à jour d'une valeur de la clé de partition
-
+### Exemple de partitionnement par hachage
 <div class="slide-content">
-
-  * En version 10 : `DELETE` puis `INSERT`
-  * En version 11, la mise à jour fonctionne avec la commande UPDATE
-  * la ligne est alors déplacée dans une nouvelle partition
-
+  * Créer une table partitionnée : 
+  ```CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)```
+  * Ajouter une partition :
+  ```CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0)```
 </div>
 
-<div class="notes">
-
-En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
-
+<div class="note">
 </div>
 
 -----
@@ -283,7 +269,6 @@ En version 10 il n'était pas possible de mettre à jour une clé de partition e
   * l'index est créé sur chaque partition
   * création automatique sur toute nouvelle partition
   * mise à jour de l'index possible (???)
-  * permet la création de contrainte unique (???est-ce vraiment lié???)
 
 </div>
 
@@ -311,8 +296,36 @@ Indexes:
 
 -----
 
-### Support des clés étrangères
+### Support des clés primaires
+<div class="slide-content">
+  * Support des index `UNIQUE`
+  * Permet la création de clés primaires
+</div>
 
+<div class="notes">
+
+Création de contrainte unique sur une table partitionnée :
+
+FIXME comparaison v10 et ordre de création ?
+```sql
+\d logs
+                            Table "public.logs"
+   Column   |            Type             | Collation | Nullable | Default
+------------+-----------------------------+-----------+----------+---------
+ created_at | timestamp without time zone |           |          |
+ content    | text                        |           |          |
+Partition key: RANGE (created_at)
+Indexes:
+    "logs_created_at_content_key" UNIQUE CONSTRAINT, btree (created_at, content)
+Number of partitions: 0
+
+Permet la création de clés primaires.
+
+</div>
+
+-----
+
+### Support des clés étrangères
 <div class="slide-content">
   * Support de clé étrangère vers une table non partitionnée
   * Une clé étrangère d'une colonne d'une table partitionnée est toujours
@@ -346,6 +359,23 @@ FIXME clés étrangères vers une table partitionnée toujours impossible
 
 -----
 
+### Mise à jour d'une valeur de la clé de partition
+<div class="slide-content">
+
+  * En version 10 : `DELETE` puis `INSERT`
+  * En version 11, la mise à jour fonctionne avec la commande UPDATE
+  * la ligne est alors déplacée dans une nouvelle partition
+
+</div>
+
+<div class="notes">
+
+En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
+
+</div>
+
+-----
+
 ### Partition par défaut
 <div class="slide-content">
 
@@ -364,12 +394,10 @@ FIXME que se passe-t-il quand on crée une partition correspondant à des lignes
 </div>
 
 -----
-
-### Élagage des partitions
-
+### Meilleures performances des SELECT
 <div class="slide-content">
-    * Elimination dynamique des partitions
-    * Control Partition Pruning
+  * Élagage dynamique des partitions
+  * Control Partition Pruning
 </div>
 
 <div class="notes">
@@ -387,19 +415,6 @@ FIXME
 
 
 <div class="notes">
-Création de contrainte unique sur une table partitionnée :
-FIXME comparaison v10 et ordre de création ?
-```sql
-\d logs
-                            Table "public.logs"
-   Column   |            Type             | Collation | Nullable | Default
-------------+-----------------------------+-----------+----------+---------
- created_at | timestamp without time zone |           |          |
- content    | text                        |           |          |
-Partition key: RANGE (created_at)
-Indexes:
-    "logs_created_at_content_key" UNIQUE CONSTRAINT, btree (created_at, content)
-Number of partitions: 0
 
 En version 10, la clause **ON CONFLICT** n'était pas supporté sur le partitionnement :
 ```sql
@@ -416,40 +431,58 @@ INSERT 0 1
 
 -----
 
-## Sécurité
+## Sécurité et intégrité
 
 <div class="slide-content">
 
   * SCRAM
   * Nouveaux rôles
+  * Vérification d'intégrité
 
 </div>
+
+-----
 
 ### SCRAM
 <div class="slide-content">
 
   * Agrégation de canaux sur l'authentification **SCRAM**
-    * Permet d'éviter des attaques de type **Man in the midddle**
+  * Permet d'éviter des attaques de type **Man in the midddle**
 
 </div>
+
 <div class="notes">
 </div>
 
+-----
 
 ### Nouveaux rôles
 <div class="slide-content">
-**Ajout de nouveaux rôles :**
-
-  * **pg_read_server_files**
-    * Rôle autorisé à la lecture de fichier sur le serveur
-  * **pg_write_server_files**
-    * Rôle autorisé a la modification de fichier sur le serveur
-  * **pg_execute_server_program **
-    * Rôle autorisé a l'execution de fichier sur le serveur
+  * **pg_read_server_files** : permet la lecture de fichier sur le serveur
+  * **pg_write_server_files** : permet la modification de fichier sur le serveur
+  * **pg_execute_server_program** : permet l'execution de fichier sur le serveur
 
 </div>
 
 <div class="notes">
+Ajout de nouveaux rôles... FIXME
+
+</div>
+
+-----
+
+### Vérification d'intégrité
+<div class="slide-content">
+  * nouvelle commande `pg_verify_checksums`
+  * vérification des sommes de contrôles dans `pg_basebackup`
+  * nouveau module `amcheck`
+</div>
+
+<div class="notes">
+commande `pg_verify_checksums` est à froid.
+
+`amcheck` vérifie que chaque ligne possède une entrée dans les index.
+
 </div>
 
 -----
@@ -480,101 +513,135 @@ INSERT 0 1
 
 -----
 
-
-
-## PL/pgSQL
+### PL/pgSQL
 <div class="slide-content">
-    * Création d'objets **PROCEDURES**
-      * Similaires au fonctions mais ne retournant aucune valeur.
-    * Ajout d'une clause **CONSTANT** à une variable
-    * Contrainte **NOT NULL** à une variable
-    * ordre `SET TRANSACTION` dans un bloc
-
-</div>
-
-
------
-
-
-## Outils
-<div class="slide-content">
-
-  * PSQL
-  * initdb
-  * pl/pgSQL
-  * ...
-
-</div>
-
-### PSQL
-
-<div class="slide-content">
-      * **\sf**
-        * retourne la définition d'une fonction entrée en paramètre.
-      * **\gdesc**
-        * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
-      * **exit** et **quit** peuvent être utiliser a la place de **\q** pour quitter le terminal psql
-
-</div>
-
-### initdb
-<div class="slide-content">
-      * option **--wal-segsize**
-        * cette option permet de spécifier la taille des fichier WAL lors de l'initialisation de l'instance (Par défaut a 16MB).
-      * option **--allow-group-access**
-          * Autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
-          * Droit sur les fichiers : **drwxr-x---**
-</div>
-
-### autres
-<div class="slide-content">
-   * **pg_dumpall**
-        * option **--encoding** afin de spécifier l'encodage de sortie.
-   * **pg_basebackup**
-        * option **--create-slot** pour créer un slot de réplication.
-   * **compilation postgreSQL**
-        * option **--with-llvm** afin de fournir la compilation JIT
-   * **pg_rewind** : Suppression de la dépendance du super utilisateur pour pg_rewind - peut être utiliser par un utilisateur classique.
+  * Création d'objets **PROCEDURES**
+    * Similaires au fonctions mais ne retournant aucune valeur.
+  * Ajout d'une clause **CONSTANT** à une variable
+  * Contrainte **NOT NULL** à une variable
+  * Ordre `SET TRANSACTION` dans un bloc
 
 </div>
 
 -----
-
-## Autres nouveautés
-
-
-<div class="slide-content">
-
-  * WAL et checkpoint
-  * Réplication logique
-  * JSON
-
-</div>
-
-
-### WAL et Checkpoint
-
-<div class="slide-content">
-    * Suppression du second checkpoint
-      * https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/
-</div>
-
-
-### Réplication Logique
-
-<div class="slide-content">
-
-    * La commande **TRUNCATE** est supporté par la réplication logique.
-
-</div>
-
 
 ### JSON
 
 <div class="slide-content">
-    * Index Surjectif
-    * TRANSFORM FOR TYPE Json
-    * LOCK TABLE view
+  * Index Surjectif
+  * TRANSFORM FOR TYPE Json
+  * LOCK TABLE view
+</div>
+
+-----
+
+## Outils
+<div class="slide-content">
+
+  * `psql`
+  * `initdb`
+  * `pg_dump` et `pg_dumpall`
+  * `pg_basebackup`
+  * `pg_rewind`
+
+</div>
+
+-----
+
+### psql
+<div class="slide-content">
+  * `\sf`
+    * retourne la définition d'une fonction entrée en paramètre.
+  * `\gdesc`
+    * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
+  * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
+
+</div>
+
+-----
+
+### initdb
+<div class="slide-content">
+  * option `--wal-segsize` : spécifie la taille des fichier WAL à l'initialisation
+  * option `--allow-group-access` :
+    * droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
+    * Droit sur les fichiers : `drwxr-x---`
+</div>
+
+
+<div class="notes">
+L'option `--wal-segsize` permet de spécifier la taille des fichier WAL lors de l'initialisation de l'instance (Par défaut a 16MB).
+
+L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`.
+
+</div>
+
+-----
+
+### Sauvegardes et restauration
+<div class="slide-content">
+  * `pg_dumpall`
+    * option `--encoding` pour spécifier l'encodage de sortie.
+    * l'option `-g` ne charge plus les permissions et les configurations de variables
+  * `pg_dump` et `pg_restore` gèrent maintenant les permissions et les configurations de variables
+  * `pg_basebackup`
+        * option `--create-slot` pour créer un slot de réplication.
+
+</div>
+
+<div class="notes">
+les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+</div>
+
+-----
+
+### pg_rewind
+<div class="slide-content">
+  * pg_rewind peut-être utilisé par un utilisateur classique.
+
+FIXME slide un peu vide. Est-ce qu'on peut la mettre avec une autre ?
+</div>
+
+-----
+
+## Réplication 
+<div class="slide-content">
+  * Réplication Logique
+  * WAL et Checkpoint
+</div>
+
+<div class="notes">
+
+</div>
+
+-----
+
+### Réplication Logique
+<div class="slide-content">
+
+  * Réplication des commandes `TRUNCATE`
+  * Réduction de l'empreinte mémoire
+
+</div>
+
+<div class="notes">
+
+Add a generational memory allocator which is optimized for serial allocation/deallocation (Tomas Vondra). This reduces memory usage for logical decoding.
+
+</div>
+
+-----
+
+### WAL et Checkpoint
+<div class="slide-content">
+  * Suppression du second checkpoint
+  * Remplissage des portions de WAL non utilisés par des 0
+</div>
+
+<div class="notes">
+https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/
+
+En cas de changement forcé de fichier WAL, la portion de WAL non utilisée est replie par des 0. Cela permet une meilleure compression des fichiers en cas d'archivage.
 </div>
 
 -----
@@ -583,7 +650,7 @@ INSERT 0 1
 ## Compatibilité
 
 <div class="slide-content">
-  * Changements dans les outils
+  * Changements dans les outils (¿¿ à garder ??)
   * Les outils de la sphère Dalibo
 </div>
 
@@ -633,9 +700,9 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 
   * Installation
   * Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique.
-  * Mise à jour d'une partition avec un **UPDATE**.
-  * Tester le support de **TRUNCATE** avec la réplication logique.
-  * Création d'un partitionnement par **hachage**.
+  * Mise à jour d'une partition avec un `UPDATE`.
+  * Tester le support de `TRUNCATE` avec la réplication logique.
+  * Création d'un partitionnement par `hachage`.
   * Tester les nouveaux rôles
   * Création de slot avec pg_basebackup
   * Parallélisation
@@ -755,7 +822,7 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 <div class="notes">
 
 
-  * **pg_rewind** peut être utiliser par un utilisateur classique.
+  * `pg_rewind` peut être utiliser par un utilisateur classique.
 
 ```sql
 CREATE USER rewind_user LOGIN;
