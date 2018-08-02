@@ -492,7 +492,7 @@ commande `pg_verify_checksums` est à froid.
 <div class="slide-content">
 
   * Index couvrant
-    * Ajout de la clause INCLUDE pour l'ordre CREATE INDEX permettant d'ajouter une contrainte sur une colonne qui ne fait par partie de la clé primaire.
+    * CREATE INDEX...INCLUDE
   * VACUUM tables multiples
     * VACUUM t1, t2;
   * support fonction fenêtrage SQL:2011
@@ -503,6 +503,8 @@ commande `pg_verify_checksums` est à froid.
 
 </div>
 
+<div class="notes">
+</div>
 
 ### Fonctions de fenêtrage
 
