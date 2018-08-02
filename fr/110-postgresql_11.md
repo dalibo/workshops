@@ -145,8 +145,8 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 
 ### Au menu
 <div class="slide-content">
-  * Performances
   * Partitionnement
+  * Performances
   * Sécurité et intégrité
   * Instructions SQL
   * Outils
@@ -162,51 +162,6 @@ des articles en anglais :
 
   * [New in postgres 11](https://dali.bo/new-in-postgres-11) du projet PostgreSQL
   * ...
-</div>
-
------
-
-## Performances
-
-<div class="slide-content">
-  * compilation Just In Time (JIT)
-  * parallélisme
-
-</div>
-
-<div class="notes">
-</div>
-
------
-
-
-### JIT
-<div class="slide-content">
-
-  * Support de la compilation Just In Time
-  * Diminue le temps d’exécution des requêtes
-
-</div>
-
-<div class="notes">
-</div>
-
------
-
-### Parallélisation
-<div class="slide-content">
-
-**Améliorations du parallélisme**
-
-  * Parallélisation sur les types de jointures Hash
-  * Parallélisation des types de noeud Append
-  * CREATE TABLE AS SELECT statement
-  * CREATE MATERIALIZED VIEW
-  * SELECT INTO statement
-  * CREATE INDEX statement
-</div>
-
-<div class="notes">
 </div>
 
 -----
@@ -427,6 +382,51 @@ En version 11 la clause fonctionne :
 b1=# insert into articles values ('title2') on conflict do nothing;
 INSERT 0 1
 ```
+</div>
+
+-----
+
+## Performances
+
+<div class="slide-content">
+  * compilation Just In Time (JIT)
+  * parallélisme
+
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+
+### JIT
+<div class="slide-content">
+
+  * Support de la compilation Just In Time
+  * Diminue le temps d’exécution des requêtes
+
+</div>
+
+<div class="notes">
+</div>
+
+-----
+
+### Parallélisation
+<div class="slide-content">
+
+**Améliorations du parallélisme**
+
+  * Parallélisation sur les types de jointures Hash
+  * Parallélisation des types de noeud Append
+  * CREATE TABLE AS SELECT statement
+  * CREATE MATERIALIZED VIEW
+  * SELECT INTO statement
+  * CREATE INDEX statement
+</div>
+
+<div class="notes">
 </div>
 
 -----
