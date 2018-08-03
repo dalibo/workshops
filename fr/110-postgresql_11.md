@@ -559,7 +559,7 @@ commande `pg_verify_checksums` est à froid.
   * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
 
 </div>
-
+<
 -----
 
 ### initdb
@@ -594,6 +594,10 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 
 <div class="notes">
 les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+
+pg_dumpall bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
+
+Une nouvelle option --create-slot est disponible dans pg_basebackup permettant de créer directement un slot de réplication lors de. Elle doit donc être utiliser en complément de l'option --slot. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande pg_basebackup s’interrompt et affiche un message d'erreur.  
 </div>
 
 -----
