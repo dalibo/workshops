@@ -588,7 +588,7 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
     * l'option `-g` ne charge plus les permissions et les configurations de variables
   * `pg_dump` et `pg_restore` gèrent maintenant les permissions et les configurations de variables
   * `pg_basebackup`
-        * option `--create-slot` pour créer un slot de réplication.
+    * option `--create-slot` pour créer un slot de réplication.
 
 </div>
 
