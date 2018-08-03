@@ -544,7 +544,6 @@ commande `pg_verify_checksums` est à froid.
   * `initdb`
   * `pg_dump` et `pg_dumpall`
   * `pg_basebackup`
-  * `pg_rewind`
 
 </div>
 
@@ -602,15 +601,6 @@ les permissions par `GRANT` et `REVOKE` et les configurations de variables par `
 pg_dumpall bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
 
 Une nouvelle option --create-slot est disponible dans pg_basebackup permettant de créer directement un slot de réplication lors de. Elle doit donc être utiliser en complément de l'option --slot. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande pg_basebackup s’interrompt et affiche un message d'erreur.  
-</div>
-
------
-
-### pg_rewind
-<div class="slide-content">
-  * pg_rewind peut-être utilisé par un utilisateur classique.
-
-FIXME slide un peu vide. Est-ce qu'on peut la mettre avec une autre ?
 </div>
 
 -----
