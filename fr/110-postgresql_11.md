@@ -560,7 +560,9 @@ commande `pg_verify_checksums` est à froid.
 
 </div>
 <div class="notes">
-
+De nouvelles commandes psql ont été ajoutées dans PostgreSQL 11. 
+La commande \gdesc retourne la definition d'une fonction spécifié.
+La commande gdesc retourne le nom et le type des colonnes de la dernière requête exécute. Les commandes exit et quit ont été ajoutée pour quitter le terminal afin que cela soit plus intuitif pour les nouveaux utilisateurs. 
 </div>
 -----
 
