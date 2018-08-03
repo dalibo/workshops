@@ -559,7 +559,9 @@ commande `pg_verify_checksums` est à froid.
   * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
 
 </div>
-<
+<div class="notes">
+
+</div>
 -----
 
 ### initdb
