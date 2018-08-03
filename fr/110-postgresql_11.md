@@ -564,9 +564,10 @@ commande `pg_verify_checksums` est à froid.
 
 ### initdb
 <div class="slide-content">
-  * option `--wal-segsize` : spécifie la taille des fichier WAL à l'initialisation
+  * option `--wal-segsize` : 
+    * spécifie la taille des fichier WAL à l'initialisation
   * option `--allow-group-access` :
-    * droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
+    * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
 </div>
 
