@@ -730,25 +730,24 @@ l'utiliser pour installer PostgreSQL 11.
 On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
 
 ```
-# export pgdg_yum=https://download.postgresql.org/pub/repos/yum/
-# wget $pgdg_yum/testing/10/redhat/rhel-6-x86_64/pgdg-centos10-10-1.noarch.rpm
-# yum install -y pgdg-centos10-10-1.noarch.rpm
-Installing:
- pgdg-centos10                     noarch                     10-1
+# pgdg_yum=https://download.postgresql.org/pub/repos/yum/
+# pgdg_yum+=testing/11/redhat/rhel-6.9-x86_64/pgdg-centos11-11-2.noarch.rpm
+# yum install -y $pgdg_yum
+Installed:
+  pgdg-centos11.noarch 0:11-2
 
-# yum install -y postgresql10 postgresql10-server postgresql10-contrib
-Installing:
- postgresql10                        x86_64                10.0-beta4_1PGDG.rhel6
- postgresql10-contrib                x86_64                10.0-beta4_1PGDG.rhel6
- postgresql10-server                 x86_64                10.0-beta4_1PGDG.rhel6
-Installing for dependencies:
- postgresql10-libs                   x86_64                10.0-beta4_1PGDG.rhel6
+# yum install -y postgresql11 postgresql11-contrib postgresql11-server
+
+Installed:
+  postgresql11.x86_64 0:11.0-beta2_1PGDG.rhel6                  postgresql11-contrib.x86_64 0:11.0-beta2_1PGDG.rhel6                  postgresql11-server.x86_64 0:11.0-beta2_1PGDG.rhel6                 
+Dependency Installed:
+  libicu.x86_64 0:4.2.1-14.el6                               libxslt.x86_64 0:1.1.26-2.el6_3.1                               postgresql11-libs.x86_64 0:11.0-beta2_1PGDG.rhel6
 ```
 
 On peut ensuite initialiser une instance :
 
 ```
-# service postgresql-10 initdb
+# service postgresql-11 initdb
 Initializing database:                                     [  OK  ]
 ```
 
@@ -756,57 +755,56 @@ Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
 RedHat et CentOS :
 
 ```
-# service postgresql-10 start
-Starting postgresql-10 service:                            [  OK  ]
+# service postgresql-11 start
+Starting postgresql-11 service:                            [  OK  ]
 ```
 
 Pour se connecter à l'instance sans modifier `pg_hba.conf` :
 
 ```
-# sudo -iu postgres /usr/pgsql-10/bin/psql
+# sudo -iu postgres /usr/pgsql-11/bin/psql
 ```
 
 Enfin, on vérifie la version :
 
 ```sql
-postgres=# SELECT version();
-                                      version
---------------------------------------------------------------------------------
- PostgreSQL 10beta4 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.4.7 20120313
- (Red Hat 4.4.7-18), 64-bit
-(1 ligne)
+postgres=# select version();
+                                                  version                                                   
+------------------------------------------------------------------------------------------------------------
+ PostgreSQL 11beta2 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18), 64-bit
 ```
 
 On répète ensuite le processus d'installation de façon à installer PostgreSQL
-9.6 aux côtés de PostgreSQL 10.
+10 aux côtés de PostgreSQL 11.
 
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
 
 ```
-# export pgdg_yum=https://download.postgresql.org/pub/repos/yum/
-# wget $pgdg_yum/9.6/redhat/rhel-6-x86_64/pgdg-centos96-9.6-3.noarch.rpm
-# yum install -y pgdg-centos96-9.6-3.noarch.rpm
-Installing:
- pgdg-centos96                    noarch                    9.6-3
+# pgdg_yum=https://download.postgresql.org/pub/repos/yum/
+# pgdg_yum+=testing/10/redhat/rhel-6.9-x86_64/pgdg-centos10-10-2.noarch.rpm
+# yum install -y $pgdg_yum 
 
-# yum install -y postgresql96 postgresql96-server postgresql96-contrib
-Installing:
- postgresql96                      x86_64        9.6.5-1PGDG.rhel6
- postgresql96-contrib              x86_64        9.6.5-1PGDG.rhel6
- postgresql96-server               x86_64        9.6.5-1PGDG.rhel6
-Installing for dependencies:
- postgresql96-libs                 x86_64        9.6.5-1PGDG.rhel6
+Installed:
+  pgdg-centos10.noarch 0:10-2     
 
-# service postgresql-9.6 initdb
+
+yum install -y postgresql10 postgresql10-contrib postgresql10-server
+Installed:
+  postgresql10.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-contrib.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-server.x86_64 0:10.4-1PGDG.rhel6                       
+
+Dependency Installed:
+  postgresql10-libs.x86_64 0:10.4-1PGDG.rhel6
+
+# service postgresql-10 initdb
 Initializing database:                                     [  OK  ]
 
 # sed -i "s/#port = 5432/port = 5433/" \
-  /var/lib/pgsql/9.6/data/postgresql.conf
+  /var/lib/pgsql/10/data/postgresql.conf
 
-# service postgresql-9.6 start
-Starting postgresql-9.6 service:                           [  OK  ]
+# service postgresql-10 start
+Starting postgresql-10 service:                           [  OK  ]
 
-# sudo -iu postgres /usr/pgsql-9.6/bin/psql -p 5433
+# sudo -iu postgres /usr/pgsql-10/bin/psql -p 5433
 ```
 
 Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
