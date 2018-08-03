@@ -722,12 +722,12 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
 
-FIXME
+FIXME toujours en beta2 ?
 
 Le site postgresql.org propose son propre dépôt RPM, nous allons donc
 l'utiliser pour installer PostgreSQL 11.
 
-On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
+On commence par installer le RPM du dépôt `pgdg-centos11-11-2.noarch.rpm` :
 
 ```
 # pgdg_yum=https://download.postgresql.org/pub/repos/yum/
@@ -777,18 +777,18 @@ postgres=# select version();
 On répète ensuite le processus d'installation de façon à installer PostgreSQL
 10 aux côtés de PostgreSQL 11.
 
-Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
+Le RPM du dépôt est `pgdg-centos10-10-2.noarch.rpm` :
 
 ```
 # pgdg_yum=https://download.postgresql.org/pub/repos/yum/
-# pgdg_yum+=testing/10/redhat/rhel-6.9-x86_64/pgdg-centos10-10-2.noarch.rpm
+# pgdg_yum+=/10/redhat/rhel-6.9-x86_64/pgdg-centos10-10-2.noarch.rpm
 # yum install -y $pgdg_yum 
 
 Installed:
   pgdg-centos10.noarch 0:10-2     
 
 
-yum install -y postgresql10 postgresql10-contrib postgresql10-server
+# yum install -y postgresql10 postgresql10-contrib postgresql10-server
 Installed:
   postgresql10.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-contrib.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-server.x86_64 0:10.4-1PGDG.rhel6                       
 
