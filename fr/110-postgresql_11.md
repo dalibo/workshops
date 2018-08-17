@@ -564,7 +564,44 @@ commande `pg_verify_checksums` est à froid.
 <div class="notes">
 De nouvelles commandes psql ont été ajoutées dans PostgreSQL 11. 
 La commande `\sf` retourne la definition d'une fonction spécifié.
-La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute. Les commandes exit et quit ont été ajoutée pour quitter le terminal afin que cela soit plus intuitif pour les nouveaux utilisateurs.
+La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute.
+Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
+```
+workshop11=# \d t1
+                 Table "public.t1"
+ Column |  Type   | Collation | Nullable | Default 
+--------+---------+-----------+----------+---------
+ c1     | integer |           |          | 
+
+workshop11=# select c2 from t1;
+ERROR:  column "c2" does not exist
+
+```
+La variable ERROR renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur. 
+```
+workshop11=# \echo :ERROR
+true
+```
+La variable SQLSTATE retourne le code de l'erreur ou '00000' s'il n'y a pas d'erreur. 
+```
+workshop11=# \echo :SQLSTATE 
+42703
+```
+La variable ROW_COUNT renvoie le nombre de lignes retourné lors de l’exécution de la dernière requête. 
+```
+workshop11=# \echo :ROW_COUNT 
+0
+```
+Il existe aussi les variable LAST_ERROR_MESSAGE et LAST_ERROR_SQLSTATE qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur. 
+```
+workshop11=# \echo :LAST_ERROR_MESSAGE
+column "c2" does not exist
+
+workshop11=# \echo :LAST_ERROR_SQLSTATE 
+42703
+```
+
+Les commandes exit et quit ont été ajoutée pour quitter le terminal afin que cela soit plus intuitif pour les nouveaux utilisateurs.
 </div>
 -----
 
