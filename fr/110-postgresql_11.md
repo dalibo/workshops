@@ -565,6 +565,29 @@ commande `pg_verify_checksums` est à froid.
 PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 La commande `\sf` retourne la definition d'une fonction spécifié.
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute.
+```
+workshop11=# select * from t1;
+ c1 
+----
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+(10 rows)
+
+workshop11=# \gdesc
+ Column |  Type   
+--------+---------
+ c1     | integer
+(1 row)
+```
+
 Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
 ```
 workshop11=# \d t1
