@@ -924,7 +924,103 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 <div class="notes">
 Le test se déroulera à partir de deux instance :
-L'instance data est en écoute sur le port 5435
-L'instance data2 est en écoute sur le port 5436
+L'instance `data` est en écoute sur le port 5435.
+L'instance `data2` est en écoute sur le port 5436.
+
+
+Sur la première instance `data` dans la base `workshop11`.
+Création de la table t1 et insertion de quelques valeurs :
+
+```
+workshop11=# CREATE TABLE t1 (c1 int);
+CREATE TABLE
+workshop11=# INSERT INTO t1 SELECT generate_series(1,10);
+INSERT 0 10
+workshop11=# SELECT * FROM t1;
+ c1 
+----
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+(10 rows)
+```
+
+Création de la publication `p1` :
+
+```
+workshop11=# CREATE PUBLICATION p1 FOR TAABLE t1;
+CREATE PUBLICATION
+
+```
+
+Sur la deuxième instance data2 dans la base workshop11_2. 
+Création d'une table t1 sans aucune données. 
+
+```
+workshop11_2=# CREATE TABLE t1 (c1 int);
+CREATE TABLE
+
+```
+Création de la souscription `s1` : 
+```
+workshop11_2=# CREATE SUBSCRIPTION s1 CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
+NOTICE:  created replication slot "s1" on publisher
+CREATE SUBSCRIPTION
+
+```
+Vérification de la réplication des données :
+
+```
+workshop11_2=# SELECT * FROM t1;
+ c1 
+----
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+(10 rows)
+
+```
+Sur l'instance data nous vidons la table avec la commande TRUNCATE :
+
+```
+workshop11=# TRUNCATE t1;
+TRUNCATE TABLE 
+
+```
+
+La table t1 est vide :
+
+```
+workshop11=# select * from t1;
+ c1 
+----
+(0 rows)
+
+```
+
+Sur l'instance data2 nous vérifions que la réplication a été effectuée et que la table a bien été vidée : 
+
+```
+workshop11_2=# select * from t1;
+ c1 
+----
+(0 rows)
+
+```
+
 
 </div>
