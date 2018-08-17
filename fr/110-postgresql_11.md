@@ -553,7 +553,7 @@ commande `pg_verify_checksums` est à froid.
 ### psql
 <div class="slide-content">
   * `\sf`
-    * retourne la définition d'une fonction entrée en paramètre.
+    * retourne la définition d'une procédure entrée en paramètre.
   * `\gdesc`
     * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
   * Variables de suivi des erreurs de requêtes
@@ -562,7 +562,7 @@ commande `pg_verify_checksums` est à froid.
 
 </div>
 <div class="notes">
-De nouvelles commandes psql ont été ajoutées dans PostgreSQL 11. 
+PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 La commande `\sf` retourne la definition d'une fonction spécifié.
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute.
 Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
