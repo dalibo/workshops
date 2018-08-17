@@ -556,6 +556,8 @@ commande `pg_verify_checksums` est à froid.
     * retourne la définition d'une fonction entrée en paramètre.
   * `\gdesc`
     * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
+  * Variables de suivi des erreurs de requêtes
+    * ERROR SQLSTATE et ROW_COUNT
   * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
 
 </div>
