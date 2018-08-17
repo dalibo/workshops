@@ -917,3 +917,14 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 \pset format wrapped
 ```
 </div>
+
+-----
+
+## Tester le support de TRUNCATE avec la réplication logique
+
+<div class="notes">
+Le test se déroulera à partir de deux instance :
+L'instance data est en écoute sur le port 5435
+L'instance data2 est en écoute sur le port 5436
+
+</div>
