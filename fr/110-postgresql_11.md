@@ -917,4 +917,3 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 \pset format wrapped
 ```
 </div>
-
