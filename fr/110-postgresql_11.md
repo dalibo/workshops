@@ -564,6 +564,15 @@ commande `pg_verify_checksums` est à froid.
 <div class="notes">
 PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 La commande `\sf` retourne la definition d'une fonction spécifié.
+```
+workshop11=# \sf remove_data 
+CREATE OR REPLACE PROCEDURE public.remove_data(a integer)
+ LANGUAGE sql
+AS $procedure$
+DELETE FROM t1 WHERE c1=a;
+$procedure$
+```
+
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute.
 ```
 workshop11=# select * from t1;
