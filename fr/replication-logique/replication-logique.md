@@ -96,7 +96,7 @@ hide_author_in_slide: true
 
 # Réplication Logique : présentation et exercice pratique
 
-![PostgreSQL](../medias/art-rock-carving-elephant-sculpture.jpg)
+![PostgreSQL](medias/art-rock-carving-elephant-sculpture.jpg)
 
 <div class="notes">
 Photographie obtenue sur [urltarget.com](http://www.urltarget.com/art-rock-carving-elephant-sculpture-cyril.html).
@@ -726,6 +726,7 @@ b1=# SELECT * FROM t1 WHERE id_t1 IN (101, 10, 11);
     10 | T1, LIGNE 10
 (2 rows)
 ```
+</div>
 
 -----
 
@@ -1092,10 +1093,12 @@ Le processus de réplication logique n'arrive plus à appliquer les données sur
 s2, d'où les messages suivants dans les traces :
 
 ```
-LOG:  logical replication apply worker for subscription "subscr_complete" has started
+LOG:  logical replication apply worker for subscription "subscr_complete" 
+has started
 ERROR:  duplicate key value violates unique constraint "t1_pkey"
 DETAIL:  Key (id_t1)=(103) already exists.
-LOG:  background worker "logical replication worker" (PID 19923) exited with exit code 1
+LOG:  background worker "logical replication worker" (PID 19923) exited 
+with exit code 1
 ```
 
 Il faut corriger manuellement la situation, par exemple en supprimant la ligne
