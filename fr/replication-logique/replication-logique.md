@@ -613,7 +613,7 @@ CREATE SUBSCRIPTION nom
 
 <div class="notes">
 Une fois la publication créée, le serveur destination doit s'y abonner. Il
-doit pour cela indiquer sur quel serveur se connecter et à quel publication
+doit pour cela indiquer sur quel serveur se connecter et à quelle publication
 souscrire.
 
 Le serveur s'indique avec la chaîne `infos_connexion`, dont la syntaxe est la
