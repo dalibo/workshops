@@ -552,29 +552,117 @@ commande `pg_verify_checksums` est à froid.
 
 ### psql
 <div class="slide-content">
-  * `\sf`
-    * retourne la définition d'une fonction entrée en paramètre.
-  * `\gdesc`
-    * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
-  * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
+ 
+  * `SELECT ... FROM ... \gdesc`
+    * types des colonnes
+    * ou `\gdesc` seul après exécution
+  * Variables de suivi des erreurs de requêtes
+    * `ERROR`, `SQLSTATE` et `ROW_COUNT`
+  * `exit` et `quit` à la place de `\q` pour quitter psql
+  * fonctionnalités psql, donc utilisable sur des bases < 11
 
 </div>
+<div class="notes">
+PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 
+La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
+```sql
+workshop11=# select * from t1;
+ c1 
+----
+  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+(10 rows)
+
+workshop11=# \gdesc
+ Column |  Type   
+--------+---------
+ c1     | integer
+(1 row)
+```
+
+On peut aussi tester les types retournés par une requête sans l'exécuter :
+```sql
+workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
+   Column   |           Type           
+------------+--------------------------
+ ratio      | numeric
+ maintenant | timestamp with time zone
+```
+
+Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
+```sql
+workshop11=# \d t1
+                 Table "public.t1"
+ Column |  Type   | Collation | Nullable | Default 
+--------+---------+-----------+----------+---------
+ c1     | integer |           |          | 
+
+workshop11=# select c2 from t1;
+ERROR:  column "c2" does not exist
+```
+
+La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur. 
+```sql
+workshop11=# \echo :ERROR
+true
+```
+
+La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur. 
+```sql
+workshop11=# \echo :SQLSTATE 
+42703
+```
+
+La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête. 
+```sql
+workshop11=# \echo :ROW_COUNT 
+0
+```
+
+Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur. 
+```sql
+workshop11=# \echo :LAST_ERROR_MESSAGE
+column "c2" does not exist
+
+workshop11=# \echo :LAST_ERROR_SQLSTATE 
+42703
+```
+
+Les commandes `exit` et `quit` ont été ajoutées pour quitter psql afin que cela soit plus intuitif pour les nouveaux utilisateurs.
+
+Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent être utilisées même si le serveur reste dans une version antérieure.
+
+</div>
 -----
 
 ### initdb
 <div class="slide-content">
-  * option `--wal-segsize` : spécifie la taille des fichier WAL à l'initialisation
+  * option `--wal-segsize` : 
+    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
-    * droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
+    * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
 </div>
 
 
 <div class="notes">
-L'option `--wal-segsize` permet de spécifier la taille des fichier WAL lors de l'initialisation de l'instance (Par défaut a 16MB).
+L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
-L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`.
+Exemple pour des WAL de 1 Go  :
+```bash
+initdb -D /var/lib/postgresql/11/workshop --wal-segsize=1024
+```
+
+L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de lecture à un outil de sauvegarde.
 
 </div>
 
@@ -583,25 +671,29 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 ### Sauvegardes et restauration
 <div class="slide-content">
   * `pg_dumpall`
-    * option `--encoding` pour spécifier l'encodage de sortie.
+    * option `--encoding` pour spécifier l'encodage de sortie
     * l'option `-g` ne charge plus les permissions et les configurations de variables
   * `pg_dump` et `pg_restore` gèrent maintenant les permissions et les configurations de variables
   * `pg_basebackup`
-        * option `--create-slot` pour créer un slot de réplication.
+    * option `--create-slot` pour créer un slot de réplication.
 
 </div>
 
 <div class="notes">
-les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+
+`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
+
+Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permettant de créer directement un slot de réplication. Elle doit donc être utilisée en complément de l'option `--slot`. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.  
 </div>
 
 -----
 
 ### pg_rewind
 <div class="slide-content">
-  * pg_rewind peut-être utilisé par un utilisateur classique.
+  * `pg_rewind` : optimisations de fichiers inutiles
+  * interdit en tant que root
 
-FIXME slide un peu vide. Est-ce qu'on peut la mettre avec une autre ?
 </div>
 
 -----
@@ -710,7 +802,7 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
   * Parallélisation
   * Index couvrant
   * Élagage de partition
-  * pg_rewind sans super-utilisateur
+  * `pg_rewind` sans super-utilisateur
 
 </div>
 
