@@ -693,7 +693,19 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 <div class="slide-content">
   * `pg_rewind` : optimisations de fichiers inutiles
   * interdit en tant que root
+  * possible avec un accès non-superuser sur le maître
 
+</div>
+
+<div class="notes">
+`pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
+« décroché » sans la reconstruire complètement, à partir d'un primaire.
+
+Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certains
+environnements a été améliorée en interdisant le fonctionnement du binaire sous
+root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
+sur le serveur primaire
+(voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/).
 </div>
 
 -----
@@ -802,7 +814,6 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
   * Parallélisation
   * Index couvrant
   * Élagage de partition
-  * `pg_rewind` sans super-utilisateur
 
 </div>
 
@@ -905,25 +916,5 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 \pset columns 80
 \pset format wrapped
 ```
-</div>
-
------
-
-## pg_rewind sans super-utilisateur
-
-<div class="notes">
-
-
-  * `pg_rewind` peut être utiliser par un utilisateur classique.
-
-```sql
-CREATE USER rewind_user LOGIN;
-GRANT EXECUTE ON function pg_catalog.pg_ls_dir(text, boolean, boolean) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_stat_file(text, boolean) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean) TO rewind_user;
-```
-
-
 </div>
 
