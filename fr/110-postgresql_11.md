@@ -552,29 +552,21 @@ commande `pg_verify_checksums` est à froid.
 
 ### psql
 <div class="slide-content">
-  * `\sf`
-    * retourne la définition d'une procédure entrée en paramètre.
-  * `\gdesc`
-    * retourne le type de donnée de la ou les colonne(s) sélectionné dans la dernière requête exécuté.
+ 
+  * `SELECT ... FROM ... \gdesc`
+    * types des colonnes
+    * ou `\gdesc` seul après exécution
   * Variables de suivi des erreurs de requêtes
-    * ERROR SQLSTATE et ROW_COUNT
-  * `exit` et `quit` peuvent être utiliser a la place de `\q` pour quitter le terminal psql
+    * `ERROR`, `SQLSTATE` et `ROW_COUNT`
+  * `exit` et `quit` à la place de `\q` pour quitter psql
+  * fonctionnalités psql, donc utilisable sur des bases < 11
 
 </div>
 <div class="notes">
 PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
-La commande `\sf` retourne la definition d'une fonction spécifié.
-```
-workshop11=# \sf remove_data 
-CREATE OR REPLACE PROCEDURE public.remove_data(a integer)
- LANGUAGE sql
-AS $procedure$
-DELETE FROM t1 WHERE c1=a;
-$procedure$
-```
 
-La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécute.
-```
+La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
+```sql
 workshop11=# select * from t1;
  c1 
 ----
@@ -597,8 +589,17 @@ workshop11=# \gdesc
 (1 row)
 ```
 
-Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
+On peut aussi tester les types retournés par une requête sans l'exécuter :
+```sql
+workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
+   Column   |           Type           
+------------+--------------------------
+ ratio      | numeric
+ maintenant | timestamp with time zone
 ```
+
+Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
+```sql
 workshop11=# \d t1
                  Table "public.t1"
  Column |  Type   | Collation | Nullable | Default 
@@ -607,25 +608,28 @@ workshop11=# \d t1
 
 workshop11=# select c2 from t1;
 ERROR:  column "c2" does not exist
+```
 
-```
-La variable ERROR renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur. 
-```
+La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur. 
+```sql
 workshop11=# \echo :ERROR
 true
 ```
-La variable SQLSTATE retourne le code de l'erreur ou '00000' s'il n'y a pas d'erreur. 
-```
+
+La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur. 
+```sql
 workshop11=# \echo :SQLSTATE 
 42703
 ```
-La variable ROW_COUNT renvoie le nombre de lignes retourné lors de l’exécution de la dernière requête. 
-```
+
+La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête. 
+```sql
 workshop11=# \echo :ROW_COUNT 
 0
 ```
-Il existe aussi les variable LAST_ERROR_MESSAGE et LAST_ERROR_SQLSTATE qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur. 
-```
+
+Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur. 
+```sql
 workshop11=# \echo :LAST_ERROR_MESSAGE
 column "c2" does not exist
 
@@ -633,7 +637,10 @@ workshop11=# \echo :LAST_ERROR_SQLSTATE
 42703
 ```
 
-Les commandes exit et quit ont été ajoutée pour quitter le terminal afin que cela soit plus intuitif pour les nouveaux utilisateurs.
+Les commandes `exit` et `quit` ont été ajoutées pour quitter psql afin que cela soit plus intuitif pour les nouveaux utilisateurs.
+
+Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent être utilisées même si le serveur reste dans une version antérieure.
+
 </div>
 -----
 
