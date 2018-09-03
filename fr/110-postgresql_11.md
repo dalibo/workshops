@@ -113,22 +113,22 @@ Public Domain CC0.
 ## Introduction
 
 <div class="slide-content">
-  * Développement depuis...
-  * Version beta 1 sortie 24 Mai 2018
-  * 2e bêta sortie le 28 Juin 2018
-  * Sortie de la version final : Fin 2018
-  * Est composé de plus de 1,5 millions de lige de code
+  * Développement depuis l'été 2017
+  * Version bêta 1 sortie 24 mai 2018
+  * bêta 2 sortie le 28 juin
+  * bêta 3 sortie le 9 août
+  * Sortie de la version finale attendue fin septembre 2018
+  * Plus de 1,5 millions de lignes de code
   * Des centaines de contributeurs
 </div>
 
 <div class="notes">
 
-FIXME avec version en date
 Le développement de la version 11 a suivi l'organisation habituelle : un
-démarrage mi 2017, des Commit Fests tous les deux mois, un Feature Freeze en
-mars, une première version beta fin mai.
+démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un 
+_feature freeze_ le 7 avril, une première version bêta fin mai.
 
-La version finale est sortie le XX octobre 2018.
+La version finale est sortie fin septembre ou début octobre 2018.
 
 La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
 1 509 660 lignes pour être précis. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
@@ -150,7 +150,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
   * SQL
   * Outils
   * Réplication
-  * Compatibilité FIXME à garder ???
+  * Compatibilité
   * Futur
 </div>
 
@@ -1557,11 +1557,11 @@ nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et réplication logique. FIXME ?
 
 Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
- FIXME
-  * septembre 2018 : <https://commitfest.postgresql.org/14/?status=4>
-  * novembre : <https://commitfest.postgresql.org/15/?status=4>
-  * janvier 2019 : <https://commitfest.postgresql.org/16/?status=4>
-  * mars : <https://commitfest.postgresql.org/17/?status=4>
+  * juillet 2018 : <https://commitfest.postgresql.org/18/?status=4>
+  * septembre : <https://commitfest.postgresql.org/19/?status=4>
+  * novembre : <https://commitfest.postgresql.org/20/?status=4>
+  * janvier 2019 : <https://commitfest.postgresql.org/21/?status=4>
+  * mars : <https://commitfest.postgresql.org/22/?status=4>
 
 </div>
 
