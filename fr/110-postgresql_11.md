@@ -693,7 +693,19 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 <div class="slide-content">
   * `pg_rewind` : optimisations de fichiers inutiles
   * interdit en tant que root
+  * possible avec un accès non-superuser sur le maître
 
+</div>
+
+<div class="notes">
+`pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
+« décroché » sans la reconstruire complètement, à partir d'un primaire.
+
+Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certains
+environnements a été améliorée en interdisant le fonctionnement du binaire sous
+root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
+sur le serveur primaire
+(voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/).
 </div>
 
 -----
