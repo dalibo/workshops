@@ -923,15 +923,15 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 ## Tester le support de TRUNCATE avec la réplication logique
 
 <div class="notes">
-Le test se déroulera à partir de deux instance :
+Le test se déroulera à partir de deux instances :
 L'instance `data` est en écoute sur le port 5435.
 L'instance `data2` est en écoute sur le port 5436.
 
 
-Sur la première instance `data` dans la base `workshop11`.
-Création de la table t1 et insertion de quelques valeurs :
+Sur la première instance `data` dans la base `workshop11`,
+création de la table `t1` et insertion de quelques valeurs :
 
-```
+```sql
 workshop11=# CREATE TABLE t1 (c1 int);
 CREATE TABLE
 workshop11=# INSERT INTO t1 SELECT generate_series(1,10);
@@ -954,30 +954,29 @@ workshop11=# SELECT * FROM t1;
 
 Création de la publication `p1` :
 
-```
+```sql
 workshop11=# CREATE PUBLICATION p1 FOR TAABLE t1;
 CREATE PUBLICATION
-
 ```
 
-Sur la deuxième instance data2 dans la base workshop11_2. 
-Création d'une table t1 sans aucune données. 
+Sur la deuxième instance `data2` dans la base `workshop11_2`,
+création d'une table `t1` sans aucune donnée. 
 
-```
+```sql
 workshop11_2=# CREATE TABLE t1 (c1 int);
 CREATE TABLE
-
 ```
 Création de la souscription `s1` : 
-```
-workshop11_2=# CREATE SUBSCRIPTION s1 CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
+```sql
+workshop11_2=# CREATE SUBSCRIPTION s1
+               CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
 NOTICE:  created replication slot "s1" on publisher
 CREATE SUBSCRIPTION
 
 ```
 Vérification de la réplication des données :
 
-```
+```sql
 workshop11_2=# SELECT * FROM t1;
  c1 
 ----
@@ -992,35 +991,30 @@ workshop11_2=# SELECT * FROM t1;
   9
  10
 (10 rows)
-
 ```
-Sur l'instance data nous vidons la table avec la commande TRUNCATE :
+Sur l'instance `data` nous vidons la table avec la commande `TRUNCATE` :
 
-```
+```sql
 workshop11=# TRUNCATE t1;
 TRUNCATE TABLE 
-
 ```
 
-La table t1 est vide :
+La table `t1` est vide :
 
-```
+```sql
 workshop11=# select * from t1;
  c1 
 ----
 (0 rows)
-
 ```
 
-Sur l'instance data2 nous vérifions que la réplication a été effectuée et que la table a bien été vidée : 
+Sur l'instance `data2` nous vérifions que la réplication a été effectuée et que la table a bien été vidée : 
 
 ```
 workshop11_2=# select * from t1;
  c1 
 ----
 (0 rows)
-
 ```
-
 
 </div>
