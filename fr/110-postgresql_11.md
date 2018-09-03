@@ -647,7 +647,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 ### initdb
 <div class="slide-content">
   * option `--wal-segsize` : 
-    * spécifie la taille des fichier WAL à l'initialisation
+    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
@@ -655,9 +655,14 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 
 <div class="notes">
-L'option `--wal-segsize` permet de spécifier la taille des fichier WAL lors de l'initialisation de l'instance (Par défaut a 16MB).
+L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
-L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`.
+Exemple pour des WAL de 1 Go  :
+```bash
+initdb -D /var/lib/postgresql/11/workshop --wal-segsize=1024
+```
+
+L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de lecture à un outil de sauvegarde.
 
 </div>
 
@@ -666,7 +671,7 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 ### Sauvegardes et restauration
 <div class="slide-content">
   * `pg_dumpall`
-    * option `--encoding` pour spécifier l'encodage de sortie.
+    * option `--encoding` pour spécifier l'encodage de sortie
     * l'option `-g` ne charge plus les permissions et les configurations de variables
   * `pg_dump` et `pg_restore` gèrent maintenant les permissions et les configurations de variables
   * `pg_basebackup`
@@ -675,20 +680,20 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 </div>
 
 <div class="notes">
-les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
 
-pg_dumpall bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
+`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
 
-Une nouvelle option --create-slot est disponible dans pg_basebackup permettant de créer directement un slot de réplication lors de. Elle doit donc être utiliser en complément de l'option --slot. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande pg_basebackup s’interrompt et affiche un message d'erreur.  
+Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permettant de créer directement un slot de réplication. Elle doit donc être utilisée en complément de l'option `--slot`. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.  
 </div>
 
 -----
 
 ### pg_rewind
 <div class="slide-content">
-  * pg_rewind peut-être utilisé par un utilisateur classique.
+  * `pg_rewind` : optimisations de fichiers inutiles
+  * interdit en tant que root
 
-FIXME slide un peu vide. Est-ce qu'on peut la mettre avec une autre ?
 </div>
 
 -----
@@ -797,7 +802,7 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
   * Parallélisation
   * Index couvrant
   * Élagage de partition
-  * pg_rewind sans super-utilisateur
+  * `pg_rewind` sans super-utilisateur
 
 </div>
 
