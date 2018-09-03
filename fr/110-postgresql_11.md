@@ -802,7 +802,6 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
   * Parallélisation
   * Index couvrant
   * Élagage de partition
-  * `pg_rewind` sans super-utilisateur
 
 </div>
 
@@ -905,25 +904,5 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 \pset columns 80
 \pset format wrapped
 ```
-</div>
-
------
-
-## pg_rewind sans super-utilisateur
-
-<div class="notes">
-
-
-  * `pg_rewind` peut être utiliser par un utilisateur classique.
-
-```sql
-CREATE USER rewind_user LOGIN;
-GRANT EXECUTE ON function pg_catalog.pg_ls_dir(text, boolean, boolean) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_stat_file(text, boolean) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text) TO rewind_user;
-GRANT EXECUTE ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean) TO rewind_user;
-```
-
-
 </div>
 
