@@ -22,7 +22,7 @@ url : https://dalibo.com/formations
 
 #toc: true
 
-## Limiter la profondeur de la table des matiÃ¨res
+## Limiter la profondeur de la table des matières
 toc-depth: 2
 
 ## Mettre les lien http en pieds de page
@@ -491,8 +491,8 @@ commande `pg_verify_checksums` est à froid.
 ## Instructions SQL
 <div class="slide-content">
 
-  * Index couvrant
-    * CREATE INDEX...INCLUDE
+  * Index couvrants
+    * `CREATE INDEX ... INCLUDE`
   * VACUUM tables multiples
     * VACUUM t1, t2;
   * support fonction fenêtrage SQL:2011
@@ -812,7 +812,7 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
   * Tester les nouveaux rôles
   * Création de slot avec pg_basebackup
   * Parallélisation
-  * Index couvrant
+  * Index couvrants
   * Élagage de partition
 
 </div>
@@ -1018,3 +1018,185 @@ workshop11_2=# select * from t1;
 ```
 
 </div>
+
+-----
+
+## Index couvrants
+
+<div class="notes">
+
+
+Soit une table avec des données et une contrainte d'unicité sur 2 colonnes :
+```sql
+v11=# CREATE TABLE t2 (a int, b int, c varchar(10));
+CREATE TABLE
+v11=# INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(1,10000000) AS i);
+INSERT 0 10000000
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
+CREATE INDEX
+```
+
+Pour simplifier les plans, on désactive le parallélisme :
+```sql
+SET max_parallel_workers_per_gather TO 0 ;
+```
+
+En cas de recherche sur la colonne _a_, on va pouvoir récupérer les colonnes
+_a_ et _b_ grâce à un _Index Only Scan_ :
+```sql
+v11=# EXPLAIN ANALYSE SELECT a,b FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Only Scan using t2_a_b_unique_idx on t2
+     (cost=0.43..1953.87 rows=1100 width=8)
+     (actual time=0.078..28.066 rows=47999 loops=1)
+   Index Cond: ((a > 1000) AND (a < 2000))
+   Heap Fetches: 0
+ Planning Time: 0.225 ms
+ Execution Time: 12.628 ms
+(5 lignes)
+```
+
+Cependant, si on veut récupérer également la colonne _c_, on passera par un
+_Index Scan_ et un accès à la table :
+```sql
+v11=# EXPLAIN ANALYSE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Scan using t2_a_b_unique_idx on t2
+     (cost=0.43..61372.04 rows=46652 width=19)
+     (actual time=0.063..13.073 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+ Planning Time: 0.223 ms
+ Execution Time: 16.034 ms
+(4 lignes)
+```
+
+Dans notre exemple, le temps réel n'est pas vraiment différent entre les 2
+requêtes. Si l'optimisation de cette requête est cependant cruciale, nous
+pouvons créer un index spécifique incluant la colonne _c_ et permettre
+l'utilisation d'un _Index Only Scan_ :
+```sql
+v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
+CREATE INDEX
+v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Only Scan using t2_a_b_c_idx on t2
+     (cost=0.56..1861.60 rows=46652 width=19)
+     (actual time=0.048..11.241 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+   Heap Fetches: 0
+ Planning Time: 0.265 ms
+ Execution Time: 14.329 ms
+(5 lignes)
+```
+
+La taille cumulée de nos index est de 602 Mo :
+```sql
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_idx'));
+ pg_size_pretty 
+----------------
+ 214 MB
+(1 ligne)
+
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_c_idx'));
+ pg_size_pretty 
+----------------
+ 387 MB
+(1 ligne)
+```
+
+En v11 nous pouvons utiliser à la place un seul index appliquant toujours la
+contrainte d'unicité sur les colonnes _a_ et _b_ **et** couvrant la colonne
+_c_ :
+```sql
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_covering_c_idx ON t2 (a,b) INCLUDE (c);
+CREATE INDEX
+v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+----------------------------------------------------------
+ Index Only Scan using t2_a_b_unique_covering_c_idx on t2
+     (cost=0.43..1857.47 rows=46652 width=19)
+     (actual time=0.045..11.945 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+   Heap Fetches: 0
+ Planning Time: 0.228 ms
+ Execution Time: 14.263 ms
+(5 lignes)
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_covering_c_idx'));
+ pg_size_pretty 
+----------------
+ 386 MB
+(1 ligne)
+```
+
+La nouvelle fonctionnalité sur les index couvrants nous a permit d'éviter la
+création de 2 index pour un gain de 35% d'espace disque !
+
+Noter que la colonne `c` est renseignée depuis l'index, mais elle n'est pas
+triée (comme dans un index normal), et donc un `ORDER BY` n'en profite pas
+(étape _Sort_ nécessaire) :
+```sql
+v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b ;
+                   QUERY PLAN
+----------------------------------------------------------
+ Index Only Scan using t2_a_b_unique_covering_c_idx on t2 
+             (cost=0.43..347752.43 rows=10000000 width=19)
+```
+
+```sql
+v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b,c ;
+                   QUERY PLAN
+----------------------------------------------------------
+ Sort  (cost=1736527.83..1761527.83 rows=10000000 width=19)
+   Sort Key: a, b, c
+   ->  Seq Scan on t2  (cost=0.00..163695.00 rows=10000000 width=19)
+```
+
+
+Les performances en insertion vont également être meilleures car un seul index
+doit être maintenu :
+```sql
+v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(10000001,10100000) AS i);
+                   QUERY PLAN
+-------------------------------------------------------------
+ Insert on t2
+     (cost=0.00..25.00 rows=1000 width=46)
+     (actual time=502.111..502.111 rows=0 loops=1)
+   ->  Function Scan on generate_series i
+           (cost=0.00..25.00 rows=1000 width=46)
+	   (actual time=14.356..107.205 rows=100000 loops=1)
+ Planning Time: 0.132 ms
+ Execution Time: 502.594 ms
+(4 lignes)
+```
+
+Si on supprime l'index couvrant et que l'on recrée les 2 index :
+```sql
+v11=# DROP INDEX t2_a_b_unique_covering_c_idx ;
+DROP INDEX
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
+CREATE INDEX
+v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
+CREATE INDEX
+v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(10100001,10200000) AS i);
+                   QUERY PLAN
+-------------------------------------------------------------
+ Insert on t2
+     (cost=0.00..25.00 rows=1000 width=46)
+     (actual time=842.455..842.455 rows=0 loops=1)
+   ->  Function Scan on generate_series i
+           (cost=0.00..25.00 rows=1000 width=46)
+	   (actual time=14.708..127.441 rows=100000 loops=1)
+ Planning Time: 0.155 ms
+ Execution Time: 843.147 ms
+(4 lignes)
+```
+
+On a un gain de performance à l'insertion de 40%.
+
+</notes>
