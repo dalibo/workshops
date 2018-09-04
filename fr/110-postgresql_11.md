@@ -792,6 +792,7 @@ FIXME : TODO
 -----
 
 ### Parallélisme
+
 <div class="slide-content">
 
 **Améliorations du parallélisme**
@@ -801,7 +802,7 @@ FIXME : TODO
   * `CREATE TABLE AS SELECT...`
   * `CREATE MATERIALIZED VIEW`
   * `SELECT INTO`
-  * `CREATE INDEX`
+  * `CREATE INDEX` (`max_parallel_maintenance_workers`)
 </div>
 
 <div class="notes">
@@ -818,17 +819,17 @@ Un nœud déjà parallélisé a été amélioré, le _Hash join_  (jointure par 
 
 
 ```sql
-create table a as select i from generate_series(1,10000000) i ;
-create table b as select i from generate_series(1,10000000) i ; 
+CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
+CREATE TABLE b as select i FROM generate_series(1,10000000) i ; 
 CREATE INDEX ON a(i) ;
 
 SET work_mem TO '1GB' ;
 SET max_parallel_workers_per_gather TO 2;
 
 
-explain select * from a inner join b on (a.i=b.i) where a.i between 500000 and 900000;
+EXPLAIN SELECT * FROM a INNER JOIN b on (a.i=b.i) WHERE a.i BETWEEN 500000 AND 900000;
 
-                                                QUERY PLAN                                                 
+                                 QUERY PLAN                                                 
 -------------------------------------------------------------------------------
  Gather  (cost=2661.43..69586.10 rows=50000 width=8)
    Workers Planned: 2
@@ -846,6 +847,8 @@ explain select * from a inner join b on (a.i=b.i) where a.i between 500000 and 9
 Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11, ils partagent la même table de travail et peuvent donc paralléliser sa construction (ici en parallélisant l'_Index Scan_) :
 
 ```sql
+                                 QUERY PLAN                                                 
+-------------------------------------------------------------------------------
  Gather  (cost=14273.37..154632.46 rows=381571 width=8)
    Workers Planned: 2
    ->  Parallel Hash Join  (cost=13273.37..115475.36 rows=158988 width=8)
@@ -859,9 +862,43 @@ Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11, 
 
 
 ```
+L'auteur de cette optmisation a écrit un article assez complet sur le sujet :
+<https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
 
 
+FIXME :  exemple d'Append avec UNION ALL
 
+FIXME : exemple SELECT INTO
+
+La création d'index peut à présent être parallélisée, ce qui va permettre de gros gains de temps dans certains cas. La parallélisation est activée par défaut et est contrôlée par un nouveau paramètre,
+`max_parallel_maintenance_workers` (défaut : 2) et non l'habituel
+`max_parallel_workers_per_gather`.
+
+```sql
+\timing on
+SET maintenance_work_mem TO '2GB';
+CREATE TABLE t9 AS SELECT random() FROM  generate_series(1,50000000) ;
+
+SET max_parallel_maintenance_workers TO  0 ;
+
+CREATE index ix_t9 ON t9 (random) ;
+CREATE INDEX
+Durée : 65404,092 ms (01:05,404)
+
+DROP INDEX ix_t9 ;
+
+CREATE index ix_t9 ON t9 (random) ;
+CREATE INDEX
+Durée : 51177,289 ms (00:51,177)
+```
+
+La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
+nombre de workers au niveau de la définition de la table, mais attention cela
+va aussi impacter vos requêtes !
+
+Pour de plus amples détails, les Allemands de Cybertec ont mis cet article en
+ligne :
+<https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/>
 
 </div>
 
