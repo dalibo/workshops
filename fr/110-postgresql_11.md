@@ -1463,7 +1463,7 @@ workshop11=# \gdesc
 (1 row)
 ```
 
-On peut aussi tester les types retournés par une requête sans l'exécuter :
+On peut aussi tester les types retournés par une requête sans l'exécuter :
 ```sql
 workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
    Column   |           Type           
@@ -1521,7 +1521,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 ### initdb
 <div class="slide-content">
   * option `--wal-segsize` : 
-    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
+    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
@@ -1529,7 +1529,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 
 <div class="notes">
-L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
+L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
 Exemple pour des WAL de 1 Go  :
 ```bash
@@ -1573,11 +1573,11 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 
 <div class="notes">
 `pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
-« décroché » sans la reconstruire complètement, à partir d'un primaire.
+« décroché » sans la reconstruire complètement, à partir d'un primaire.
 
 Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certains
 environnements a été améliorée en interdisant le fonctionnement du binaire sous
-root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
+root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
 sur le serveur primaire
 (voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/).
 </div>
