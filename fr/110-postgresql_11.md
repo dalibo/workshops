@@ -763,8 +763,9 @@ FIXME `FOR EACH ROW trigger`
 ## Performances
 
 <div class="slide-content">
-  * compilation Just In Time (JIT)
-  * parallélisme
+  * Compilation Just In Time (JIT)
+  * Parallélisme étendu à plusieurs commandes
+  * Ajout de colonne avec `DEFAULT` sans réécriture de la table
 
 </div>
 
@@ -783,24 +784,85 @@ FIXME `FOR EACH ROW trigger`
 </div>
 
 <div class="notes">
+
+FIXME : TODO
+
 </div>
 
 -----
 
-### Parallélisation
+### Parallélisme
 <div class="slide-content">
 
 **Améliorations du parallélisme**
 
-  * Parallélisation sur les types de jointures Hash
-  * Parallélisation des types de noeud Append
-  * CREATE TABLE AS SELECT statement
-  * CREATE MATERIALIZED VIEW
-  * SELECT INTO statement
-  * CREATE INDEX statement
+  * Nœuds Append (`UNION ALL`)
+  * Jointures type Hash
+  * `CREATE TABLE AS SELECT...`
+  * `CREATE MATERIALIZED VIEW`
+  * `SELECT INTO`
+  * `CREATE INDEX`
 </div>
 
 <div class="notes">
+
+La parallélisation des requêtes avait été introduite en version 9.6, sur certains nœuds d'exécution seulement, et pour les requêtes en lecture seules uniquement. La version 10 avait étendu à d'autres nœuds.
+
+Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux de type _Append_, qui servent aux `UNION ALL` notamment :
+
+**FIXME** - exemple
+
+
+Un nœud déjà parallélisé a été amélioré, le _Hash join_  (jointure par hachage). Dans l'exemple suivant tiré de la version 10, le _hash join_ est déjà parallélisé :
+
+
+
+```sql
+create table a as select i from generate_series(1,10000000) i ;
+create table b as select i from generate_series(1,10000000) i ; 
+CREATE INDEX ON a(i) ;
+
+SET work_mem TO '1GB' ;
+SET max_parallel_workers_per_gather TO 2;
+
+
+explain select * from a inner join b on (a.i=b.i) where a.i between 500000 and 900000;
+
+                                                QUERY PLAN                                                 
+-------------------------------------------------------------------------------
+ Gather  (cost=2661.43..69586.10 rows=50000 width=8)
+   Workers Planned: 2
+   ->  Hash Join  (cost=1661.43..63586.10 rows=20833 width=8)
+         Hash Cond: (b.i = a.i)
+         ->  Parallel Seq Scan on b  (cost=0.00..46091.37 rows=4166657 width=4)
+         ->  Hash  (cost=1036.43..1036.43 rows=50000 width=4)
+               ->  Index Only Scan using a_i_idx on a  
+                                  (cost=0.43..1036.43 rows=50000 width=4)
+                     Index Cond: ((i >= 500000) AND (i <= 90000))
+
+```
+
+
+Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11, ils partagent la même table de travail et peuvent donc paralléliser sa construction (ici en parallélisant l'_Index Scan_) :
+
+```sql
+ Gather  (cost=14273.37..154632.46 rows=381571 width=8)
+   Workers Planned: 2
+   ->  Parallel Hash Join  (cost=13273.37..115475.36 rows=158988 width=8)
+         Hash Cond: (b.i = a.i)
+         ->  Parallel Seq Scan on b  (cost=0.00..85914.57 rows=4166657 width=4)
+         ->  Parallel Hash  (cost=11286.02..11286.02 rows=158988 width=4)
+               ->  Parallel Index Only Scan using a_i_idx on a  
+                                  (cost=0.43..11286.02 rows=158988 width=4)
+                     Index Cond: ((i >= 500000) AND (i <= 900000))
+
+
+
+```
+
+
+
+
 </div>
 
 -----
@@ -1364,7 +1426,7 @@ workshop11=# \gdesc
 (1 row)
 ```
 
-On peut aussi tester les types retournés par une requête sans l'exécuter :
+On peut aussi tester les types retournés par une requête sans l'exécuter :
 ```sql
 workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
    Column   |           Type           
@@ -1422,7 +1484,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 ### initdb
 <div class="slide-content">
   * option `--wal-segsize` : 
-    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
+    * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
@@ -1430,7 +1492,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 
 <div class="notes">
-L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
+L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
 Exemple pour des WAL de 1 Go  :
 ```bash
@@ -1474,11 +1536,11 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 
 <div class="notes">
 `pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
-« décroché » sans la reconstruire complètement, à partir d'un primaire.
+« décroché » sans la reconstruire complètement, à partir d'un primaire.
 
 Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certains
 environnements a été améliorée en interdisant le fonctionnement du binaire sous
-root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
+root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
 sur le serveur primaire
 (voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/).
 </div>
@@ -1556,7 +1618,8 @@ Les développements de la version 12 ont commencé. Les premiers commit fests
 nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et réplication logique. FIXME ?
 
-Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des modifications validées pour chaque commit fest :
+Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
+modifications validées pour chaque commit fest :
 
   * [juillet 2018](https://commitfest.postgresql.org/18/?status=4)
   * [septembre 2018](https://commitfest.postgresql.org/19/?status=4)
