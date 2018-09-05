@@ -1217,23 +1217,9 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
 <div class="slide-content">
 
-  * SCRAM
   * Nouveaux rôles
   * Vérification d'intégrité
 
-</div>
-
------
-
-### SCRAM
-<div class="slide-content">
-
-  * Agrégation de canaux sur l'authentification **SCRAM**
-  * Permet d'éviter des attaques de type **Man in the midddle**
-
-</div>
-
-<div class="notes">
 </div>
 
 -----
