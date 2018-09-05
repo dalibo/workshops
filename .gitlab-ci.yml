@@ -37,7 +37,9 @@ pandocker:
 #    
 publish:
   stage: deploy
-  image: dalibo/pandocker:no-entrypoint
+  image:
+    name: dalibo/pandocker:18.08
+    entrypoint: [""]  # we need to override the image entrypoint
   script:
     ## Install Deploy Key
     - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
