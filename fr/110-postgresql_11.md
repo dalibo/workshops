@@ -472,8 +472,6 @@ Number of partitions: 0
 
 </div>
 
------
-
 ### Support des clés étrangères
 <div class="slide-content">
   * Clé étrangère depuis une table non partitionnée
@@ -1767,7 +1765,7 @@ workshop11=# select * from t1;
 
 workshop11=# \gdesc
  Column |  Type   
---------+---------
+--------|---------
  c1     | integer
 (1 row)
 ```
@@ -1776,7 +1774,7 @@ On peut aussi tester les types retournés par une requête sans l'exécuter :
 ```sql
 workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
    Column   |           Type           
-------------+--------------------------
+------------|--------------------------
  ratio      | numeric
  maintenant | timestamp with time zone
 ```
@@ -1786,7 +1784,7 @@ Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de
 workshop11=# \d t1
                  Table "public.t1"
  Column |  Type   | Collation | Nullable | Default 
---------+---------+-----------+----------+---------
+--------|---------|-----------|----------|---------
  c1     | integer |           |          | 
 
 workshop11=# select c2 from t1;
@@ -2394,6 +2392,266 @@ v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
 On a un gain de performance à l'insertion de 40%.
 
 </div>
+
+-----
+
+# Mise à jour Majeure avec la réplication logique.
+Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique. 
+
+<div class="slide-content">
+ * Installation de Postgres 10 et 11
+ * Configuration PostgreSQL pour la réplication logique, à réaliser sur les 2 instances.
+ * Clé primaire
+ * Réplication du schéma.
+ * Mise en œuvre de la réplication.
+ * Préparation du Switchover
+ * Switchover
+</div>
+
+  * La migration est réalisé avec la base pgbench, sous CentOS 6. Il est conseillé de réalisé la migration dans un environnement de test avant de passer en production.
+  * **Limitations**: la réplication logique ne réplique que les tables. L'ordre TRUNCATE est à exclure lors de la réplication. Egalement les ordres DDL sont à exclure lors de la migration.
+  * L'atelier est réalisé sur 2 instances différenciées par leur port (5432 pour PG10 et 5433 pour PG11) et comme adresse commune localhost.
+
+> Par convention, si les commandes sont préfixées par:
+> * `$`: à exécuté par l'utilisateur système `postgres`
+> * `#`: à exécuté par l'utilisateur système `root`
+
+### Préparer l'environnement de l'atelier.
+L'installation est à exécuter sous le compte système `root`.
+**Installation Postgres 10 et 11**  
+```console
+# pg10=https://yum.postgresql.org/10/redhat/rhel-6-x86_64/pgdg-redhat10-10-2.noarch.rpm
+# yum install ${pgdg10} -y
+# pg11=https://yum.postgresql.org/11/redhat/rhel-7-x86_64/pgdg-centos11-11-2.noarch.rpm
+# yum install ${pgdg11} -y
+# yum makecache
+# yum install -y postgresql10 postgresql10-contrib postgresql10-server
+# yum install -y postgresql11 postgresql11-contrib postgresql11-server
+```
+  
+**Initialisation des instances.**  
+```console
+# service postgresql-10 initdb
+# service postgresql-11 initdb
+```
+  
+**L'instance PG11 est mis sur le port d'écoute 5433**  
+```console
+$ sed -i "s/#port = 5432/port = 5433/" /var/lib/pgsql/11/data/postgresql.conf
+```
+  
+**Démarrer les instances PG au démarrage de OS.**
+```console
+# chkconfig postgresql-10 on
+# chkconfig postgresql-10 on
+```
+
+**Créer la base pgbench sur l'instance PG10 (port 5432) qui sera répliqué sur vers l'instance PG11 (port 5433):**
+```console
+# su - postgres
+$ createuser -P bench
+$ cat >>~postgres/.pgpass<<EOF
+*:*:*:bench:pass
+EOF
+$ chmod 600 ~postgres/.pgpass
+$ createdb -O bench bench
+$ /usr/pgsql-10/bin/pgbench -s 50 -i -U bench -h 127.0.0.1 bench
+```
+
+### Configuration PostgreSQL pour la réplication logique, à réaliser sur les 2 instances.
+**Création du rôle `repli` avec le droit de réplication.**  
+```console
+# su - postgres
+$ /usr/pgsql-10/bin/createuser --replication -P repli
+$ cat >>~postgres/.pgpass<<EOF
+*:*:*:repli:pass
+EOF
+$ chmod 600 ~postgres/.pgpass
+```
+
+**Attribuer au role repli le droit de connection à la base bench pour la subscription.**
+```console
+$ cat >> /var/lib/pgsql/10/data/pg_hba.conf <<EOF
+host bench repli 127.0.0.1/32 md5
+EOF
+```
+
+**On passe le niveau de réplication replica à logical sur les 2 instances.**
+```console
+$ cd /var/lib/pgsql/10/data
+$ sed -i 's/#wal_level\ =\ replica/wal_level\ =\ logical/' postgresql.conf
+$ cd /var/lib/pgsql/11/data
+$ sed -i 's/#wal_level\ =\ replica/wal_level\ =\ logical/' postgresql.conf
+```
+
+**Redémarrer les 2 instances sour le compte système root.**  
+```console
+$ exit
+# service postgresql-10 restart
+# service postgresql-11 restart
+```
+
+### Clé primaire
+Il est recommandé d'avoir une clé primaire aux tables à répliquer, si la PK est absent les risques encourus sont:  
+  
+  * Volume de données écrit dans les WALs augmentent.
+  * Contenu des tables incohérents entre les 2 instances.
+  * Volume de données plus important à répliquer en cas DELETE ou UPDATE.
+
+**On recherche les tables sans clés primaire et les ajouter (quite à créer une colonne si nécessaire).**
+```sql
+$ psql -U bench -d bench
+bench=> SELECT n.nspname, c.relname FROM pg_class c
+  JOIN pg_namespace n ON n.oid=c.relnamespace
+WHERE c.relkind='r' AND n.nspname !~ '^(pg_.*|information_schema)$'
+  AND NOT EXISTS (select 1 from pg_index i where i.indrelid = c.oid and i.indisprimary);
+ nspname |     relname     
+---------|-----------------
+ public  | pgbench_history
+(1 row)
+
+bench=> ALTER TABLE public.pgbench_history ADD COLUMN id integer
+bench-> PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY;
+ALTER TABLE
+```
+
+### Réplication du schéma.
+Il est nécessaire de préparer les bases vides côté subscriber avant la mise en réplication. Si ce n'est pas déjà fait, répliquer les objets globaux vers l'instance de destination, cela nous permet de simplifier la procédure en synchronisant les rôles, les mots de passe et les éventuels tablespaces nécessaires: 
+
+**Répliquer les rôles et tablespaces**  
+```console
+$ pg_dumpall  -U postgres  --globals|psql -p 5433
+```
+
+Il peut y avoir des erreurs si certains objets globaux existent déjà. Il est nécessaire de vérifier les erreurs renvoyées par psql. Puis, nous créons une base vide avec le même schéma que la base d'origine dans l'instance de destination. Les données y seront répliquées par la suite:   
+**Générer le schéma de la base bench sur l'instance slave (PG11).**  
+```console
+$ createdb -e -O bench bench -p 5433
+$ pg_dump -U bench -h 127.0.0.1 -v --schema-only bench|psql bench -p 5433
+```
+
+### Mise en œuvre de la réplication.
+Nous pouvons désormais configurer la réplication logique entre les deux instances. Commençons par l'initialisation de la publication sur l'instance PG10:  
+**PUBLICATION**  
+```sql
+$ psql -c 'CREATE PUBLICATION pub_bench_10 FOR ALL TABLES' bench
+```
+  
+Nous devons ensuite nous assurer que l'utilisateur de réplication a au minimin le droit de lecture, les données sur la base bench: 
+**Droit sur la base `bench`**  
+```sql
+$ psql -c "GRANT bench to repli"
+```
+  
+Nous pouvons désormais créer la subscription sur PG11 
+**SUBSCRIPTION**  
+```sql
+$ cat <<'EOQ' | psql bench -p 5433
+CREATE SUBSCRIPTION sub_bench_11
+         CONNECTION 'host=127.0.0.1 user=repli dbname=bench'
+        PUBLICATION pub_bench_10
+EOQ
+```
+  
+**Coté subscriber (instance PG11), vous trouverez dans les log les messages suivants:**
+```console
+logical replication apply worker for subscription "sub_bench_11" has started
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_accounts" has started
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_branches" has started
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_branches" has finished
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_history" has started
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_history" has finished
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_tellers" has started
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_tellers" has finished
+logical replic table synchro worker for subs "sub_bench_11", table "pgbench_accounts" has finished
+```
+  
+### Préparation du Switchover
+Avant de commencer, il est nécessaire de positionner les applications clientes en mode maintenance. Afin de sécuriser l'ensemble, nous ajoutons les lignes suivantes en début de fichier pg_hba.conf afin d'empêcher toute connexion autre que celle concernant la réplication:  
+**Limiter les connection avec `pg_hba.conf`**
+```console
+host    bench     repli     127.0.0.1/32  md5
+local   bench     postgres                peer
+local   bench     all                     reject
+host    bench     all       0.0.0.0/0     reject
+```
+  
+**Reload la configuration pour que notre modification soit pris en compte (PG10)**
+```sql
+$ psql -c "select pg_reload_conf();"
+```
+  
+**Tuez toutes connexion restante à la base bench sur l'instance PG10**
+```sql
+$ cat<<EOQ|psql
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE backend_type = 'client backend'
+  AND pid <> pg_backend_pid()
+  AND datname='bench';
+EOQ
+```
+    
+Nous attendons que le lag entre les deux serveurs soit entièrement résorbé. Depuis srv10, observez l'évolution des compteurs de lag présentés par pg_stat_replication. Notez que même si les autres compteurs évoluent encore, les écritures en question ne concernent plus la base qui nous intéresse (et ces écritures ne sont pas envoyées vers srv11). Nous patientons juste quelque secondes que les lag affichés soient résorbés.
+```sql
+$ watch -n2 "psql -d bench -xc \
+\"select confirmed_flush_lsn from pg_replication_slots where slot_name='sub_bench_11'\""
+```
+
+Il est aussi possible de simplement comparer des données représentatives de la réplication. Eg.:  
+**instance PG10**
+```sql
+$ psql -Atc "select max(id) from pgbench_history" bench
+```
+  
+**instance PG11**
+```sql
+$ psql -Atc "select max(id) from pgbench_history" -U repli bench -p 5433
+```
+
+**Réplication des séquences:**  
+Réplication logique ne réplique pas les séquence. Aussi, il nous faut mettre à jour les séquences sur srv11 avant d'effectuer le switchover.
+```sql
+$ cat <<'EOQ' | psql -At -U repli bench -h 127.0.0.1| psql bench -5433
+SELECT format( 'SELECT setval(%L, %s)',
+    schemaname||'.'||sequencename, last_value
+)
+FROM pg_sequences where last_value is not null;
+EOQ
+```
+
+### Switchover
+Nous pouvons désormais effectuer le switchover qui consiste à échanger les rôles au sein de la réplication logique. Ces commandes sont à exécuter sur l'instance PG11 (port 5433)
+```sql
+$ psql -p 5433 -d bench -c 'DROP SUBSCRIPTION sub_bench_11'
+$ psql -p 5433 -c 'GRANT bench TO repli'
+$ psql -p 5433 -d bench -c 'CREATE PUBLICATION pub_bench_11 FOR ALL TABLES'
+```
+
+> Attention, rappel ! Si votre application utilise l'ordre TRUNCATE l'instance v11 tentera de la répliquer vers l'instance v10, provoquant alors une erreur et empêchant la réplication. Vous pouvez le remplacer par DELETE qui est supporté.
+
+Notez que les données étant déjà présente sur srv10, nous demandons explicitement de ne pas initialiser les données lors de la création de la subscription: (Appliqué à l instance PG10):
+```sql
+$ cat <<'EOQ' | psql bench
+CREATE SUBSCRIPTION sub_bench_10
+         CONNECTION 'host=srv11 user=repli dbname=bench'
+        PUBLICATION pub_bench_11
+               WITH (copy_data = false)
+EOQ
+```
+
+> La suppression de l'ancien serveur est simple: il suffit de supprimer la réplication logique entre les deux serveurs (sur l'instance PG10):
+
+**Suppression `subscription` sur l'instance PG10**  
+```sql
+$ psql -c 'drop subscription sub_bench_10 cascade' bench
+```
+  
+**Suppression `publication` sur l'instance PG11.**  
+```sql
+psql -p 5433 -d bench -c 'drop publication pub_bench_11 cascade'
+DROP PUBLICATION
+```
 
 -----
 
