@@ -1272,9 +1272,11 @@ HINT:  Anyone can COPY to stdout or from stdin. psql's \copy command also works 
 </div>
 
 <div class="notes">
-commande `pg_verify_checksums` est à froid.
+La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les bases de données à froid. L'instance doit être arrêtée proprement avant lancer la commande. 
 
-`amcheck` vérifie que chaque ligne possède une entrée dans les index.
+Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`. 
+
+Le module amcheck vérifie que chaque ligne possède une entrée dans les index. Un patch a été ajouter à ce module permettant d'effectuer une vérification sur les tables heap liée a l'index. (`heapallindexed`) 
 
 </div>
 
