@@ -1233,8 +1233,33 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 </div>
 
 <div class="notes">
-Ajout de nouveaux rôles... FIXME
+Postgresql ajoute de nouveaux rôles de sécurité permettant d'affiner la permission des utilisateurs. Ces nouveaux rôle seront pourront êtres utile pour l'import ou l'export de données avec l'ordre COPY.
 
+Création de l'utilisateur user_r membre du rôle pg_read_server_files : 
+
+```sql
+postgres@v11=# CREATE USER user_r;
+CREATE ROLE
+postgres@v11=# GRANT pg_read_server_files TO user_r;
+GRANT ROLE
+```
+
+Import des données depuis un fichier externe csv : 
+
+```sql
+user_r@v11=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+COPY 11
+```
+Si l'utilisateur tente d'envoyer les données d'une table vers un fichier externe, le message suivant apparaît : 
+
+```sql
+user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
+2018-09-07 12:00:29.431 CEST [2364] ERROR:  must be superuser or a member of the pg_write_server_files role to COPY to a file
+2018-09-07 12:00:29.431 CEST [2364] HINT:  Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
+2018-09-07 12:00:29.431 CEST [2364] STATEMENT:  COPY t1 TO '/tmp/t1.csv' CSV ;
+ERROR:  must be superuser or a member of the pg_write_server_files role to COPY to a file
+HINT:  Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
+```
 </div>
 
 -----
