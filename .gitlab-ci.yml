@@ -1,4 +1,3 @@
-
 ##
 ## "Secret" variables
 ## defined in the project config at : Settings > CI/CD > Secret variables
@@ -12,7 +11,8 @@
 ##
 ## Custom variables
 ##
-THEMES_BRANCH: stable # usually 'stable' or 'master'
+variables:
+  THEMES_BRANCH: stable # usually 'stable' or 'master'
 
 
 before_script:
