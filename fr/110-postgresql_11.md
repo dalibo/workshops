@@ -807,61 +807,67 @@ FIXME : TODO
 
 <div class="notes">
 
-La parallélisation des requêtes avait été introduite en version 9.6, sur certains nœuds d'exécution seulement, et pour les requêtes en lecture seules uniquement. La version 10 avait étendu à d'autres nœuds.
+La parallélisation des requêtes avait été introduite en version 9.6, sur
+certains nœuds d'exécution seulement, et pour les requêtes en lecture seules
+uniquement. La version 10 avait étendu à d'autres nœuds.
 
-Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux de type _Append_, qui servent aux `UNION ALL` notamment :
+Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
+de type _Append_, qui servent aux `UNION ALL` notamment :
 
 **FIXME** - exemple
 
 
-Un nœud déjà parallélisé a été amélioré, le _Hash join_  (jointure par hachage). Dans l'exemple suivant tiré de la version 10, le _hash join_ est déjà parallélisé :
-
-
+Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
+hachage). Soit les tables suivantes :
 
 ```sql
 CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
-CREATE TABLE b as select i FROM generate_series(1,10000000) i ; 
+CREATE TABLE b as SELECT i FROM generate_series(1,10000000) i ; 
 CREATE INDEX ON a(i) ;
 
 SET work_mem TO '1GB' ;
 SET max_parallel_workers_per_gather TO 2;
-
-
-EXPLAIN SELECT * FROM a INNER JOIN b on (a.i=b.i) WHERE a.i BETWEEN 500000 AND 900000;
-
-                                 QUERY PLAN                                                 
--------------------------------------------------------------------------------
- Gather  (cost=2661.43..69586.10 rows=50000 width=8)
-   Workers Planned: 2
-   ->  Hash Join  (cost=1661.43..63586.10 rows=20833 width=8)
-         Hash Cond: (b.i = a.i)
-         ->  Parallel Seq Scan on b  (cost=0.00..46091.37 rows=4166657 width=4)
-         ->  Hash  (cost=1036.43..1036.43 rows=50000 width=4)
-               ->  Index Only Scan using a_i_idx on a  
-                                  (cost=0.43..1036.43 rows=50000 width=4)
-                     Index Cond: ((i >= 500000) AND (i <= 90000))
-
 ```
 
+Dans la version 10, le _hash join_ est déjà parallélisé :
+```sql
+v10=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
+        WHERE a.i BETWEEN 500000 AND 900000;
+                            QUERY PLAN
+-------------------------------------------------------------------
+ Gather
+   Workers Planned: 2
+   ->  Hash Join
+         Hash Cond: (b.i = a.i)
+         ->  Parallel Seq Scan on b
+         ->  Hash
+               ->  Index Only Scan using a_i_idx on a
+                     Index Cond: ((i >= 500000) AND (i <= 900000))
+(8 lignes)
+```
 
-Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11, ils partagent la même table de travail et peuvent donc paralléliser sa construction (ici en parallélisant l'_Index Scan_) :
+Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11,
+ils partagent la même table de travail et peuvent donc paralléliser sa
+construction (ici en parallélisant l'_Index Scan_) :
 
 ```sql
-                                 QUERY PLAN                                                 
--------------------------------------------------------------------------------
- Gather  (cost=14273.37..154632.46 rows=381571 width=8)
+v11=# SET enable_parallel_hash = on;
+SET
+v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
+        WHERE a.i BETWEEN 500000 AND 900000;
+                            QUERY PLAN
+-------------------------------------------------------------------
+ Gather
    Workers Planned: 2
-   ->  Parallel Hash Join  (cost=13273.37..115475.36 rows=158988 width=8)
+   ->  Parallel Hash Join
          Hash Cond: (b.i = a.i)
-         ->  Parallel Seq Scan on b  (cost=0.00..85914.57 rows=4166657 width=4)
-         ->  Parallel Hash  (cost=11286.02..11286.02 rows=158988 width=4)
-               ->  Parallel Index Only Scan using a_i_idx on a  
-                                  (cost=0.43..11286.02 rows=158988 width=4)
+         ->  Parallel Seq Scan on b
+         ->  Parallel Hash
+               ->  Parallel Index Only Scan using a_i_idx on a
                      Index Cond: ((i >= 500000) AND (i <= 900000))
-
-
-
+(8 lignes)
 ```
+
 L'auteur de cette optmisation a écrit un article assez complet sur le sujet :
 <https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
 
@@ -870,35 +876,44 @@ FIXME :  exemple d'Append avec UNION ALL
 
 FIXME : exemple SELECT INTO
 
-La création d'index peut à présent être parallélisée, ce qui va permettre de gros gains de temps dans certains cas. La parallélisation est activée par défaut et est contrôlée par un nouveau paramètre,
+La création d'index peut à présent être parallélisée, ce qui va permettre de
+gros gains de temps dans certains cas. La parallélisation est activée par
+défaut et est contrôlée par un nouveau paramètre,
 `max_parallel_maintenance_workers` (défaut : 2) et non l'habituel
 `max_parallel_workers_per_gather`.
 
 ```sql
-\timing on
-SET maintenance_work_mem TO '2GB';
-CREATE TABLE t9 AS SELECT random() FROM  generate_series(1,50000000) ;
+v11=# SET maintenance_work_mem TO '2GB';
+SET
+v11=# CREATE TABLE t9 AS SELECT random() FROM  generate_series(1,5000000);
+CREATE TABLE
+v11=# SET max_parallel_maintenance_workers TO 0;
+SET
+v11=# \timing on
+Chronométrage activé.
 
-SET max_parallel_maintenance_workers TO  0 ;
-
-CREATE index ix_t9 ON t9 (random) ;
+v11=# CREATE index ix_t9 ON t9 (random);
 CREATE INDEX
-Durée : 65404,092 ms (01:05,404)
-
-DROP INDEX ix_t9 ;
-
-CREATE index ix_t9 ON t9 (random) ;
+Durée : 86731,660 ms (01:26,732)
+v11=# DROP INDEX ix_t9 ;
+DROP INDEX
+v11=# SET max_parallel_maintenance_workers TO 4;
+SET
+v11=# CREATE index ix_t9 ON t9 (random) ;
 CREATE INDEX
-Durée : 51177,289 ms (00:51,177)
+Durée : 67278,338 ms (01:07,278)
 ```
+
+Le gain en temps est ici de plus de 20% pour 4 workers.
 
 La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
 nombre de workers au niveau de la définition de la table, mais attention cela
 va aussi impacter vos requêtes !
 
-Pour de plus amples détails, les Allemands de Cybertec ont mis cet article en
-ligne :
-<https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/>
+Pour de plus amples détails, les Allemands de Cybertec ont mis un [article sur
+le
+sujet](https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/)
+en ligne.
 
 </div>
 
