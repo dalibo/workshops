@@ -31,6 +31,10 @@ image:
   entrypoint: [""]  # we need to override the image entrypoint
 
 
+##
+##  B U I L D
+##
+
 pandoc:
   stage: build
   script:
@@ -53,10 +57,12 @@ pandoc:
       - en/
     expire_in: 1 day
 
-#
-# Publish the master branch
-#    
-publish:
+##
+##  D E P L O Y 
+##
+
+## Export the master branch in a public location  
+public:
   stage: deploy
   script:
     ## Install Deploy Key
@@ -67,4 +73,33 @@ publish:
   only:
     - master@formation/workshops
 
+## Export artefacts from each branch in a private environments
+## see https://gitlab.dalibo.info/formation/workshops/environments
+private:
+  stage: deploy
+  environment:
+    name: $CI_COMMIT_REF_SLUG # one environment for each branch
+    url: https://cloud.dalibo.com/private/exports/formation/workshops/$CI_COMMIT_REF_SLUG/
+    on_stop: clean_up_private_storage
+  script:
+    ## Install Deploy Key
+    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
+    ## Push
+    - rsync -avp $CI_PROJECT_DIR/* $CLOUD_DEPLOY_PRIVATE_DEST/$CI_COMMIT_REF_SLUG
+  only:
+    - branches@formation/workshops
+
+## Delete environments
+clean_up_private_storage:
+  stage: deploy
+  script:
+    ## Install Deploy Key
+    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
+    - host=$(echo $CLOUD_DEPLOY_PRIVATE_DEST | sed 's/:.*//')
+    - path=$(echo $CLOUD_DEPLOY_PRIVATE_DEST | sed 's/.*://')
+    - ssh $host rm -fr $path/$CI_COMMIT_REF_SLUG
+  when: manual
+  environment:
+    name: $CI_COMMIT_REF_SLUG
+    action: stop
 
