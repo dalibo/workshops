@@ -117,13 +117,13 @@ Public Domain CC0.
   * Version beta 1 sortie 24 Mai 2018
   * 2e bêta sortie le 28 Juin 2018
   * Sortie de la version final : Fin 2018
-  * Est composé de plus de 1,5 millions de lige de code (1,509,660)
+  * Est composé de plus de 1,5 millions de lige de code
   * Des centaines de contributeurs
 </div>
 
 <div class="notes">
 
-FIXME
+FIXME avec version en date
 Le développement de la version 11 a suivi l'organisation habituelle : un
 démarrage mi 2017, des Commit Fests tous les deux mois, un Feature Freeze en
 mars, une première version beta fin mai.
@@ -131,8 +131,7 @@ mars, une première version beta fin mai.
 La version finale est sortie le XX octobre 2018.
 
 La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
-Son développement est assuré par des centaines de contributeurs répartis partout
-dans le monde.
+1 509 660 lignes pour être précis. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
 Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL,
 une présentation récente de *Daniel Vérité* est disponible en ligne :
@@ -148,7 +147,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
   * Partitionnement
   * Performances
   * Sécurité et intégrité
-  * Instructions SQL
+  * SQL
   * Outils
   * Réplication
   * Compatibilité FIXME à garder ???
@@ -343,7 +342,7 @@ En version 10 il n'était pas possible de mettre à jour une clé de partition e
 
 En version 10 PostgreSQL générait une erreur lorsque les données n'appartenaient à aucune partitions.
 
-FIXME que se passe-t-il quand on crée une partition correspondant à des lignescontenues dans la parition par défaut ?
+FIXME que se passe-t-il quand on crée une partition correspondant à des lignes contenues dans la partition par défaut ?
 
 
 </div>
@@ -487,42 +486,199 @@ commande `pg_verify_checksums` est à froid.
 
 -----
 
-
-## Instructions SQL
+## SQL
 <div class="slide-content">
 
-  * Index couvrants
-    * `CREATE INDEX ... INCLUDE`
-  * VACUUM tables multiples
-    * VACUUM t1, t2;
-  * support fonction fenêtrage SQL:2011
-  * LOCK VIEW
-  * objets PROCEDURES
-  * Définir le seuil de conversion en TOAST depuis l'ordre CREATE TABLE
-  * Opérateur ^@ similaire à LIKE
-
+  * Index couvrant
+  * Objets `PROCEDURE`
+  * Contrôle transactionnel en PL
+  * JSON
+  * PL/pgSQL
+  * Fonctions de fenêtrage
+  * Autres nouveautés
 </div>
 
 <div class="notes">
+
 </div>
 
-### Fonctions de fenêtrage
+-----
 
+### Index couvrant
 <div class="slide-content">
-    * Support de l'intégralité des fonctions de fenêtrage de la norme **SQL:2011**
-      * https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
+  * Déclaration grâce au mot clé `INCLUDE`
+  * Uniquement pour les index B-Tree
+  * Permet des _Index Only Scan_ en complétant des index uniques
+</div>
+
+<div class="notes">
+Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table uniquement dans les feuilles d'un index de type B-Tree. L'index ne pourra pas être utilisé pour faire des recherches sur ces colonnes incluses. L'index sera cependant utilisable pour récupérer directement les informations de ces colonnes incluses sans avoir besoin d'accéder à la table grâce à un `Index Only Scan`. La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
+
+```sql
+CREATE INDEX index_couvrant ON ma_table
+  (lookup_col1, lookup_col2) INCLUDE (autre_col);
+```
+
+La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est présente dans l'index, il n'est alors pas nécessaire de lire la table pour récupérer les données recherchées : on les lit directement dans l'index pour des gains substantiels de performance ! Mais pour que ce nœud s'active, il faut évidemment que toutes les colonnes recherchées soient présentes dans l'index.
+
+Une colonne sur laquelle aucune recherche n'est faite mais dont on a besoin dans la requête peut être ajoutée à la fin de la liste des colonnes indexées. La requête pourra alors utiliser un `Index Only Scan`. Dans un index couvrant, le nouveau mot clé `INCLUDE` permet de ne pas l'ajouter à la liste des colonnes indexées, mais en plus de ces colonnes. Les colonnes incluses ne sont pas triées et ne peuvent donc pas directement servir aux tris et recherches.
+
+Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes dans un index duplique de l'information. Cela a un impact en terme de volume sur disque mais également en terme de performance d'insertion et de mise à jour de la table.
+
+Les index couvrants ne changent rien côté taille des index. Leur intérêt premier est de pouvoir ajouter des colonnes dans un index déjà présent (unique notamment) sans devoir déclarer un index distinct.
+En effet, PostgreSQL utilise un index unique pour implémenter une contrainte d'unicité sur une ou un ensemble de colonnes. Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques ainsi qu'à une autre colonne, il faut créer un nouvel index. Un index couvrant va permettre de ne pas créer de nouvel index en intégrant l'autre colonne recherchée à l'index unique.
+
+</div>
+
+-----
+
+### Objet `PROCEDURE`
+<div class="slide-content">
+  * Conforme à la norme SQL
+  * Création par `CREATE PROCEDURE`
+  * Appel avec `CALL`
+  * Ne retourne rien
+  * Permet un contrôle transactionnel en PL
+</div>
+
+<div class="notes">
+
+Création et appel d'une procédure (ici en pur SQL) :
+```sql
+v11=# CREATE TABLE test1 (a int, b text);
+CREATE TABLE
+
+v11=# CREATE PROCEDURE insert_data(a integer, b integer)
+      LANGUAGE SQL
+      AS $$
+        INSERT INTO test1 VALUES (a);
+        INSERT INTO test1 VALUES (b);
+      $$;
+CREATE PROCEDURE
+
+v11=# CALL insert_data(1, 2);
+CALL
+
+v11=# SELECT * FROM test1;
+ a | b 
+---+---
+ 1 | 
+ 2 | 
+(2 lignes)
+```
+
+Les objets de type PROCEDURE sont sensiblement les mêmes que les objets de type FUNCTION.
+
+Les différences sont :
+
+  * l'appel se fait par le mot clé `CALL` et non `SELECT` ;
+  * les object de type PROCEDURE ne peuvent rien retourner ;
+  * les object de type PROCEDURE permettent un contrôle transactionnel,
+ce que ne peuvent pas faire les objets de type FUNCTION.
+
+</div>
+
+-----
+
+### Contrôle transactionnel en PL
+<div class="slide-content">
+  * Disponible en PL/pgSQL, PL/Perl, PL/Python, PL/Tcl, SPI (C)
+  * Utilisable :
+    * dans des blocs `DO` / `CALL`
+    * dans des objets de type PROCEDURE
+  * ne fonctionne pas à l'intérieur d'une transaction
+  * incompatible avec une clause `EXCEPTION`
+</div>
+
+<div class="notes">
+Les mots clés sont différents suivants les langages :
+
+  * SPI : `SPI_start_transaction()`, `SPI_commit()` et `SPI_rollback()`
+  * PL/Perl : `spi_commit()` et `spi_rollback()`
+  * PL/pgSQL : `COMMIT` et `ROLLBACK`
+  * PL/Python : `plpy.commit` et `plpy.rollback`
+  * PL/Tcl : `commit` et `rollback`
+
+Voici un exemple avec `COMMIT` ou `ROLLBACK` suivant que le nombre est pair ou impair :
+```sql
+v11=# CREATE TABLE test1 (a int) ;
+CREATE TABLE
+
+v11=# CREATE OR REPLACE PROCEDURE transaction_test1()
+      LANGUAGE plpgsql
+      AS $$
+      BEGIN
+        FOR i IN 0..5 LOOP
+            INSERT INTO test1 (a) VALUES (i);
+            IF i % 2 = 0 THEN
+               COMMIT;
+            ELSE
+               ROLLBACK;
+            END IF;
+         END LOOP;
+      END
+      $$;
+CREATE PROCEDURE
+
+v11=# CALL transaction_test1();
+CALL
+
+v11=# SELECT * FROM test1;
+ a | b
+---+---
+ 0 |
+ 2 |
+ 4 |
+ 6 |
+ 8 |
+(5 lignes)
+```
+
+Noter qu'il n'y a pas de `BEGIN` explicite dans la gestion des transactions.
+
+On ne peut pas imbriquer des transactions :
+```sql
+v11=# BEGIN ; CALL transaction_test1() ;
+BEGIN
+Temps : 0,097 ms
+ERROR:  invalid transaction termination
+CONTEXTE : PL/pgSQL function transaction_test1() line 6 at COMMIT
+```
+
+On ne peut pas utiliser en même une clause `EXCEPTION` et le contrôle transactionnel :
+```sql
+v11=# DO LANGUAGE plpgsql $$
+      BEGIN
+        BEGIN
+          INSERT INTO test1 (a) VALUES (1);
+          COMMIT;
+          INSERT INTO test1 (a) VALUES (1/0);
+          COMMIT;
+        EXCEPTION
+          WHEN division_by_zero THEN
+             RAISE NOTICE 'caught division_by_zero';
+        END;
+      END;
+      $$;
+ERREUR:  cannot commit while a subtransaction is active
+CONTEXTE : fonction PL/pgsql inline_code_block, ligne 5 à COMMIT
+```
+
+Pour plus de détails, par exemple sur les curseurs :
+<https://www.postgresql.org/docs/11/static/plpgsql-transactions.html>
+
 </div>
 
 -----
 
 ### PL/pgSQL
 <div class="slide-content">
-  * Création d'objets **PROCEDURES**
-    * Similaires au fonctions mais ne retournant aucune valeur.
-  * Ajout d'une clause **CONSTANT** à une variable
-  * Contrainte **NOT NULL** à une variable
-  * Ordre `SET TRANSACTION` dans un bloc
+  * Ajout d'une clause `CONSTANT` à une variable
+  * Contrainte `NOT NULL` à une variable
+</div>
 
+<div class="notes">
+FIXME
 </div>
 
 -----
@@ -530,9 +686,253 @@ commande `pg_verify_checksums` est à froid.
 ### JSON
 
 <div class="slide-content">
-  * Index Surjectif
-  * TRANSFORM FOR TYPE Json
-  * LOCK TABLE view
+  * Conversion de et vers du type jsonb
+    * en SQL : booléen et nombre
+    * en PL/Perl : tableau et _hash_
+    * en PL/Python : `dict` et `list`
+  * Conversion JSON en tsvector pour la _Full text Search_
+</div>
+
+<div class="notes">
+
+#### Conversion de et vers du type jsonb
+
+**jsonb <=> SQL**
+
+Il existe 4 types primitif en JSON. Voici le tableau de correspondance avec les types PostgreSQL :
+
+
+| Type Primitif JSON | Type PostgreSQL |
+|:------------------:|:---------------:|
+|  string            |  text           |
+|  number            |  numeric        |
+|  boolean           |  boolean        |
+|  null              |  (aucun)        |
+
+S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type texte :
+```sql
+v10=# SELECT 'true'::jsonb::boolean;
+ERROR:  cannot cast type jsonb to boolean
+LIGNE 1 : SELECT 'true'::jsonb::boolean;
+                              ^
+v10=# SELECT 'true'::jsonb::text::boolean;
+ bool 
+------
+ t
+(1 ligne)
+
+v10=# SELECT '3.141592'::jsonb::float;
+ERROR:  cannot cast type jsonb to double precision
+LIGNE 1 : SELECT '3.141592'::jsonb::float;
+                                  ^
+v10=# SELECT '3.141592'::jsonb::text::float;
+  float8  
+----------
+ 3.141592
+(1 ligne)
+```
+
+Il est dorénavant possible de convertir des données de type jsonb vers les types booléen et numérique :
+```sql
+v11=# SELECT 'true'::jsonb::boolean;
+ bool 
+------
+ t
+(1 ligne)
+
+v11=# SELECT '3.141592'::jsonb::float;
+  float8  
+----------
+ 3.141592
+(1 ligne)
+```
+
+**jsonb <=> PL/Perl **
+
+Une transformation a été ajoutée en PL/Perl pour transformer les champs jsonb en champs natif Perl.
+
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur RedHat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
+
+Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
+
+```sql
+v11=# CREATE EXTENSION jsonb_plperl CASCADE;
+NOTICE:  installing required extension "plperl"
+CREATE EXTENSION
+
+v11=# CREATE OR REPLACE FUNCTION fperl(val jsonb)
+  RETURNS jsonb
+  TRANSFORM FOR TYPE jsonb
+  AS $$
+    my $arg = shift;
+    elog(NOTICE, "Arg is: [$arg]");
+    my $keys_str = "";
+    for my $key (keys %$arg) {
+      $keys_str .= "'".$key."' "
+    }
+    elog(NOTICE, "JSON keys are: ".$keys_str);
+  $$ LANGUAGE plperl;
+CREATE FUNCTION
+
+v11=# SELECT fperl('{"1":1,"example": null}'::jsonb);
+NOTICE:  Arg is: [HASH(0x1d7e330)]
+NOTICE:  jsonb keys are: '1' 'example'
+ fperl 
+-------
+ 
+(1 ligne)
+```
+
+**jsonb <=> PL/Python **
+
+Une transformation a été ajoutée en PL/Python pour transformer les champs jsonb en champs natif Python.
+
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpyhton-11.0` sur RedHat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
+
+Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
+
+```sql
+v11=# CREATE EXTENSION jsonb_plpythonu CASCADE;
+NOTICE:  installing required extension "plperl"
+CREATE EXTENSION
+
+v11=# CREATE OR REPLACE FUNCTION fpython(val jsonb)
+  RETURNS jsonb
+  TRANSFORM FOR TYPE jsonb
+  AS $$
+    plpy.info(val)
+    keys_str = ""
+    for key in val:
+      keys_str += "'"+key+"' "
+    plpy.info("JSON keys are: " + keys_str)
+  $$ LANGUAGE plpythonu;
+CREATE FUNCTION
+
+v11=# SELECT fpython('{"1":1,"example": null}'::jsonb);
+INFO:  {'1': Decimal('1'), 'example': None}
+INFO:  JSON keys are: '1' 'example' 
+ fpython 
+---------
+ 
+(1 ligne)
+```
+
+#### JSON en tsvector pour la _Full Text Search_
+
+La conversion en tsvector permet la recherche plein texte. Couplé à
+une indexation adéquate, GIN ou GiST, les fonctionnalités sont
+nombreuses et les performances impressionnantes.
+
+Jusqu'à maintenant, les champs JSON était analysés comme des textes,
+sans tenir compte de la sémantique. La nouvelle fonction
+`jsonb_to_tsvector` permet d'extraire des informations ciblées issues
+de champs JSON choisis.  
+La fonction prend en premier paramètre la langue et en deuxième
+paramètre la structure JSON à analyser. Le troisième paramètre permet
+de choisir les valeur à filter :
+
+  * _string_ : les chaines de caractères,
+  * _numeric_ : les valeur numérique,
+  * _boolean_ : les booléen (`true` et `false`),
+  * _key_ : pour inclure toutes les clés de la structure JSON,
+  * _all_ : pour inclure tous les champs ci-dessus.
+
+Voici ce que donnait la fonction `to_tsvector` :
+```sql
+v11=# select to_tsvector('french',
+    '{ "a": "Vive la v11 !",
+       "b": 5432,
+       "c" : { "1": 42, "2": "question", "3": true } }'::jsonb);
+         to_tsvector          
+------------------------------
+ 'question':5 'v11':3 'viv':1
+(1 ligne)
+```
+
+En choisissant l'option de filtre `string`, on obtient le même résultat :
+```sql
+v11=# select jsonb_to_tsvector('french',
+    '{ "a": "Vive la v11 !",
+       "b": 5432,
+       "c" : { "1": 42, "2": "question", "3": true } }'::jsonb, '["string"]');
+      jsonb_to_tsvector       
+------------------------------
+ 'question':5 'v11':3 'viv':1
+(1 ligne)
+```
+
+La nouvelle fonction donne cependant accès à de nombreux autres modes :
+```sql
+v11=# select jsonb_to_tsvector('french',
+    '{ "a": "Vive la v11 !",
+       "b": 5432,
+       "c" : { "1": 42, "2": "question", "3": true } }'::jsonb,
+     '["numeric", "boolean"]');
+    jsonb_to_tsvector    
+-------------------------
+ '42':3 '5432':1 'tru':5
+(1 ligne)
+
+v11=# select jsonb_to_tsvector('french',
+    '{ "a": "Vive la v11 !",
+       "b": 5432,
+       "c" : { "1": 42, "2": "question", "3": true } }'::jsonb,
+     '["key"]');
+       jsonb_to_tsvector        
+--------------------------------
+ '1':6 '2':8 '3':10 'a':1 'b':3
+(1 ligne)
+
+v11=# select jsonb_to_tsvector('french',
+    '{ "a": "Vive la v11 !",
+       "b": 5432,
+       "c" : { "1": 42, "2": "question", "3": true } }'::jsonb,
+     '["all"]');
+                 jsonb_to_tsvector
+------------------------------------------------------
+ '1':12 '2':16 '3':20 '42':14 '5432':9 'a':1 'b':7 \
+ 'question':18 'tru':22 'v11':5 'viv':3
+(1 ligne)
+```
+
+
+
+
+</div>
+
+-----
+
+### Fonctions de fenêtrage
+
+<div class="slide-content">
+  * Support de l'intégralité des fonctions de fenêtrage de la norme **SQL:2011**
+</div>
+
+<div class="notes">
+https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
+
+FIXME
+</div>
+
+-----
+
+### Autre nouveautés
+<div class="slide-content">
+
+  * `ANALYSE` et `VACUUM` tables multiples
+  * `LOCK TABLE view`
+  * Définir le seuil de conversion en _TOAST_ depuis l'ordre `CREATE TABLE`
+  * Opérateur `^@` pour les index _SP-GiST_ similaire à `LIKE`
+  * Option `recheck_on_update` pour les index fonctionnels
+
+</div>
+
+<div class="notes">
+```sql
+VACUUM t1, t2
+```
+
+FIXME
 </div>
 
 -----
