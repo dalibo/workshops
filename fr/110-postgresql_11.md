@@ -1556,12 +1556,13 @@ Les développements de la version 12 ont commencé. Les premiers commit fests
 nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et réplication logique. FIXME ?
 
-Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
-  * juillet 2018 : <https://commitfest.postgresql.org/18/?status=4>
-  * septembre : <https://commitfest.postgresql.org/19/?status=4>
-  * novembre : <https://commitfest.postgresql.org/20/?status=4>
-  * janvier 2019 : <https://commitfest.postgresql.org/21/?status=4>
-  * mars : <https://commitfest.postgresql.org/22/?status=4>
+Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des modifications validées pour chaque commit fest :
+
+  * [juillet 2018](https://commitfest.postgresql.org/18/?status=4)
+  * [septembre 2018](https://commitfest.postgresql.org/19/?status=4)
+  * [novembre 2018](https://commitfest.postgresql.org/20/?status=4)
+  * [janvier 2019](https://commitfest.postgresql.org/21/?status=4)
+  * [mars 2019](https://commitfest.postgresql.org/22/?status=4)
 
 </div>
 
