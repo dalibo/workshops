@@ -13,7 +13,7 @@
 #------------------------------------------------------------------------------
 #  
 #  - by default, we use pandoc to compile documents
-#  - if pandoc is not install, we use a docker image instead
+#  - if pandoc is not installed, we use a docker image instead
 #  - use `DOCKER=latest make all` to force make to use docker 
 #
 #
@@ -76,7 +76,7 @@ endif
 # Then we replace $P with a docker call
 ifneq ($(DOCKER_TAG),)
 	DOCKER_DLB=/root/dalibo/themes
-	P=docker run --rm -it --privileged --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
+	P=docker run --rm -it --privileged -u `id -u`:`id -g` --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
 	DLB=$(DOCKER_DLB)
 endif
 
@@ -94,7 +94,7 @@ ifeq ("$(wildcard $(LOCAL_DLB))","")
  REVEAL_FLAGS=-t revealjs --standalone -V revealjs-url:http://lab.hakim.se/reveal-js/
  TEX_FLAGS= -st beamer 
  BEAMER_FLAGS= -st beamer 
- PDF_FLAGS=--toc --latex-engine=xelatex
+ PDF_FLAGS=--toc --pdf-engine=xelatex
  ODT_FLAGS=-t odt --toc
  DOC_FLAGS=-t doc --toc
  EPUB_FLAGS=-t epub --toc
@@ -106,7 +106,7 @@ else
  REVEAL_FLAGS=-t revealjs --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs" --self-contained --standalone -V revealjs-url="$(DLB)/reveal.js/"
  TEX_FLAGS= -st beamer -V theme=Dalibo
  BEAMER_FLAGS= -st beamer -V theme=Dalibo
- PDF_FLAGS=--latex-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition
+ PDF_FLAGS=--pdf-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition
  ODT_FLAGS=-t odt --toc --reference-odt=$(DLB)/odt/template_conference.dokuwiki.odt
  DOC_FLAGS=-t doc --toc --reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
  EPUB_FLAGS=

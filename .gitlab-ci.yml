@@ -1,15 +1,38 @@
+##
+## "Secret" variables
+## defined in the project config at : Settings > CI/CD > Secret variables
+##
+
+# GITLAB_DEPLOY_PRIVATE_KEY is used to clone the themes project
+# CLOUD_DEPLOY_PRIVATE_KEY is the key to publish artefacts on the HTTP server
+# CLOUD_DEPLOY_DEST is the public destination of the HTTP server
+# CLOUD_DEPLOY_PRIVATE_DEST is the private destination on the HTTP server
+
+##
+## Custom variables
+##
+variables:
+  THEMES_BRANCH: stable # usually 'stable' or 'master'
+
+
 before_script:
-  ## Prepare for Deploy Keys
-  ## see https://docs.gitlab.com/ee/ci/ssh_keys/README.html#ssh-keys-when-using-the-docker-executor
+  # Prepare for Deploy Keys
+  # see https://docs.gitlab.com/ee/ci/ssh_keys/README.html#ssh-keys-when-using-the-docker-executor
   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
   - mkdir -p ~/.ssh
   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
+#
+# We use the same image for all jobs
+#
+image:
+  name: dalibo/pandocker:18.06 # usually 'stable' or 'latest' (=master)
+  entrypoint: [""]  # we need to override the image entrypoint
 
-pandocker:
+
+pandoc:
   stage: build
-  image: dalibo/pandocker:no-entrypoint
   script:
     #
     # The dalibo themes are not mandatory
@@ -18,12 +41,10 @@ pandocker:
     - > 
         if [[ $GITLAB_DEPLOY_PRIVATE_KEY ]] ; then 
                 ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
-                git clone -b stable git@gitlab.dalibo.info:marketing/themes.git
+                git clone -b $THEMES_BRANCH git@gitlab.dalibo.info:marketing/themes.git
                 make --directory=themes install
         fi
-    #
     # pandoc
-    # 
     - make all
 
   artifacts:
@@ -34,17 +55,14 @@ pandocker:
 
 #
 # Publish the master branch
-#    
+#
 publish:
   stage: deploy
-  image:
-    name: dalibo/pandocker:18.08
-    entrypoint: [""]  # we need to override the image entrypoint
   script:
     ## Install Deploy Key
     - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
     ## Push
-    - rsync -avp fr $CLOUD_DEPLOY_DEST 
+    - rsync -avp fr $CLOUD_DEPLOY_DEST
     - rsync -avp en $CLOUD_DEPLOY_DEST
   only:
     - master@formation/workshops
