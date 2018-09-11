@@ -847,9 +847,38 @@ La documentation officielle est assez accessible :
 </div>
 
 -----
-
 ### JIT
+
 <div class="slide-content">
+ Exemple de JIT en fin de plan d'exécution :
+
+ ```
+ Planning Time: 0.553 ms
+ JIT:
+   Functions: 27
+   Generation Time: 7.058 ms
+   Inlining: true
+   Inlining Time: 16.028 ms
+   Optimization: true
+   Optimization Time: 617.294 ms
+   Emission Time: 425.744 ms
+ Execution Time: 29402.666 ms
+```
+
+</div>
+
+<div class="notes">
+
+Si le JIT est activé dans une requête, le plan d'exécution est complété, à la
+fin, des informations suivantes :
+
+  * le nombre de fonctions concernées ;
+  * les temps de génération, d'inclusion des fonctions, d'optimisation du code
+compilé...
+
+Dans l'exemple ci-dessus, on peut constater que ces coûts ne sont pas négligeables
+par rapport au temps total. Il reste à voir si ce temps perdu est récupéré sur
+le temps d'exécution de la requête, ce qui en pratique n'a rien d'évident.
 
  Qu'est-ce qui compilé ?
 
@@ -860,6 +889,11 @@ La documentation officielle est assez accessible :
   * Appels de fonctions (_inlining_)
   * Mais pas les jointures
 
+* Pas de limitation par les I/O
+  * Requêtes complexes (calculs, agrégats, appels de fonctions...)
+  * Beaucoup de lignes
+  * Assez longues pour « rentabiliser » le JIT
+  * Analytiques, pas ERP
 </div>
 
 <div class="notes">
@@ -884,6 +918,7 @@ par l'auteur principal du JIT, Andres Freund.
 
 
 </div>
+
 
 -----
 
@@ -2145,7 +2180,42 @@ Michael Paquier a écrit un
 
 <div class="notes">
 
-FIXME
+** FIXME : notes pour brouillon
+
+
+shared_buffers à 2GB
+
+
+```
+SET work_mem to '2GB';
+SET max_parallel_workers_per_gather TO 1 ;
+
+\echo Préchargement en mémoireautant que possible
+CREATE EXTENSION pg_prewarm ;
+SELECT pg_prewarm ('faits_commandes') ;
+
+SHOW shared_buffers;
+
+\pset pager off
+
+\echo "Tests avec JIT"
+
+SET jit TO on ; SET jit_above_cost TO 0 ; SET jit_inline_above_cost TO default ; SET jit_optimize_above_cost TO default ;
+
+SHOW jit ;
+SHOW jit_above_cost ;
+SHOW jit_inline_above_cost ;
+SHOW jit_optimize_above_cost ;
+
+
+... test
+
+SET jit TO off ;
+
+... test
+
+
+```
 
 </div>
 
