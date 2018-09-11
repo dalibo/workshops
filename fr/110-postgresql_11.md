@@ -88,7 +88,7 @@ history: true
 # Defilement des slides avec la roulette
 mouseWheel: true
 
-# Annule la transformation uppercase de certains thÃ¨mes
+# Annule la transformation uppercase de certains thèmes
 title-transform : none
 
 # Cache l'auteur sur la première slide
@@ -167,10 +167,10 @@ des articles en anglais :
 
 ## Nouveautés sur le partitionnement
 <div class="slide-content">
- 
+
   * Partitionnment par hachage
   * Création d'index automatique
-  * Support de clé primaires et clé étrangères
+  * Support de clés primaires et clés étrangères
   * Mise à jour de la clé de partition
   * Partitionnement par défaut
   * Amélioration des performances
@@ -180,8 +180,12 @@ des articles en anglais :
 </div>
 
 <div class="notes">
-Le partitionnement natif était une fonctionnalité très attendu de PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient dissuader de l'utilisation de celui ci.
-La version 11 apporte plusieurs améliorations au niveau du partitionnement et corrige certaines limites impactant la version 10.
+Le partitionnement natif était une fonctionnalité très attendu de
+PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient
+dissuader de l'utilisation de celui-ci.
+
+La version 11 apporte plusieurs améliorations au niveau du partitionnement et
+corrige certaines limites impactant la version 10.
 
 </div>
 
@@ -195,10 +199,20 @@ La version 11 apporte plusieurs améliorations au niveau du partitionnement et c
 </div>
 
 <div class="notes">
-Le partitionnement par hachage permet de répartir les données sur plusieurs partitions selon la valeur de hachage de la clé de partition.
-Il va être utile pour les partitions destinées à s’agrandir et pour rendre plus rapide les opérations de VACUUM.
 
-FIXME précision sur si et comment on peut étendre davantage les données en créant une nouvelle partition ?
+Le partitionnement par hachage permet de répartir les données équitablement sur
+plusieurs partitions selon la valeur de hachage de la clé de partition.
+
+Ce mode de partitionnement est utile lorsqu'on cherche à séparer les données en
+plusieurs parties sans rechercher un classement particulier des
+enregistrements.
+
+Tous les mode de partitionnement permettent d'accélérer les opérations de
+`VACUUM`.  
+Les partitionnements par liste ou par intervalles permettent de facilement
+archiver ou supprimer des données. Le partitionnement par hachage va être utile
+pour les partitions destinées à s’agrandir et pour lesquelles il n'y a pas de
+clé de partitionnement naturelle.
 
 </div>
 
@@ -206,46 +220,198 @@ FIXME précision sur si et comment on peut étendre davantage les données en cr
 
 ### Exemple de partitionnement par hachage
 <div class="slide-content">
-  * Créer une table partitionnée : 
-  ```CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)```
+  * Créer une table partitionnée :
+    `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
   * Ajouter une partition :
-  ```CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0)```
+    `CREATE TABLE t1_a PARTITION OF t1`
+    `  FOR VALUES WITH (modulus 3,remainder 0)`
+  * Augmentation du nombre de partitions délicat
 </div>
 
-<div class="note">
+<div class="notes">
+
+On fixe la valeur initiale du modulo au nombre de partitions à créer. On doit
+créer les tables partitionnées pour tous les restes car il n'est pas possible
+de définir de table par défaut avec les partitions par hachage.
+
+```sql
+v11=# CREATE TABLE t1(c1 int PRIMARY KEY) PARTITION BY HASH (c1);
+CREATE TABLE
+v11=# CREATE TABLE t1_default PARTITION OF t1 DEFAULT;
+ERROR:  a hash-partitioned table may not have a default partition
+v11=# CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);
+CREATE TABLE
+v11=# CREATE TABLE t1_b PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 1);
+CREATE TABLE
+v11=# INSERT INTO t1 SELECT generate_series(0,10000);
+ERROR:  no partition of relation "t1" found for row
+DÉTAIL : Partition key of the failing row contains (c1) = (0).
+v11=# CREATE TABLE t1_c PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 2);
+CREATE TABLE
+
+v11=# \d+ t1
+                          Table « public.t1 »
+ Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage |
+---------+---------+-----------------+-----------+------------+----------+
+ c1      | integer |                 | not null  |            | plain    |
+Clé de partition : HASH (c1)
+Index :
+    "t1_pkey" PRIMARY KEY, btree (c1)
+Partitions: t1_a FOR VALUES WITH (modulus 3, remainder 0),
+            t1_b FOR VALUES WITH (modulus 3, remainder 1),
+            t1_c FOR VALUES WITH (modulus 3, remainder 2)
+
+```
+
+Pour trier les données dans la bonne colonne, la classe d'opérateur par hachage
+par défaut des colonnes de la clé est utilisé. Il ne s'agit pas de l'opération
+modulo mathématique. On le voit bien en regardant le nombre d'insertions dans
+chaque partition pour une liste d'entiers de 0 à 10000.
+
+```sql
+v11=# INSERT INTO t1 SELECT generate_series(0,10000);
+INSERT 0 10001
+v11=# SELECT count(*) FROM t1;
+ count
+-------
+ 10001
+(1 ligne)
+
+v11=# SELECT count(*) FROM t1_a;
+ count
+-------
+  3277
+(1 ligne)
+
+v11=# SELECT count(*) FROM t1_b;
+ count
+-------
+  3369
+(1 ligne)
+
+v11=# select COUNT(*) FROM t1_c;
+ count
+-------
+  3355
+(1 ligne)
+```
+
+Il n'existe pas de commande permettant d'étendre automatiquement le nombre de
+partitions d'une table partitionnée par hachage. On peut contourner en
+détachant une partition et créant des « sous-partitions » (en terme de modulo)
+de cette partition et réinsérer les données de la table détachée dans la table
+mère.
+
+```sql
+v11=# BEGIN;
+BEGIN
+v11=# ALTER TABLE t1 DETACH PARTITION t1_a;
+ALTER TABLE
+v11=# CREATE TABLE t1_aa PARTITION OF t1 FOR VALUES WITH (modulus 6,remainder 0);
+CREATE TABLE
+v11=# CREATE TABLE t1_ab PARTITION OF t1 FOR VALUES WITH (modulus 6,remainder 3);
+CREATE TABLE
+v11=# INSERT INTO t1 SELECT * from t1_a;
+INSERT 0 3277
+v11=# DROP TABLE t1_a;
+DROP TABLE
+v11=# COMMIT;
+COMMIT
+v11=# SELECT SUM(c) count_aa_ab FROM (
+  SELECT count(*) c FROM t1_aa
+  UNION SELECT count(*) FROM t1_ab) t;
+ count_aa_ab
+-------------
+        3277
+(1 ligne)
+
+workshop11=# \d+ t1
+                         Table « public.t1 »
+ Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage |
+---------+---------+-----------------+-----------+------------+----------+
+ c1      | integer |                 | not null  |            | plain    |
+Clé de partition : HASH (c1)
+Index :
+    "t1_pkey" PRIMARY KEY, btree (c1)
+Partitions: t1_aa FOR VALUES WITH (modulus 6, remainder 0),
+            t1_ab FOR VALUES WITH (modulus 6, remainder 3),
+            t1_b FOR VALUES WITH (modulus 3, remainder 1),
+            t1_c FOR VALUES WITH (modulus 3, remainder 2)
+
+```
+
+Toutes les lignes de la table recoupée `t1_a` ont bien été insérées dans les 2
+nouvelles partitions `t1_aa` et `t1_ab`.
+
 </div>
 
 -----
 
 ### Création d'INDEX automatique
 <div class="slide-content">
-  * création d'un index sur une table partitionnée possible
-  * l'index est créé sur chaque partition
-  * création automatique sur toute nouvelle partition
-  * mise à jour de l'index possible (???)
+  * Index sur une table partitionnée entière
+  * Index créé sur chaque partition
+  * Création automatique sur toute nouvelle partition
 
 </div>
 
 <div class="notes">
-En version 10 Il n'était pas possible de créer un index sur une table partitionnée.
-
-FIXME ajout d'un exemple en version 10
-
-En version 11 FIXME
-
-Création d'index sur une table partitionnée :
+Soit la table partitionnée par intervalles :
 ```sql
-b1=# \d articles_a
-                  Table "public.articles_a"
- Column  |       Type        | Collation | Nullable | Default
----------+-------------------+-----------+----------+---------
- title   | character varying |           |          |
- content | text              |           |          |
-Partition of: articles FOR VALUES IN ('title1', 'title2', 'title3')
-Indexes:
-    "articles_a_title_idx" btree (title)
-
+CREATE TABLE livres (titre text, parution timestamp with time zone)
+  PARTITION BY RANGE (titre);
+CREATE TABLE livres_a_m PARTITION OF livres FOR VALUES FROM ('a') TO ('m');
+CREATE TABLE livres_m_z PARTITION OF livres FOR VALUES FROM ('m') TO ('zzz');
 ```
+
+En version 10, il n'était pas possible de créer un index sur une table
+partitionnée :
+```sql
+v10=# CREATE INDEX ON livres (titre);
+ERROR:  cannot create index on partitioned table "livres"
+```
+
+En version 11, les index sont créés sur chaques partitions :
+```sql
+v11=# CREATE INDEX ON livres (titre);
+CREATE INDEX
+v11=# \d livres
+                            Table « public.livres »
+ Colonne  |           Type           | Collationnement | NULL-able | Par défaut
+----------+--------------------------+-----------------+-----------+------------
+ titre    | text                     |                 |           |
+ parution | timestamp with time zone |                 |           |
+Clé de partition : RANGE (titre)
+Index :
+    "livres_titre_idx" btree (titre)
+Nombre de partitions : 2 (utilisez \d+ pour les lister)
+
+v11=# \d livres_a_m
+                          Table « public.livres_a_m »
+ Colonne  |           Type           | Collationnement | NULL-able | Par défaut
+----------+--------------------------+-----------------+-----------+------------
+ titre    | text                     |                 |           |
+ parution | timestamp with time zone |                 |           |
+Partition de : livres FOR VALUES FROM ('a') TO ('m')
+Index :
+    "livres_a_m_titre_idx" btree (titre)
+```
+
+Si on crée une nouvelle partition, l'index sera créé automatiquement :
+```sql
+v11=# CREATE TABLE livres_0_9 PARTITION OF livres FOR VALUES FROM ('0') TO ('999');
+CREATE TABLE
+v11=# \d livres_0_9
+                          Table « public.livres_0_9 »
+ Colonne  |           Type           | Collationnement | NULL-able | Par défaut
+----------+--------------------------+-----------------+-----------+------------
+ titre    | text                     |                 |           |
+ parution | timestamp with time zone |                 |           |
+Partition de : livres FOR VALUES FROM ('0') TO ('999')
+Index :
+    "livres_0_9_titre_idx" btree (titre)
+```
+
 </div>
 
 -----
@@ -254,26 +420,55 @@ Indexes:
 <div class="slide-content">
   * Support des index `UNIQUE`
   * Permet la création de clés primaires
+  * Uniquement si l'index comprend la clé de partition
 </div>
 
 <div class="notes">
 
-Création de contrainte unique sur une table partitionnée :
-
-FIXME comparaison v10 et ordre de création ?
+La version 11 offre la possibilité de créer des index sur des tables
+partitionnées. Si l'index contient la clé de partition, il est possible de
+créer un index unique :
 ```sql
-\d logs
-                            Table "public.logs"
-   Column   |            Type             | Collation | Nullable | Default
-------------+-----------------------------+-----------+----------+---------
- created_at | timestamp without time zone |           |          |
- content    | text                        |           |          |
-Partition key: RANGE (created_at)
-Indexes:
-    "logs_created_at_content_key" UNIQUE CONSTRAINT, btree (created_at, content)
-Number of partitions: 0
+v11=# CREATE UNIQUE INDEX ON livres (titre);
+CREATE INDEX
+v11=# \d livres;
+                            Table « public.livres »
+ Colonne  |           Type           | Collationnement | NULL-able | Par défaut
+----------+--------------------------+-----------------+-----------+------------
+ titre    | text                     |                 |           |
+ parution | timestamp with time zone |                 |           |
+Clé de partition : RANGE (titre)
+Index :
+    "livres_titre_idx" UNIQUE, btree (titre)
+Nombre de partitions : 3 (utilisez \d+ pour les lister)
+```
 
-Permet la création de clés primaires.
+Cela n'est pas possible sur des colonnes en dehors de la clé de partition :
+```sql
+v11=# CREATE UNIQUE INDEX ON livres (parution);
+ERROR:  insufficient columns in UNIQUE constraint definition
+DÉTAIL : UNIQUE constraint on table "livres" lacks column "titre" which is part
+         of the partition key.
+```
+
+Cette nouvelle fonctionnalité permet la création de clés primaires sur la clé
+de partition :
+```sql
+v11=# CREATE TABLE livres_primary_key (
+    titre text PRIMARY KEY, parution timestamp with time zone)
+  PARTITION BY RANGE (titre);
+CREATE TABLE
+v11=# \d livres_primary_key;
+                      Table « public.livres_primary_key »
+ Colonne  |           Type           | Collationnement | NULL-able | Par défaut
+----------+--------------------------+-----------------+-----------+------------
+ titre    | text                     |                 | not null  |
+ parution | timestamp with time zone |                 |           |
+Clé de partition : RANGE (titre)
+Index :
+    "livres_primary_key_pkey" PRIMARY KEY, btree (titre)
+Number of partitions: 0
+```
 
 </div>
 
@@ -281,34 +476,59 @@ Permet la création de clés primaires.
 
 ### Support des clés étrangères
 <div class="slide-content">
-  * Support de clé étrangère vers une table non partitionnée
-  * Une clé étrangère d'une colonne d'une table partitionnée est toujours
-  impossible
+  * Clé étrangère depuis une table non partitionnée
+  * Clé étrangère vers une table partitionnée toujours impossible
 
 </div>
 
 <div class="notes">
 
-FIXME définition de la table livre ?
-
 En version 10 les clés étrangères ne sont pas supportées dans une partition :
 ```sql
-
-CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+v10=# CREATE TABLE auteur (nom text PRIMARY KEY);
+CREATE TABLE
+v10=# CREATE TABLE bibliographie (titre text, auteur text REFERENCES auteur(nom))
+   PARTITION BY RANGE (titre);
 ERROR:  foreign key constraints are not supported on partitioned tables
-LIGNE 1 : CREATE TABLE auteur (nom text, num_livre int REFERENCES livr...
-
+LIGNE 2 :                      auteur text REFERENCES auteur(nom))
+                                           ^
 ```
 
-La version 11 supporte les clées étrangères sur les partitions.
+La version 11 supporte les clés étrangères sur les partitions. Il faut bien sûr une
+contrainte :
 ```sql
-CREATE TABLE auteur (nom text, num_livre int REFERENCES livres(num)) PARTITION BY LIST (nom);
+v11=# CREATE TABLE auteurs (nom text PRIMARY KEY);
+CREATE TABLE
+v11=# CREATE TABLE bibliographie (titre text PRIMARY KEY, auteur text REFERENCES auteurs(nom))
+    PARTITION BY RANGE (titre);
+CREATE TABLE
+v11=# \d bibliographie
+              Table « public.bibliographie »
+ Colonne | Type | Collationnement | NULL-able | Par défaut
+---------+------+-----------------+-----------+------------
+ titre   | text |                 |           |
+ auteur  | text |                 |           |
+Clé de partition : RANGE (titre)
+Contraintes de clés étrangères :
+    "bibliographie_auteur_fkey" FOREIGN KEY (auteur) REFERENCES auteurs(nom)
+Number of partitions: 0
+```
+
+Les clés étrangères depuis n'importe quelle table
+vers une table partitionnée sont cependant toujours impossibles :
+```sql
+v11=# CREATE TABLE avis_livre (avis text, livre text REFERENCES bibliographie(titre)) ;
+ERROR:  cannot reference partitioned table "livres"
+```
+
+On peut cependant créer une clé étrangère vers une partition donnée de la
+table. Ceci ne correspondra qu'à des cas d'usage bien spécifiques :
+```sql
+v11=# CREATE TABLE avis_livres_a_m (
+  nom text, livre text REFERENCES livres_a_m(titre))
+    PARTITION BY RANGE (nom);
 CREATE TABLE
 ```
-
-
-FIXME clés étrangères vers une table partitionnée toujours impossible
-
 </div>
 
 -----
@@ -316,34 +536,79 @@ FIXME clés étrangères vers une table partitionnée toujours impossible
 ### Mise à jour d'une valeur de la clé de partition
 <div class="slide-content">
 
-  * En version 10 : `DELETE` puis `INSERT`
-  * En version 11, la mise à jour fonctionne avec la commande UPDATE
-  * la ligne est alors déplacée dans une nouvelle partition
+  * En version 10 : `DELETE` puis `INSERT` obligatoires si clé modifiée
+  * En version 11, `UPDATE` fonctionne
+  * La ligne est alors déplacée dans une nouvelle partition
 
 </div>
 
 <div class="notes">
 
-En version 10 il n'était pas possible de mettre à jour une clé de partition entre deux partition différentes avec la commande UPDATE, il était nécessaire de faire un DELETE puis un INSERT
+En version 10 il n'était pas possible de mettre à jour une clé de partition
+entre deux partitions différentes avec la commande `UPDATE`, il était
+nécessaire de faire un `DELETE` puis un `INSERT`.
 
+En version 11, PostgreSQL rend la chose transparente.
 </div>
-
 -----
 
 ### Partition par défaut
 <div class="slide-content">
 
-  * contiendra toutes les données n'appartenant à aucune des autres partitions
-  ```CREATE TABLE articles_default PARTITION OF articles DEFAULT;```
+  * Pour les données n'appartenant à aucune autre partition :
+  `CREATE TABLE livres_default PARTITION OF livres DEFAULT;`
 
 </div>
 
 <div class="notes">
+PostgreSQL génère une erreur lorsque les données n'appartiennent à aucune
+partition :
+```sql
+v11=# INSERT INTO livres VALUES ('zzzz', now());
+ERROR:  no partition of relation "livres" found for row
+DÉTAIL : Partition key of the failing row contains (titre) = (zzzz).
+```
 
-En version 10 PostgreSQL générait une erreur lorsque les données n'appartenaient à aucune partitions.
+En version 11, il est possible de définir une partition par défaut où iront les
+données sans partition explicite :
+```sql
+v11=# CREATE TABLE livres_default PARTITION OF livres DEFAULT;
+CREATE TABLE
+v11=# INSERT INTO livres VALUES ('zzzz', now());
+INSERT 0 1
+```
 
-FIXME que se passe-t-il quand on crée une partition correspondant à des lignes contenues dans la partition par défaut ?
+Attention : on ne pourra pas ensuite créer de partition dont la contrainte
+contiendrait des lignes présentes dans la partition par défaut :
+```sql
+v11=# CREATE TABLE livres_zzz_zzzzz PARTITION OF livres
+  FOR VALUES FROM ('zzz') TO ('zzzzz');
+ERROR:  updated partition constraint for default partition "livres_default"
+        would be violated by some row
+```
 
+Le contournement est le suvant : créer la partition en dehors de la table
+partitionnée, insérer les enregistrements de la table par défaut dans la
+nouvelle table, supprimer ces enregistrements de la table par défaut et
+attacher la table comme nouvelle partition :
+```sql
+v11=# BEGIN;
+BEGIN
+v11=# CREATE TABLE livres_zzz_zzzzz (
+  titre text CHECK (titre>='zzz' AND titre<'zzzzz'),
+  parution timestamp with time zone);
+CREATE TABLE
+v11=# INSERT INTO livres_zzz_zzzzz
+  SELECT * FROM livres_default WHERE (titre>='zzz' AND titre<'zzzzz');
+INSERT 0 1
+v11=# DELETE FROM livres_default WHERE (titre>='zzz' AND titre<'zzzzz');
+DELETE 1
+v11=# ALTER TABLE livres ATTACH PARTITION livres_zzz_zzzzz
+  FOR VALUES FROM ('zzz') TO ('zzzzz');
+ALTER TABLE
+v11=# COMMIT;
+COMMIT
+```
 
 </div>
 
@@ -351,7 +616,7 @@ FIXME que se passe-t-il quand on crée une partition correspondant à des lignes
 ### Meilleures performances des SELECT
 <div class="slide-content">
   * Élagage dynamique des partitions
-  * Control Partition Pruning
+  * _Control Partition Pruning_
 </div>
 
 <div class="notes">
@@ -369,18 +634,128 @@ FIXME
 
 
 <div class="notes">
-
-En version 10, la clause **ON CONFLICT** n'était pas supporté sur le partitionnement :
+En version 10, la clause `ON CONFLICT` n'était pas supportée sur le
+partitionnement :
 ```sql
-b1=# insert into articles values ('title2') on conflict do nothing;
-ERREUR:  la clause ON CONFLICT n'est pas supporté avec les tables partitionnées
+v10=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
+ERROR:  ON CONFLICT clause is not supported with partitioned tables
 ```
 
-En version 11 la clause fonctionne :
+En version 11 la clause fonctionne :
 ```sql
-b1=# insert into articles values ('title2') on conflict do nothing;
+v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 INSERT 0 1
+v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
+INSERT 0 0
 ```
+
+Une évolution a été mise en place : le _Partition-Wise Aggregate_.
+
+Les paramètres `enable_partitionwise_join` et `enable_partitionwise_aggregate`
+ont été ajoutés. Ils sont désactivés par défaut. En cas de jointure entre
+plusieurs tables partitionnées avec les mêmes contraintes, le moteur va d'abord
+effectuer des jointures entre les différentes partitions de chaque table. Il
+joindra dans un deuxième temps ces résultats entre eux.
+
+L'activation de ces nouveaux paramètres va permettre au moteur d'effectuer dans
+un premier temps les jointures entre les partitions de différentes tables
+possédant les mêmes contraintes. Il effectuera dans un deuxième temps la
+jointure des résultats entre eux.
+
+```sql
+CREATE TABLE t2(c1 int) PARTITION BY HASH (c1);
+CREATE TABLE t2_a PARTITION OF t2 FOR VALUES WITH (modulus 2,remainder 0);
+CREATE TABLE t2_b PARTITION OF t2 FOR VALUES WITH (modulus 2,remainder 1);
+INSERT INTO t2 SELECT generate_series(0,200000);
+CREATE TABLE t3(c1 int) PARTITION BY HASH (c1);
+CREATE TABLE t3_a PARTITION OF t3 FOR VALUES WITH (modulus 2,remainder 0);
+CREATE TABLE t3_b PARTITION OF t3 FOR VALUES WITH (modulus 2,remainder 1);
+INSERT INTO t3 SELECT generate_series(0,400000);
+VACUUM ANALYSE t2, t3;
+```
+
+Pour plus de simplicité dans la lecture des plans d'exécution, nous désactivons
+la parallélisation. Il faut noter que les optimisations décrites fonctionnent
+en mode parallélisé :
+```sql
+v11=# SET max_parallel_workers_per_gather=0;
+SET
+```
+
+Voici le plan sans les optimisations. Les jointures sont effectuées entre les partitions d'une même table :
+```sql
+v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
+                QUERY PLAN
+------------------------------------------
+ Aggregate
+   ->  Hash Join
+         Hash Cond: (t3_a.c1 = t2_a.c1)
+         ->  Append
+               ->  Seq Scan on t3_a
+               ->  Seq Scan on t3_b
+         ->  Hash
+               ->  Append
+                     ->  Seq Scan on t2_a
+                     ->  Seq Scan on t2_b
+(10 lignes)
+```
+
+Voici le plan avec l'activation de la jointure des partitions,
+`enable_partitionwise_join`. On remarque que les jointures se font en premier
+lieu entre les partitions de même type :
+```sql
+v11=# SET enable_partitionwise_join = on;
+SET
+v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
+                  QUERY PLAN
+----------------------------------------------
+ Aggregate
+   ->  Append
+         ->  Hash Join
+               Hash Cond: (t3_a.c1 = t2_a.c1)
+               ->  Seq Scan on t3_a
+               ->  Hash
+                     ->  Seq Scan on t2_a
+         ->  Hash Join
+               Hash Cond: (t3_b.c1 = t2_b.c1)
+               ->  Seq Scan on t3_b
+               ->  Hash
+                     ->  Seq Scan on t2_b
+(12 lignes)
+```
+
+Voici le plan avec l'activation de l'agrégation et le regroupement des
+partitions, `enable_partitionwise_aggregate`. Une fois les jointures entre les
+partitions de même type effectuées, une agrégation partielle de celles-ci sont
+effectuées avant l'agrégation finale entre les différentes jointures :
+```sql
+v11=# SET enable_partitionwise_aggregate = on;
+SET
+v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
+                     QUERY PLAN
+----------------------------------------------------
+ Finalize Aggregate
+   ->  Append
+         ->  Partial Aggregate
+               ->  Hash Join
+                     Hash Cond: (t3_a.c1 = t2_a.c1)
+                     ->  Seq Scan on t3_a
+                     ->  Hash
+                           ->  Seq Scan on t2_a
+         ->  Partial Aggregate
+               ->  Hash Join
+                     Hash Cond: (t3_b.c1 = t2_b.c1)
+                     ->  Seq Scan on t3_b
+                     ->  Hash
+                           ->  Seq Scan on t2_b
+(14 lignes)
+```
+
+FIXME : trouver un use case idéal pour cette fonctionnalité
+
+
+FIXME `FOR EACH ROW trigger`
+
 </div>
 
 -----
@@ -952,7 +1327,7 @@ FIXME
 
 ### psql
 <div class="slide-content">
- 
+
   * `SELECT ... FROM ... \gdesc`
     * types des colonnes
     * ou `\gdesc` seul après exécution
