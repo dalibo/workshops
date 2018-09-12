@@ -763,8 +763,9 @@ FIXME `FOR EACH ROW trigger`
 ## Performances
 
 <div class="slide-content">
-  * compilation Just In Time (JIT)
-  * parallélisme
+  * Compilation Just In Time (JIT)
+  * Parallélisme étendu à plusieurs commandes
+  * Ajout de colonne avec `DEFAULT` sans réécriture de la table
 
 </div>
 
@@ -783,24 +784,137 @@ FIXME `FOR EACH ROW trigger`
 </div>
 
 <div class="notes">
+
+FIXME : TODO
+
 </div>
 
 -----
 
-### Parallélisation
+### Parallélisme
+
 <div class="slide-content">
 
 **Améliorations du parallélisme**
 
-  * Parallélisation sur les types de jointures Hash
-  * Parallélisation des types de noeud Append
-  * CREATE TABLE AS SELECT statement
-  * CREATE MATERIALIZED VIEW
-  * SELECT INTO statement
-  * CREATE INDEX statement
+  * Nœuds Append (`UNION ALL`)
+  * Jointures type Hash
+  * `CREATE TABLE AS SELECT...`
+  * `CREATE MATERIALIZED VIEW`
+  * `SELECT INTO`
+  * `CREATE INDEX` (`max_parallel_maintenance_workers`)
 </div>
 
 <div class="notes">
+
+La parallélisation des requêtes avait été introduite en version 9.6, sur
+certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
+uniquement. La version 10 avait étendu à d'autres nœuds.
+
+Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
+de type _Append_, qui servent aux `UNION ALL` notamment :
+
+**FIXME** - exemple
+
+
+Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
+hachage). Soit les tables suivantes :
+
+```sql
+CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
+CREATE TABLE b as SELECT i FROM generate_series(1,10000000) i ; 
+CREATE INDEX ON a(i) ;
+
+SET work_mem TO '1GB' ;
+SET max_parallel_workers_per_gather TO 2;
+```
+
+Dans la version 10, le _hash join_ est déjà parallélisé :
+```sql
+v10=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
+        WHERE a.i BETWEEN 500000 AND 900000;
+                            QUERY PLAN
+-------------------------------------------------------------------
+ Gather
+   Workers Planned: 2
+   ->  Hash Join
+         Hash Cond: (b.i = a.i)
+         ->  Parallel Seq Scan on b
+         ->  Hash
+               ->  Index Only Scan using a_i_idx on a
+                     Index Cond: ((i >= 500000) AND (i <= 900000))
+(8 lignes)
+```
+
+Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11,
+ils partagent la même table de travail et peuvent donc paralléliser sa
+construction (ici en parallélisant l'_Index Scan_) :
+
+```sql
+v11=# SET enable_parallel_hash = on;
+SET
+v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
+        WHERE a.i BETWEEN 500000 AND 900000;
+                            QUERY PLAN
+-------------------------------------------------------------------
+ Gather
+   Workers Planned: 2
+   ->  Parallel Hash Join
+         Hash Cond: (b.i = a.i)
+         ->  Parallel Seq Scan on b
+         ->  Parallel Hash
+               ->  Parallel Index Only Scan using a_i_idx on a
+                     Index Cond: ((i >= 500000) AND (i <= 900000))
+(8 lignes)
+```
+
+L'auteur de cette optmisation a écrit un article assez complet sur le sujet :
+<https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
+
+
+FIXME :  exemple d'Append avec UNION ALL
+
+FIXME : exemple SELECT INTO
+
+La création d'index peut à présent être parallélisée, ce qui va permettre de
+gros gains de temps dans certains cas. La parallélisation est activée par
+défaut et est contrôlée par un nouveau paramètre,
+`max_parallel_maintenance_workers` (défaut : 2) et non l'habituel
+`max_parallel_workers_per_gather`.
+
+```sql
+v11=# SET maintenance_work_mem TO '2GB';
+SET
+v11=# CREATE TABLE t9 AS SELECT random() FROM  generate_series(1,5000000);
+CREATE TABLE
+v11=# SET max_parallel_maintenance_workers TO 0;
+SET
+v11=# \timing on
+Chronométrage activé.
+
+v11=# CREATE index ix_t9 ON t9 (random);
+CREATE INDEX
+Durée : 86731,660 ms (01:26,732)
+v11=# DROP INDEX ix_t9 ;
+DROP INDEX
+v11=# SET max_parallel_maintenance_workers TO 4;
+SET
+v11=# CREATE index ix_t9 ON t9 (random) ;
+CREATE INDEX
+Durée : 67278,338 ms (01:07,278)
+```
+
+Le gain en temps est dans cet exemple de plus de 20 % pour 4 workers.
+
+La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
+nombre de workers au niveau de la définition de la table, mais attention cela
+va aussi impacter vos requêtes !
+
+Pour de plus amples détails, les Allemands de Cybertec ont mis un [article sur
+le
+sujet](https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/)
+en ligne.
+
 </div>
 
 -----
@@ -1556,7 +1670,8 @@ Les développements de la version 12 ont commencé. Les premiers commit fests
 nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et réplication logique. FIXME ?
 
-Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des modifications validées pour chaque commit fest :
+Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
+modifications validées pour chaque commit fest :
 
   * [juillet 2018](https://commitfest.postgresql.org/18/?status=4)
   * [septembre 2018](https://commitfest.postgresql.org/19/?status=4)
