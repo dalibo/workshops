@@ -904,7 +904,7 @@ CREATE INDEX
 Durée : 67278,338 ms (01:07,278)
 ```
 
-Le gain en temps est ici de plus de 20% pour 4 workers.
+Le gain en temps est dans cet exemple de plus de 20 % pour 4 workers.
 
 La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
 nombre de workers au niveau de la définition de la table, mais attention cela
