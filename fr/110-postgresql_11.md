@@ -808,7 +808,7 @@ FIXME : TODO
 <div class="notes">
 
 La parallélisation des requêtes avait été introduite en version 9.6, sur
-certains nœuds d'exécution seulement, et pour les requêtes en lecture seules
+certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
 uniquement. La version 10 avait étendu à d'autres nœuds.
 
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
