@@ -765,7 +765,7 @@ FIXME `FOR EACH ROW trigger`
 <div class="slide-content">
   * Compilation Just In Time (JIT)
   * Parallélisme étendu à plusieurs commandes
-  * Ajout de colonne avec `DEFAULT` sans réécriture de la table
+  * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
 
 </div>
 
@@ -916,6 +916,87 @@ sujet](https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-f
 en ligne.
 
 </div>
+
+-----
+
+### ALTER TABLE ADD COLUMN ... DEFAULT ... sans réécriture
+
+<div class="slide-content">
+
+  * Réécriture complète de la table avant v11 !
+  * v11 : valeur par défaut mémorisée, ajout instantané
+  * ... si défaut n'est pas une fonction volatile
+
+</div>
+
+<div class="notes">
+
+Jusqu'en version 10 incluse, l'ajout d'une colonne avec une valeur `DEFAULT` (à
+raison de plus avec `NOT NULL`) provoquait la réécriture complète de la table,
+en bloquant tous les accès.  Sur de grosses tables, l'interruption de service
+était parfois intolérable et menait à des mises à jour par étapes délicates.
+
+La version 11 prend simplement note de la valeur par défaut de la nouvelle
+colonne et n'a pas besoin de l'écrire physiquement pour la restituer ensuite.
+
+Une contrainte est que cette valeur par défaut soit une constante pendant
+l'ordre, ce qui est le cas de `DEFAULT 1234`, `DEFAULT now()` ou de toute
+fonction déclarée comme `STABLE` ou `IMMUTABLE`, mais pas de `DEFAULT
+clock_timestamp()` par exemple.  Si la valeur par défaut est fournie par une
+fonction déclarée comme, ou implicitement `VOLATILE`, la réécriture de la
+table est nécessaire.
+
+Le verrou _Access Exclusive_ reste nécessaire, et peut entraîner quelques
+attentes, mais il est relâché beaucoup plus rapidement que si la réécriture
+était nécessaire.
+
+La table n'est donc pas réécrite ni ne change de taille. Par la suite, chaque
+ligne modifée sera réécrite en intégrant la valeur par défaut. De même, un
+`VACUUM FULL` réécrira la table avec ces valeurs par défaut, donnant au final
+une table potentiellement beaucoup plus grande qu'avant le `VACUUM` !
+
+La table système `pg_attribute` contient 2 nouveaux champs `atthasmissing` et
+`attmissingval` indiquant si un champ possède une telle valeur par défaut :
+```sql
+v11=# ALTER TABLE ajouts ADD COLUMN d3 timetz DEFAULT (now()) ;
+ALTER TABLE
+
+v11=# SELECT * FROM pg_attribute
+   WHERE attrelid = (SELECT oid FROM pg_class WHERE relname='ajouts')
+   and atthasmissing = 't' \gx
+
+-[ RECORD 1 ]-+---------------------
+attrelid      | 69352
+attname       | d3
+atttypid      | 1266
+attstattarget | -1
+attlen        | 12
+attnum        | 7
+attndims      | 0
+attcacheoff   | -1
+atttypmod     | -1
+attbyval      | f
+attstorage    | p
+attalign      | d
+attnotnull    | f
+atthasdef     | t
+atthasmissing | t
+attidentity   |
+attisdropped  | f
+attislocal    | t
+attinhcount   | 0
+attcollation  | 0
+attacl        |
+attoptions    |
+attfdwoptions |
+attmissingval | {16:55:40.017082+02}
+```
+
+
+Pour les détails, voir <https://brandur.org/postgres-default>.
+
+</div>
+
 
 -----
 
