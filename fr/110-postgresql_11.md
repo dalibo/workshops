@@ -1235,6 +1235,21 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 <div class="notes">
 Postgresql ajoute de nouveaux rôles de sécurité permettant d'affiner la permission des utilisateurs. Ces nouveaux rôle seront pourront êtres utile pour l'import ou l'export de données avec l'ordre COPY.
 
+Contenu du fichier t1.csv :
+```sql
+$ cat /tmp/t1.csv 
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
 Création de l'utilisateur user_r membre du rôle pg_read_server_files : 
 
 ```sql
@@ -1243,6 +1258,16 @@ CREATE ROLE
 postgres@v11=# GRANT pg_read_server_files TO user_r;
 GRANT ROLE
 ```
+En version 10 le rôle pg_read_server_files n'existe pas et postgreSQL retourne un message d'erreur :
+```sql
+postgres@v10=# CREATE USER user_r;
+CREATE ROLE
+postgres@v10=# GRANT pg_read_server_files TO user_r;
+ERROR:  role "pg_read_server_files" does not exist
+```
+
+Création de la table t1 qui récuperera les données :
+user_r@v11=> CREATE TABLE t1(data int);
 
 Import des données depuis un fichier externe csv : 
 
@@ -1250,6 +1275,25 @@ Import des données depuis un fichier externe csv :
 user_r@v11=> COPY t1 FROM '/tmp/t1.csv' CSV ;
 COPY 11
 ```
+
+Vérification des données sur la table t1;
+```sql
+user_r@v11=> select * from t1;
+ data 
+------
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+   10
+
+```
+
 Si l'utilisateur tente d'envoyer les données d'une table vers un fichier externe, le message suivant apparaît : 
 
 ```sql
@@ -1260,6 +1304,61 @@ user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
 ERROR:  must be superuser or a member of the pg_write_server_files role to COPY to a file
 HINT:  Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
 ```
+Le role pg_write server file va permettre d'envoyer les données les données d'une table vers un fichier externe :
+
+Création de l'utilisateur user_w membre du rôle pg_write_server_files : 
+```sql
+postgres@v11=# CREATE USER user_w;
+CREATE ROLE
+postgres@v11=# GRANT pg_write_server_files TO user_w;
+GRANT ROLE
+```
+Création de la table t2 (l'utilisateur doit être le propriétaire de la table) :
+```sql
+user_w@v11=> CREATE TABLE t2(data int);
+CREATE TABLE
+user_w@v11=>  INSERT INTO t2 SELECT * from generate_series(1,10);
+INSERT 0 10
+```
+
+Contenu de la table t2 :
+```sql
+user_w@v11=> select * from t2;
+ data 
+------
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+   10
+```
+
+Export des données de la table dans un fichier csv :
+
+```sql
+user_w@v11=> COPY t2 TO '/tmp/t2.csv' CSV ;
+COPY 10OPY t2 TO '/tmp/t1.csv' CSV ;
+```
+Vérification des données dans le fichier csv : 
+```sql
+$ cat /tmp/t2.csv 
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+
 </div>
 
 -----
