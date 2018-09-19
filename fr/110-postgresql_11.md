@@ -3372,7 +3372,8 @@ pg_prewarm
 postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
 							 QUERY PLAN
 -------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4) (actual time=0.016..715.889 rows=10000000 loops=1)
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.016..715.889 rows=10000000 loops=1)
 Buffers: shared hit=44248
 Planning Time: 0.038 ms
 Execution Time: 1123.740 ms
@@ -3380,7 +3381,7 @@ Execution Time: 1123.740 ms
 
 ```
 
-L'extension pg_buffercache permet de voir le contenu des _shared buffers_ (ici
+L'extension `pg_buffercache` permet de voir le contenu des _shared buffers_ (ici
 on filtre les tables et index systèmes pour la lisibilité) :
 
 ```sql
