@@ -2114,25 +2114,32 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 -----
 
-## Mise à jour d'une partition avec un `UPDATE`.
+## Mise à jour d'une partition avec un `UPDATE`
 
-La table partitionné est créer sur une base en version 10 et 11.
+La table partitionné est créé sur les deux instances en version 10 et 11.
 
-Création d'une table partitionné par intervalle :
+  * Création d'une table partitionné par intervalle :
 
-```
+```sql
 CREATE TABLE date_2018(date timestamp) PARTITION BY RANGE(date);
 ```
-Création des partitions :
-```
-CREATE TABLE date_2018a PARTITION OF date_2018 FOR VALUES FROM ('2018-01-01') TO ('2018-03-31');
-CREATE TABLE date_2018b PARTITION OF date_2018 FOR VALUES FROM ('2018-04-01') to ('2018-06-30');
-CREATE TABLE date_2018c partition of date_2018 FOR VALUES FROM ('2018-07-01') to ('2018-09-30');
-CREATE TABLE date_2018d partition of date_2018 FOR VALUES FROM ('2018-10-01') to ('2018-12-31');
+
+  * Création des partitions :
+
+```sql
+CREATE TABLE date_2018a PARTITION OF date_2018
+       FOR VALUES FROM ('2018-01-01') TO ('2018-03-31');
+CREATE TABLE date_2018b PARTITION OF date_2018
+       FOR VALUES FROM ('2018-04-01') to ('2018-06-30');
+CREATE TABLE date_2018c partition of date_2018
+       FOR VALUES FROM ('2018-07-01') to ('2018-09-30');
+CREATE TABLE date_2018d partition of date_2018
+       FOR VALUES FROM ('2018-10-01') to ('2018-12-31');
 ```
 
-Insertion de données dans les partitions :
-```
+  * Insertion de données dans les partitions :
+
+```sql
 INSERT INTO date_2018 VALUES ('2018-01-15');
 INSERT INTO date_2018 VALUES ('2018-02-10');
 INSERT INTO date_2018 VALUES ('2018-03-12');
@@ -2144,10 +2151,11 @@ INSERT INTO date_2018 VALUES ('2018-11-30');
 INSERT INTO date_2018 VALUES ('2018-12-19');
 ```
 
-Vérification du contenu des tables :
-```
-SELECT * FROM date_2018;
-        date         
+  * Vérification du contenu des tables sur les deux instances :
+
+```sql
+=# SELECT * FROM date_2018;
+        date
 ---------------------
  2018-01-15 00:00:00
  2018-02-10 00:00:00
@@ -2159,66 +2167,72 @@ SELECT * FROM date_2018;
  2018-11-30 00:00:00
  2018-12-19 00:00:00
 
-SELECT * FROM date_2018a;
-        date         
+=# SELECT * FROM date_2018a;
+        date
 ---------------------
  2018-01-15 00:00:00
  2018-02-10 00:00:00
  2018-03-12 00:00:00
 
-SELECT * FROM date_2018b;
-        date         
+=# SELECT * FROM date_2018b;
+        date
 ---------------------
  2018-05-25 00:00:00
  2018-06-02 00:00:00
 
-SELECT * FROM date_2018c;
-        date         
+=# SELECT * FROM date_2018c;
+        date
 ---------------------
  2018-08-12 00:00:00
 
-SELECT * FROM date_2018d;
-        date         
+=# SELECT * FROM date_2018d;
+        date
 ---------------------
  2018-10-20 00:00:00
  2018-11-30 00:00:00
  2018-12-19 00:00:00
+```
 
-```
-Version 10
-La mise à jour avec UPDATE retourne une erreur :
-```
+### UPDATE en version 10 
+
+En version 10, la mise à jour avec UPDATE retourne une erreur :
+
+```sql
 v10=# UPDATE date_2018 SET date='2018-09-22' WHERE date='2018-01-15';
 ERROR:  new row for relation "date_2018a" violates partition constraint
 DÉTAIL : Failing row contains (2018-09-22 00:00:00).
+```
 
-```
-L'opération fonctionnera seulement si la donnée mise à jour sur se trouve sur la même partition :
-```
+L'opération fonctionnera seulement si la donnée mise à jour sur se trouve sur
+la même partition :
+
+```sql
 v10=# UPDATE date_2018 set date='2018-09-22' WHERE date='2018-08-12';
 UPDATE 1
 v10=# SELECT * FROM date_2018c;
-        date         
+        date
 ---------------------
  2018-09-22 00:00:00
 ```
 
-Si la donnée mise à jour doit se retouver dans une autre partition il est nécessaire de supprimer la donnée de l'ancienne partition et d'insérer la donnée souhaiter dans la nouvelle partition.
-```
+Si la donnée mise à jour doit se retouver dans une autre partition il est
+nécessaire de supprimer la donnée de l'ancienne partition et d'insérer la
+donnée souhaiter dans la nouvelle partition.
+
+```sql
 v10=# DELETE FROM date_2018a WHERE date='2018-03-12';
 DELETE 1
 v10=# SELECT * FROM date_2018a;
-        date         
+        date
 ---------------------
  2018-01-15 00:00:00
  2018-02-10 00:00:00
-
 
 v10=# INSERT INTO date_2018 values ('2018-07-14');
 INSERT 0 1
 
 v10=# SELECT * FROM date_2018;
-        date         
+        date
 ---------------------
  2018-01-15 00:00:00
  2018-02-10 00:00:00
@@ -2230,30 +2244,33 @@ v10=# SELECT * FROM date_2018;
  2018-11-30 00:00:00
  2018-12-19 00:00:00
 
-
 v10=# SELECT * FROM date_2018a;
-        date         
+        date
 ---------------------
  2018-01-15 00:00:00
  2018-02-10 00:00:00
 
-
 v10=# SELECT * FROM date_2018c;
-        date         
+        date
 ---------------------
  2018-09-22 00:00:00
  2018-07-14 00:00:00
 ```
-Version11
+
+### UPDATE en version 11
+
 La mise à jour avec UPDATE fonctionne :
-```
+
+```sql
 v11=# UPDATE date_2018 SET date='2018-09-22' WHERE date='2018-01-15';
 UPDATE 1
 ```
+
 Les données sont automatiquement redirigées vers les bonnes partition :
-```
+
+```sql
 v11=# SELECT * FROM date_2018;
-        date         
+        date
 ---------------------
  2018-02-10 00:00:00
  2018-03-12 00:00:00
@@ -2265,22 +2282,20 @@ v11=# SELECT * FROM date_2018;
  2018-11-30 00:00:00
  2018-12-19 00:00:00
 
-
 v11=# SELECT * FROM date_2018a;
-        date         
+        date
 ---------------------
  2018-02-10 00:00:00
  2018-03-12 00:00:00
 
-
 v11=# SELECT * FROM date_2018c;
-        date         
+        date
 ---------------------
  2018-08-12 00:00:00
  2018-09-22 00:00:00
 ```
 
------ 
+-----
 
 ## Support du TRUNCATE dans la réplication logique
 
