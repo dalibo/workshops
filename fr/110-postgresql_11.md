@@ -1248,7 +1248,23 @@ $ cat /tmp/t1.csv
 8
 9
 10
+
 ```
+En version 10 il était nécessaire d'être superutilisateur pour pouvoir importer les données d'une table depuis un fichier externe.
+
+Création d'un utilisateur standard :
+```sql
+postgres@v10=# CREATE USER user_std;
+CREATE ROLE
+```
+Avec l'utilisateur standard l'import de données depuis un fichier externe retourne l'erreur suivante :
+```sql
+user_std@v10=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+ERROR:  must be superuser to COPY to or from a file
+HINT : Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
+```
+
+En version 11 le rôle pg_read_server_files permet a un utilisateur standard d'importer les données depuis un fichier externe.
 
 Création de l'utilisateur user_r membre du rôle pg_read_server_files : 
 
@@ -1257,13 +1273,6 @@ postgres@v11=# CREATE USER user_r;
 CREATE ROLE
 postgres@v11=# GRANT pg_read_server_files TO user_r;
 GRANT ROLE
-```
-En version 10 le rôle pg_read_server_files n'existe pas et postgreSQL retourne un message d'erreur :
-```sql
-postgres@v10=# CREATE USER user_r;
-CREATE ROLE
-postgres@v10=# GRANT pg_read_server_files TO user_r;
-ERROR:  role "pg_read_server_files" does not exist
 ```
 
 Création de la table t1 qui récuperera les données :
