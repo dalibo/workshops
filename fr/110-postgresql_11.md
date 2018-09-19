@@ -485,12 +485,13 @@ Number of partitions: 0
 
 En version 10 les clés étrangères ne sont pas supportées dans une partition :
 ```sql
-v10=# CREATE TABLE auteur (nom text PRIMARY KEY);
+v10=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
-v10=# CREATE TABLE bibliographie (titre text, auteur text REFERENCES auteur(nom))
+v10=# CREATE TABLE bibliographie
+   (titre text, auteur text REFERENCES auteurs(nom))
    PARTITION BY RANGE (titre);
 ERROR:  foreign key constraints are not supported on partitioned tables
-LIGNE 2 :                      auteur text REFERENCES auteur(nom))
+LIGNE 2 :                      auteur text REFERENCES auteurs(nom))
                                            ^
 ```
 
@@ -499,7 +500,8 @@ contrainte :
 ```sql
 v11=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
-v11=# CREATE TABLE bibliographie (titre text PRIMARY KEY, auteur text REFERENCES auteurs(nom))
+v11=# CREATE TABLE bibliographie
+    (titre text PRIMARY KEY, auteur text REFERENCES auteurs(nom))
     PARTITION BY RANGE (titre);
 CREATE TABLE
 v11=# \d bibliographie
@@ -517,7 +519,7 @@ Number of partitions: 0
 Les clés étrangères depuis n'importe quelle table
 vers une table partitionnée sont cependant toujours impossibles :
 ```sql
-v11=# CREATE TABLE avis_livre (avis text, livre text REFERENCES bibliographie(titre)) ;
+v11=# CREATE TABLE avis_livre (avis text, livre text REFERENCES bibliographie(titre));
 ERROR:  cannot reference partitioned table "livres"
 ```
 
@@ -2018,16 +2020,22 @@ On commence par installer le RPM du dépôt `pgdg-centos11-11-2.noarch.rpm`
 depuis <https://yum.postgresql.org/>:
 
 ```
-# yum install -y https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-6-x86_64/pgdg-centos11-11-2.noarch.rpm
+# pgdg_yum_11=https://download.postgresql.org/pub/repos/yum
+# pgdg_yum_11+=/11/redhat/rhel-6-x86_64/pgdg-centos11-11-2.noarch.rpm
+# yum install -y $pgdg_yum_11
 Installed:
   pgdg-centos11.noarch 0:11-2
 
 # yum install -y postgresql11 postgresql11-contrib postgresql11-server
 
 Installed:
-  postgresql11.x86_64 0:11.0-beta2_1PGDG.rhel6                  postgresql11-contrib.x86_64 0:11.0-beta2_1PGDG.rhel6                  postgresql11-server.x86_64 0:11.0-beta2_1PGDG.rhel6                 
+  postgresql11.x86_64 0:11.0-beta2_1PGDG.rhel6
+  postgresql11-contrib.x86_64 0:11.0-beta2_1PGDG.rhel6
+  postgresql11-server.x86_64 0:11.0-beta2_1PGDG.rhel6
 Dependency Installed:
-  libicu.x86_64 0:4.2.1-14.el6                               libxslt.x86_64 0:1.1.26-2.el6_3.1                               postgresql11-libs.x86_64 0:11.0-beta2_1PGDG.rhel6
+  libicu.x86_64 0:4.2.1-14.el6
+  libxslt.x86_64 0:1.1.26-2.el6_3.1
+  postgresql11-libs.x86_64 0:11.0-beta2_1PGDG.rhel6
 ```
 
 On peut ensuite initialiser une instance :
@@ -2055,9 +2063,10 @@ Enfin, on vérifie la version :
 
 ```sql
 postgres=# select version();
-                                                  version                                                   
-------------------------------------------------------------------------------------------------------------
- PostgreSQL 11beta2 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18), 64-bit
+                         version
+-------------------------------------------------------------------
+ PostgreSQL 11beta2 on x86_64-pc-linux-gnu, 
+   compiled by gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18), 64-bit
 ```
 
 On répète ensuite le processus d'installation de façon à installer PostgreSQL
@@ -2066,17 +2075,19 @@ On répète ensuite le processus d'installation de façon à installer PostgreSQ
 Le RPM du dépôt est `pgdg-centos10-10-2.noarch.rpm` :
 
 ```
-# pgdg_yum=https://download.postgresql.org/pub/repos/yum/
-# pgdg_yum+=/10/redhat/rhel-6.9-x86_64/pgdg-centos10-10-2.noarch.rpm
-# yum install -y $pgdg_yum 
+# pgdg_yum_10=https://download.postgresql.org/pub/repos/yum
+# pgdg_yum_10+=/10/redhat/rhel-6.9-x86_64/pgdg-centos10-10-2.noarch.rpm
+# yum install -y $pgdg_yum_10
 
 Installed:
-  pgdg-centos10.noarch 0:10-2     
+  pgdg-centos10.noarch 0:10-2
 
 
 # yum install -y postgresql10 postgresql10-contrib postgresql10-server
 Installed:
-  postgresql10.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-contrib.x86_64 0:10.4-1PGDG.rhel6                        postgresql10-server.x86_64 0:10.4-1PGDG.rhel6                       
+  postgresql10.x86_64 0:10.4-1PGDG.rhel6
+  postgresql10-contrib.x86_64 0:10.4-1PGDG.rhel6
+  postgresql10-server.x86_64 0:10.4-1PGDG.rhel6
 
 Dependency Installed:
   postgresql10-libs.x86_64 0:10.4-1PGDG.rhel6
@@ -2103,7 +2114,7 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 -----
 
-## Tester le support de TRUNCATE avec la réplication logique
+## Support du TRUNCATE dans la réplication logique
 
 <div class="notes">
 Le test se déroulera à partir de deux instances :
@@ -2382,47 +2393,14 @@ v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
 
 On a un gain de performance à l'insertion de 40%.
 
-</notes>
+</div>
+
+-----
 
 ## JIT
 
 <div class="notes">
 
-** FIXME : notes pour brouillon
-
-
-shared_buffers à 2GB
-
-
-```
-SET work_mem to '2GB';
-SET max_parallel_workers_per_gather TO 1 ;
-
-\echo Préchargement en mémoireautant que possible
-CREATE EXTENSION pg_prewarm ;
-SELECT pg_prewarm ('faits_commandes') ;
-
-SHOW shared_buffers;
-
-\pset pager off
-
-\echo "Tests avec JIT"
-
-SET jit TO on ; SET jit_above_cost TO 0 ; SET jit_inline_above_cost TO default ; SET jit_optimize_above_cost TO default ;
-
-SHOW jit ;
-SHOW jit_above_cost ;
-SHOW jit_inline_above_cost ;
-SHOW jit_optimize_above_cost ;
-
-
-... test
-
-SET jit TO off ;
-
-... test
-
-
-```
+FIXME
 
 </div>
