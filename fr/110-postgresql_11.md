@@ -1930,10 +1930,22 @@ Add a generational memory allocator which is optimized for serial allocation/dea
 <div class="notes">
 https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/
 
-Un checkpoint est un point de vérification au cours duquel les fichiers de données sont mis à jour pour refléter les informations des journaux de transactions. En version 10, les fichiers de journaux de transactions étaient conservé jusqu’à deux checkpoint. Les journaux précédents le premier checkpoint sont alors recyclés. L’intérêt d'avoir deux checkpoint était de permettre de revenir au précédent checkpoint au cas où le dernier est introuvable ou illisible. Après discussion sur pgsql-hacker, il a été décidé qu'il n'était pas nécessaire de conserver ce second checkpoint. Cette suppression a plusieurs conséquences. Le réglage de la valeur max_wal_size réduira d'environ 33% la fréquence des checkpoints. Cela augmentera temps maximum pour terminer la récupération après un crash.
-En cas de changement forcé de fichier WAL, la portion de WAL non utilisée est remplie par des 0. Cela permet une meilleure compression des fichiers en cas d'archivage.
+Un checkpoint est un « point de vérification » au cours duquel les fichiers de données sont mis à jour pour refléter les informations des journaux de transactions.
 
-[disscussion sur pgsql-hacker](https://www.postgresql.org/message-id/20160201235854.GO8743%40awork2.anarazel.de)
+En version 10, les fichiers de journaux de transactions étaient conservés le temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre de pouvoir revenir au précédent checkpoint au cas où le dernier soit introuvable ou illisible.
+
+Il a été décidé qu'il n'était finalement pas nécessaire de conserver ce second
+checkpoint et que cela pouvait même être
+[plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
+La suppression de ce second checkpoint permet aussi de simplifier un peu le code.
+
+En conséquence, à `max_wal_size` égal, on va ainsi
+réduire d'environ 33% la fréquence des checkpoints, et on augmentera le temps
+pour terminer la récupération après un crash.
+
+Michael Paquier a écrit un
+[petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/)
+
 </div>
 
 -----
