@@ -252,7 +252,7 @@ CREATE TABLE
 v11=# \d+ t1
                           Table « public.t1 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage |
----------|---------|-----------------|-----------|------------|----------+
+---------+---------+-----------------+-----------+------------+----------+
  c1      | integer |                 | not null  |            | plain    |
 Clé de partition : HASH (c1)
 Index :
@@ -328,7 +328,7 @@ v11=# SELECT SUM(c) count_aa_ab FROM (
 workshop11=# \d+ t1
                          Table « public.t1 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage |
----------|---------|-----------------|-----------|------------|----------+
+---------+---------+-----------------+-----------+------------+----------+
  c1      | integer |                 | not null  |            | plain    |
 Clé de partition : HASH (c1)
 Index :
@@ -378,7 +378,7 @@ CREATE INDEX
 v11=# \d livres
                             Table « public.livres »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
-----------|--------------------------|-----------------|-----------|------------
+----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 |           |
  parution | timestamp with time zone |                 |           |
 Clé de partition : RANGE (titre)
@@ -389,7 +389,7 @@ Nombre de partitions : 2 (utilisez \d+ pour les lister)
 v11=# \d livres_a_m
                           Table « public.livres_a_m »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
-----------|--------------------------|-----------------|-----------|------------
+----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 |           |
  parution | timestamp with time zone |                 |           |
 Partition de : livres FOR VALUES FROM ('a') TO ('m')
@@ -404,7 +404,7 @@ CREATE TABLE
 v11=# \d livres_0_9
                           Table « public.livres_0_9 »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
-----------|--------------------------|-----------------|-----------|------------
+----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 |           |
  parution | timestamp with time zone |                 |           |
 Partition de : livres FOR VALUES FROM ('0') TO ('999')
@@ -434,7 +434,7 @@ CREATE INDEX
 v11=# \d livres;
                             Table « public.livres »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
-----------|--------------------------|-----------------|-----------|------------
+----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 |           |
  parution | timestamp with time zone |                 |           |
 Clé de partition : RANGE (titre)
@@ -461,7 +461,7 @@ CREATE TABLE
 v11=# \d livres_primary_key;
                       Table « public.livres_primary_key »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
-----------|--------------------------|-----------------|-----------|------------
+----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 | not null  |
  parution | timestamp with time zone |                 |           |
 Clé de partition : RANGE (titre)
@@ -471,6 +471,8 @@ Number of partitions: 0
 ```
 
 </div>
+
+-----
 
 ### Support des clés étrangères
 <div class="slide-content">
@@ -505,7 +507,7 @@ CREATE TABLE
 v11=# \d bibliographie
               Table « public.bibliographie »
  Colonne | Type | Collationnement | NULL-able | Par défaut
----------|------|-----------------|-----------|------------
+---------+------+-----------------+-----------+------------
  titre   | text |                 |           |
  auteur  | text |                 |           |
 Clé de partition : RANGE (titre)
@@ -1176,7 +1178,7 @@ v11=# SELECT * FROM pg_attribute
    WHERE attrelid = (SELECT oid FROM pg_class WHERE relname='ajouts')
    and atthasmissing = 't' \gx
 
--[ RECORD 1 ]-|---------------------
+-[ RECORD 1 ]-+---------------------
 attrelid      | 69352
 attname       | d3
 atttypid      | 1266
@@ -1342,7 +1344,7 @@ CALL
 
 v11=# SELECT * FROM test1;
  a | b 
----|---
+---+---
  1 | 
  2 | 
 (2 lignes)
@@ -1406,7 +1408,7 @@ CALL
 
 v11=# SELECT * FROM test1;
  a | b
----|---
+---+---
  0 |
  2 |
  4 |
@@ -1765,7 +1767,7 @@ workshop11=# select * from t1;
 
 workshop11=# \gdesc
  Column |  Type   
---------|---------
+--------+---------
  c1     | integer
 (1 row)
 ```
@@ -1774,7 +1776,7 @@ On peut aussi tester les types retournés par une requête sans l'exécuter :
 ```sql
 workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
    Column   |           Type           
-------------|--------------------------
+------------+--------------------------
  ratio      | numeric
  maintenant | timestamp with time zone
 ```
@@ -1784,7 +1786,7 @@ Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de
 workshop11=# \d t1
                  Table "public.t1"
  Column |  Type   | Collation | Nullable | Default 
---------|---------|-----------|----------|---------
+--------+---------+-----------+----------+---------
  c1     | integer |           |          | 
 
 workshop11=# select c2 from t1;
@@ -2395,21 +2397,20 @@ On a un gain de performance à l'insertion de 40%.
 
 -----
 
-## Mise à jour Majeure avec la réplication logique.
+## Mise à jour Majeure avec la réplication logique
 
-<div class="slide-content">
- * Installation de Postgres 10 et 11
- * Configuration PostgreSQL pour la réplication logique, à réaliser sur les 2 instances.
- * Clé primaire
- * Réplication du schéma
- * Mise en œuvre de la réplication
- * Préparation de la bascule
- * Bascule
-</div>
+<div class="notes">
 
-  * Le présent exemple de migration est réalisé avec la base pgbench, sous CentOS 6. Il est bien sûr conseillé de réaliser la migration dans un environnement de test avant de passer en production.
-  * **Limitations** : la réplication logique ne réplique que les tables. L'ordre `TRUNCATE` est à exclure lors de la réplication, ainsi que les ordres DDL.
-  * L'atelier est réalisé sur 2 instances différenciées par leur port (5432 pour PG10 et 5433 pour PG11) avec comme adresse commune 127.0.0.1.
+Le présent exemple de migration est réalisé avec la base pgbench, sous
+CentOS 6. Il est bien sûr conseillé de réaliser la migration dans un
+environnement de test avant de passer en production.
+ 
+**Limitations** : la réplication logique en version 10 ne réplique que les
+tables. L'ordre `TRUNCATE` est à exclure lors de la réplication, ainsi que les
+ordres DDL.
+
+L'atelier est réalisé sur 2 instances différenciées par leur port - 5432 pour
+PG10 et 5433 pour PG11 - avec comme adresse commune 127.0.0.1.
 
 > Par convention, l'invite de commande indique l'utilisateur à utiliser :
 >
@@ -2417,13 +2418,22 @@ On a un gain de performance à l'insertion de 40%.
 >
 >   `#` : à exécuter par l'utilisateur système `root`
 
-\newpage
+
+### Au programme
+
+  * Installation de Postgres 10 et 11
+  * Configuration PostgreSQL pour la réplication logique, à réaliser sur les 2
+    instances.
+  * Clé primaire
+  * Réplication du schéma
+  * Mise en œuvre de la réplication
+  * Préparation de la bascule
+  * Bascule
+
 
 ### Préparer l'environnement de l'atelier.
 
-**Installation de PostgreSQL 10 et 11 :**  
-
-FIXME : pourquoi RH7 ci dessous ?! (corrigé BH)
+  * **Installer PostgreSQL 10 et 11**
 
 ```console
 # pg10=https://yum.postgresql.org/10/redhat/rhel-6.10-x86_64/
@@ -2436,41 +2446,40 @@ FIXME : pourquoi RH7 ci dessous ?! (corrigé BH)
 # yum install -y postgresql10 postgresql10-contrib postgresql10-server
 # yum install -y postgresql11 postgresql11-contrib postgresql11-server
 ```
-FIXME : affecter les ports AVANT de démarrer !
 
-**Initialisation des instances :**  
+  * **Initialiser les instances**
 
 ```console
 # service postgresql-10 initdb
 # service postgresql-11 initdb
 ```
-  
-**L'instance PG11 est mise sur le port d'écoute 5433 :**
+
+  * **Changer le port d'écoute de l'instance PG11 en 5433**
+
 ```console
 $ sed -i "s/#port = 5432/port = 5433/" /var/lib/pgsql/11/data/postgresql.conf
 ```
 L'instance PG10 restera sur le port 5432.
 
-  
-**Démarrer les instances PG au démarrage de l'OS :**
+  * **Démarrer les instances PG au démarrage de l'OS**
+
 ```console
 # chkconfig postgresql-10 on
 # chkconfig postgresql-11 on
 ```
 
-**Démarrer les services**
+  * **Démarrer les services**
+
 ```console
 # service postgresql-10 start
 # service postgresql-11 start
 ```
 
-FIXME : je rajoute le port dans tous les ordres, il faut que la base utilisée soit toujours explicite ; (Corrigé BH)
-à relire
+  * **Créer la base pgbench sur l'instance PG10** (port 5432) qui sera
+répliquée vers l'instance PG11 (port 5433)
 
-**Créer la base pgbench sur l'instance PG10 (port 5432) qui sera répliquée vers l'instance PG11 (port 5433) :**  
-FIXME : ci-dessous rajouter le chemin absolu de createdb... sinon par défaut il risque d'utiliser celui de la v11! (pas propre) (Corrigé BH)
+Créer l'utilisateur dédié (entrer le mot de passe « _pass_ ») :
 
-L'utilisateur dédié (entrer le mot de passe « pass ») :
 ```console
 # su - postgres
 $ /usr/pgsql-10/bin/createuser -p 5432 -P bench
@@ -2480,18 +2489,21 @@ EOF
 $ chmod 600 ~postgres/.pgpass
 ```
 
-FIXME .... et ça ne marche pas sur une installation par défaut : (corrigé BH)
-FATAL:  authentification Ident échouée pour l'utilisateur « bench » (corrigé)
+Créer la base bench (initialisée avec une taille de 648 Mo environ) :
 
-La base bench, initialisée avec une taille de 648 Mo environ :
-
-FAIT-FIXME: idem, ajouter chemin absolu pour createdb (corrigé)
-
-Autoriser l'accès à la base `bench` aux rôles `bench` et `repli` (role crée un peu plus loin), les accès sont définis par le fichier configuration `/var/lib/pgsql/10/data/pg_hba.conf`. Ajouter les 3 premières lignes.
 ```console
-host    bench           repli           127.0.0.1/32            md5 
-host    bench           bench           127.0.0.1/32            md5
-host    bench           all             0.0.0.0/0               md5
+$ /usr/pgsql-10/bin/createdb -p 5432 -O bench bench
+$ /usr/pgsql-10/bin/pgbench -s 50 -i -U bench -h 127.0.0.1 -p 5432 bench
+```
+
+Autoriser l'accès à la base `bench` en local en utilisant le mode
+d'authentification md5. Les accès sont définis par le fichier configuration
+`/var/lib/pgsql/10/data/pg_hba.conf`. Ajouter les deux lignes suivantes :
+
+```console
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+host    bench           repli           127.0.0.1/32            md5
+host    bench           all             0.0.0.0/32              md5
 
 local   all             all                                     peer
 host    all             all             127.0.0.1/32            ident
@@ -2501,23 +2513,19 @@ host    replication     all             127.0.0.1/32            ident
 host    replication     all             ::1/128                 ident
 ```
 
-On recharge la configuration.
+Recharger la configuration :
+
 ```console
 $ psql -p 5432 -U postgres -c "select pg_reload_conf();"
 ```
 
-Initialiser la base `pgbench`
-```console
-$ /usr/pgsql-10/bin/createdb -p 5432 -O bench bench
-$ /usr/pgsql-10/bin/pgbench -s 50 -i -U bench -h 127.0.0.1 -p 5432 bench
-```
+### Configurer PostgreSQL pour la réplication logique
 
-\newpage
+**Configuration à réaliser sur les 2 instances !**
 
-### Configuration PostgreSQL pour la réplication logique, à réaliser sur les 2 instances.
-**Création du rôle `repli` avec le droit de réplication :**  
+ * **Création du rôle `repli` avec le droit de réplication**
 
-Comme mot de passe, entrer « pass » :
+Comme mot de passe, entrez « _pass_ » :
 
 ```console
 $ /usr/pgsql-10/bin/createuser -p 5432 --replication -P repli
@@ -2525,9 +2533,14 @@ $ cat >>~postgres/.pgpass<<EOF
 *:*:*:repli:pass
 EOF
 ```
-FIXME : sûr que ce ça marche ? il y a cette clause *avant* dans pg_hba.conf: (corrigé BH)
 
-**On passe le niveau de réplication replica à logical sur les 2 instances :** (Ces scripts remplacent les lignes `#wal_level = replica` par `wal_level = logical` dans le fichier de configuration `postgresql.conf`)
+  * **Modifier le niveau de réplication sur les 2 instances**
+
+On passe le niveau de réplication de `replica` à `logical` sur les 2 instances.
+
+Ces scripts remplacent les lignes `#wal_level = replica` par `wal_level =
+logical` dans le fichier de configuration `postgresql.conf`.
+
 ```console
 $ cd /var/lib/pgsql/10/data
 $ sed -i 's/#wal_level\ =\ replica/wal_level\ =\ logical/' postgresql.conf
@@ -2535,7 +2548,8 @@ $ cd /var/lib/pgsql/11/data
 $ sed -i 's/#wal_level\ =\ replica/wal_level\ =\ logical/' postgresql.conf
 ```
 
-**Redémarrer les 2 instances :**  
+  * **Redémarrer les 2 instances**
+
 ```console
 $ exit
 # service postgresql-10 restart
@@ -2544,35 +2558,39 @@ $ exit
 
 ### Simulation d'une application cliente
 
-Dans un autre terminal, lancer ceci pour simuler des applications clients qui modifieront la base pendant toutes les opérations, sauf la bascule :
+Dans un autre terminal, on lance le script suivant pour simuler des
+applications clients qui modifieront la base pendant toutes les opérations,
+sauf la bascule :
 
 ```console
 $ /usr/pgsql-10/bin/pgbench -h 127.0.0.1 -p 5432 -U bench \
   -d bench -c3 -n -C -j1 -R 5 -T10000
 ```
 
-\newpage
-
 ### Clés primaires
 
-Il est fortement recommandé d'avoir une clé primaire **sur chaque table à répliquer**.
+Il est fortement recommandé d'avoir une clé primaire **sur chaque table à
+répliquer**.  
 Si une PK est absente, les risques encourus sont :
-  
+
   * volume de données écrites plus important ;
   * contenu des tables incohérents entre les 2 instances ;
   * volume de données plus important à répliquer en cas de `DELETE` ou `UPDATE`.
 
-**On recherche les tables sans clés primaire et on l'ajoute (quitte à créer une colonne si nécessaire) :**
+  * **On recherche les tables sans clés primaire et on l'ajoute** (quitte à
+créer une colonne si nécessaire)
+
 ```sql
 # su - postgres
 $ psql -h 127.0.0.1 -p 5432 -U bench -d bench
 bench=> SELECT n.nspname, c.relname FROM pg_class c
   JOIN pg_namespace n ON n.oid=c.relnamespace
-WHERE c.relkind='r' AND n.nspname !~ '^(pg_.*|information_schema)$'
-  AND NOT EXISTS (select 1 from pg_index i where i.indrelid = c.oid and i.indisprimary);
+  WHERE c.relkind='r' AND n.nspname !~ '^(pg_.*|information_schema)$'
+    AND NOT EXISTS (select 1 from pg_index i
+                    where i.indrelid = c.oid and i.indisprimary);
 
- nspname |     relname     
----------|-----------------
+ nspname |     relname
+---------+-----------------
  public  | pgbench_history
 (1 row)
 
@@ -2581,91 +2599,102 @@ bench=> ALTER TABLE public.pgbench_history ADD COLUMN id integer
 ALTER TABLE
 ```
 
-\newpage
-
 ### Réplication du schéma
-Il est nécessaire de préparer des bases vides côté cible avant la mise en réplication. Si ce n'est pas déjà fait, recréer les objets globaux dans l'instance de destination. Cela nous permet de simplifier la procédure en synchronisant les rôles, les mots de passe et les éventuels tablespaces :
+
+Il est nécessaire de préparer des bases vides côté cible avant la mise en
+réplication. Si ce n'est pas déjà fait, recréer les objets globaux dans
+l'instance de destination. Cela nous permet de simplifier la procédure en
+synchronisant les rôles, les mots de passe et les éventuels tablespaces :
 
 FIXME : complexifier en créant un tablespace
 
-On complexifie la réplication logique en ajoutant une table partitionné `tab` simple dans un tablespace `tbl_pbench`.
+On complexifie la réplication logique en ajoutant une table partitionné `tab`
+simple dans un tablespace `tbl_pbench`.
 
-Créer un tablespace `tbs_pbench` appartenant au rôle `bench`
-**Créer un tablespace**
+  * **Créer un tablespace `tbs_pbench` appartenant au rôle `bench`**
+
 ```console
 $ mkdir /var/lib/pgsql/tbs/
 $ chmod 700 /var/lib/pgsql/tbs/
-$ psql -p 5432 -c "create tablespace tbl_pbench OWNER bench LOCATION '/var/lib/pgsql/tbs/';"
+$ psql -p 5432 -c \
+"create tablespace tbl_pbench OWNER bench LOCATION '/var/lib/pgsql/tbs/';"
 ```
 
-Crée une table partitionné `tab`, dans le tablespace `tbl_pbench`
+  * **Créer une table partitionné `tab`, dans le tablespace `tbl_pbench`**
+
 ```sql
 $ psql -p 5432 -U bench -d bench -h 127.0.0.1
-bench@bench=> CREATE TABLE tab(t_id integer GENERATED BY DEFAULT AS IDENTITY, nombre int NOT NULL) PARTITION BY RANGE (nombre) TABLESPACE tbl_pbench;
-bench@bench=> CREATE TABLE tab_0_50 PARTITION OF tab FOR VALUES FROM ('0') TO ('51') TABLESPACE tbl_pbench;
-bench@bench=> CREATE TABLE tab_51_100 PARTITION OF tab FOR VALUES FROM ('51') TO ('101') TABLESPACE tbl_pbench;
+bench@bench=> CREATE TABLE tab
+  (t_id integer GENERATED BY DEFAULT AS IDENTITY,nombre int NOT NULL)
+  PARTITION BY RANGE (nombre) TABLESPACE tbl_pbench;
+bench@bench=> CREATE TABLE tab_0_50
+  PARTITION OF tab FOR VALUES FROM ('0') TO ('51') TABLESPACE tbl_pbench;
+bench@bench=> CREATE TABLE tab_51_100
+  PARTITION OF tab FOR VALUES FROM ('51') TO ('101') TABLESPACE tbl_pbench;
 bench@bench=> INSERT INTO tab (nombre) SELECT * FROM generate_series(0,100);
 ```
 
-**Répliquer les rôles et tablespaces :**  
+  * **Répliquer les rôles et tablespaces**
+
 ```console
 $ pg_dumpall  -p 5432 -U postgres  --globals | psql -p 5433
 ```
 
-Il peut y avoir des erreurs si certains objets globaux existent déjà. Il est nécessaire de vérifier les erreurs renvoyées par psql. Puis nous créons une base vide avec le même schéma que la base d'origine dans l'instance de destination. Les données y seront répliquées par la suite.
+Il peut y avoir des erreurs si certains objets globaux existent déjà. Il est
+nécessaire de vérifier les erreurs renvoyées par psql. Puis nous créons une
+base vide avec le même schéma que la base d'origine dans l'instance de
+destination. Les données y seront répliquées par la suite.
 
+  * **Générer le schéma de la base bench sur l'instance secondaire (PG11)**
 
-FIXME chemin absolu pour createdb
-
-
-**Générer le schéma de la base bench sur l'instance slave (PG11).**  
 ```console
 $ /usr/pgsql-11/bin/createdb -e -O bench bench -p 5433
-$ pg_dump -U bench -d bench -h 127.0.0.1 -p 5432 -v --schema-only\
+$ pg_dump -U bench -d bench -h 127.0.0.1 -p 5432 -v --schema-only \
 |psql -d bench -p 5433
 ```
 
-\newpage
-
 ### Mise en œuvre de la réplication
 
-Nous pouvons désormais configurer la réplication logique entre les deux instances. Commençons par l'initialisation de la publication sur l'instance PG10 :
+Nous pouvons désormais configurer la réplication logique entre les deux
+instances. Commençons par l'initialisation de la publication sur l'instance
+PG10.
 
-**Publication :**  
+  * **Créer la publication**
+
 ```sql
-$ psql -p 5432 -d bench -c 'CREATE PUBLICATION pub_bench_10 FOR ALL TABLES' 
+$ psql -p 5432 -d bench -c 'CREATE PUBLICATION pub_bench_10 FOR ALL TABLES'
 ```
 
 FIXME : il se passe quoi si on ajoute une table qui n'est pas dans le search_path??
 
-**Droits sur la base `bench` :**  
-  
-Nous devons ensuite nous assurer que l'utilisateur de réplication a au minimum le droit de lecture sur les données sur la base bench :
+  * **Donner les droits sur la base `bench`**
+
+Nous devons ensuite nous assurer que l'utilisateur de réplication a au minimum
+le droit de lecture sur les données sur la base bench :
 
 ```sql
-$ psql  -p 5432 -c "GRANT bench to repli"
+$ psql -p 5432 -c "GRANT bench to repli"
 ```
-  
-Nous pouvons désormais créer l'abonnement sur PG11 :
 
-**Abonnement :**  
+  * **Créer l'abonnement sur PG11**
+
 ```sql
 $ cat <<'EOQ' | psql bench -p 5433
 CREATE SUBSCRIPTION sub_bench_11
-         CONNECTION 'host=127.0.0.1 user=repli dbname=bench'
-        PUBLICATION pub_bench_10
+       CONNECTION 'host=127.0.0.1 user=repli dbname=bench'
+       PUBLICATION pub_bench_10
 EOQ
 ```
-  
-**Côté abonnement (instance PG11), vous trouverez dans les logs les messages suivants :**  
-(vous les trouverez dans le répertoire /var/lib/pgsql/11/data/log/)
 
-FIXME : chemin du log?
+  * **Vérifier l'état de la réplication**
+
+Côté abonnement (instance PG11), vérifier dans les logs de PostgreSQL, dans le
+répertoire _/var/lib/pgsql/11/data/log/_, la présence des messages suivants :
 
 ```console
 logical replication apply worker for subscription "sub_bench_11" has started
-logical replication table synchronization worker for subscription "sub_bench_11", \
-     table "pgbench_accounts" has started
+logical replication table synchronization worker for subscription "sub_bench_11"
+ ... table "pgbench_accounts" has started
  ... table "pgbench_branches" has started
  ... table "pgbench_branches" has finished
  ... table "pgbench_history" has started
@@ -2674,43 +2703,62 @@ logical replication table synchronization worker for subscription "sub_bench_11"
  ... table "pgbench_tellers" has finished
  ... table "pgbench_accounts" has finished
 ```
-Vous pouvez regarder, pendant la synchronisation, le contenu des logs de l'instance PG10, et
-vérifier que la charge en processeur est supportable (dans le cas d'une petite configuration ou
-d'une charge en écriture bien plus importante que dans cet exemple).
 
-Pour vérifier que les données sont bien transmises en permanence entre les deux bases,
-cette requête sur la clé primaire que nous avons ajoutée précédemment doit montrer une valeur qui
-s'incrémente régulièrement si on l'exécute simultanément des deux côtés :
+Vous pouvez regarder, pendant la synchronisation, le contenu des logs de
+l'instance PG10, et vérifier que la charge en processeur est supportable (dans
+le cas d'une petite configuration ou d'une charge en écriture bien plus
+importante que dans cet exemple).
+
+Pour vérifier que les données sont bien transmises en permanence entre les deux
+bases, cette requête sur la clé primaire que nous avons ajoutée précédemment
+doit montrer une valeur qui s'incrémente régulièrement si on l'exécute
+simultanément des deux côtés :
 
 ```sql
 bench=# SELECT max(id) FROM pgbench_history ;
 ```
 
-Nous attendons que l'écart (_lag_) entre les deux serveurs soit entièrement résorbé. Depuis le serveur PG10, observez l'évolution des compteurs du lag présentés par `pg_stat_replication`. Notez que même si les autres compteurs évoluent encore, les écritures en question ne concernent plus la base qui nous intéresse (et ces écritures ne sont pas envoyées vers l'instance PG11). Nous patienterons juste quelques secondes que les écarts affichés soient résorbés.
+Nous attendons que l'écart (_lag_) entre les deux serveurs soit entièrement
+résorbé. Depuis le serveur PG10, observez l'évolution des compteurs du lag
+présentés par `pg_stat_replication`. Notez que même si les autres compteurs
+évoluent encore, les écritures en question ne concernent plus la base qui nous
+intéresse (et ces écritures ne sont pas envoyées vers l'instance PG11). Nous
+patienterons juste quelques secondes que les écarts affichés soient résorbés.
+
 ```sql
-$ watch -n2 "psql -p 5432 -d bench -xc \  
+$ watch -n2 "psql -p 5432 -d bench -xc \
 \"select confirmed_flush_lsn from pg_replication_slots where slot_name='sub_bench_11'\""
 ```
 
-Il est aussi possible de simplement comparer des données représentatives de la réplication. Par exemple :  
-**instance PG10 :**
+Il est aussi possible de simplement comparer des données représentatives de la réplication. Par exemple :
+
+  * sur l'instance **PG10** :
+
 ```sql
 $ psql -p 5432 -d bench -Atc "select max(id) from pgbench_history"
 ```
-**instance PG11 :**
+
+  * sur l'instance **PG11** :
+
 ```sql
 $ psql -p 5433 -U bench -d bench -Atc "select max(id) from pgbench_history"
 ```
 
-> Aucune donnée ne doit plus être écrite dans les tables migrées avant la fin de la bascule !
+> Aucune donnée ne doit plus être écrite dans les tables migrées avant la fin
+> de la bascule !
 
-**Réplication des séquences :**  
-La réplication logique ne réplique pas les séquences. Aussi, il nous faut mettre à jour les séquences sur l'instance PG11 avant d'effectuer la bascule.
+  * **Répliquer les séquences**
 
-L'ordre suivant va générer des requêtes pour toutes les séquences concernées, comme par exemple  
+La réplication logique ne réplique pas les séquences. Aussi, il nous faut
+mettre à jour les séquences sur l'instance PG11 avant d'effectuer la bascule.
+
+L'ordre suivant va générer des requêtes pour toutes les séquences concernées,
+comme par exemple :
+
 ```sql
 psql -U postgres -d bench -c "SELECT setval('public.pgbench_history_id_seq', 36549);"
 ```
+
 pour toutes les séquences concernées :
 ```sql
 $ cat <<'EOQ' | psql -At -U repli bench -h 127.0.0.1 -p 5432 | psql bench -p 5433
@@ -2721,15 +2769,16 @@ FROM pg_sequences where last_value is not null;
 EOQ
 ```
 
-\newpage
-
 ### Préparation de la bascule (switchover)
 
-Avant de commencer, il est nécessaire de couper l'accès des applications clients. Afin de sécuriser l'ensemble, nous ajoutons les lignes suivantes en **début** du fichier `/var/lib/pgsql/10/data/pg_hba.conf` afin d'empêcher toute nouvelle connexion autre que celle concernant la réplication :
+Avant de commencer, il est nécessaire de couper l'accès des applications
+clients. Afin de sécuriser l'ensemble, nous ajoutons les lignes suivantes en
+**début** du fichier `/var/lib/pgsql/10/data/pg_hba.conf` afin d'empêcher toute
+nouvelle connexion autre que celle concernant la réplication :
 
 ```console
-host    bench           repli           127.0.0.1/32            md5 
-host    bench           bench           127.0.0.1/32            md5
+# TYPE  DATABASE        USER            ADDRESS                 METHOD
+host    bench           repli           127.0.0.1/32            md5
 local   bench           postgres                                peer
 local   bench           all                                     reject
 host    bench           all             0.0.0.0/0               reject
@@ -2742,11 +2791,11 @@ host    replication     all             127.0.0.1/32            ident
 host    replication     all             ::1/128                 ident
 ```
 
-FIXME Rajouter ici les ouvertures de droits de repli sur PG11 (pas bench!).  
-Egalement on prépare les accès à l'instance PG11 `/var/lib/pgsql/11/data/pg_hba.conf`
+Egalement on prépare les accès à l'instance PG11
+`/var/lib/pgsql/11/data/pg_hba.conf` :
+
 ```console
 host    bench           repli           127.0.0.1/32            md5
-#host    bench           all             127.0.0.1/32           reject
 local   bench           postgres                                peer
 local   bench           all                                     reject
 host    bench           all             0.0.0.0/0     	        reject
@@ -2761,15 +2810,23 @@ host    replication     repli           127.0.0.1/32            md5
 host    db              user1           127.0.0.1/32            md5
 ```
 
-**Recharger la configuration pour prendre notre modification en compte (PG10) et (PG11):**
+  * **Recharger les configurations**
+
+On recharger la configuration pour prendre notre modification en compte
+(PG10) et (PG11) :
+
 ```console
 $ psql -p5432  -c "select pg_reload_conf();"
 $ psql -p5433  -c "select pg_reload_conf();"
 ```
 
-Vérifier que le pgbench d'arrière-plan ne se connecte plus. Ne pas l'arrêter.
+  * **Arrêt des connexions distantes**
+
+Vérifier que le script pgbench d'arrière-plan ne se connecte plus. Ne pas
+l'arrêter.
 
 **Tuer toute connexion restante à la base bench sur l'instance PG10 :**
+
 ```sql
 $ cat<<EOQ|psql -p 5432
 SELECT pg_terminate_backend(pid)
@@ -2779,19 +2836,22 @@ WHERE backend_type = 'client backend'
   AND datname='bench';
 EOQ
 ```
-    
-
-\newpage
 
 ### Bascule
-Nous pouvons désormais effectuer la bascule qui consiste à échanger les rôles au sein de la réplication logique. Ces commandes sont à exécuter sur l'instance PG11 (port 5433) :
+
+Nous pouvons désormais effectuer la bascule qui consiste à échanger les rôles
+au sein de la réplication logique. Ces commandes sont à exécuter sur l'instance
+PG11 (port 5433) :
+
 ```sql
 $ psql -p 5433 -d bench -c 'DROP SUBSCRIPTION sub_bench_11'
 $ psql -p 5433 -c 'GRANT bench TO repli'
 $ psql -p 5433 -d bench -c 'CREATE PUBLICATION pub_bench_11 FOR ALL TABLES'
 ```
 
-Notez que les données étant déjà présentes sur PG10, nous demandons explicitement de ne pas initialiser les données lors de la création de l'abonnement :
+Notez que les données étant déjà présentes sur PG10, nous demandons
+explicitement de ne pas initialiser les données lors de la création de
+l'abonnement :
 
 ```sql
 $ cat <<'EOQ' | psql bench -p 5432
@@ -2804,13 +2864,11 @@ EOQ
 
 Vérifier dans les logs des deux instances que tout va bien.
 
+  * **Ouvrir les accès clients à la base bench sur PG11**
 
-**Ouvrir les accès clients à la base bench sur PG11 :**
-FIXME (corrigé BH)
-/var/lib/pgsql/11/data/pg_hba.conf 
+`/var/lib/pgsql/11/data/pg_hba.conf` :
 ```console
-# host    bench           repli           127.0.0.1/32           reject
-# host    bench           all             127.0.0.1/32           reject
+host    bench           repli           127.0.0.1/32            reject
 local   bench           postgres                                peer
 local   bench           all                                     md5
 host    bench           all             0.0.0.0/0     	        md5
@@ -2824,10 +2882,13 @@ host    replication     all             ::1/128                 ident
 host    replication     repli           127.0.0.1/32            md5
 ```
 
-**Relancer les applis clientes :**
+Puis recharger la confiduration :
+
 ```sql
 $ psql -p5433  -c "select pg_reload_conf();"
 ```
+
+  * **Relancer les applis clientes**
 
 Ne pas oublier de modifier leur chaîne de connexion :
 
@@ -2836,9 +2897,15 @@ Ne pas oublier de modifier leur chaîne de connexion :
 -U bench -d bench -c3 -n -C -j1 -R 1 -T10000
 ```
 
-> Rappel ! Si votre application utilise l'ordre `TRUNCATE` l'instance PG11 tentera de la répliquer vers l'instance PG10, provoquant alors une erreur et empêchant la réplication. Vous pouvez le remplacer par `DELETE` qui est supporté.
+> Rappel ! Si votre application utilise l'ordre `TRUNCATE` l'instance PG11
+> tentera de la répliquer vers l'instance PG10, provoquant alors une erreur et
+> empêchant la réplication. Vous pouvez le remplacer par `DELETE` qui est
+> supporté.
 
-**Contrôler que la réplication se fait correctement vers l'ancienne instance PG10 :**
+  * **Vérifier l'état de la réplication**
+
+On contrôle que la réplication se fait correctement vers l'ancienne instance
+PG10 :**
 
 ```sql
 psql -h 127.0.0.1 -p 5433 -U bench -d bench -Atc "select max(id) from pgbench_history"
@@ -2849,20 +2916,24 @@ psql -h 127.0.0.1 -p 5432 -U repli -d bench -Atc "select max(id) from pgbench_hi
 FIXME Faire un exemple de bascule inverse pour revenir à l'état d'origine en cas d'abandon de la migration ? (A réaliser dans un 2eme temps)
 
 
-> La suppression de l'ancien serveur est simple : il suffit de supprimer la réplication logique entre les deux serveurs :
+### Suppression de l'ancienne instance
 
-**Suppression de l'abonnement sur l'instance PG10 :**  
+La suppression de l'ancienne instance est simple : il suffit de supprimer la
+réplication logique entre les deux serveurs.
+
+  * **Suppression de l'abonnement sur l'instance PG10**
+
 ```sql
 $ psql -p 5432 -d bench -c 'drop subscription sub_bench_10 cascade'
 ```
-  
-**Suppression de la publication sur l'instance PG11 :**  
+
+  * **Suppression de la publication sur l'instance PG11**
+
 ```sql
 psql -p 5433 -d bench -c 'drop publication pub_bench_11 cascade'
 DROP PUBLICATION
 ```
 
-<<<<<<< HEAD
 FIXME : ajouter contrôles finaux ?
 
 </div>
@@ -2876,7 +2947,3 @@ FIXME : ajouter contrôles finaux ?
 FIXME
 
 </div>
-
-=======
-FIXME : ajouter contrôles finaux ??
->>>>>>> Correction répli logique, selon retour fait
