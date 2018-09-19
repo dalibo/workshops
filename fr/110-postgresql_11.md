@@ -850,35 +850,6 @@ La documentation officielle est assez accessible :
 ### JIT
 
 <div class="slide-content">
- Exemple de JIT en fin de plan d'exécution :
-
- ```
- Planning Time: 0.553 ms
- JIT:
-   Functions: 27
-   Generation Time: 7.058 ms
-   Inlining: true
-   Inlining Time: 16.028 ms
-   Optimization: true
-   Optimization Time: 617.294 ms
-   Emission Time: 425.744 ms
- Execution Time: 29402.666 ms
-```
-
-</div>
-
-<div class="notes">
-
-Si le JIT est activé dans une requête, le plan d'exécution est complété, à la
-fin, des informations suivantes :
-
-  * le nombre de fonctions concernées ;
-  * les temps de génération, d'inclusion des fonctions, d'optimisation du code
-compilé...
-
-Dans l'exemple ci-dessus, on peut constater que ces coûts ne sont pas négligeables
-par rapport au temps total. Il reste à voir si ce temps perdu est récupéré sur
-le temps d'exécution de la requête, ce qui en pratique n'a rien d'évident.
 
  Qu'est-ce qui compilé ?
 
@@ -889,11 +860,6 @@ le temps d'exécution de la requête, ce qui en pratique n'a rien d'évident.
   * Appels de fonctions (_inlining_)
   * Mais pas les jointures
 
-* Pas de limitation par les I/O
-  * Requêtes complexes (calculs, agrégats, appels de fonctions...)
-  * Beaucoup de lignes
-  * Assez longues pour « rentabiliser » le JIT
-  * Analytiques, pas ERP
 </div>
 
 <div class="notes">
