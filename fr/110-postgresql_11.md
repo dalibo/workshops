@@ -1217,7 +1217,6 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
 <div class="slide-content">
 
-  * SCRAM
   * Nouveaux rôles
   * Vérification d'intégrité
 
@@ -1225,21 +1224,9 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
 -----
 
-### SCRAM
-<div class="slide-content">
-
-  * Agrégation de canaux sur l'authentification **SCRAM**
-  * Permet d'éviter des attaques de type **Man in the midddle**
-
-</div>
-
-<div class="notes">
-</div>
-
------
-
 ### Nouveaux rôles
 <div class="slide-content">
+
   * **pg_read_server_files** : permet la lecture de fichier sur le serveur
   * **pg_write_server_files** : permet la modification de fichier sur le serveur
   * **pg_execute_server_program** : permet l'execution de fichier sur le serveur
@@ -1247,7 +1234,151 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 </div>
 
 <div class="notes">
-Ajout de nouveaux rôles... FIXME
+PostgreSQL 11 ajoute de nouveaux rôles de sécurité permettant d'affiner les
+permissions des utilisateurs. Ces nouveaux rôle pourront notamment être
+utiles pour l'import ou l'export de fichier de données situés **sur le serveur**
+avec l'ordre `COPY`.
+(Rappelons que des fichiers situés sur un poste **client** peuvent être chargés
+depuis psql avec `\COPY`, comme le rappellent les messages d'erreurs ci-dessous.)
+
+Nous voulons charger le fichier `t1.csv` :
+```sql
+$ cat /tmp/t1.csv 
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
+En version 10 il était nécessaire d'être superutilisateur pour pouvoir importer
+les données d'une table depuis un fichier externe :
+
+
+Création d'un utilisateur standard :
+```sql
+postgres@v10=# CREATE USER user_r;
+CREATE ROLE
+```
+Création de la table qui récupérera les données :
+```sql
+user_r@v10=> CREATE TABLE t1(data int);
+```
+Avec l'utilisateur standard l'import de données depuis un fichier externe retourne l'erreur suivante :
+```sql
+user_r@v10=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+ERROR:  must be superuser to COPY to or from a file
+HINT : Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
+```
+
+En version 11 le rôle `pg_read_server_files` permet à un utilisateur standard
+d'importer les données depuis un fichier externe.
+
+Création de l'utilisateur `user_r`, membre du rôle `pg_read_server_files` :
+
+```sql
+postgres@v11=# CREATE USER user_r;
+CREATE ROLE
+postgres@v11=# GRANT pg_read_server_files TO user_r;
+GRANT ROLE
+```
+
+Import des données depuis un fichier externe csv : 
+```sql
+user_r@v11=> CREATE TABLE t1(data int);
+CREATE TABLE
+
+user_r@v11=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+COPY 10
+```
+
+Vérification des données sur la table t1;
+```sql
+user_r@v11=> select * from t1;
+ data 
+------
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+   10
+```
+
+Par la suite, si l'utilisateur tente d'envoyer les données d'une table vers un
+fichier externe, le message suivant apparaît : 
+
+```sql
+user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
+ERROR:  must be superuser or a member of the pg_write_server_files role to
+															COPY to a file
+ASTUCE : Anyone can COPY to stdout or from stdin. psql's \copy command
+													also works for anyone.
+```
+
+Le rôle `pg_write_server_file` va permettre d'envoyer les données les données
+d'une table vers un fichier externe :
+
+Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` : 
+```sql
+postgres@v11=# CREATE USER user_w;
+CREATE ROLE
+postgres@v11=# GRANT pg_write_server_files TO user_w;
+GRANT ROLE
+```
+Création de la table `t2` (l'utilisateur doit être le propriétaire de la table) :
+```sql
+user_w@v11=> CREATE TABLE t2(data int);
+CREATE TABLE
+user_w@v11=> INSERT INTO t2 SELECT * from generate_series(1,10);
+INSERT 0 10
+```
+
+Contenu de la table `t2` :
+```sql
+user_w@v11=> select * from t2;
+ data 
+------
+    1
+    2
+    3
+    4
+    5
+    6
+    7
+    8
+    9
+   10
+```
+
+Export des données de la table dans un fichier CSV :
+
+```sql
+user_w@v11=> COPY t2 TO '/tmp/t2.csv' CSV ;
+COPY 10
+```
+Vérification des données dans le fichier : 
+```sql
+$ cat /tmp/t2.csv 
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+```
 
 </div>
 
@@ -1255,15 +1386,19 @@ Ajout de nouveaux rôles... FIXME
 
 ### Vérification d'intégrité
 <div class="slide-content">
-  * nouvelle commande `pg_verify_checksums`
-  * vérification des sommes de contrôles dans `pg_basebackup`
-  * nouveau module `amcheck`
+
+  * Nouvelle commande `pg_verify_checksums`
+  * Vérification des sommes de contrôles dans `pg_basebackup`
+  * Amélioration d'`amcheck`
 </div>
 
 <div class="notes">
-commande `pg_verify_checksums` est à froid.
+La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les bases de données à froid. L'instance doit être arrêtée proprement avant lancer la commande. 
 
-`amcheck` vérifie que chaque ligne possède une entrée dans les index.
+Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`. 
+
+Le module `amcheck` apparu en v10 a été complété. Les fonctions `bt_index_check` et `bt_index_parent_check` accueillent un nouveau paramètre booléen `heapallindex`. Si ce paramètre vaut `true`, la fonction effectue une vérification sur toutes les colonnes liées à l'index.
+Cela pourra être utile afin de détecter une incohérence de structure entre les index et les tables indexées.
 
 </div>
 
