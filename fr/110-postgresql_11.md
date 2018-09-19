@@ -126,7 +126,7 @@ Public Domain CC0.
 <div class="notes">
 
 Le développement de la version 11 a suivi l'organisation habituelle : un
-démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un 
+démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un
 _feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
 le 17 septembre
 
@@ -144,12 +144,12 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 
 -----
 
-### Au menu
+## Au menu
 <div class="slide-content">
   * Partitionnement
   * Performances
   * Sécurité et intégrité
-  * SQL
+  * SQL & PL/pgSQL
   * Outils
   * Réplication
   * Compatibilité
@@ -164,6 +164,8 @@ des articles en anglais :
   * [New in postgres 11](https://dali.bo/new-in-postgres-11) du projet PostgreSQL
   * ...
 </div>
+
+\
 
 -----
 
@@ -349,7 +351,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
 -----
 
-### Création d'INDEX automatique
+### Création d'index automatique sur les partitions
 <div class="slide-content">
   * Index sur une table partitionnée entière
   * Index créé sur chaque partition
@@ -420,6 +422,7 @@ Index :
 
 ### Support des clés primaires
 <div class="slide-content">
+
   * Support des index `UNIQUE`
   * Permet la création de clés primaires
   * Uniquement si l'index comprend la clé de partition
@@ -478,6 +481,7 @@ Number of partitions: 0
 
 ### Support des clés étrangères
 <div class="slide-content">
+
   * Clé étrangère depuis une table non partitionnée
   * Clé étrangère vers une table partitionnée toujours impossible
 
@@ -541,8 +545,8 @@ CREATE TABLE
 <div class="slide-content">
 
   * En version 10 : `DELETE` puis `INSERT` obligatoires si clé modifiée
-  * En version 11, `UPDATE` fonctionne
-  * La ligne est alors déplacée dans une nouvelle partition
+  * En version 11 : `UPDATE` fonctionne
+    * Ligne déplacée dans une nouvelle partition
 
 </div>
 
@@ -617,7 +621,7 @@ COMMIT
 </div>
 
 -----
-### Meilleures performances des SELECT
+### Performance & partitions
 <div class="slide-content">
   * Élagage dynamique des partitions
   * _Control Partition Pruning_
@@ -776,6 +780,8 @@ FIXME `FOR EACH ROW trigger`
 <div class="notes">
 </div>
 
+\newpage
+
 -----
 
 ### JIT
@@ -812,8 +818,8 @@ c'est le cas par défaut sur Debian/Ubuntu. Sur
 CentOS/RedHat 7 il faut penser à installer le package `postgresql11-llvmjit`.
 CentOS/RedHat 6 ne permettent actuellement pas d'utuiliser le JIT.
 
-Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas 
-d'erreur et continue sans tenter de JIT. 
+Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas
+d'erreur et continue sans tenter de JIT.
 Pour tester que le JIT est fonctionnel sur votre machine, il doit apparaître
 dans un plan quand on force son utilisation ainsi :
 ```sql
@@ -912,7 +918,7 @@ qu'au cas par cas pour les utilisateurs, bases, ou requêtes qui pourraient en
 profiter.
 
 La compilation n'a cependant lieu que pour un coût de requête calculé d'au moins
-`jit_above_cost`, valeur par défaut assez élevée. 
+`jit_above_cost`, valeur par défaut assez élevée.
 
 Puis, si le coût atteint
 `jit_inline_above_cost`, certaines fonctions utilisées par la requête et
@@ -987,7 +993,7 @@ beaucoup le CPU, donc effectuant des calculs sur beaucoup de lignes : calculs
 d'expression, filtrage, agrégats.
 
 Ce seront donc plus des requêtes analytiques
-brassant beaucoup de lignes que les petites requêtes d'un ERP. 
+brassant beaucoup de lignes que les petites requêtes d'un ERP.
 
 Il n'y a pas non plus de mise en cache du code compilé.
 
@@ -996,7 +1002,7 @@ lignes, et devient de plus important au fur et à mesure que la volumétrie
 augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
 (saturation de la bande passante notamment).
 
-Documentation officielle : 
+Documentation officielle :
 <https://docs.postgresql.fr/11/jit-decision.html>
 
 
@@ -1037,7 +1043,7 @@ hachage). Soit les tables suivantes :
 
 ```sql
 CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
-CREATE TABLE b as SELECT i FROM generate_series(1,10000000) i ; 
+CREATE TABLE b as SELECT i FROM generate_series(1,10000000) i ;
 CREATE INDEX ON a(i) ;
 
 SET work_mem TO '1GB' ;
@@ -1125,10 +1131,8 @@ La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
 nombre de workers au niveau de la définition de la table, mais attention cela
 va aussi impacter vos requêtes !
 
-Pour de plus amples détails, les Allemands de Cybertec ont mis un [article sur
-le
-sujet](https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/)
-en ligne.
+Pour de plus amples détails, les Autrichiens de Cybertec ont publié un
+[article sur le sujet] (https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/).
 
 </div>
 
@@ -1138,9 +1142,10 @@ en ligne.
 
 <div class="slide-content">
 
-  * Réécriture complète de la table avant v11 !
-  * v11 : valeur par défaut mémorisée, ajout instantané
-  * ... si défaut n'est pas une fonction volatile
+  * `ALTER TABLE ADD COLUMN ... DEFAULT ...`
+    * v10 : réécriture complète de la table !
+    * v11 : valeur par défaut mémorisée, ajout instantané
+    * ... si le défaut n'est pas une fonction volatile
 
 </div>
 
@@ -1245,7 +1250,7 @@ depuis psql avec `\COPY`, comme le rappellent les messages d'erreurs ci-dessous.
 
 Nous voulons charger le fichier `t1.csv` :
 ```sql
-$ cat /tmp/t1.csv 
+$ cat /tmp/t1.csv
 1
 2
 3
@@ -1289,7 +1294,7 @@ postgres@v11=# GRANT pg_read_server_files TO user_r;
 GRANT ROLE
 ```
 
-Import des données depuis un fichier externe csv : 
+Import des données depuis un fichier externe csv :
 ```sql
 user_r@v11=> CREATE TABLE t1(data int);
 CREATE TABLE
@@ -1301,7 +1306,7 @@ COPY 10
 Vérification des données sur la table t1;
 ```sql
 user_r@v11=> select * from t1;
- data 
+ data
 ------
     1
     2
@@ -1316,7 +1321,7 @@ user_r@v11=> select * from t1;
 ```
 
 Par la suite, si l'utilisateur tente d'envoyer les données d'une table vers un
-fichier externe, le message suivant apparaît : 
+fichier externe, le message suivant apparaît :
 
 ```sql
 user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
@@ -1329,7 +1334,7 @@ ASTUCE : Anyone can COPY to stdout or from stdin. psql's \copy command
 Le rôle `pg_write_server_file` va permettre d'envoyer les données les données
 d'une table vers un fichier externe :
 
-Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` : 
+Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` :
 ```sql
 postgres@v11=# CREATE USER user_w;
 CREATE ROLE
@@ -1347,7 +1352,7 @@ INSERT 0 10
 Contenu de la table `t2` :
 ```sql
 user_w@v11=> select * from t2;
- data 
+ data
 ------
     1
     2
@@ -1367,9 +1372,9 @@ Export des données de la table dans un fichier CSV :
 user_w@v11=> COPY t2 TO '/tmp/t2.csv' CSV ;
 COPY 10
 ```
-Vérification des données dans le fichier : 
+Vérification des données dans le fichier :
 ```sql
-$ cat /tmp/t2.csv 
+$ cat /tmp/t2.csv
 1
 2
 3
@@ -1395,9 +1400,9 @@ $ cat /tmp/t2.csv
 </div>
 
 <div class="notes">
-La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les bases de données à froid. L'instance doit être arrêtée proprement avant lancer la commande. 
+La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les bases de données à froid. L'instance doit être arrêtée proprement avant lancer la commande.
 
-Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`. 
+Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`.
 
 Le module `amcheck` apparu en v10 a été complété. Les fonctions `bt_index_check` et `bt_index_parent_check` accueillent un nouveau paramètre booléen `heapallindex`. Si ce paramètre vaut `true`, la fonction effectue une vérification sur toutes les colonnes liées à l'index.
 Cela pourra être utile afin de détecter une incohérence de structure entre les index et les tables indexées.
@@ -1406,10 +1411,11 @@ Cela pourra être utile afin de détecter une incohérence de structure entre le
 
 -----
 
-## SQL
+## SQL et PL/pgSQL
+
 <div class="slide-content">
 
-  * Index couvrant
+  * Index couvrants
   * Objets `PROCEDURE`
   * Contrôle transactionnel en PL
   * JSON
@@ -1424,7 +1430,7 @@ Cela pourra être utile afin de détecter une incohérence de structure entre le
 
 -----
 
-### Index couvrant
+### Index couvrants
 <div class="slide-content">
   * Déclaration grâce au mot clé `INCLUDE`
   * Uniquement pour les index B-Tree
@@ -1480,10 +1486,10 @@ v11=# CALL insert_data(1, 2);
 CALL
 
 v11=# SELECT * FROM test1;
- a | b 
+ a | b
 ---+---
- 1 | 
- 2 | 
+ 1 |
+ 2 |
 (2 lignes)
 ```
 
@@ -1615,7 +1621,7 @@ FIXME
 
 <div class="notes">
 
-#### Conversion de et vers du type jsonb
+#### Conversion depuis et vers le type jsonb
 
 **jsonb <=> SQL**
 
@@ -1629,14 +1635,14 @@ Il existe 4 types primitif en JSON. Voici le tableau de correspondance avec les 
 |  boolean           |  boolean        |
 |  null              |  (aucun)        |
 
-S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type texte :
+S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type text :
 ```sql
 v10=# SELECT 'true'::jsonb::boolean;
 ERROR:  cannot cast type jsonb to boolean
 LIGNE 1 : SELECT 'true'::jsonb::boolean;
                               ^
 v10=# SELECT 'true'::jsonb::text::boolean;
- bool 
+ bool
 ------
  t
 (1 ligne)
@@ -1655,7 +1661,7 @@ v10=# SELECT '3.141592'::jsonb::text::float;
 Il est dorénavant possible de convertir des données de type jsonb vers les types booléen et numérique :
 ```sql
 v11=# SELECT 'true'::jsonb::boolean;
- bool 
+ bool
 ------
  t
 (1 ligne)
@@ -1697,9 +1703,9 @@ CREATE FUNCTION
 v11=# SELECT fperl('{"1":1,"example": null}'::jsonb);
 NOTICE:  Arg is: [HASH(0x1d7e330)]
 NOTICE:  jsonb keys are: '1' 'example'
- fperl 
+ fperl
 -------
- 
+
 (1 ligne)
 ```
 
@@ -1730,10 +1736,10 @@ CREATE FUNCTION
 
 v11=# SELECT fpython('{"1":1,"example": null}'::jsonb);
 INFO:  {'1': Decimal('1'), 'example': None}
-INFO:  JSON keys are: '1' 'example' 
- fpython 
+INFO:  JSON keys are: '1' 'example'
+ fpython
 ---------
- 
+
 (1 ligne)
 ```
 
@@ -1814,10 +1820,6 @@ v11=# select jsonb_to_tsvector('french',
  'question':18 'tru':22 'v11':5 'viv':3
 (1 ligne)
 ```
-
-
-
-
 </div>
 
 -----
@@ -1829,6 +1831,9 @@ v11=# select jsonb_to_tsvector('french',
 </div>
 
 <div class="notes">
+
+FIXME
+
 https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
 
 FIXME
@@ -1836,7 +1841,7 @@ FIXME
 
 -----
 
-### Autre nouveautés
+### Autres nouveautés
 <div class="slide-content">
 
   * `ANALYSE` et `VACUUM` tables multiples
@@ -1853,6 +1858,8 @@ VACUUM t1, t2
 ```
 
 FIXME
+
+
 </div>
 
 -----
@@ -1888,7 +1895,7 @@ PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes p
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
 ```sql
 workshop11=# select * from t1;
- c1 
+ c1
 ----
   1
   2
@@ -1918,42 +1925,42 @@ workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
  maintenant | timestamp with time zone
 ```
 
-Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée. 
+Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée.
 ```sql
 workshop11=# \d t1
                  Table "public.t1"
- Column |  Type   | Collation | Nullable | Default 
+ Column |  Type   | Collation | Nullable | Default
 --------+---------+-----------+----------+---------
- c1     | integer |           |          | 
+ c1     | integer |           |          |
 
 workshop11=# select c2 from t1;
 ERROR:  column "c2" does not exist
 ```
 
-La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur. 
+La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur.
 ```sql
 workshop11=# \echo :ERROR
 true
 ```
 
-La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur. 
+La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur.
 ```sql
-workshop11=# \echo :SQLSTATE 
+workshop11=# \echo :SQLSTATE
 42703
 ```
 
-La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête. 
+La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête.
 ```sql
-workshop11=# \echo :ROW_COUNT 
+workshop11=# \echo :ROW_COUNT
 0
 ```
 
-Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur. 
+Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur.
 ```sql
 workshop11=# \echo :LAST_ERROR_MESSAGE
 column "c2" does not exist
 
-workshop11=# \echo :LAST_ERROR_SQLSTATE 
+workshop11=# \echo :LAST_ERROR_SQLSTATE
 42703
 ```
 
@@ -1966,7 +1973,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 ### initdb
 <div class="slide-content">
-  * option `--wal-segsize` : 
+  * option `--wal-segsize` :
     * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
@@ -1988,7 +1995,7 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 
 -----
 
-### Sauvegardes et restauration
+### Sauvegarde et restauration
 <div class="slide-content">
   * `pg_dumpall`
     * option `--encoding` pour spécifier l'encodage de sortie
@@ -2002,7 +2009,7 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 <div class="notes">
 Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
 
-`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump. 
+`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump.
 
 Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permettant de créer directement un slot de réplication. Elle doit donc être utilisée en complément de l'option `--slot`. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.  
 </div>
@@ -2030,10 +2037,10 @@ sur le serveur primaire
 
 -----
 
-## Réplication 
+## Réplication
 <div class="slide-content">
-  * Réplication Logique
-  * WAL et Checkpoint
+  * Réplication logique
+  * Taille des WALs checkpoint
 </div>
 
 <div class="notes">
@@ -2052,6 +2059,8 @@ sur le serveur primaire
 
 <div class="notes">
 
+FIXME
+
 Add a generational memory allocator which is optimized for serial allocation/deallocation (Tomas Vondra). This reduces memory usage for logical decoding.
 
 </div>
@@ -2061,11 +2070,9 @@ Add a generational memory allocator which is optimized for serial allocation/dea
 ### WAL et Checkpoint
 <div class="slide-content">
   * Suppression du second checkpoint
-  * Remplissage des portions de WAL non utilisés par des 0
 </div>
 
 <div class="notes">
-https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/
 
 Un checkpoint est un « point de vérification » au cours duquel les fichiers de données sont mis à jour pour refléter les informations des journaux de transactions.
 
@@ -2091,11 +2098,13 @@ Michael Paquier a écrit un
 ## Compatibilité
 
 <div class="slide-content">
-  * Changements dans les outils (¿¿ à garder ??)
   * Les outils de la sphère Dalibo
 </div>
 
 <div class="notes">
+
+FIXME
+
 </div>
 
 -----
@@ -2136,7 +2145,7 @@ modifications validées pour chaque commit fest :
 </div>
 
 -----
-### Atelier
+# Atelier
 
 <div class="slide-content">
 À présent, place à l'atelier...
@@ -2215,7 +2224,7 @@ Enfin, on vérifie la version :
 postgres=# select version();
                          version
 -------------------------------------------------------------------
- PostgreSQL 11beta2 on x86_64-pc-linux-gnu, 
+ PostgreSQL 11beta2 on x86_64-pc-linux-gnu,
    compiled by gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18), 64-bit
 ```
 
@@ -2344,7 +2353,7 @@ INSERT INTO liste_dates VALUES ('2018-12-19');
  2018-12-19 00:00:00+01
 ```
 
-### UPDATE en version 10 
+### UPDATE en version 10
 
 En version 10, la mise à jour avec UPDATE retourne une erreur :
 
@@ -2466,7 +2475,7 @@ CREATE TABLE
 workshop11=# INSERT INTO t1 SELECT generate_series(1,10);
 INSERT 0 10
 workshop11=# SELECT * FROM t1;
- c1 
+ c1
 ----
   1
   2
@@ -2489,13 +2498,13 @@ CREATE PUBLICATION
 ```
 
 Sur la deuxième instance `data2` dans la base `workshop11_2`,
-création d'une table `t1` sans aucune donnée. 
+création d'une table `t1` sans aucune donnée.
 
 ```sql
 workshop11_2=# CREATE TABLE t1 (c1 int);
 CREATE TABLE
 ```
-Création de la souscription `s1` : 
+Création de la souscription `s1` :
 ```sql
 workshop11_2=# CREATE SUBSCRIPTION s1
                CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
@@ -2507,7 +2516,7 @@ Vérification de la réplication des données :
 
 ```sql
 workshop11_2=# SELECT * FROM t1;
- c1 
+ c1
 ----
   1
   2
@@ -2525,23 +2534,23 @@ Sur l'instance `data` nous vidons la table avec la commande `TRUNCATE` :
 
 ```sql
 workshop11=# TRUNCATE t1;
-TRUNCATE TABLE 
+TRUNCATE TABLE
 ```
 
 La table `t1` est vide :
 
 ```sql
 workshop11=# select * from t1;
- c1 
+ c1
 ----
 (0 rows)
 ```
 
-Sur l'instance `data2` nous vérifions que la réplication a été effectuée et que la table a bien été vidée : 
+Sur l'instance `data2` nous vérifions que la réplication a été effectuée et que la table a bien été vidée :
 
 ```
 workshop11_2=# select * from t1;
- c1 
+ c1
 ----
 (0 rows)
 ```
@@ -2625,13 +2634,13 @@ v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
 La taille cumulée de nos index est de 602 Mo :
 ```sql
 v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_idx'));
- pg_size_pretty 
+ pg_size_pretty
 ----------------
  214 MB
 (1 ligne)
 
 v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_c_idx'));
- pg_size_pretty 
+ pg_size_pretty
 ----------------
  387 MB
 (1 ligne)
@@ -2655,7 +2664,7 @@ v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
  Execution Time: 14.263 ms
 (5 lignes)
 v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_covering_c_idx'));
- pg_size_pretty 
+ pg_size_pretty
 ----------------
  386 MB
 (1 ligne)
@@ -2671,7 +2680,7 @@ triée (comme dans un index normal), et donc un `ORDER BY` n'en profite pas
 v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b ;
                    QUERY PLAN
 ----------------------------------------------------------
- Index Only Scan using t2_a_b_unique_covering_c_idx on t2 
+ Index Only Scan using t2_a_b_unique_covering_c_idx on t2
              (cost=0.43..347752.43 rows=10000000 width=19)
 ```
 
@@ -2739,7 +2748,7 @@ On a un gain de performance à l'insertion de 40%.
 Le présent exemple de migration est réalisé avec la base pgbench, sous
 CentOS 6. Il est bien sûr conseillé de réaliser la migration dans un
 environnement de test avant de passer en production.
- 
+
 **Limitations** : la réplication logique en version 10 ne réplique que les
 données.
 L'ordre `TRUNCATE` est à exclure lors de la réplication, ainsi que les
