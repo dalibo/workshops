@@ -759,11 +759,6 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 (14 lignes)
 ```
 
-FIXME : trouver un use case idéal pour cette fonctionnalité
-
-
-FIXME `FOR EACH ROW trigger`
-
 </div>
 
 -----
@@ -1035,9 +1030,6 @@ uniquement. La version 10 avait étendu à d'autres nœuds.
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
 de type _Append_, qui servent aux `UNION ALL` notamment :
 
-**FIXME** - exemple
-
-
 Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
 hachage). Soit les tables suivantes :
 
@@ -1091,11 +1083,6 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 
 L'auteur de cette optmisation a écrit un article assez complet sur le sujet :
 <https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
-
-
-FIXME :  exemple d'Append avec UNION ALL
-
-FIXME : exemple SELECT INTO
 
 La création d'index peut à présent être parallélisée, ce qui va permettre de
 gros gains de temps dans certains cas. La parallélisation est activée par
@@ -1836,7 +1823,6 @@ FIXME
 
 https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
 
-FIXME
 </div>
 
 -----
