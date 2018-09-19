@@ -1375,7 +1375,8 @@ La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les base
 
 Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`. 
 
-Le module amcheck vérifie que chaque ligne possède une entrée dans les index. Un patch a été ajouter à ce module permettant d'effectuer une vérification sur les tables heap liée a l'index. (`heapallindexed`) 
+Un patch a été ajouté au module amcheck permettant de vérifier que chaque ligne possède une entrée dans les index. Les fonctions bt_index_check et bt_index_parent_check acceuillent un nouveau paramètre booléen heapallindex. Si ce paramètre vaut true, la fonction effectue une vérification sur toutes les colonnes liées a l'index.
+Cela pourra être utile afin de détecter une incohérence de structure entre les index et les tables indexées.
 
 </div>
 
