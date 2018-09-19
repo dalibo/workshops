@@ -2393,11 +2393,7 @@ On a un gain de performance à l'insertion de 40%.
 
 </div>
 
-<<<<<<< HEAD
 -----
-=======
-\newpage
->>>>>>> Correction répli logique, selon retour fait
 
 ## Mise à jour Majeure avec la réplication logique.
 
@@ -2866,6 +2862,7 @@ psql -p 5433 -d bench -c 'drop publication pub_bench_11 cascade'
 DROP PUBLICATION
 ```
 
+<<<<<<< HEAD
 FIXME : ajouter contrôles finaux ?
 
 </div>
@@ -2880,3 +2877,6 @@ FIXME
 
 </div>
 
+=======
+FIXME : ajouter contrôles finaux ??
+>>>>>>> Correction répli logique, selon retour fait
