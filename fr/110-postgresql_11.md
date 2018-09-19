@@ -2114,6 +2114,191 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 -----
 
+## Mise à jour d'une partition avec un `UPDATE`
+
+La table partitionné est créé sur les deux instances en version 10 et 11.
+
+  * Création d'une table partitionné par intervalle :
+
+```sql
+CREATE TABLE liste_dates (d timestamptz) PARTITION BY RANGE(d);
+```
+
+  * Création des partitions :
+
+```sql
+CREATE TABLE liste_dates_a PARTITION OF liste_dates
+       FOR VALUES FROM ('2018-01-01') TO ('2018-04-01');
+CREATE TABLE liste_dates_b PARTITION OF liste_dates
+       FOR VALUES FROM ('2018-04-01') to ('2018-07-01');
+CREATE TABLE liste_dates_c partition of liste_dates
+       FOR VALUES FROM ('2018-07-01') to ('2018-10-01');
+CREATE TABLE liste_dates_d partition of liste_dates
+       FOR VALUES FROM ('2018-10-01') to ('2018-12-31');
+```
+
+  * Insertion de données dans les partitions :
+
+```sql
+INSERT INTO liste_dates VALUES ('2018-01-15');
+INSERT INTO liste_dates VALUES ('2018-02-10');
+INSERT INTO liste_dates VALUES ('2018-03-12');
+INSERT INTO liste_dates VALUES ('2018-05-25');
+INSERT INTO liste_dates VALUES ('2018-06-02');
+INSERT INTO liste_dates VALUES ('2018-08-12');
+INSERT INTO liste_dates VALUES ('2018-10-20');
+INSERT INTO liste_dates VALUES ('2018-11-30');
+INSERT INTO liste_dates VALUES ('2018-12-19');
+```
+
+  * Vérification du contenu des tables sur les deux instances :
+
+```sql
+=# SELECT * FROM liste_dates ;
+           d            
+------------------------
+ 2018-01-15 00:00:00+01
+ 2018-02-10 00:00:00+01
+ 2018-03-12 00:00:00+01
+ 2018-05-25 00:00:00+02
+ 2018-06-02 00:00:00+02
+ 2018-08-12 00:00:00+02
+ 2018-10-20 00:00:00+02
+ 2018-11-30 00:00:00+01
+ 2018-12-19 00:00:00+01
+(9 lignes)
+
+=# SELECT * FROM liste_dates_a;
+          d
+------------------------
+ 2018-01-15 00:00:00+01
+ 2018-02-10 00:00:00+01
+ 2018-03-12 00:00:00+01
+
+=# SELECT * FROM liste_dates_b;
+          d    
+------------------------
+ 2018-05-25 00:00:00+02
+ 2018-06-02 00:00:00+02
+
+=# SELECT * FROM liste_dates_c;
+          d
+-----------------------
+ 2018-08-12 00:00:00+02
+
+=# SELECT * FROM liste_dates_d;
+           d
+------------------------
+ 2018-10-20 00:00:00+02
+ 2018-11-30 00:00:00+01
+ 2018-12-19 00:00:00+01
+```
+
+### UPDATE en version 10 
+
+En version 10, la mise à jour avec UPDATE retourne une erreur :
+
+```sql
+v10=# UPDATE liste_dates SET d='2018-09-22' WHERE d='2018-01-15';
+ERROR:  new row for relation "liste_dates_a" violates partition constraint
+DÉTAIL : Failing row contains (2018-09-22 00:00:00).
+```
+
+L'opération fonctionnera seulement si la donnée mise à jour se trouve sur
+la même partition :
+
+```sql
+v10=# UPDATE liste_dates set d='2018-09-22' WHERE d='2018-08-12';
+UPDATE 1
+v10=# SELECT * FROM liste_dates_c;
+           d
+------------------------
+ 2018-09-22 00:00:00+02
+```
+
+Si la donnée mise à jour doit se retouver dans une autre partition, il est
+nécessaire de supprimer la donnée de l'ancienne partition et d'insérer la
+donnée souhaiter dans la nouvelle partition.
+
+```sql
+v10=# DELETE FROM liste_dates_a WHERE d='2018-03-12';
+DELETE 1
+v10=# SELECT * FROM liste_dates_a;
+           d
+------------------------
+ 2018-01-15 00:00:00+01
+ 2018-02-10 00:00:00+01
+
+v10=# INSERT INTO liste_dates values ('2018-07-14');
+INSERT 0 1
+
+v10=# SELECT * FROM liste_dates ;
+           d
+------------------------
+ 2018-01-15 00:00:00+01
+ 2018-02-10 00:00:00+01
+ 2018-05-25 00:00:00+01
+ 2018-06-02 00:00:00+02
+ 2018-09-22 00:00:00+02
+ 2018-07-14 00:00:00+02
+ 2018-10-20 00:00:00+02
+ 2018-11-30 00:00:00+01
+ 2018-12-19 00:00:00+01
+
+v10=# SELECT * FROM liste_dates_a;
+           d
+------------------------
+ 2018-01-15 00:00:00+01
+ 2018-02-10 00:00:00+01
+
+v10=# SELECT * FROM liste_dates_c;
+           d
+------------------------
+ 2018-09-22 00:00:00+02
+ 2018-07-14 00:00:00+02
+```
+
+### UPDATE en version 11
+
+La mise à jour avec UPDATE fonctionne :
+
+```sql
+v11=# UPDATE liste_dates SET d='2018-09-22' WHERE d='2018-01-15';
+UPDATE 1
+```
+
+Les données sont automatiquement redirigées vers les bonnes partitions :
+
+```sql
+v11=# SELECT * FROM liste_dates ;
+           d            
+------------------------
+ 2018-02-10 00:00:00+01
+ 2018-03-12 00:00:00+01
+ 2018-05-25 00:00:00+02
+ 2018-06-02 00:00:00+02
+ 2018-08-12 00:00:00+02
+ 2018-09-22 00:00:00+02
+ 2018-10-20 00:00:00+02
+ 2018-11-30 00:00:00+01
+ 2018-12-19 00:00:00+01
+(9 lignes)
+
+v11=# SELECT * FROM liste_dates_a ;
+           d
+------------------------
+ 2018-02-10 00:00:00+01
+ 2018-03-12 00:00:00+01
+
+v11=# SELECT * FROM liste_dates_c ;
+           d
+------------------------
+ 2018-08-12 00:00:00+02
+ 2018-09-22 00:00:00+02
+```
+
+-----
+
 ## Support du TRUNCATE dans la réplication logique
 
 <div class="notes">
