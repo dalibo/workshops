@@ -763,7 +763,7 @@ FIXME `FOR EACH ROW trigger`
 ## Performances
 
 <div class="slide-content">
-  * Compilation Just In Time (JIT)
+  * Compilation _Just In Time_ (JIT)
   * Parallélisme étendu à plusieurs commandes
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
 
@@ -774,20 +774,231 @@ FIXME `FOR EACH ROW trigger`
 
 -----
 
-
 ### JIT
 <div class="slide-content">
 
-  * Support de la compilation Just In Time
-  * Diminue le temps d’exécution des requêtes
+  * Compilation _Just In Time_ des requêtes
+  * Utilise le compilateur LLVM
+  * Vérifier que l'installation est fonctionnelle
+  * Désactivé par défaut
 
 </div>
 
 <div class="notes">
 
-FIXME : TODO
+Une des nouveautés les plus visibles et techniquement pointues de la v11
+est la « compilation à la volée » (_Just In Time compilation_, ou JIT)
+des requêtes SQL.
+
+Dans certaines requêtes, l'essentiel du temps est passé à décoder
+des enregistrements (_tuple deforming_), à analyser des clauses `WHERE`, à
+effectuer des calculs. L'idée du JIT est de tranformer tout ou partie de la
+requête en un programme natif directement exécuté par le processeur.
+
+C'est le fruit de deux ans de travail d'Andres Freund notamment.
+
+Cette compilation est une opération lourde qui ne sera effectuée que pour
+des requêtes qui en valent le coup.
+
+Le JIT de PostgreSQL s'appuie actuellement sur la chaîne de compilation LLVM,
+choisie pour sa flexibilité.
+L'utilisation nécessite un PostgreSQL compilé avec l'option `--with-llvm` et
+l'installation des bibliothèques de LLVM. Avec les paquets du PGDG,
+c'est le cas par défaut sur Debian/Ubuntu. Sur
+CentOS/RedHat 7 il faut penser à installer le package `postgresql11-llvmjit`.
+CentOS/RedHat 6 ne permettent actuellement pas d'utuiliser le JIT.
+
+Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas 
+d'erreur et continue sans tenter de JIT. 
+Pour tester que le JIT est fonctionnel sur votre machine, il doit apparaître
+dans un plan quand on force son utilisation ainsi :
+```sql
+SET jit=on;
+SET jit_above_cost TO 0 ;
+EXPLAIN (ANALYZE) SELECT 1;
+                                     QUERY PLAN
+------------------------------------------------------------------------------------
+ Result  (cost=0.00..0.01 rows=1 width=4) (actual time=1.041..1.041 rows=1 loops=1)
+ Planning Time: 0.016 ms
+ JIT:
+   Functions: 1
+   Generation Time: 0.155 ms
+   Inlining: false
+   Inlining Time: 0.000 ms
+   Optimization: false
+   Optimization Time: 0.093 ms
+   Emission Time: 0.881 ms
+ Execution Time: 1.242 ms
+```
+
+[Il a été décidé que le JIT serait désactivé par défaut](https://www.postgresql.org/message-id/flat/20180914222657.mw25esrzbcnu6qlu%40alap3.anarazel.de)
+en version 11. Cela est fréquemment le cas pour les nouvelles fonctionnalités
+pouvant avoir des effets de bords négatifs, en attendant les retours d'expérience.
+On verra plus bas que l'activer est très simple.
+
+La documentation officielle est assez accessible :
+<https://doc.postgresql.fr/11/jit.html>
 
 </div>
+
+-----
+
+### JIT
+<div class="slide-content">
+
+ Qu'est-ce qui compilé ?
+
+  * _Tuple deforming_
+  * Évaluation d'expressions :
+    * `WHERE`
+    * Agrégats, `GROUP BY`
+  * Appels de fonctions (_inlining_)
+  * Mais pas les jointures
+
+</div>
+
+<div class="notes">
+
+Le JIT ne peut pas encore compiler toute une requête. La version actuelle se
+concentre sur des goulots d'étranglements classiques :
+
+  - le décodage des enregistrements (_tuple deforming_) pour en extraire les
+champs intéressants ;
+  - les évaluations d'expressions, notamment dans les clauses `WHERE` pour
+  filtrer les lignes ;
+  - les agrégats, les `GROUP BY`...
+
+Les jointures ne sont pas (encore ?) concernées par le JIT.
+
+Le code résultant est utilisable plus efficacement avec les processeurs
+actuels qui utilisent les pipelines et les prédictions de branchement.
+
+Pour les détails, on peut consulter notamment cette
+[conférence très technique au FOSDEM 2018](https://archive.fosdem.org/2018/schedule/event/jiting_postgresql_using_llvm/)
+par l'auteur principal du JIT, Andres Freund.
+
+
+</div>
+
+-----
+
+### JIT
+
+
+<div class="slide-content">
+  Algorithme « naïf » :
+
+  * `jit` (défaut : `off`)
+  * `jit_above_cost` (défaut : 100 000)
+  * `jit_inline_above_cost` (défaut : 500 000)
+  * `jit_optimize_above_cost` (défaut : 500 000)
+  *  à comparer au coût de la requête... I/O comprises
+  * valeurs arbitraires !
+
+</div>
+
+<div class="notes">
+
+De l'avis même de son auteur, l'algorithme de déclenchement du JIT est « naïf ».
+Quatre paramètres existent (hors débogage).
+
+Par défaut, `jit` est à `off`. `jit = on` active le JIT **si** l'environnement
+technique évoqué plus haut le permet. Il est préférable de n'activer le JIT
+qu'au cas par cas pour les utilisateurs, bases, ou requêtes qui pourraient en
+profiter.
+
+La compilation n'a cependant lieu que pour un coût de requête calculé d'au moins
+`jit_above_cost`, valeur par défaut assez élevée. 
+
+Puis, si le coût atteint
+`jit_inline_above_cost`, certaines fonctions utilisées par la requête et
+supportées par le JIT sont intégrées dans la compilation. Si
+`jit_optimize_above_cost` est atteint, une optimisation du code compilé est
+également effectuée. Ces deux dernières opérations étant longues, elles ne le
+sont que pour des coûts assez importants.
+
+Ces seuils sont à comparer avec les coûts des requêtes, qui incluent les
+entrées-sorties, donc sans considération du coût CPU. Ces seuils sont un peu
+arbitraires et nécessiteront sans doute un certain tuning en fonction de vos
+requêtes.
+
+
+</div>
+
+-----
+### JIT
+
+<div class="slide-content">
+ Exemple de JIT en fin de plan d'exécution :
+
+ ```
+ Planning Time: 0.553 ms
+ JIT:
+   Functions: 27
+   Generation Time: 7.058 ms
+   Inlining: true
+   Inlining Time: 16.028 ms
+   Optimization: true
+   Optimization Time: 617.294 ms
+   Emission Time: 425.744 ms
+ Execution Time: 29402.666 ms
+```
+
+</div>
+
+<div class="notes">
+
+Si le JIT est activé dans une requête, le plan d'exécution est complété, à la
+fin, des informations suivantes :
+
+  * le nombre de fonctions concernées ;
+  * les temps de génération, d'inclusion des fonctions, d'optimisation du code
+compilé...
+
+Dans l'exemple ci-dessus, on peut constater que ces coûts ne sont pas négligeables
+par rapport au temps total. Il reste à voir si ce temps perdu est récupéré sur
+le temps d'exécution de la requête, ce qui en pratique n'a rien d'évident.
+
+Sans JIT la durée de la requête était d'environ 33 s.
+</div>
+
+-----
+
+### JIT
+
+<div class="slide-content">
+  Quand le JIT est-il utile ?
+
+  * Pas de limitation par les I/O
+  * Requêtes complexes (calculs, agrégats, appels de fonctions...)
+  * Beaucoup de lignes
+  * Assez longues pour « rentabiliser » le JIT
+  * Analytiques, pas ERP
+</div>
+
+<div class="notes">
+
+Vu son coût élevé, le JIT n'a d'intérêt que pour les requêtes utilisant
+beaucoup le CPU, donc effectuant des calculs sur beaucoup de lignes : calculs
+d'expression, filtrage, agrégats.
+
+Ce seront donc plus des requêtes analytiques
+brassant beaucoup de lignes que les petites requêtes d'un ERP. 
+
+Il n'y a pas non plus de mise en cache du code compilé.
+
+Si gain il y a, il est relativement modeste en-deçà de quelques millions de
+lignes, et devient de plus important au fur et à mesure que la volumétrie
+augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
+(saturation de la bande passante notamment).
+
+Documentation officielle : 
+<https://docs.postgresql.fr/11/jit-decision.html>
+
+
+
+</div>
+
 
 -----
 
@@ -1771,7 +1982,7 @@ modifications validées pour chaque commit fest :
 </div>
 
 -----
-# Atelier
+### Atelier
 
 <div class="slide-content">
 À présent, place à l'atelier...
@@ -1781,6 +1992,7 @@ modifications validées pour chaque commit fest :
   * Mise à jour d'une partition avec un `UPDATE`.
   * Tester le support de `TRUNCATE` avec la réplication logique.
   * Création d'un partitionnement par `hachage`.
+  * JIT
   * Tester les nouveaux rôles
   * Création de slot avec pg_basebackup
   * Parallélisation
@@ -1802,12 +2014,11 @@ FIXME toujours en beta2 ?
 Le site postgresql.org propose son propre dépôt RPM, nous allons donc
 l'utiliser pour installer PostgreSQL 11.
 
-On commence par installer le RPM du dépôt `pgdg-centos11-11-2.noarch.rpm` :
+On commence par installer le RPM du dépôt `pgdg-centos11-11-2.noarch.rpm`
+depuis <https://yum.postgresql.org/>:
 
 ```
-# pgdg_yum=https://download.postgresql.org/pub/repos/yum/
-# pgdg_yum+=testing/11/redhat/rhel-6.9-x86_64/pgdg-centos11-11-2.noarch.rpm
-# yum install -y $pgdg_yum
+# yum install -y https://download.postgresql.org/pub/repos/yum/11/redhat/rhel-6-x86_64/pgdg-centos11-11-2.noarch.rpm
 Installed:
   pgdg-centos11.noarch 0:11-2
 
@@ -2172,3 +2383,46 @@ v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
 On a un gain de performance à l'insertion de 40%.
 
 </notes>
+
+## JIT
+
+<div class="notes">
+
+** FIXME : notes pour brouillon
+
+
+shared_buffers à 2GB
+
+
+```
+SET work_mem to '2GB';
+SET max_parallel_workers_per_gather TO 1 ;
+
+\echo Préchargement en mémoireautant que possible
+CREATE EXTENSION pg_prewarm ;
+SELECT pg_prewarm ('faits_commandes') ;
+
+SHOW shared_buffers;
+
+\pset pager off
+
+\echo "Tests avec JIT"
+
+SET jit TO on ; SET jit_above_cost TO 0 ; SET jit_inline_above_cost TO default ; SET jit_optimize_above_cost TO default ;
+
+SHOW jit ;
+SHOW jit_above_cost ;
+SHOW jit_inline_above_cost ;
+SHOW jit_optimize_above_cost ;
+
+
+... test
+
+SET jit TO off ;
+
+... test
+
+
+```
+
+</div>
