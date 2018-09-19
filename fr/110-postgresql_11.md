@@ -2023,7 +2023,44 @@ sur le serveur primaire
 
 -----
 
-## Réplication
+### pg_prewarm
+
+<div class="slide-content">
+
+  * `pg_prewarm` : chargement de données en cache (PG ou OS)
+  * En v11, peut être automatique au redémarrage
+
+</div>
+
+<div class="notes">
+
+`pg_prewarm` est un module permettant de charger des tables (ou un index,
+ou une partie de table) en mémoire cache (les _shared buffers_ ou le cache de
+l'OS). 
+
+On peut ainsi éviter que des requêtes soient ralenties parce que les données
+ne sont pas encore chargées en mémoire, notamment en cas de redémarrage. 
+
+La v11 permet d'automatiser cela au démarrage. La mise en place s'opère dans
+le `postgresql.conf` :
+```
+shared_preload_libraries = 'pg_prewarm'
+pg_prewarm.autoprewarm = true
+```
+
+PostgreSQL sauvegarde toutes les 5 minutes (par défaut) les blocs dans les
+_shared buffers_, ainsi que lors d'un arrêt normal.
+
+Il n'est cependant pas garanti que les données restent dans les caches si
+la base est active.
+
+Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
+
+</div>
+
+-----
+
+## Réplication 
 <div class="slide-content">
   * Réplication logique
   * Taille des WALs checkpoint
@@ -3243,3 +3280,167 @@ DROP PUBLICATION
 FIXME
 
 </div>
+
+-----
+
+## pg_prewarm
+
+Ce qui suit suppose un paramètre `shared_buffers` assez grand :
+
+```
+shared_buffers = '512MB'  # redémarrage nécessaire en cas de changement
+```
+
+Créons une table de 346 Mo puis exécutons une requête dessus :
+
+```sql
+CREATE TABLE matable AS SELECT i FROM generate_series(1,10000000) i;
+
+EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+												 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.007..694.690 rows=10000000 loops=1)
+Buffers: shared hit=44248
+Planning Time: 0.065 ms
+Execution Time: 1080.083 ms
+```
+La requête a été lue depuis le cache de PostgreSQL comme en témoigne le nombre
+de blocs de 8 ko en _shared hits_.
+
+
+On redémarre PostgreSQL :
+
+```console
+service postgresql-11 restart
+```
+
+La première rééxécution de la requête est bien plus lente car les blocs sont lus
+depuis le disque (_shared read_), ou avec de la chance depuis la cache de l'OS.
+Cela reste valable pour le deuxième ou troisième appel, car lors d'un parcours
+complet d'une grosse table, tous les blocs ne sont pas chargés en mémoire
+d'entrée :
+
+```sql
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.098..948.179 rows=10000000 loops=1)
+Buffers: shared read=44248
+Planning Time: 0.514 ms
+Execution Time: 1428.741 ms
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.128..796.596 rows=10000000 loops=1)
+Buffers: shared hit=32 read=44216
+Planning Time: 0.091 ms
+Execution Time: 1215.664 ms
+(4 lignes)
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.147..829.618 rows=10000000 loops=1)
+Buffers: shared hit=64 read=44184
+Planning Time: 0.109 ms
+Execution Time: 1263.430 ms
+(4 lignes)
+
+```
+
+Avec `pg_prewarm`, on peut accélérer ce chargement :
+
+```sql
+postgres=# CREATE EXTENSION pg_prewarm ;
+CREATE EXTENSION
+
+postgres=# SELECT pg_prewarm ('matable','buffer') ;
+
+pg_prewarm
+------------
+  44248
+(1 ligne)
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4) (actual time=0.016..715.889 rows=10000000 loops=1)
+Buffers: shared hit=44248
+Planning Time: 0.038 ms
+Execution Time: 1123.740 ms
+(4 lignes)
+
+```
+
+L'extension pg_buffercache permet de voir le contenu des _shared buffers_ (ici
+on filtre les tables et index systèmes pour la lisibilité) :
+
+```sql
+postgres=# CREATE EXTENSION pg_buffercache ;
+CREATE EXTENSION
+
+postgres=# SELECT c.relname, count(*) AS buffers,
+   pg_size_pretty(count(*)*8192) as taille_mem
+   FROM pg_buffercache b INNER JOIN pg_class c
+   ON b.relfilenode = pg_relation_filenode(c.oid) AND
+	  b.reldatabase IN (0, (SELECT oid FROM pg_database
+							WHERE datname = current_database()))
+   WHERE relname not like 'pg_%'
+   GROUP BY c.relname ;
+
+relname | buffers | taille_mem
+---------+---------+------------
+matable |   44248 | 346 MB
+(1 ligne)
+```
+
+Faisons en sorte que PostgreSQL charge la table dès le démarrage. Dans
+`postgresql.conf` :
+```
+shared_preload_libraries = 'pg_prewarm'
+pg_prewarm.autoprewarm = true
+```
+
+Avant de redémarrer PostgreSQL on demande à sauvegarder le contenu du cache :
+
+```sql
+postgres=# SELECT autoprewarm_dump_now() ;
+
+autoprewarm_dump_now
+----------------------
+			44537
+(1 ligne)
+
+```
+
+On redémarre :
+```console
+service postgresql-11 restart
+```
+
+Et l'on vérifie qu'avant toute requête la table est déjà en cache avec la
+requête ci-dessus sur `pg_buffercache` :
+```sql
+relname | buffers | taille_mem
+---------+---------+------------
+matable |   44248 | 346 MB
+
+postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
+
+                          QUERY PLAN
+------------------------------------------------------------------------------
+ Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                      (actual time=0.042..713.662 rows=10000000 loops=1)
+   Buffers: shared hit=44248
+ Planning Time: 0.348 ms
+ Execution Time: 1107.820 ms
+(4 lignes)
+```
