@@ -115,9 +115,10 @@ Public Domain CC0.
 <div class="slide-content">
   * Développement depuis l'été 2017
   * Version bêta 1 sortie 24 mai 2018
-  * bêta 2 sortie le 28 juin
-  * bêta 3 sortie le 9 août
-  * Sortie de la version finale attendue fin septembre 2018
+  * Bêta 2 le 28 juin
+  * Bêta 3 le 9 août
+  * Bêta 4 le 17 septembre
+  * Version finale espérée septembre ou octobre 2018
   * Plus de 1,5 millions de lignes de code
   * Des centaines de contributeurs
 </div>
@@ -126,9 +127,10 @@ Public Domain CC0.
 
 Le développement de la version 11 a suivi l'organisation habituelle : un
 démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un 
-_feature freeze_ le 7 avril, une première version bêta fin mai.
+_feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
+le 17 septembre
 
-La version finale est sortie fin septembre ou début octobre 2018.
+La version finale est espérée fin septembre ou début octobre 2018.
 
 La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
 1 509 660 lignes pour être précis. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
@@ -2160,8 +2162,6 @@ modifications validées pour chaque commit fest :
 <div class="notes">
 Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
-
-FIXME toujours en beta2 ?
 
 Le site postgresql.org propose son propre dépôt RPM, nous allons donc
 l'utiliser pour installer PostgreSQL 11.
