@@ -100,10 +100,10 @@ hide_author_in_slide: true
 
 # Nouveautés de PostgreSQL 11
 
-![PostgreSQL](medias/elephant-rock-valley-of-fire.jpg)
+![PostgreSQL](medias/Elephant_Amboseli.jpg)
 
 <div class="notes">
-Photographie obtenue sur [urltarget.com](http://www.urltarget.com/elephant-rock-valley-of-fire.html).
+Photographie obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Elephant_Amboseli.jpg).
 
 Public Domain CC0.
 </div>
