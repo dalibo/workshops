@@ -1385,6 +1385,8 @@ $ cat /tmp/t2.csv
   * Nouvelle commande `pg_verify_checksums`
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
+    * 2 fonctions de vérifications plus ou moins invasives
+	* v11 : détection (probabiliste)
 </div>
 
 <div class="notes">
@@ -1392,8 +1394,76 @@ La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les base
 
 Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas de corruption des données, l'opération sera intérrompu, cependant le début de la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de l'option `--no-clean`). Il est possible de désactiver cette vérification avec l'option `--no-verify-checksums`.
 
-Le module `amcheck` apparu en v10 a été complété. Les fonctions `bt_index_check` et `bt_index_parent_check` accueillent un nouveau paramètre booléen `heapallindex`. Si ce paramètre vaut `true`, la fonction effectue une vérification sur toutes les colonnes liées à l'index.
-Cela pourra être utile afin de détecter une incohérence de structure entre les index et les tables indexées.
+Le module `amcheck` était apparu en version 10 pour vérifier la cohérence des index
+et de leur structure interne, et ainsi détecter des bugs, des corruptions dues
+au système de fichier voire la mémoire. Il définit deux fonctions :
+  * La fonction `bt_index_check` est destinée aux vérifications de routine,
+ne pose qu'un verrou _AccessShareLock_ peu gênant. En v10, elle ne vérifie
+pas la cohérence par rapport aux données de la table.
+  * La fonction `bt_index_parent_check` est plus minutieuse, mais son
+exécution gêne les modifications dans la table (verrou _ShareLock_ sur la 
+table et l'index), ne fonctionne pas sur un serveur secondaire ; en v10 elle
+ne vérifie toujours pas la cohérence entre l'index et la table.
+
+```sql
+postgres=# CREATE EXTENSION amcheck ;
+CREATE EXTENSION
+
+postgres=# SELECT bt_index_check('unetable_pkey');
+
+ bt_index_check
+----------------
+
+(1 ligne)
+
+Durée : 63753,257 ms (01:03,753)
+
+```
+
+En v11 apparaît le nouveau paramètre booléen `heapallindex`.
+
+Si ce paramètre vaut `true`, chaque fonction effectue une vérification supplémentaire
+en recréant temporairement une structure d'index et en la comparant avec l'index
+original. Ceci est évidemment bien plus long que les vérifications précédentes.
+Les verrous posés par les fonctions ne changent pas.
+
+Pour limiter l'impact, cela n'a lieu qu'en mémoire, et dans la limite du
+paramètre `maintenance_work_mem` (lequel est souvent de l'ordre du gigaoctet sur
+les serveurs récents). Cette restriction mémoire implique que la détection de
+problèmes est probabiliste pour le plus grosses tables (2 octets de mémoire
+par ligne donne une probabilité de détection d'une erreur sur cette ligne de
+98 %), mais rien n'empêche de relancer les vérifications régulièrement.
+
+```
+postgres=# select bt_index_check('unetable_pkey', true);
+ bt_index_check 
+----------------
+ 
+(1 ligne)
+
+Durée : 234381,730 ms (03:54,382)
+```
+
+`amcheck` ne fournit aucun moyen de corriger une erreur, puisqu'il détecte des
+choses qui ne devraient jamais arriver. `REINDEX` sera souvent la solution la
+plus simple et facile, mais cela dépend de la cause du problème.
+
+Sur un index de 10 Go sur un entier :
+```sql
+v11=# EXPLAIN (ANALYZE, VERBOSE,BUFFERS) SELECT bt_index_check('unetable_pkey', true);
+                                    QUERY PLAN
+------------------------------------------------------------------------------
+ Result  (cost=0.00..0.01 rows=1 width=4)
+         (actual time=234190.567..234190.568 rows=1 loops=1)
+   Output: bt_index_check('unetable_pkey'::regclass, true)
+   Buffers: shared hit=1371336 read=3582951
+   I/O Timings: read=16096.397
+ Planning Time: 0.010 ms
+ Execution Time: 234190.579 ms
+(6 lignes)
+
+Durée : 234200,678 ms (03:54,201)
+```
 
 </div>
 
