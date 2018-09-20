@@ -2095,7 +2095,7 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 ### Réplication Logique
 <div class="slide-content">
 
-  * Réplication de `TRUNCATE`
+  * Réplication de l'ordre `TRUNCATE`
   * Réduction de l'empreinte mémoire
   * Migration majeure par réplication logique
 
@@ -2113,10 +2113,11 @@ répliquées sont modifiables, et la base cible impose la cohérence de ses
 données au dépend des données source au besoin.
 
 La gestion de la mémoire a été améliorée grâce à un nouvel allocateur mémoire
-en mode FIFO idéal pour ce besoin (cf <https://commitfest.postgresql.org/14/1239/>).
+en mode FIFO idéal pour ce besoin
+(cf. <https://commitfest.postgresql.org/14/1239/>).
 
 Enfin, les premières migrations majeures utilisant la réplication logique sans
-outil tiers pourront avoir lieu entre des versions 10 et 11. 
+outil tiers pourront avoir lieu entre des versions 10 et 11.
 
 </div>
 
