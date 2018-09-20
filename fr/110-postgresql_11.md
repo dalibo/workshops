@@ -1385,8 +1385,8 @@ $ cat /tmp/t2.csv
   * Nouvelle commande `pg_verify_checksums`
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
-    * 2 fonctions de vérifications plus ou moins invasives
-	* v11 : détection d'erreur (probabiliste)
+    * v10 : 2 fonctions de vérification de l'intégrité des index
+	* v11 : vérification dela cohérence avec la table (probabiliste)
 </div>
 
 <div class="notes">
@@ -1395,9 +1395,10 @@ La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les base
 de données à froid. L'instance doit être arrêtée proprement avant lancer la
 commande.
 
-Les sommes de contrôles sont vérifiées par défaut sur `pg_basebackup`. En cas
-de corruption des données, l'opération sera intérrompu, cependant le début de
-la sauvegarde ne sera pas effacer automatiquement (similaire au comportement de
+Les sommes de contrôles, si elles sont là,
+sont à présent vérifiées par défaut sur `pg_basebackup`. En cas
+de corruption des données, l'opération sera interrompue. Cependant le début de
+la sauvegarde ne sera pas effacé automatiquement (similaire au comportement de
 l'option `--no-clean`). Il est possible de désactiver cette vérification avec
 l'option `--no-verify-checksums`.
 
@@ -1424,11 +1425,11 @@ fixé à 2%.
 Les verrous posés par les fonctions ne changent pas. Néanmoins, l'utilisation
 de ce mode a un impact sur la durée d'exécution des vérifications.  
 Pour limiter l'impact, l'opération n'a lieu qu'en mémoire, et dans la limite du
-paramètre `maintenance_work_mem`. Ce paramètre est souvent configuré de l'ordre
-du gigaoctet sur les serveurs récents.  
+paramètre `maintenance_work_mem`. Ce paramètre atteint ou dépasse souvent
+le gigaoctet sur les serveurs récents.  
 C'est cette restriction mémoire qui implique que la détection de problèmes est
-probabiliste pour le plus grosses tables. Mais rien n'empêche de relancer les
-vérifications régulièrement, diminuant ainsi les chances de ne pas détecter une
+probabiliste pour les plus grosses tables. Mais rien n'empêche de relancer les
+vérifications régulièrement, diminuant ainsi les chances de rater une
 erreur.
 
 `amcheck` ne fournit aucun moyen de corriger une erreur, puisqu'il détecte des
