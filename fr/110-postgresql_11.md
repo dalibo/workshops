@@ -847,8 +847,8 @@ La documentation officielle est assez accessible :
 </div>
 
 -----
-
 ### JIT
+
 <div class="slide-content">
 
  Qu'est-ce qui compilé ?
@@ -884,6 +884,7 @@ par l'auteur principal du JIT, Andres Freund.
 
 
 </div>
+
 
 -----
 
@@ -3296,7 +3297,278 @@ DROP PUBLICATION
 
 <div class="notes">
 
-FIXME
+Le JIT est difficile à reproduire sur une machine de bureau. Les gains n'étant
+visible que pour des requêtes coûteuses, manipulant et agrégeant de grand volume
+de données.  
+Dans le fichier de configuration `postgresql.conf`, monter les paramètres
+suivants au moins à :
+
+```
+shared_buffers = '2GB'
+work_mem = '1500MB'
+```
+
+Puis redémarrer votre instance :
+
+```console
+# service postgresql-11 restart
+```
+
+La table suivante imite une table de faits d'un _datawarehouse_ de vente,
+avec des dizaines de millions de lignes et environ 2 Go de taille :
+```sql
+DROP TABLE IF EXISTS faits_commandes CASCADE;
+
+CREATE TABLE faits_commandes AS
+  SELECT
+    extract('year' FROM date_commande) AS annee_commande,
+    to_char(date_commande, 'YYYYMM') AS mois_commande,
+    to_char(date_commande, 'IYYYIW') AS semaine_commande,
+    x3.*,
+    CASE WHEN mod(client_code, 3) > 0
+	      AND extract('month' FROM date_commande) < 11
+	  THEN round((random() / 10) ::numeric, 2)
+      ELSE 0
+    END AS remise,
+    mod(quantite, 10) AS nb_paquets,
+    (100000000 * random())::int AS numero_lot,
+    md5(ligne_num::text) AS code_confirmation,
+    round((random() * quantite * poids_unitaire) ::numeric, 0) AS cout_expedition
+FROM (
+  SELECT
+    ligne_num,
+    commande_num,
+    CASE WHEN random() > 0.95 THEN TRUE ELSE FALSE END AS commande_annulee,
+    client_code,
+    mod(client_code, 5) AS type_client,
+    date_commande,
+    d0 + (commande_num+(4*dmois*random())::int) * interval '2 hour'
+	  AS date_production,
+    d0 + (commande_num+50+(dmois*random())::int) * interval '2 hour'
+	  AS date_expedition,
+    d0 + (commande_num+80+(dmois*random())::int) * interval '2 hour'
+	  AS date_livraison,
+    d0 + (commande_num+(4*dmois*random())::int) * interval '2 hour'
+	  AS date_facturation,
+    d0 + (commande_num+250+(1500*random())::int) * interval '1 hour'
+	  AS date_paiement,
+    (random() > 0.5) AS flag1,
+    (random() > 0.3) AS flag2,
+    (random() > 0.1) AS flag3,
+    (random() > 0.9) AS flag4,
+    (random() > 0.99) AS flag5,
+    (random() > 0.6) AS flag6,
+    (random() > 0.99) AS flag7,
+    (random() > 0.999) AS flag8,
+    (random() > 0.88) AS flag9,
+    article_code,
+    mod(article_code, 54) AS fournisseur_code,
+    prix_unitaire_base,
+    prix_unitaire_base * (0.85 + 0.3 * random()) AS prix_unitaire,
+    (client_code * random() / 3) ::int AS quantite,
+    mod(article_code, 3) / 10 AS taux_tva,
+    round((prix_unitaire_base * (0.3 + random()))::numeric, 2) AS poids_unitaire,
+    CASE mod(client_code, 9)
+      WHEN 1 THEN 'FR' WHEN 2 THEN 'FR' WHEN 3 THEN 'FR'
+      WHEN 4 THEN 'DE'
+      WHEN 5 THEN 'GB' WHEN 7 THEN 'GB'
+      WHEN 6 THEN 'BE'
+      ELSE 'UE'
+    END AS pays_destination
+    FROM (
+      SELECT
+          *,
+          d0 + commande_num * interval '1 hour' AS date_commande,
+          extract('month' FROM (d0 + commande_num*interval '1 hour')) AS dmois
+      FROM (
+          SELECT
+              i AS ligne_num,
+              round(100000 * random())::int AS commande_num,
+              mod(round(100000 * random())::int, 333) AS client_code,
+              (1000 * random())::int AS article_code,
+              70 * random() AS prix_unitaire_base,
+              '2007-01-01 00:00:00'::timestamptz AS d0
+          FROM
+              generate_series(1, 8000000) i
+	) x1
+  ) x2
+) x3;
+
+\echo Petit extrait
+SELECT * FROM faits_commandes LIMIT 6;
+
+\echo Taille de la table de faits :
+SELECT pg_size_pretty(pg_relation_size('faits_commandes')) AS taille_table;
+
+\echo VACUUM ANALYZE
+VACUUM ANALYZE faits_commandes;
+```
+
+Notre requête de test calcule des statistiques sur toute la table. Pour des
+raisons de praticité, elle est créée sous forme de vue :
+
+```sql
+DROP VIEW IF EXISTS stats_commandes_v;
+
+CREATE OR REPLACE VIEW stats_commandes_v AS
+SELECT
+  annee_commande,
+  mois_commande,
+  sum(ca)::bigint AS ca_global_mois,
+  sum(ca) filter (WHERE (
+    extract(day FROM date_expedition) < 8))::bigint AS ca_semaine1,
+  sum(ca) filter (WHERE (
+    extract(day FROM date_expedition) BETWEEN 8 AND 16))::bigint AS ca_semaine2,
+  sum(ca) filter (WHERE (
+    extract(day FROM date_expedition) BETWEEN 17 AND 23))::bigint AS ca_semaine3,
+  sum(ca) filter (WHERE (
+    extract(day FROM date_expedition) > 23))::bigint AS ca_semaine4,
+  --
+  sum(ca) filter (WHERE commande_annulee IS TRUE) AS ca_annule,
+  --
+  sum(ca) filter (WHERE pays_destination = 'FR') AS ca_fr,
+  sum(ca) filter (WHERE pays_destination = 'DE') AS ca_de,
+  sum(ca) filter (WHERE pays_destination = 'GB') AS ca_gb,
+  sum(ca) filter (WHERE pays_destination = 'BE') AS ca_be,
+  sum(ca) filter (WHERE pays_destination = 'UE') AS ca_ue,
+  --
+  (sum(ca) filter (WHERE pays_destination = 'FR') / sum(ca)) AS ca_proportion_fr,
+  sum(ca) filter (WHERE flag1 IS TRUE) AS ca_urgent,
+  sum(ca) filter (WHERE flag1 IS TRUE AND flag2 IS TRUE) AS ca_urgent_bon_client,
+  sum(ca) filter (WHERE flag5 IS TRUE AND commande_annulee IS FALSE)
+    AS ca_annulation_interne,
+  sum(quantite) AS qte_tot_mois,
+  max(max(quantite)) OVER (PARTITION BY mois_commande) AS qte_commande_max_mois,
+  count(DISTINCT commande_num) AS nb_commandes,
+  count(DISTINCT commande_num) FILTER (WHERE commande_annulee IS FALSE)
+	AS nb_commandes_annulees,
+  (count(DISTINCT commande_num) FILTER (WHERE commande_annulee IS FALSE))
+    / count(DISTINCT commande_num) AS ratio_annulation,
+  --
+   avg(date_livraison - date_expedition) AS delai_reception_moyen,
+   avg(date_livraison - date_production) AS delai_prod_client_moyen,
+   avg(date_livraison - date_commande) AS delai_livraison_total_moyen,
+  --
+   round(avg(nb_paquets) FILTER (WHERE commande_annulee IS FALSE), 1)
+     AS nb_paquets_moyen,
+   sum(quantite) FILTER (WHERE commande_annulee IS FALSE)
+     / sum(nb_paquets) FILTER (WHERE commande_annulee IS FALSE)
+	 AS qte_moyenne_par_paquet,
+  --
+  ( avg(delai_facturation))::int AS delai_facturation_moyen,
+  ( avg(sum(delai_facturation) / count(delai_facturation))
+    OVER (PARTITION BY annee_commande))::int AS delai_facturation_moyen_annuel,
+  ( avg(delai_paiement))::int AS delai_paiement_moyen,
+  ( avg(sum(delai_paiement) / count(delai_paiement))
+    OVER (PARTITION BY annee_commande))::int AS delai_paiement_moyen_annuel
+  ----
+FROM (
+  SELECT
+    l.*,
+    l.quantite * prix_unitaire * (1 - remise) AS ca,
+    l.quantite * prix_unitaire_base AS ca_base,
+    extract('days' FROM date_facturation - date_commande) AS delai_facturation,
+    extract('days' FROM date_paiement - date_facturation) AS delai_paiement
+      FROM faits_commandes l
+	  WHERE date_expedition > '15-01-2007'
+        AND commande_num > 7
+        AND commande_num != 88
+        AND commande_num != 666
+        AND numero_lot > 5
+        AND numero_lot NOT IN (666, 999, 888, 123456789)
+        AND fournisseur_code != 1528
+        AND article_code NOT IN (673, 1942)
+        AND remise < 1
+        AND (flag1 OR flag2 OR flag3 OR flag4 OR flag5
+		     OR flag6 OR flag7 OR flag8 OR flag9)
+  ) details
+GROUP BY annee_commande, mois_commande;
+```
+
+Avant de lancer les tests, figeons la configuration, et forçons le chargement
+de la table (ou du moins la plus grande partie possible) en mémoire partagée
+grâce à pg_prewarm :
+
+
+```sql
+SET max_parallel_workers_per_gather TO 1;
+
+\echo Préchargement en mémoire autant que possible
+CREATE EXTENSION pg_prewarm;
+SELECT pg_prewarm ('faits_commandes');
+
+\echo Shared buffers
+SHOW shared_buffers;
+\echo Work mem
+SHOW work_mem;
+
+\pset pager off
+```
+
+On teste en activant le JIT. Vue la taille de la requête il ne sera pas utile
+de le forcer en descendant `jit_above_cost` à 0.
+
+```sql
+\echo "Tests avec JIT"
+
+SET jit TO on;
+SET jit_above_cost TO default;
+SET jit_inline_above_cost TO default;
+SET jit_optimize_above_cost TO default;
+
+SHOW jit;
+SHOW jit_above_cost;
+SHOW jit_inline_above_cost;
+SHOW jit_optimize_above_cost;
+
+EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM stats_commandes_v
+ORDER BY 1,2;
+```
+
+Rééxécuter la requête plusieurs fois pour vérifier que le temps d'exécution
+est reproductible.
+
+Vous devez trouver en fin du plan mention du JIT et des optimisations effectuées.
+Ici on voit notamment que le temps de génération du code n'est que de quelques
+millisecondes, mais plus d'une demi-seconde a été perdu à optimiser au
+maximum le code (_Optimization time_), et presque autant à générer le code
+object final (_Emission Time_) :
+
+```sql
+ Planning Time: 0.520 ms
+ JIT:
+   Functions: 27
+   Generation Time: 7.278 ms
+   Inlining: true
+   Inlining Time: 21.696 ms
+   Optimization: true
+   Optimization Time: 611.467 ms
+   Emission Time: 421.446 ms
+ Execution Time: 39285.440 ms
+(37 lignes)
+
+Durée : 39286,546 ms (00:39,287)
+```
+
+Comparons avec le temps d'exécution, sans le JIT :
+
+```sql
+SET jit TO off;
+
+EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM stats_commandes_v
+ORDER BY 1,2;
+```
+Ce qui nous donne sur la même machine que précédemment :
+
+```sql
+ Execution Time: 44686.972 ms
+```
+
+Le gain en temps tourne donc ici autour des 10 %.
+
+Si la machine disponible est assez puissante, on peut ensuite
+augmenter le nombre de lignes générées dans la table. L'écart devrait devenir
+de plus en plus important. Si possible, monter `shared_buffers` à 4 Go.
 
 </div>
 
