@@ -2083,7 +2083,7 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 ## Réplication 
 <div class="slide-content">
   * Réplication logique
-  * Taille des WALs checkpoint
+  * Taille des WALs et checkpoint
 </div>
 
 <div class="notes">
@@ -2095,16 +2095,28 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 ### Réplication Logique
 <div class="slide-content">
 
-  * Réplication des commandes `TRUNCATE`
+  * Réplication de `TRUNCATE`
   * Réduction de l'empreinte mémoire
+  * Migration majeure par réplication logique
 
 </div>
 
 <div class="notes">
 
-FIXME
+La version 11 lève une des contraintes les plus gênantes de la réplication
+logique apparue en version 10 : les ordres `TRUNCATE` sont à présent dupliqués.
 
-Add a generational memory allocator which is optimized for serial allocation/deallocation (Tomas Vondra). This reduces memory usage for logical decoding.
+La documentation précise que la réplication de l'ordre peut échouer si des clés
+étrangères ont été ajoutées vers cette table. Cela est cohérent avec le
+principe de la réplication logique : les données et schémas
+répliquées sont modifiables, et la base cible impose la cohérence de ses
+données au dépend des données source au besoin.
+
+La gestion de la mémoire a été améliorée grâce à un nouvel allocateur mémoire
+en mode FIFO idéal pour ce besoin (cf <https://commitfest.postgresql.org/14/1239/>).
+
+Enfin, les premières migrations majeures utilisant la réplication logique sans
+outil tiers pourront avoir lieu entre des versions 10 et 11. 
 
 </div>
 
