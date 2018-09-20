@@ -2157,7 +2157,12 @@ FIXME
 <div class="slide-content">
   * Branche de développement de la version 12 créée le FIXME
     * ... quelques améliorations déjà présentes
-    * FIXME
+    * Index couvrants sur GIST
+    * Requêtes parallèles sur transactions `SERIALIZABLE`
+    * Filtrage des ligne pour la réplication logique
+    * Support GnuTLS
+    * Spécifier un nom d'index en paramètre de `ANALYSE`
+
 </div>
 
 <div class="notes">
@@ -2166,7 +2171,7 @@ grandes étapes.
 
 Les développements de la version 12 ont commencé. Les premiers commit fests
 nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
-suivants : parallélisme, partitionnement et réplication logique. FIXME ?
+suivants : parallélisme, partitionnement et réplication logique.
 
 Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
 modifications validées pour chaque commit fest :
