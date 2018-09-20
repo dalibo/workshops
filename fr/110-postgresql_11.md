@@ -2028,31 +2028,50 @@ sur le serveur primaire
 <div class="slide-content">
 
   * `pg_prewarm` : chargement de données en cache (PG ou OS)
-  * En v11, peut être automatique au redémarrage
+  * En v11 :
+    * sauvegarde régulière des blocs dans le cache PG
+    * chargement automatique de ces blocs au démarrage
 
 </div>
 
 <div class="notes">
 
-`pg_prewarm` est un module permettant de charger des tables (ou un index,
-ou une partie de table) en mémoire cache (les _shared buffers_ ou le cache de
-l'OS). 
+`pg_prewarm` est un module permettant de charger des tables (ou un index, ou
+une partie de table) en mémoire cache (les _shared buffers_ ou le cache de
+l'OS). Il permettait jusqu'à maintenant de charger des relations dans le cache
+via la fonction `pg_prewarm`, donc de façon manuelle uniquement.
 
-On peut ainsi éviter que des requêtes soient ralenties parce que les données
-ne sont pas encore chargées en mémoire, notamment en cas de redémarrage. 
+Une nouvelle fonctionnalité de la version 11 permet de sauvegarder
+périodiquement les blocs dans le cache de PostgreSQL. Cette sauvegarde peut
+être effectuée de façon régulière, toutes les 5 minutes par défaut. Elle sera
+effectuée de toutes façons lors d'un arrêt normal de l'instance.
 
-La v11 permet d'automatiser cela au démarrage. La mise en place s'opère dans
-le `postgresql.conf` :
+Grâce à cette sauvegarde, il est désormais possible d'automatiser le chargement
+de la dernière sauvegarde au démarrage de l'instance. La mise en place s'opère
+dans le fichier `postgresql.conf` :
 ```
 shared_preload_libraries = 'pg_prewarm'
 pg_prewarm.autoprewarm = true
 ```
 
-PostgreSQL sauvegarde toutes les 5 minutes (par défaut) les blocs dans les
-_shared buffers_, ainsi que lors d'un arrêt normal.
+On peut ainsi éviter que des requêtes soient ralenties parce que les données
+ne sont pas encore chargées en mémoire, notamment en cas de redémarrage. 
 
-Il n'est cependant pas garanti que les données restent dans les caches si
-la base est active.
+Le paramètre `pg_prewarm.autoprewarm_interval`, exprimé en secondes, permet de
+préciser le rythme des sauvegardes. Les sauvegardes seront stockées dans le
+fichier `$PGDATA/autoprewarm.blocks`.
+
+Deux nouvelles fonctions font leur apparition. Elles sont surtout utiles si le
+préchauffage n'est pas activé :
+
+  * `autoprewarm_start_worker()` : permet de lancer le processus de sauvegarde
+    automatique des blocs du _shared buffers_, le _autoprewarm worker_,
+  * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde. 
+
+Le préchauffage des caches est typiquement plus utile au démarrage, quand les
+caches sont majoritairement vides. Il n'est cependant pas garanti que les
+données chargées soient utiles aux requêtes et qu'elles restent dans les caches
+si la base est active et manipule des grands volumes de données.
 
 Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 
