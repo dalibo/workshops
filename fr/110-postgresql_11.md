@@ -4031,6 +4031,61 @@ postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
  Execution Time: 1107.820 ms
 (4 lignes)
 ```
+-----
+
+### Les outils de la sphère Dalibo
+
+<div class="slide-content">
+Compatibilité des outils à version PostgreSQL 11 :
+
++----------------------+------------------------------------------------------+
+| Outil                | Compatibilité avec PostgreSQL 11 |
++======================+======================================================+
+| pgBadger             | Oui |
++----------------------+------------------------------------------------------+
+| pgCluu               | Oui |
++----------------------+------------------------------------------------------+
+| ora2Pg               | En cours de développement ( normalement compatible PG11 à partir de la version 19.1) |
++----------------------+------------------------------------------------------+
+| pg_stat_kcache       | oui, compatible depuis la version 2.1.0 (version courant est 2.1.1) |
++----------------------+------------------------------------------------------+
+| ldap2pg              | Oui pg11 |
++----------------------+------------------------------------------------------+
+| pitrery              | Oui pg11 à partir de la version 2.2 |
++----------------------+------------------------------------------------------+
+
+</div>
+
+<div class="notes">
+Compatibilité des outils à version PostgreSQL 11 (septembre 2018) :
+
++----------------------+------------------------------------------------------+
+| Outil                | Compatibilité avec PostgreSQL 11 |
++======================+======================================================+
+| pg_activity          | pas encore testé. (attend la réponse de julmon) |
++----------------------+------------------------------------------------------+
+| check_pgactivity     | En cours de développement, partiellement compatible. |
++----------------------+------------------------------------------------------+
+| pgBadger             | Oui |
++----------------------+------------------------------------------------------+
+| pgCluu               | Oui pg11 |
++----------------------+------------------------------------------------------+
+| ora2Pg               | En cours de développement (normalement compatible PG11 à partir de la version 19.1) |
++----------------------+------------------------------------------------------+
+| powa-archivist       | oui, compatible depuis la version 3.1.2 |
++----------------------+------------------------------------------------------+
+| pg_qualstats         | oui, compatible depuis la version 1.0.5 |
++----------------------+------------------------------------------------------+
+| pg_stat_kcache       | oui, compatible depuis la version 2.1.0 (version courant est 2.1.1) |
++----------------------+------------------------------------------------------+
+| hypopg               | oui depuis la version 1.1.2 (supporte l'index scan en parallèle et la clause INCLUDE sur les index hypothétiques) |
++----------------------+------------------------------------------------------+
+| PAF                  | pas encore testé. (ioguix) |
++----------------------+------------------------------------------------------+
+| temboard             | pas encore testé. (attend la réponse de julmon) |
++----------------------+------------------------------------------------------+
+| ldap2pg              | Oui |
++----------------------+------------------------------------------------------+
 
 </div>
 
