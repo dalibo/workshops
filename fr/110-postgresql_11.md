@@ -628,9 +628,9 @@ COMMIT
 
 ### Performance & partitions
 <div class="slide-content">
-  * Paramètre dédié pour l'élagage des partitions : `enable_partition_pruning`
   * Amélioration de l'algorithme d'élagage
-  * Élagage dynamique des partitions
+  * `enable_partition_pruning` 
+  * Élagage dynamique des partitions, à l'exécution
 </div>
 
 <div class="notes">
@@ -655,19 +655,21 @@ par hachage.
 
 Une autre nouveauté est la possibilité pour le moteur, non seulement d'élaguer
 à la planification, mais aussi lors de l'exécution de la requête ! Cette
-amélioration est visible en effectuant un _EXPLAIN ANALYSE_ de la requête. 
+amélioration est visible en effectuant un _EXPLAIN ANALYZE_ de la requête. 
 
-Insérons des données dans la table livres :
+Insérons des données dans la table partitionnée `livres` déjà utilisée
+plus haut :
 
 ```sql
-INSERT INTO livres SELECT md5(i::text)::text, now() - i*'1 week'::interval
-  FROM generate_series(1,100000) i;
+INSERT INTO livres
+SELECT md5(i::text)::text, now() - i*'1 week'::interval
+FROM generate_series(1,100000) i;
 ```
 
-On va rechercher tous les livres avec des titres commençant par les lettre _a_
-à _c_. On va cependant émuler le cas où le deuxième paramètre provient d'une
+Nous allons rechercher tous les livres avec des titres commençant par les lettres `a`
+à `c`. On va cependant émuler le cas où le deuxième paramètre provient d'une
 sous-requête. Si on désactive l'élagage des partitions, on obtient un parcours
-de toutes les partitions :
+de toutes les partitions :
 
 ```sql
 v11=# SET enable_partition_pruning = off;
@@ -689,7 +691,8 @@ SELECT * FROM livres WHERE titre BETWEEN 'a' AND (SELECT 'c');
 ```
 
 Lorsque l'élagage est activé, le moteur détecte qu'il n'a pas besoin de
-parcourir la partition _livres_0_9_ lors de la phase de planification :
+parcourir la partition `livres_0_9`, et ce dès la phase de planification. Par
+contre il prévoit de parcourir `livres_m_z` :
 
 ```sql
 v11=# SET enable_partition_pruning = on;
@@ -708,8 +711,8 @@ SELECT * FROM livres l WHERE titre BETWEEN 'a' AND (SELECT 'c');
 (7 lignes)
 ```
 
-Nous voyons bien qu'il n'a pas besoin de parcourir la partition _livres_m_z_, la
-recherche s'arrêtant aux titres commençant par la lettre _c_. En activant
+Or nous savons bien qu'il n'a pas besoin de parcourir la partition `livres_m_z`,
+puisque la recherche s'arrête aux titres commençant par la lettre `c`. Activons
 l'analyse du plan d'exécution :
 
 ```sql
@@ -730,11 +733,13 @@ SELECT * FROM livres l WHERE titre BETWEEN 'a' and (select 'c');
 (10 lignes)
 ```
 
-Nous nous apercevons que lors de l'exécution, le parcours de la partition
-_livres_m_z_ que le planificateur avait prévu, est annulé : `never
-executed`.  
-Cet élagage dynamique pourra être effectué pour toute expression stable. Par
-exemple, un appel à une fonction _stable_ ou _immutable_.
+Nous constatons que lors de l'exécution, le parcours de la partition
+`livres_m_z` prévu par le planificateur est annulé :
+`never executed`.
+
+Cet élagage dynamique pourra être effectué sur toute expression stable. Par
+exemple, un appel à une fonction _stable_ ou _immutable_ (donc une expression
+constante, un calcul, la fonction `now()`, mais pas la fonction`random()` par exemple).
 
 L'élagage dynamique est également activé dans les instructions préparées.
 
