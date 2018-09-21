@@ -403,7 +403,7 @@ Index :
 
 Si on crée une nouvelle partition, l'index sera créé automatiquement :
 ```sql
-v11=# CREATE TABLE livres_0_9 PARTITION OF livres FOR VALUES FROM ('0') TO ('999');
+v11=# CREATE TABLE livres_0_9 PARTITION OF livres FOR VALUES FROM ('0') TO ('a');
 CREATE TABLE
 v11=# \d livres_0_9
                           Table « public.livres_0_9 »
@@ -411,7 +411,7 @@ v11=# \d livres_0_9
 ----------+--------------------------+-----------------+-----------+------------
  titre    | text                     |                 |           |
  parution | timestamp with time zone |                 |           |
-Partition de : livres FOR VALUES FROM ('0') TO ('999')
+Partition de : livres FOR VALUES FROM ('0') TO ('a')
 Index :
     "livres_0_9_titre_idx" btree (titre)
 ```
@@ -2405,6 +2405,8 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 ## Mise à jour d'une partition avec un `UPDATE`
 
+<div class="notes">
+
 La table partitionné est créé sur les deux instances en version 10 et 11.
 
   * Création d'une table partitionné par intervalle :
@@ -3662,6 +3664,8 @@ de plus en plus important. Si possible, monter `shared_buffers` à 4 Go.
 -----
 
 ## pg_prewarm
+
+<div class="notes">
 
 Ce qui suit suppose un paramètre `shared_buffers` assez grand :
 
