@@ -128,7 +128,7 @@ Public Domain CC0.
 Le développement de la version 11 a suivi l'organisation habituelle : un
 démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un
 _feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
-le 17 septembre
+le 17 septembre.
 
 La version finale est espérée fin septembre ou début octobre 2018.
 
@@ -141,6 +141,8 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
   * [Vidéo](https://youtu.be/NPRw0oJETGQ)
   * [Slides](https://dali.bo/daniel-verite-communaute-dev-pgday)
 </div>
+
+\newpage
 
 -----
 
@@ -165,18 +167,16 @@ des articles en anglais :
   * ...
 </div>
 
-\
-
 -----
 
 ## Nouveautés sur le partitionnement
 <div class="slide-content">
 
-  * Partitionnment par hachage
+  * Partitionnement par hachage
   * Création d'index automatique
   * Support de clés primaires et clés étrangères
   * Mise à jour de la clé de partition
-  * Partitionnement par défaut
+  * Partition par défaut
   * Amélioration des performances
   * Clause `INSERT ON CONFLICT`
   * Trigger `FOR EACH ROW`
@@ -184,7 +184,7 @@ des articles en anglais :
 </div>
 
 <div class="notes">
-Le partitionnement natif était une fonctionnalité très attendu de
+Le partitionnement natif était une fonctionnalité très attendue de
 PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient
 dissuader de l'utilisation de celui-ci.
 
@@ -193,13 +193,15 @@ corrige certaines limites impactant la version 10.
 
 </div>
 
+\newpage
+
 -----
 
 ### Partitionnement par hachage
 <div class="slide-content">
-  * répartition des données suivant la valeur de hachage de la clé de partition
-  * très utile pour les partitions destinées à grandir
-  * accéleration des `VACUUM`
+  * Répartition des données suivant la valeur de hachage de la clé de partition
+  * Très utile pour les partitions destinées à grandir
+  * Accélération des `VACUUM`
 </div>
 
 <div class="notes">
@@ -211,13 +213,13 @@ Ce mode de partitionnement est utile lorsqu'on cherche à séparer les données 
 plusieurs parties sans rechercher un classement particulier des
 enregistrements.
 
-Tous les mode de partitionnement permettent d'accélérer les opérations de
-`VACUUM`.  
 Les partitionnements par liste ou par intervalles permettent de facilement
 archiver ou supprimer des données. Le partitionnement par hachage va être utile
 pour les partitions destinées à s’agrandir et pour lesquelles il n'y a pas de
 clé de partitionnement naturelle.
 
+Tous les modes de partitionnement permettent d'accélérer les opérations de
+`VACUUM`.  
 </div>
 
 -----
@@ -235,8 +237,8 @@ clé de partitionnement naturelle.
 <div class="notes">
 
 On fixe la valeur initiale du modulo au nombre de partitions à créer. On doit
-créer les tables partitionnées pour tous les restes car il n'est pas possible
-de définir de table par défaut avec les partitions par hachage.
+créer les tables partitionnées pour tous les restes de la division entière car 
+il n'est pas possible de définir de table par défaut avec les partitions par hachage.
 
 ```sql
 v11=# CREATE TABLE t1(c1 int PRIMARY KEY) PARTITION BY HASH (c1);
@@ -329,7 +331,7 @@ v11=# SELECT SUM(c) count_aa_ab FROM (
         3277
 (1 ligne)
 
-workshop11=# \d+ t1
+v11=# \d+ t1
                          Table « public.t1 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage |
 ---------+---------+-----------------+-----------+------------+----------+
@@ -375,7 +377,7 @@ v10=# CREATE INDEX ON livres (titre);
 ERROR:  cannot create index on partitioned table "livres"
 ```
 
-En version 11, les index sont créés sur chaques partitions :
+En version 11, les index sont créés sur chaque partition :
 ```sql
 v11=# CREATE INDEX ON livres (titre);
 CREATE INDEX
@@ -482,8 +484,9 @@ Number of partitions: 0
 ### Support des clés étrangères
 <div class="slide-content">
 
-  * Clé étrangère depuis une table non partitionnée
+  * Clé étrangère depuis une table partitionnée
   * Clé étrangère vers une table partitionnée toujours impossible
+    * mais possible vers une partition spécifique
 
 </div>
 
@@ -552,12 +555,13 @@ CREATE TABLE
 
 <div class="notes">
 
-En version 10 il n'était pas possible de mettre à jour une clé de partition
+En version 10, il n'était pas possible de mettre à jour une clé de partition
 entre deux partitions différentes avec la commande `UPDATE`, il était
 nécessaire de faire un `DELETE` puis un `INSERT`.
 
 En version 11, PostgreSQL rend la chose transparente.
 </div>
+
 -----
 
 ### Partition par défaut
@@ -586,7 +590,7 @@ v11=# INSERT INTO livres VALUES ('zzzz', now());
 INSERT 0 1
 ```
 
-Attention : on ne pourra pas ensuite créer de partition dont la contrainte
+Attention, on ne pourra pas ensuite créer de partition dont la contrainte
 contiendrait des lignes présentes dans la partition par défaut :
 ```sql
 v11=# CREATE TABLE livres_zzz_zzzzz PARTITION OF livres
@@ -595,10 +599,11 @@ ERROR:  updated partition constraint for default partition "livres_default"
         would be violated by some row
 ```
 
-Le contournement est le suvant : créer la partition en dehors de la table
+Le contournement est le suivant : créer la partition en dehors de la table
 partitionnée, insérer les enregistrements de la table par défaut dans la
 nouvelle table, supprimer ces enregistrements de la table par défaut et
-attacher la table comme nouvelle partition :
+attacher la table comme nouvelle partition.
+
 ```sql
 v11=# BEGIN;
 BEGIN
@@ -621,6 +626,7 @@ COMMIT
 </div>
 
 -----
+
 ### Performance & partitions
 <div class="slide-content">
   * Élagage dynamique des partitions
@@ -640,7 +646,6 @@ FIXME
   * `FOR EACH ROW trigger`
 </div>
 
-
 <div class="notes">
 En version 10, la clause `ON CONFLICT` n'était pas supportée sur le
 partitionnement :
@@ -657,7 +662,7 @@ v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 INSERT 0 0
 ```
 
-Une évolution a été mise en place : le _Partition-Wise Aggregate_.
+_Partition-Wise Aggregate_ :
 
 Les paramètres `enable_partitionwise_join` et `enable_partitionwise_aggregate`
 ont été ajoutés. Ils sont désactivés par défaut. En cas de jointure entre
@@ -690,7 +695,8 @@ v11=# SET max_parallel_workers_per_gather=0;
 SET
 ```
 
-Voici le plan sans les optimisations. Les jointures sont effectuées entre les partitions d'une même table :
+Voici le plan sans les optimisations. 
+Les jointures sont effectuées entre les partitions d'une même table :
 ```sql
 v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
                 QUERY PLAN
@@ -797,7 +803,7 @@ des requêtes SQL.
 
 Dans certaines requêtes, l'essentiel du temps est passé à décoder
 des enregistrements (_tuple deforming_), à analyser des clauses `WHERE`, à
-effectuer des calculs. L'idée du JIT est de tranformer tout ou partie de la
+effectuer des calculs. L'idée du JIT est de transformer tout ou partie de la
 requête en un programme natif directement exécuté par le processeur.
 
 C'est le fruit de deux ans de travail d'Andres Freund notamment.
@@ -811,7 +817,7 @@ L'utilisation nécessite un PostgreSQL compilé avec l'option `--with-llvm` et
 l'installation des bibliothèques de LLVM. Avec les paquets du PGDG,
 c'est le cas par défaut sur Debian/Ubuntu. Sur
 CentOS/RedHat 7 il faut penser à installer le package `postgresql11-llvmjit`.
-CentOS/RedHat 6 ne permettent actuellement pas d'utuiliser le JIT.
+CentOS/RedHat 6 ne permettent actuellement pas d’utiliser le JIT.
 
 Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas
 d'erreur et continue sans tenter de JIT.
@@ -847,8 +853,8 @@ La documentation officielle est assez accessible :
 </div>
 
 -----
-### JIT
 
+### JIT
 <div class="slide-content">
 
  Qu'est-ce qui compilé ?
@@ -882,14 +888,11 @@ Pour les détails, on peut consulter notamment cette
 [conférence très technique au FOSDEM 2018](https://archive.fosdem.org/2018/schedule/event/jiting_postgresql_using_llvm/)
 par l'auteur principal du JIT, Andres Freund.
 
-
 </div>
-
 
 -----
 
 ### JIT
-
 
 <div class="slide-content">
   Algorithme « naïf » :
@@ -928,16 +931,16 @@ entrées-sorties, donc sans considération du coût CPU. Ces seuils sont un peu
 arbitraires et nécessiteront sans doute un certain tuning en fonction de vos
 requêtes.
 
-
 </div>
 
 -----
+
 ### JIT
 
 <div class="slide-content">
- Exemple de JIT en fin de plan d'exécution :
+  Exemple de JIT en fin de plan d'exécution :
 
- ```
+```
  Planning Time: 0.553 ms
  JIT:
    Functions: 27
@@ -1000,9 +1003,6 @@ augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
 
 Documentation officielle :
 <https://docs.postgresql.fr/11/jit-decision.html>
-
-
-
 </div>
 
 
@@ -1082,7 +1082,7 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 (8 lignes)
 ```
 
-L'auteur de cette optmisation a écrit un article assez complet sur le sujet :
+L'auteur de cette optimisation a écrit un article assez complet sur le sujet :
 <https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
 
 La création d'index peut à présent être parallélisée, ce qui va permettre de
@@ -1119,8 +1119,8 @@ La commande `ALTER TABLE t9 SET (parallel_workers = 4);` permet de fixer le
 nombre de workers au niveau de la définition de la table, mais attention cela
 va aussi impacter vos requêtes !
 
-Pour de plus amples détails, les Autrichiens de Cybertec ont publié un
-[article sur le sujet] (https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/).
+Pour de plus amples détails, Cybertec a publié un
+[article sur le sujet](https://www.cybertec-postgresql.com/en/postgresql-parallel-create-index-for-better-performance/).
 
 </div>
 
@@ -1159,7 +1159,7 @@ attentes, mais il est relâché beaucoup plus rapidement que si la réécriture
 était nécessaire.
 
 La table n'est donc pas réécrite ni ne change de taille. Par la suite, chaque
-ligne modifée sera réécrite en intégrant la valeur par défaut. De même, un
+ligne modifiée sera réécrite en intégrant la valeur par défaut. De même, un
 `VACUUM FULL` réécrira la table avec ces valeurs par défaut, donnant au final
 une table potentiellement beaucoup plus grande qu'avant le `VACUUM` !
 
@@ -1217,6 +1217,8 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
 </div>
 
+\newpage
+
 -----
 
 ### Nouveaux rôles
@@ -1224,7 +1226,7 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
   * **pg_read_server_files** : permet la lecture de fichier sur le serveur
   * **pg_write_server_files** : permet la modification de fichier sur le serveur
-  * **pg_execute_server_program** : permet l'execution de fichier sur le serveur
+  * **pg_execute_server_program** : permet l’exécution de fichier sur le serveur
 
 </div>
 
@@ -1250,9 +1252,9 @@ $ cat /tmp/t1.csv
 9
 10
 ```
-En version 10 il était nécessaire d'être superutilisateur pour pouvoir importer
-les données d'une table depuis un fichier externe :
 
+En version 10 il était nécessaire d'être super-utilisateur pour pouvoir importer
+les données d'une table depuis un fichier externe.
 
 Création d'un utilisateur standard :
 ```sql
@@ -1386,7 +1388,7 @@ $ cat /tmp/t2.csv
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
     * v10 : 2 fonctions de vérification de l'intégrité des index
-	* v11 : vérification dela cohérence avec la table (probabiliste)
+	  * v11 : vérification de la cohérence avec la table (probabiliste)
 </div>
 
 <div class="notes">
@@ -1404,11 +1406,11 @@ l'option `--no-verify-checksums`.
 
 Le module `amcheck` était apparu en version 10 pour vérifier la cohérence des
 index et de leur structure interne, et ainsi détecter des bugs, des corruptions
-dues au système de fichier voire la mémoire. Il définit deux fonctions :
+dues au système de fichier voire à la mémoire. Il défini deux fonctions :
 
-  * La fonction `bt_index_check` est destinée aux vérifications de
+  * `bt_index_check` est destinée aux vérifications de
 routine. Elle ne pose qu'un verrou _AccessShareLock_ peu gênant.
-  * La fonction `bt_index_parent_check` est plus minutieuse, mais son exécution
+  * `bt_index_parent_check` est plus minutieuse, mais son exécution
 gêne les modifications dans la table (verrou _ShareLock_ sur la table et
 l'index). Elle ne peut pas être exécutée sur un serveur secondaire.
 
@@ -1474,6 +1476,8 @@ facteur 4.
 
 </div>
 
+\newpage
+
 -----
 
 ### Index couvrants
@@ -1484,21 +1488,53 @@ facteur 4.
 </div>
 
 <div class="notes">
-Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table uniquement dans les feuilles d'un index de type B-Tree. L'index ne pourra pas être utilisé pour faire des recherches sur ces colonnes incluses. L'index sera cependant utilisable pour récupérer directement les informations de ces colonnes incluses sans avoir besoin d'accéder à la table grâce à un `Index Only Scan`. La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
+Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table 
+uniquement dans les feuilles d'un index de type B-Tree. 
+
+L'index ne pourra pas être utilisé pour faire des recherches sur ces colonnes 
+incluses. L'index sera cependant utilisable pour récupérer directement les 
+informations de ces colonnes incluses sans avoir besoin d'accéder à la table 
+grâce à un `Index Only Scan`. 
+
+La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
 
 ```sql
 CREATE INDEX index_couvrant ON ma_table
   (lookup_col1, lookup_col2) INCLUDE (autre_col);
 ```
 
-La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est présente dans l'index, il n'est alors pas nécessaire de lire la table pour récupérer les données recherchées : on les lit directement dans l'index pour des gains substantiels de performance ! Mais pour que ce nœud s'active, il faut évidemment que toutes les colonnes recherchées soient présentes dans l'index.
+La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est 
+présente dans l'index, il n'est alors pas nécessaire de lire la table pour 
+récupérer les données recherchées : on les lit directement dans l'index pour 
+des gains substantiels de performance ! Mais pour que ce nœud s'active, il 
+faut évidemment que toutes les colonnes recherchées soient présentes dans l'index.
 
-Une colonne sur laquelle aucune recherche n'est faite mais dont on a besoin dans la requête peut être ajoutée à la fin de la liste des colonnes indexées. La requête pourra alors utiliser un `Index Only Scan`. Dans un index couvrant, le nouveau mot clé `INCLUDE` permet de ne pas l'ajouter à la liste des colonnes indexées, mais en plus de ces colonnes. Les colonnes incluses ne sont pas triées et ne peuvent donc pas directement servir aux tris et recherches.
+Une colonne sur laquelle aucune recherche n'est faite mais dont on a besoin 
+dans la requête peut être ajoutée à la fin de la liste des colonnes indexées. 
+La requête pourra alors utiliser un `Index Only Scan`. 
 
-Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes dans un index duplique de l'information. Cela a un impact en terme de volume sur disque mais également en terme de performance d'insertion et de mise à jour de la table.
+Dans un index couvrant, le nouveau mot clé `INCLUDE` permet de ne pas l'ajouter 
+à la liste des colonnes indexées, mais en plus de ces colonnes. 
 
-Les index couvrants ne changent rien côté taille des index. Leur intérêt premier est de pouvoir ajouter des colonnes dans un index déjà présent (unique notamment) sans devoir déclarer un index distinct.
-En effet, PostgreSQL utilise un index unique pour implémenter une contrainte d'unicité sur une ou un ensemble de colonnes. Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques ainsi qu'à une autre colonne, il faut créer un nouvel index. Un index couvrant va permettre de ne pas créer de nouvel index en intégrant l'autre colonne recherchée à l'index unique.
+Les colonnes incluses ne sont pas triées et ne peuvent donc pas directement 
+servir aux tris et recherches.
+
+Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes 
+dans un index duplique de l'information. Cela a un impact en terme de volume sur 
+disque mais également en terme de performance d'insertion et de mise à jour de la table.
+
+Les index couvrants ne changent rien côté taille des index. Leur intérêt 
+premier est de pouvoir ajouter des colonnes dans un index déjà présent 
+(unique notamment) sans devoir déclarer un index distinct.
+
+En effet, PostgreSQL utilise un index unique pour implémenter une contrainte 
+d'unicité sur une ou un ensemble de colonnes. 
+
+Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques 
+ainsi qu'à une autre colonne, il faut créer un nouvel index. 
+
+Un index couvrant va permettre de ne pas créer de nouvel index en intégrant 
+l'autre colonne recherchée à l'index unique.
 
 </div>
 
@@ -1544,8 +1580,8 @@ Les objets de type PROCEDURE sont sensiblement les mêmes que les objets de type
 Les différences sont :
 
   * l'appel se fait par le mot clé `CALL` et non `SELECT` ;
-  * les object de type PROCEDURE ne peuvent rien retourner ;
-  * les object de type PROCEDURE permettent un contrôle transactionnel,
+  * les objets de type PROCEDURE ne peuvent rien retourner ;
+  * les objets de type PROCEDURE permettent un contrôle transactionnel,
 ce que ne peuvent pas faire les objets de type FUNCTION.
 
 </div>
@@ -1558,8 +1594,8 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
   * Utilisable :
     * dans des blocs `DO` / `CALL`
     * dans des objets de type PROCEDURE
-  * ne fonctionne pas à l'intérieur d'une transaction
-  * incompatible avec une clause `EXCEPTION`
+  * Ne fonctionne pas à l'intérieur d'une transaction
+  * Incompatible avec une clause `EXCEPTION`
 </div>
 
 <div class="notes">
@@ -1920,6 +1956,8 @@ FIXME
 
 </div>
 
+\newpage
+
 -----
 
 ### psql
@@ -1939,7 +1977,7 @@ PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes p
 
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
 ```sql
-workshop11=# select * from t1;
+v11=# select * from t1;
  c1
 ----
   1
@@ -1954,7 +1992,7 @@ workshop11=# select * from t1;
  10
 (10 rows)
 
-workshop11=# \gdesc
+v11=# \gdesc
  Column |  Type   
 --------+---------
  c1     | integer
@@ -1963,7 +2001,7 @@ workshop11=# \gdesc
 
 On peut aussi tester les types retournés par une requête sans l'exécuter :
 ```sql
-workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
+v11=# select 3.0/2 as ratio, now() as maintenant \gdesc
    Column   |           Type           
 ------------+--------------------------
  ratio      | numeric
@@ -1972,40 +2010,40 @@ workshop11=# select 3.0/2 as ratio, now() as maintenant \gdesc
 
 Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée.
 ```sql
-workshop11=# \d t1
+v11=# \d t1
                  Table "public.t1"
  Column |  Type   | Collation | Nullable | Default
 --------+---------+-----------+----------+---------
  c1     | integer |           |          |
 
-workshop11=# select c2 from t1;
+v11=# select c2 from t1;
 ERROR:  column "c2" does not exist
 ```
 
 La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur.
 ```sql
-workshop11=# \echo :ERROR
+v11=# \echo :ERROR
 true
 ```
 
 La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur.
 ```sql
-workshop11=# \echo :SQLSTATE
+v11=# \echo :SQLSTATE
 42703
 ```
 
 La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête.
 ```sql
-workshop11=# \echo :ROW_COUNT
+v11=# \echo :ROW_COUNT
 0
 ```
 
 Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur.
 ```sql
-workshop11=# \echo :LAST_ERROR_MESSAGE
+v11=# \echo :LAST_ERROR_MESSAGE
 column "c2" does not exist
 
-workshop11=# \echo :LAST_ERROR_SQLSTATE
+v11=# \echo :LAST_ERROR_SQLSTATE
 42703
 ```
 
@@ -2014,6 +2052,7 @@ Les commandes `exit` et `quit` ont été ajoutées pour quitter psql afin que ce
 Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent être utilisées même si le serveur reste dans une version antérieure.
 
 </div>
+
 -----
 
 ### initdb
@@ -2077,7 +2116,7 @@ Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certain
 environnements a été améliorée en interdisant le fonctionnement du binaire sous
 root, et en permettant au besoin de n'utiliser qu'un utilisateur « normal »
 sur le serveur primaire
-(voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/).
+(voir le blog de [Michael Paquier](https://paquier.xyz/postgresql-2/postgres-11-superuser-rewind/)).
 </div>
 
 -----
@@ -2147,6 +2186,8 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 <div class="notes">
 
 </div>
+
+\newpage
 
 -----
 
@@ -2221,6 +2262,8 @@ FIXME
 
 </div>
 
+\newpage
+
 -----
 
 ## Futur
@@ -2293,6 +2336,8 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
   * Élagage de partition
 
 </div>
+
+\newpage
 
 -----
 
