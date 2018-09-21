@@ -2155,16 +2155,18 @@ FIXME
 ## Futur
 
 <div class="slide-content">
-    * ... quelques améliorations déjà présentes
+  * Développement de la version 12 entamé été 2017
+  * ... quelques améliorations déjà présentes
     * Amélioration du partitionnement
-    * Amélioration du parallelisme
-    * Amélioration de JIT
+    * Amélioration du parallélisme
+    * Amélioration du JIT
     * Index couvrants sur GIST
-    * Requêtes parallèles sur transactions `SERIALIZABLE`
-    * clause SQL MERGE
+    * Requêtes parallèles sur les transactions `SERIALIZABLE`
+    * Clause SQL MERGE
     * Filtrage des ligne pour la réplication logique
-    * Support GnuTLS
-    * Spécifier un nom d'index en paramètre de `ANALYSE`
+    * Support de GnuTLS
+    * Spécifier un nom d'index en paramètre de `ANALYZE`
+    * ...
 
 </div>
 
@@ -2188,6 +2190,9 @@ Quelques sources :
 [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
 [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
 [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+
+Ces commits sont en cours de vérifications et de validation, cela ne garantit pas que ces améliorations seront présentes dans la version final de PostgreSQL 12. 
+
 </div>
 
 -----
