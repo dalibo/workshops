@@ -2156,16 +2156,16 @@ FIXME
 
 <div class="slide-content">
   * Développement de la version 12 entamé été 2017
-  * ... quelques améliorations déjà présentes
+  * ... quelques améliorations déjà présentes :
     * Amélioration du partitionnement
     * Amélioration du parallélisme
     * Amélioration du JIT
     * Index couvrants sur GIST
-    * Requêtes parallèles sur les transactions `SERIALIZABLE`
+    * Requêtes parallèles sur transactions `SERIALIZABLE`
     * Clause SQL MERGE
-    * Filtrage des ligne pour la réplication logique
+    * Filtrage des lignes pour la réplication logique
     * Support de GnuTLS
-    * Spécifier un nom d'index en paramètre de `ANALYZE`
+    * `ANALYZE nom_index`
     * ...
 
 </div>
@@ -2174,7 +2174,7 @@ FIXME
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
-Les commit fests nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
+Les _commit fests_ nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
 suivants : parallélisme, partitionnement et JIT.
 
 Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
@@ -2191,7 +2191,7 @@ Quelques sources :
 [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
 [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
 
-Ces commits sont en cours de vérifications et de validation, cela ne garantit pas que ces améliorations seront présentes dans la version final de PostgreSQL 12. 
+Tout cela est encore en développement et test, rien ne garantit que ces améliorations seront présentes dans la version finale de PostgreSQL 12. 
 
 </div>
 
