@@ -2588,11 +2588,14 @@ v11=# SELECT * FROM liste_dates_c ;
  2018-09-22 00:00:00+02
 ```
 
+</div>
+
 -----
 
 ## Support du TRUNCATE dans la réplication logique
 
 <div class="notes">
+
 Le test se déroulera à partir de deux instances :
 L'instance `data` est en écoute sur le port 5435.
 L'instance `data2` est en écoute sur le port 5436.
@@ -3827,3 +3830,7 @@ postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
  Execution Time: 1107.820 ms
 (4 lignes)
 ```
+
+</div>
+
+-----
