@@ -201,7 +201,6 @@ corrige certaines limites impactant la version 10.
 <div class="slide-content">
   * Répartition des données suivant la valeur de hachage de la clé de partition
   * Très utile pour les partitions destinées à grandir
-  * Accélération des `VACUUM`
 </div>
 
 <div class="notes">
