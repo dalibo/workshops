@@ -628,12 +628,116 @@ COMMIT
 
 ### Performance & partitions
 <div class="slide-content">
+  * Paramètre dédié pour l'élagage des partitions : `enable_partition_pruning`
+  * Amélioration de l'algorithme d'élagage
   * Élagage dynamique des partitions
-  * _Control Partition Pruning_
 </div>
 
 <div class="notes">
-FIXME
+
+La possibilité d'élaguer l'arbre de recherche lors de la planification était
+déjà présente depuis la version 8.4. Il s'agit d'utiliser les contraintes des
+tables pour exclure de la recherche certaines tables. Il était contrôlé par le
+paramètre `constraint_exclusion`. Le calcul des tables à exclure impacte le
+temps de planification. Pour cette raison, le paramètre est fixé à la valeur
+`partition` pour indiquer que ce mode doit être activé uniquement pour des
+tables partitionnées.
+
+Si ce paramètre existe toujours en version 11, il ne s'applique plus qu'aux
+tables partitionnées par héritage (l'ancienne méthode).  
+Le paramètre `enable_partition_pruning`, activé par défaut, a été ajouté pour
+gèrer l'élagage des partitions natives.
+
+L'algorithme d'élagage a été amélioré. D'une recherche exhaustive et linéaire,
+on passe à une recherche binaire pour les partitions par liste ou
+intervalles. Une fonction de hachage est utilisée dans le cas des partitions
+par hachage.
+
+Une autre nouveauté est la possibilité pour le moteur, non seulement d'élaguer
+à la planification, mais aussi lors de l'exécution de la requête ! Cette
+amélioration est visible en effectuant un _EXPLAIN ANALYSE_ de la requête. 
+
+Insérons des données dans la table livres :
+
+```sql
+INSERT INTO livres SELECT md5(i::text)::text, now() - i*'1 week'::interval
+  FROM generate_series(1,100000) i;
+```
+
+On va rechercher tous les livres avec des titres commençant par les lettre _a_
+à _c_. On va cependant émuler le cas où le deuxième paramètre provient d'une
+sous-requête. Si on désactive l'élagage des partitions, on obtient un parcours
+de toutes les partitions :
+
+```sql
+v11=# SET enable_partition_pruning = off;
+SET
+v11=# EXPLAIN (COSTS off)
+SELECT * FROM livres WHERE titre BETWEEN 'a' AND (SELECT 'c');
+                        QUERY PLAN
+----------------------------------------------------------
+ Append
+   InitPlan 1 (returns $0)
+     ->  Result
+   ->  Seq Scan on livres_0_9 l
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+   ->  Seq Scan on livres_a_m l_1
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+   ->  Seq Scan on livres_m_z l_2
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+(9 lignes)
+```
+
+Lorsque l'élagage est activé, le moteur détecte qu'il n'a pas besoin de
+parcourir la partition _livres_0_9_ lors de la phase de planification :
+
+```sql
+v11=# SET enable_partition_pruning = on;
+SET
+v11=# EXPLAIN (COSTS off)
+SELECT * FROM livres l WHERE titre BETWEEN 'a' AND (SELECT 'c');
+                        QUERY PLAN
+----------------------------------------------------------
+ Append
+   InitPlan 1 (returns $0)
+     ->  Result
+   ->  Seq Scan on livres_a_m l
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+   ->  Seq Scan on livres_m_z l_1
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+(7 lignes)
+```
+
+Nous voyons bien qu'il n'a pas besoin de parcourir la partition _livres_m_z_, la
+recherche s'arrêtant aux titres commençant par la lettre _c_. En activant
+l'analyse du plan d'exécution :
+
+```sql
+v11=# EXPLAIN (ANALYSE, COSTS off)
+SELECT * FROM livres l WHERE titre BETWEEN 'a' and (select 'c');
+                                  QUERY PLAN
+-------------------------------------------------------------------------------
+ Append (actual time=0.063..13.350 rows=12405 loops=1)
+   InitPlan 1 (returns $0)
+     ->  Result (actual time=0.003..0.003 rows=1 loops=1)
+   ->  Seq Scan on livres_a_m l (actual time=0.041..12.206 rows=12405 loops=1)
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+         Rows Removed by Filter: 25065
+   ->  Seq Scan on livres_m_z l_1 (never executed)
+         Filter: ((titre >= 'a'::text) AND (titre <= $0))
+ Planning Time: 0.479 ms
+ Execution Time: 14.059 ms
+(10 lignes)
+```
+
+Nous nous apercevons que lors de l'exécution, le parcours de la partition
+_livres_m_z_ que le planificateur avait prévu, est annulé : `never
+executed`.  
+Cet élagage dynamique pourra être effectué pour toute expression stable. Par
+exemple, un appel à une fonction _stable_ ou _immutable_.
+
+L'élagage dynamique est également activé dans les instructions préparées.
+
 </div>
 
 -----
