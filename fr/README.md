@@ -1,6 +1,14 @@
 Workshops en Français
 ===============================================================================
 
+Nouveautés de PostgreSQL 11
+--------------------------------------------------------------------------------
+
+* Source : [PostgreSQL 11](110-postgresql_11.md)
+* Slides : [HTML](https://cloud.dalibo.com/p/exports/formation/workshops/fr/110-postgresql_11.slides.html)
+* Handout : [PDF](https://cloud.dalibo.com/p/exports/formation/workshops/fr/110-postgresql_11.pdf)
+* Mobile : [EPUB](https://cloud.dalibo.com/p/exports/formation/workshops/fr/110-postgresql_11.epub)
+  
 Nouveautés de PostgreSQL 10
 --------------------------------------------------------------------------------
 
