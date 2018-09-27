@@ -113,6 +113,7 @@ Public Domain CC0.
 ## Introduction
 
 <div class="slide-content">
+
   * Développement depuis l'été 2017
   * Version bêta 1 sortie 24 mai 2018
   * Bêta 2 le 28 juin
@@ -148,6 +149,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 
 ## Au menu
 <div class="slide-content">
+
   * Partitionnement
   * Performances
   * Sécurité et intégrité
@@ -199,6 +201,7 @@ corrige certaines limites impactant la version 10.
 
 ### Partitionnement par hachage
 <div class="slide-content">
+
   * Répartition des données suivant la valeur de hachage de la clé de partition
   * Très utile pour les partitions destinées à grandir
 </div>
@@ -225,6 +228,7 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 
 ### Exemple de partitionnement par hachage
 <div class="slide-content">
+
   * Créer une table partitionnée :
     `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
   * Ajouter une partition :
@@ -236,7 +240,7 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 <div class="notes">
 
 On fixe la valeur initiale du modulo au nombre de partitions à créer. On doit
-créer les tables partitionnées pour tous les restes de la division entière car 
+créer les tables partitionnées pour tous les restes de la division entière car
 il n'est pas possible de définir de table par défaut avec les partitions par hachage.
 
 ```sql
@@ -354,6 +358,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
 ### Création d'index automatique sur les partitions
 <div class="slide-content">
+
   * Index sur une table partitionnée entière
   * Index créé sur chaque partition
   * Création automatique sur toute nouvelle partition
@@ -515,7 +520,7 @@ CREATE TABLE
 v11=# \d bibliographie
               Table « public.bibliographie »
  Colonne | Type | Collationnement | NULL-able | Par défaut
----------+------+-----------------+-----------+------------
+---------+-- ---+-----------------+-----------+------------
  titre   | text |                 |           |
  auteur  | text |                 |           |
 Clé de partition : RANGE (titre)
@@ -628,6 +633,7 @@ COMMIT
 
 ### Performance & partitions
 <div class="slide-content">
+
   * Amélioration de l'algorithme d'élagage
   * `enable_partition_pruning` 
   * Élagage dynamique des partitions, à l'exécution
@@ -655,7 +661,7 @@ par hachage.
 
 Une autre nouveauté est la possibilité pour le moteur, non seulement d'élaguer
 à la planification, mais aussi lors de l'exécution de la requête ! Cette
-amélioration est visible en effectuant un _EXPLAIN ANALYZE_ de la requête. 
+amélioration est visible en effectuant un _EXPLAIN ANALYZE_ de la requête.
 
 Insérons des données dans la table partitionnée `livres` déjà utilisée
 plus haut :
@@ -749,6 +755,7 @@ L'élagage dynamique est également activé dans les instructions préparées.
 
 ### Autres nouveautés du partitionnement
 <div class="slide-content">
+
   * Clause `INSERT ON CONFLICT`
   * _Partition-Wise Aggregate_
   * `FOR EACH ROW trigger`
@@ -803,7 +810,7 @@ v11=# SET max_parallel_workers_per_gather=0;
 SET
 ```
 
-Voici le plan sans les optimisations. 
+Voici le plan sans les optimisations.
 Les jointures sont effectuées entre les partitions d'une même table :
 ```sql
 v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
@@ -880,6 +887,7 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 ## Performances
 
 <div class="slide-content">
+
   * Compilation _Just In Time_ (JIT)
   * Parallélisme étendu à plusieurs commandes
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
@@ -1590,19 +1598,21 @@ facteur 4.
 
 ### Index couvrants
 <div class="slide-content">
+
   * Déclaration grâce au mot clé `INCLUDE`
   * Uniquement pour les index B-Tree
   * Permet des _Index Only Scan_ en complétant des index uniques
 </div>
 
 <div class="notes">
-Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table 
-uniquement dans les feuilles d'un index de type B-Tree. 
 
-L'index ne pourra pas être utilisé pour faire des recherches sur ces colonnes 
-incluses. L'index sera cependant utilisable pour récupérer directement les 
-informations de ces colonnes incluses sans avoir besoin d'accéder à la table 
-grâce à un `Index Only Scan`. 
+Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table
+uniquement dans les feuilles d'un index de type B-Tree.
+
+L'index ne pourra pas être utilisé pour faire des recherches sur ces colonnes
+incluses. L'index sera cependant utilisable pour récupérer directement les
+informations de ces colonnes incluses sans avoir besoin d'accéder à la table
+grâce à un `Index Only Scan`.
 
 La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
 
@@ -1611,37 +1621,37 @@ CREATE INDEX index_couvrant ON ma_table
   (lookup_col1, lookup_col2) INCLUDE (autre_col);
 ```
 
-La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est 
-présente dans l'index, il n'est alors pas nécessaire de lire la table pour 
-récupérer les données recherchées : on les lit directement dans l'index pour 
-des gains substantiels de performance ! Mais pour que ce nœud s'active, il 
+La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est
+présente dans l'index, il n'est alors pas nécessaire de lire la table pour
+récupérer les données recherchées : on les lit directement dans l'index pour
+des gains substantiels de performance ! Mais pour que ce nœud s'active, il
 faut évidemment que toutes les colonnes recherchées soient présentes dans l'index.
 
-Une colonne sur laquelle aucune recherche n'est faite mais dont on a besoin 
-dans la requête peut être ajoutée à la fin de la liste des colonnes indexées. 
-La requête pourra alors utiliser un `Index Only Scan`. 
+Une colonne sur laquelle aucune recherche n'est faite mais dont on a besoin
+dans la requête peut être ajoutée à la fin de la liste des colonnes indexées.
+La requête pourra alors utiliser un `Index Only Scan`.
 
-Dans un index couvrant, le nouveau mot clé `INCLUDE` permet de ne pas l'ajouter 
-à la liste des colonnes indexées, mais en plus de ces colonnes. 
+Dans un index couvrant, le nouveau mot clé `INCLUDE` permet de ne pas l'ajouter
+à la liste des colonnes indexées, mais en plus de ces colonnes.
 
-Les colonnes incluses ne sont pas triées et ne peuvent donc pas directement 
+Les colonnes incluses ne sont pas triées et ne peuvent donc pas directement
 servir aux tris et recherches.
 
-Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes 
-dans un index duplique de l'information. Cela a un impact en terme de volume sur 
+Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes
+dans un index duplique de l'information. Cela a un impact en terme de volume sur
 disque mais également en terme de performance d'insertion et de mise à jour de la table.
 
-Les index couvrants ne changent rien côté taille des index. Leur intérêt 
-premier est de pouvoir ajouter des colonnes dans un index déjà présent 
+Les index couvrants ne changent rien côté taille des index. Leur intérêt
+premier est de pouvoir ajouter des colonnes dans un index déjà présent
 (unique notamment) sans devoir déclarer un index distinct.
 
-En effet, PostgreSQL utilise un index unique pour implémenter une contrainte 
-d'unicité sur une ou un ensemble de colonnes. 
+En effet, PostgreSQL utilise un index unique pour implémenter une contrainte
+d'unicité sur une ou un ensemble de colonnes.
 
-Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques 
-ainsi qu'à une autre colonne, il faut créer un nouvel index. 
+Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques
+ainsi qu'à une autre colonne, il faut créer un nouvel index.
 
-Un index couvrant va permettre de ne pas créer de nouvel index en intégrant 
+Un index couvrant va permettre de ne pas créer de nouvel index en intégrant
 l'autre colonne recherchée à l'index unique.
 
 </div>
@@ -1650,6 +1660,7 @@ l'autre colonne recherchée à l'index unique.
 
 ### Objet `PROCEDURE`
 <div class="slide-content">
+
   * Conforme à la norme SQL
   * Création par `CREATE PROCEDURE`
   * Appel avec `CALL`
@@ -1698,6 +1709,7 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
 
 ### Contrôle transactionnel en PL
 <div class="slide-content">
+
   * Disponible en PL/pgSQL, PL/Perl, PL/Python, PL/Tcl, SPI (C)
   * Utilisable :
     * dans des blocs `DO` / `CALL`
@@ -1707,6 +1719,7 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
 </div>
 
 <div class="notes">
+
 Les mots clés sont différents suivants les langages :
 
   * SPI : `SPI_start_transaction()`, `SPI_commit()` et `SPI_rollback()`
@@ -1789,6 +1802,7 @@ Pour plus de détails, par exemple sur les curseurs :
 
 ### PL/pgSQL
 <div class="slide-content">
+
   * Ajout d'une clause `CONSTANT` à une variable
   * Contrainte `NOT NULL` à une variable
 </div>
@@ -1802,6 +1816,7 @@ FIXME
 ### JSON
 
 <div class="slide-content">
+
   * Conversion de et vers du type jsonb
     * en SQL : booléen et nombre
     * en PL/Perl : tableau et _hash_
@@ -2017,6 +2032,7 @@ v11=# select jsonb_to_tsvector('french',
 ### Fonctions de fenêtrage
 
 <div class="slide-content">
+
   * Support de l'intégralité des fonctions de fenêtrage de la norme **SQL:2011**
 </div>
 
@@ -2042,6 +2058,7 @@ https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-
 </div>
 
 <div class="notes">
+
 ```sql
 VACUUM t1, t2
 ```
@@ -2081,6 +2098,7 @@ FIXME
 
 </div>
 <div class="notes">
+
 PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
@@ -2165,6 +2183,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 ### initdb
 <div class="slide-content">
+
   * option `--wal-segsize` :
     * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
   * option `--allow-group-access` :
@@ -2174,6 +2193,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 
 <div class="notes">
+
 L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
 Exemple pour des WAL de 1 Go  :
@@ -2189,6 +2209,7 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 
 ### Sauvegarde et restauration
 <div class="slide-content">
+
   * `pg_dumpall`
     * option `--encoding` pour spécifier l'encodage de sortie
     * l'option `-g` ne charge plus les permissions et les configurations de variables
@@ -2210,6 +2231,7 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 
 ### pg_rewind
 <div class="slide-content">
+
   * `pg_rewind` : optimisations de fichiers inutiles
   * interdit en tant que root
   * possible avec un accès non-superuser sur le maître
@@ -2217,6 +2239,7 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 </div>
 
 <div class="notes">
+
 `pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
 « décroché » sans la reconstruire complètement, à partir d'un primaire.
 
@@ -2261,7 +2284,7 @@ pg_prewarm.autoprewarm = true
 ```
 
 On peut ainsi éviter que des requêtes soient ralenties parce que les données
-ne sont pas encore chargées en mémoire, notamment en cas de redémarrage. 
+ne sont pas encore chargées en mémoire, notamment en cas de redémarrage.
 
 Le paramètre `pg_prewarm.autoprewarm_interval`, exprimé en secondes, permet de
 préciser le rythme des sauvegardes. Les sauvegardes seront stockées dans le
@@ -2272,7 +2295,7 @@ préchauffage n'est pas activé :
 
   * `autoprewarm_start_worker()` : permet de lancer le processus de sauvegarde
     automatique des blocs du _shared buffers_, le _autoprewarm worker_,
-  * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde. 
+  * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde.
 
 Le préchauffage des caches est typiquement plus utile au démarrage, quand les
 caches sont majoritairement vides. Il n'est cependant pas garanti que les
@@ -2285,10 +2308,12 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 
 -----
 
-## Réplication 
+## Réplication
 <div class="slide-content">
+
   * Réplication logique
   * Taille des WALs et checkpoint
+
 </div>
 
 <div class="notes">
@@ -2332,6 +2357,7 @@ outil tiers pourront avoir lieu entre des versions 10 et 11.
 
 ### WAL et Checkpoint
 <div class="slide-content">
+
   * Suppression du second checkpoint
 </div>
 
@@ -2342,16 +2368,14 @@ Un checkpoint est un « point de vérification » au cours duquel les fichiers
 En version 10, les fichiers de journaux de transactions étaient conservés le temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre de pouvoir revenir au précédent checkpoint au cas où le dernier soit introuvable ou illisible.
 
 Il a été décidé qu'il n'était finalement pas nécessaire de conserver ce second
-checkpoint et que cela pouvait même être
-[plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
+checkpoint et que cela pouvait même être [plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
 La suppression de ce second checkpoint permet aussi de simplifier un peu le code.
 
 En conséquence, à `max_wal_size` égal, on va ainsi
 réduire d'environ 33% la fréquence des checkpoints, et on augmentera le temps
 pour terminer la récupération après un crash.
 
-Michael Paquier a écrit un
-[petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/)
+Michael Paquier a écrit un [petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
 
 </div>
 
@@ -2361,7 +2385,9 @@ Michael Paquier a écrit un
 ## Compatibilité
 
 <div class="slide-content">
+
   * Les outils de la sphère Dalibo
+
 </div>
 
 <div class="notes">
@@ -2377,6 +2403,7 @@ FIXME
 ## Futur
 
 <div class="slide-content">
+
   * Développement de la version 12 entamé été 2017
   * ... quelques améliorations déjà présentes :
     * Amélioration du partitionnement
@@ -2393,6 +2420,7 @@ FIXME
 </div>
 
 <div class="notes">
+
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
@@ -2409,11 +2437,11 @@ modifications validées pour chaque commit fest :
   * [mars 2019](https://commitfest.postgresql.org/22/?status=4)
 
 Quelques sources :
-[clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
-[GnuTLS support](https://commitfest.postgresql.org/19/1277/)
-[Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+* [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
+* [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
+* [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
 
-Tout cela est encore en développement et test, rien ne garantit que ces améliorations seront présentes dans la version finale de PostgreSQL 12. 
+Tout cela est encore en développement et test, rien ne garantit que ces améliorations seront présentes dans la version finale de PostgreSQL 12.
 
 </div>
 
@@ -2422,6 +2450,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 ## Questions
 
 <div class="slide-content">
+
 `SELECT * FROM questions;`
 </div>
 
@@ -2429,6 +2458,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 # Atelier
 
 <div class="slide-content">
+
 À présent, place à l'atelier...
 
   * Installation
@@ -2452,6 +2482,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 ## Installation
 
 <div class="notes">
+
 Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
 
@@ -2660,7 +2691,7 @@ v10=# SELECT * FROM liste_dates_c;
  2018-09-22 00:00:00+02
 ```
 
-Si la donnée mise à jour doit se retouver dans une autre partition, il est
+Si la donnée mise à jour doit se retrouver dans une autre partition, il est
 nécessaire de supprimer la donnée de l'ancienne partition et d'insérer la
 donnée souhaiter dans la nouvelle partition.
 
@@ -3508,7 +3539,7 @@ Ne pas oublier de modifier leur chaîne de connexion :
   * **Vérifier l'état de la réplication**
 
 On contrôle que la réplication se fait correctement vers l'ancienne instance
-PG10 :**
+PG10 :
 
 ```sql
 psql -h 127.0.0.1 -p 5433 -U bench -d bench -Atc "select max(id) from pgbench_history"
