@@ -358,6 +358,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
 ### Création d'index automatique sur les partitions
 <div class="slide-content">
+
   * Index sur une table partitionnée entière
   * Index créé sur chaque partition
   * Création automatique sur toute nouvelle partition
@@ -519,7 +520,7 @@ CREATE TABLE
 v11=# \d bibliographie
               Table « public.bibliographie »
  Colonne | Type | Collationnement | NULL-able | Par défaut
----------+------+-----------------+-----------+------------
+---------+-- ---+-----------------+-----------+------------
  titre   | text |                 |           |
  auteur  | text |                 |           |
 Clé de partition : RANGE (titre)
@@ -1597,12 +1598,14 @@ facteur 4.
 
 ### Index couvrants
 <div class="slide-content">
+
   * Déclaration grâce au mot clé `INCLUDE`
   * Uniquement pour les index B-Tree
   * Permet des _Index Only Scan_ en complétant des index uniques
 </div>
 
 <div class="notes">
+
 Cette nouvelle fonctionnalité permet d'inclure des colonnes d'une table
 uniquement dans les feuilles d'un index de type B-Tree.
 
@@ -1716,6 +1719,7 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
 </div>
 
 <div class="notes">
+
 Les mots clés sont différents suivants les langages :
 
   * SPI : `SPI_start_transaction()`, `SPI_commit()` et `SPI_rollback()`
@@ -1798,6 +1802,7 @@ Pour plus de détails, par exemple sur les curseurs :
 
 ### PL/pgSQL
 <div class="slide-content">
+
   * Ajout d'une clause `CONSTANT` à une variable
   * Contrainte `NOT NULL` à une variable
 </div>
@@ -1811,6 +1816,7 @@ FIXME
 ### JSON
 
 <div class="slide-content">
+
   * Conversion de et vers du type jsonb
     * en SQL : booléen et nombre
     * en PL/Perl : tableau et _hash_
@@ -2052,6 +2058,7 @@ https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-
 </div>
 
 <div class="notes">
+
 ```sql
 VACUUM t1, t2
 ```
@@ -2091,6 +2098,7 @@ FIXME
 
 </div>
 <div class="notes">
+
 PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
 
 La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
@@ -2185,6 +2193,7 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 
 <div class="notes">
+
 L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
 Exemple pour des WAL de 1 Go  :
@@ -2230,6 +2239,7 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 </div>
 
 <div class="notes">
+
 `pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
 « décroché » sans la reconstruire complètement, à partir d'un primaire.
 
@@ -2347,6 +2357,7 @@ outil tiers pourront avoir lieu entre des versions 10 et 11.
 
 ### WAL et Checkpoint
 <div class="slide-content">
+
   * Suppression du second checkpoint
 </div>
 
@@ -2357,16 +2368,14 @@ Un checkpoint est un « point de vérification » au cours duquel les fichiers
 En version 10, les fichiers de journaux de transactions étaient conservés le temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre de pouvoir revenir au précédent checkpoint au cas où le dernier soit introuvable ou illisible.
 
 Il a été décidé qu'il n'était finalement pas nécessaire de conserver ce second
-checkpoint et que cela pouvait même être
-[plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
+checkpoint et que cela pouvait même être [plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
 La suppression de ce second checkpoint permet aussi de simplifier un peu le code.
 
 En conséquence, à `max_wal_size` égal, on va ainsi
 réduire d'environ 33% la fréquence des checkpoints, et on augmentera le temps
 pour terminer la récupération après un crash.
 
-Michael Paquier a écrit un
-[petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/)
+Michael Paquier a écrit un [petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
 
 </div>
 
@@ -2411,6 +2420,7 @@ FIXME
 </div>
 
 <div class="notes">
+
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
@@ -2427,9 +2437,9 @@ modifications validées pour chaque commit fest :
   * [mars 2019](https://commitfest.postgresql.org/22/?status=4)
 
 Quelques sources :
-[clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
-[GnuTLS support](https://commitfest.postgresql.org/19/1277/)
-[Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+* [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
+* [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
+* [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
 
 Tout cela est encore en développement et test, rien ne garantit que ces améliorations seront présentes dans la version finale de PostgreSQL 12.
 
@@ -2440,6 +2450,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 ## Questions
 
 <div class="slide-content">
+
 `SELECT * FROM questions;`
 </div>
 
@@ -2447,6 +2458,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 # Atelier
 
 <div class="slide-content">
+
 À présent, place à l'atelier...
 
   * Installation
@@ -2470,6 +2482,7 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 ## Installation
 
 <div class="notes">
+
 Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
 
@@ -2678,7 +2691,7 @@ v10=# SELECT * FROM liste_dates_c;
  2018-09-22 00:00:00+02
 ```
 
-Si la donnée mise à jour doit se retouver dans une autre partition, il est
+Si la donnée mise à jour doit se retrouver dans une autre partition, il est
 nécessaire de supprimer la donnée de l'ancienne partition et d'insérer la
 donnée souhaiter dans la nouvelle partition.
 
@@ -3526,7 +3539,7 @@ Ne pas oublier de modifier leur chaîne de connexion :
   * **Vérifier l'état de la réplication**
 
 On contrôle que la réplication se fait correctement vers l'ancienne instance
-PG10 :**
+PG10 :
 
 ```sql
 psql -h 127.0.0.1 -p 5433 -U bench -d bench -Atc "select max(id) from pgbench_history"
