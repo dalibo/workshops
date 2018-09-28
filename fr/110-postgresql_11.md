@@ -126,7 +126,7 @@ Public Domain CC0.
 
 <div class="notes">
 
-Le développement de la version 11 a suivi l'organisation habituelle : un
+Le développement de la version 11 a suivi l'organisation habituelle : un
 démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un
 _feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
 le 17 septembre.
@@ -137,7 +137,7 @@ La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
 1 509 660 lignes pour être précis. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
 Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL,
-une présentation récente de *Daniel Vérité* est disponible en ligne :
+une présentation récente de *Daniel Vérité* est disponible en ligne :
 
   * [Vidéo](https://youtu.be/NPRw0oJETGQ)
   * [Slides](https://dali.bo/daniel-verite-communaute-dev-pgday)
@@ -163,7 +163,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 <div class="notes">
 PostgreSQL 11 apporte un grand nombre de nouvelles fonctionnalités, qui sont
 d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers
-des articles en anglais :
+des articles en anglais :
 
   * [New in postgres 11](https://dali.bo/new-in-postgres-11) du projet PostgreSQL
   * ...
@@ -229,9 +229,9 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 ### Exemple de partitionnement par hachage
 <div class="slide-content">
 
-  * Créer une table partitionnée :
+  * Créer une table partitionnée :
     `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
-  * Ajouter une partition :
+  * Ajouter une partition :
     `CREATE TABLE t1_a PARTITION OF t1`
     `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
@@ -366,7 +366,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 </div>
 
 <div class="notes">
-Soit la table partitionnée par intervalles :
+Soit la table partitionnée par intervalles :
 ```sql
 CREATE TABLE livres (titre text, parution timestamp with time zone)
   PARTITION BY RANGE (titre);
@@ -375,13 +375,13 @@ CREATE TABLE livres_m_z PARTITION OF livres FOR VALUES FROM ('m') TO ('zzz');
 ```
 
 En version 10, il n'était pas possible de créer un index sur une table
-partitionnée :
+partitionnée :
 ```sql
 v10=# CREATE INDEX ON livres (titre);
 ERROR:  cannot create index on partitioned table "livres"
 ```
 
-En version 11, les index sont créés sur chaque partition :
+En version 11, les index sont créés sur chaque partition :
 ```sql
 v11=# CREATE INDEX ON livres (titre);
 CREATE INDEX
@@ -407,7 +407,7 @@ Index :
     "livres_a_m_titre_idx" btree (titre)
 ```
 
-Si on crée une nouvelle partition, l'index sera créé automatiquement :
+Si on crée une nouvelle partition, l'index sera créé automatiquement :
 ```sql
 v11=# CREATE TABLE livres_0_9 PARTITION OF livres FOR VALUES FROM ('0') TO ('a');
 CREATE TABLE
@@ -438,7 +438,7 @@ Index :
 
 La version 11 offre la possibilité de créer des index sur des tables
 partitionnées. Si l'index contient la clé de partition, il est possible de
-créer un index unique :
+créer un index unique :
 ```sql
 v11=# CREATE UNIQUE INDEX ON livres (titre);
 CREATE INDEX
@@ -454,7 +454,7 @@ Index :
 Nombre de partitions : 3 (utilisez \d+ pour les lister)
 ```
 
-Cela n'est pas possible sur des colonnes en dehors de la clé de partition :
+Cela n'est pas possible sur des colonnes en dehors de la clé de partition :
 ```sql
 v11=# CREATE UNIQUE INDEX ON livres (parution);
 ERROR:  insufficient columns in UNIQUE constraint definition
@@ -463,7 +463,7 @@ DÉTAIL : UNIQUE constraint on table "livres" lacks column "titre" which is part
 ```
 
 Cette nouvelle fonctionnalité permet la création de clés primaires sur la clé
-de partition :
+de partition :
 ```sql
 v11=# CREATE TABLE livres_primary_key (
     titre text PRIMARY KEY, parution timestamp with time zone)
@@ -496,7 +496,7 @@ Number of partitions: 0
 
 <div class="notes">
 
-En version 10 les clés étrangères ne sont pas supportées dans une partition :
+En version 10 les clés étrangères ne sont pas supportées dans une partition :
 ```sql
 v10=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
@@ -509,7 +509,7 @@ LIGNE 2 :                      auteur text REFERENCES auteurs(nom))
 ```
 
 La version 11 supporte les clés étrangères sur les partitions. Il faut bien sûr une
-contrainte :
+contrainte :
 ```sql
 v11=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
@@ -530,7 +530,7 @@ Number of partitions: 0
 ```
 
 Les clés étrangères depuis n'importe quelle table
-vers une table partitionnée sont cependant toujours impossibles :
+vers une table partitionnée sont cependant toujours impossibles :
 ```sql
 v11=# CREATE TABLE avis_livre (avis text, livre text REFERENCES bibliographie(titre));
 ERROR:  cannot reference partitioned table "livres"
@@ -571,14 +571,14 @@ En version 11, PostgreSQL rend la chose transparente.
 ### Partition par défaut
 <div class="slide-content">
 
-  * Pour les données n'appartenant à aucune autre partition :
+  * Pour les données n'appartenant à aucune autre partition :
   `CREATE TABLE livres_default PARTITION OF livres DEFAULT;`
 
 </div>
 
 <div class="notes">
 PostgreSQL génère une erreur lorsque les données n'appartiennent à aucune
-partition :
+partition :
 ```sql
 v11=# INSERT INTO livres VALUES ('zzzz', now());
 ERROR:  no partition of relation "livres" found for row
@@ -586,7 +586,7 @@ DÉTAIL : Partition key of the failing row contains (titre) = (zzzz).
 ```
 
 En version 11, il est possible de définir une partition par défaut où iront les
-données sans partition explicite :
+données sans partition explicite :
 ```sql
 v11=# CREATE TABLE livres_default PARTITION OF livres DEFAULT;
 CREATE TABLE
@@ -603,7 +603,7 @@ ERROR:  updated partition constraint for default partition "livres_default"
         would be violated by some row
 ```
 
-Le contournement est le suivant : créer la partition en dehors de la table
+Le contournement est le suivant : créer la partition en dehors de la table
 partitionnée, insérer les enregistrements de la table par défaut dans la
 nouvelle table, supprimer ces enregistrements de la table par défaut et
 attacher la table comme nouvelle partition.
@@ -661,7 +661,7 @@ par hachage.
 
 Une autre nouveauté est la possibilité pour le moteur, non seulement d'élaguer
 à la planification, mais aussi lors de l'exécution de la requête ! Cette
-amélioration est visible en effectuant un _EXPLAIN ANALYZE_ de la requête.
+amélioration est visible en effectuant un `EXPLAIN ANALYZE` de la requête.
 
 Insérons des données dans la table partitionnée `livres` déjà utilisée
 plus haut :
@@ -718,8 +718,8 @@ SELECT * FROM livres l WHERE titre BETWEEN 'a' AND (SELECT 'c');
 ```
 
 Or nous savons bien qu'il n'a pas besoin de parcourir la partition `livres_m_z`,
-puisque la recherche s'arrête aux titres commençant par la lettre `c`. Activons
-l'analyse du plan d'exécution :
+puisque la recherche s'arrête aux titres commençant par la lettre `c`.
+Regardons le plan d'une exécution réelle :
 
 ```sql
 v11=# EXPLAIN (ANALYSE, COSTS off)
@@ -777,7 +777,7 @@ v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 INSERT 0 0
 ```
 
-_Partition-Wise Aggregate_ :
+_Partition-Wise Aggregate_ :
 
 Les paramètres `enable_partitionwise_join` et `enable_partitionwise_aggregate`
 ont été ajoutés. Ils sont désactivés par défaut. En cas de jointure entre
@@ -963,7 +963,7 @@ en version 11. Cela est fréquemment le cas pour les nouvelles fonctionnalités
 pouvant avoir des effets de bords négatifs, en attendant les retours d'expérience.
 On verra plus bas que l'activer est très simple.
 
-La documentation officielle est assez accessible :
+La documentation officielle est assez accessible :
 <https://doc.postgresql.fr/11/jit.html>
 
 </div>
@@ -976,7 +976,7 @@ La documentation officielle est assez accessible :
  Qu'est-ce qui compilé ?
 
   * _Tuple deforming_
-  * Évaluation d'expressions :
+  * Évaluation d'expressions :
     * `WHERE`
     * Agrégats, `GROUP BY`
   * Appels de fonctions (_inlining_)
@@ -1011,12 +1011,12 @@ par l'auteur principal du JIT, Andres Freund.
 ### JIT
 
 <div class="slide-content">
-  Algorithme « naïf » :
+  Algorithme « naïf » :
 
-  * `jit` (défaut : `off`)
-  * `jit_above_cost` (défaut : 100 000)
-  * `jit_inline_above_cost` (défaut : 500 000)
-  * `jit_optimize_above_cost` (défaut : 500 000)
+  * `jit` (défaut : `off`)
+  * `jit_above_cost` (défaut : 100 000)
+  * `jit_inline_above_cost` (défaut : 500 000)
+  * `jit_optimize_above_cost` (défaut : 500 000)
   *  à comparer au coût de la requête... I/O comprises
   * valeurs arbitraires !
 
@@ -1117,7 +1117,7 @@ lignes, et devient de plus important au fur et à mesure que la volumétrie
 augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
 (saturation de la bande passante notamment).
 
-Documentation officielle :
+Documentation officielle :
 <https://docs.postgresql.fr/11/jit-decision.html>
 </div>
 
@@ -1145,10 +1145,10 @@ certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
 uniquement. La version 10 avait étendu à d'autres nœuds.
 
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
-de type _Append_, qui servent aux `UNION ALL` notamment :
+de type _Append_, qui servent aux `UNION ALL` notamment :
 
 Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
-hachage). Soit les tables suivantes :
+hachage). Soit les tables suivantes :
 
 ```sql
 CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
@@ -1159,7 +1159,7 @@ SET work_mem TO '1GB' ;
 SET max_parallel_workers_per_gather TO 2;
 ```
 
-Dans la version 10, le _hash join_ est déjà parallélisé :
+Dans la version 10, le _hash join_ est déjà parallélisé :
 ```sql
 v10=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
         WHERE a.i BETWEEN 500000 AND 900000;
@@ -1178,7 +1178,7 @@ v10=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 
 Mais les deux _hashs_ en s'exécutant font le travail en double. En version 11,
 ils partagent la même table de travail et peuvent donc paralléliser sa
-construction (ici en parallélisant l'_Index Scan_) :
+construction (ici en parallélisant l'_Index Scan_) :
 
 ```sql
 v11=# SET enable_parallel_hash = on;
@@ -1247,8 +1247,8 @@ Pour de plus amples détails, Cybertec a publié un
 <div class="slide-content">
 
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...`
-    * v10 : réécriture complète de la table !
-    * v11 : valeur par défaut mémorisée, ajout instantané
+    * v10 : réécriture complète de la table !
+    * v11 : valeur par défaut mémorisée, ajout instantané
     * ... si le défaut n'est pas une fonction volatile
 
 </div>
@@ -1341,8 +1341,8 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 <div class="slide-content">
 
   * **pg_read_server_files** : permet la lecture de fichier sur le serveur
-  * **pg_write_server_files** : permet la modification de fichier sur le serveur
-  * **pg_execute_server_program** : permet l’exécution de fichier sur le serveur
+  * **pg_write_server_files** : permet la modification de fichier sur le serveur
+  * **pg_execute_server_program** : permet l’exécution de fichier sur le serveur
 
 </div>
 
@@ -1372,16 +1372,16 @@ $ cat /tmp/t1.csv
 En version 10 il était nécessaire d'être super-utilisateur pour pouvoir importer
 les données d'une table depuis un fichier externe.
 
-Création d'un utilisateur standard :
+Création d'un utilisateur standard :
 ```sql
 postgres@v10=# CREATE USER user_r;
 CREATE ROLE
 ```
-Création de la table qui récupérera les données :
+Création de la table qui récupérera les données :
 ```sql
 user_r@v10=> CREATE TABLE t1(data int);
 ```
-Avec l'utilisateur standard l'import de données depuis un fichier externe retourne l'erreur suivante :
+Avec l'utilisateur standard l'import de données depuis un fichier externe retourne l'erreur suivante :
 ```sql
 user_r@v10=> COPY t1 FROM '/tmp/t1.csv' CSV ;
 ERROR:  must be superuser to COPY to or from a file
@@ -1400,7 +1400,7 @@ postgres@v11=# GRANT pg_read_server_files TO user_r;
 GRANT ROLE
 ```
 
-Import des données depuis un fichier externe csv :
+Import des données depuis un fichier externe csv :
 ```sql
 user_r@v11=> CREATE TABLE t1(data int);
 CREATE TABLE
@@ -1427,7 +1427,7 @@ user_r@v11=> select * from t1;
 ```
 
 Par la suite, si l'utilisateur tente d'envoyer les données d'une table vers un
-fichier externe, le message suivant apparaît :
+fichier externe, le message suivant apparaît :
 
 ```sql
 user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
@@ -1440,14 +1440,14 @@ ASTUCE : Anyone can COPY to stdout or from stdin. psql's \copy command
 Le rôle `pg_write_server_file` va permettre d'envoyer les données les données
 d'une table vers un fichier externe :
 
-Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` :
+Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` :
 ```sql
 postgres@v11=# CREATE USER user_w;
 CREATE ROLE
 postgres@v11=# GRANT pg_write_server_files TO user_w;
 GRANT ROLE
 ```
-Création de la table `t2` (l'utilisateur doit être le propriétaire de la table) :
+Création de la table `t2` (l'utilisateur doit être le propriétaire de la table) :
 ```sql
 user_w@v11=> CREATE TABLE t2(data int);
 CREATE TABLE
@@ -1455,7 +1455,7 @@ user_w@v11=> INSERT INTO t2 SELECT * from generate_series(1,10);
 INSERT 0 10
 ```
 
-Contenu de la table `t2` :
+Contenu de la table `t2` :
 ```sql
 user_w@v11=> select * from t2;
  data
@@ -1472,13 +1472,13 @@ user_w@v11=> select * from t2;
    10
 ```
 
-Export des données de la table dans un fichier CSV :
+Export des données de la table dans un fichier CSV :
 
 ```sql
 user_w@v11=> COPY t2 TO '/tmp/t2.csv' CSV ;
 COPY 10
 ```
-Vérification des données dans le fichier :
+Vérification des données dans le fichier :
 ```sql
 $ cat /tmp/t2.csv
 1
@@ -1503,8 +1503,8 @@ $ cat /tmp/t2.csv
   * Nouvelle commande `pg_verify_checksums`
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
-    * v10 : 2 fonctions de vérification de l'intégrité des index
-	  * v11 : vérification de la cohérence avec la table (probabiliste)
+    * v10 : 2 fonctions de vérification de l'intégrité des index
+	  * v11 : vérification de la cohérence avec la table (probabiliste)
 </div>
 
 <div class="notes">
@@ -1537,7 +1537,7 @@ supplémentaire en recréant temporairement une structure d'index et en la
 comparant avec l'index original. `bt_index_check` vérifiera que chaque entrée
 de la table possède une entrée dans l'index. `bt_index_parent_check` vérifiera
 en plus que à chaque entrée de l'index correspond une entrée dans la table. Ces
-vérifications sont probabilistes : le taux maximum d'erreur de détection est
+vérifications sont probabilistes : le taux maximum d'erreur de détection est
 fixé à 2%.
 
 Les verrous posés par les fonctions ne changent pas. Néanmoins, l'utilisation
@@ -1614,7 +1614,7 @@ incluses. L'index sera cependant utilisable pour récupérer directement les
 informations de ces colonnes incluses sans avoir besoin d'accéder à la table
 grâce à un `Index Only Scan`.
 
-La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
+La déclaration se fait par le mot clé `INCLUDE` à la fin de la déclaration de l'index :
 
 ```sql
 CREATE INDEX index_couvrant ON ma_table
@@ -1623,7 +1623,7 @@ CREATE INDEX index_couvrant ON ma_table
 
 La version 9.2 de PostgreSQL a apporté `Index Only Scan`. Si l'information est
 présente dans l'index, il n'est alors pas nécessaire de lire la table pour
-récupérer les données recherchées : on les lit directement dans l'index pour
+récupérer les données recherchées : on les lit directement dans l'index pour
 des gains substantiels de performance ! Mais pour que ce nœud s'active, il
 faut évidemment que toutes les colonnes recherchées soient présentes dans l'index.
 
@@ -1670,7 +1670,7 @@ l'autre colonne recherchée à l'index unique.
 
 <div class="notes">
 
-Création et appel d'une procédure (ici en pur SQL) :
+Création et appel d'une procédure (ici en pur SQL) :
 ```sql
 v11=# CREATE TABLE test1 (a int, b text);
 CREATE TABLE
@@ -1696,7 +1696,7 @@ v11=# SELECT * FROM test1;
 
 Les objets de type PROCEDURE sont sensiblement les mêmes que les objets de type FUNCTION.
 
-Les différences sont :
+Les différences sont :
 
   * l'appel se fait par le mot clé `CALL` et non `SELECT` ;
   * les objets de type PROCEDURE ne peuvent rien retourner ;
@@ -1711,7 +1711,7 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
 <div class="slide-content">
 
   * Disponible en PL/pgSQL, PL/Perl, PL/Python, PL/Tcl, SPI (C)
-  * Utilisable :
+  * Utilisable :
     * dans des blocs `DO` / `CALL`
     * dans des objets de type PROCEDURE
   * Ne fonctionne pas à l'intérieur d'une transaction
@@ -1720,13 +1720,13 @@ ce que ne peuvent pas faire les objets de type FUNCTION.
 
 <div class="notes">
 
-Les mots clés sont différents suivants les langages :
+Les mots clés sont différents suivants les langages :
 
-  * SPI : `SPI_start_transaction()`, `SPI_commit()` et `SPI_rollback()`
-  * PL/Perl : `spi_commit()` et `spi_rollback()`
-  * PL/pgSQL : `COMMIT` et `ROLLBACK`
-  * PL/Python : `plpy.commit` et `plpy.rollback`
-  * PL/Tcl : `commit` et `rollback`
+  * SPI : `SPI_start_transaction()`, `SPI_commit()` et `SPI_rollback()`
+  * PL/Perl : `spi_commit()` et `spi_rollback()`
+  * PL/pgSQL : `COMMIT` et `ROLLBACK`
+  * PL/Python : `plpy.commit` et `plpy.rollback`
+  * PL/Tcl : `commit` et `rollback`
 
 Voici un exemple avec `COMMIT` ou `ROLLBACK` suivant que le nombre est pair ou impair :
 ```sql
@@ -1765,7 +1765,7 @@ v11=# SELECT * FROM test1;
 
 Noter qu'il n'y a pas de `BEGIN` explicite dans la gestion des transactions.
 
-On ne peut pas imbriquer des transactions :
+On ne peut pas imbriquer des transactions :
 ```sql
 v11=# BEGIN ; CALL transaction_test1() ;
 BEGIN
@@ -1774,7 +1774,7 @@ ERROR:  invalid transaction termination
 CONTEXTE : PL/pgSQL function transaction_test1() line 6 at COMMIT
 ```
 
-On ne peut pas utiliser en même une clause `EXCEPTION` et le contrôle transactionnel :
+On ne peut pas utiliser en même une clause `EXCEPTION` et le contrôle transactionnel :
 ```sql
 v11=# DO LANGUAGE plpgsql $$
       BEGIN
@@ -1818,9 +1818,9 @@ FIXME
 <div class="slide-content">
 
   * Conversion de et vers du type jsonb
-    * en SQL : booléen et nombre
-    * en PL/Perl : tableau et _hash_
-    * en PL/Python : `dict` et `list`
+    * en SQL : booléen et nombre
+    * en PL/Perl : tableau et _hash_
+    * en PL/Python : `dict` et `list`
   * Conversion JSON en tsvector pour la _Full text Search_
 </div>
 
@@ -1830,7 +1830,7 @@ FIXME
 
 **jsonb <=> SQL**
 
-Il existe 4 types primitif en JSON. Voici le tableau de correspondance avec les types PostgreSQL :
+Il existe 4 types primitifs en JSON. Voici le tableau de correspondance avec les types PostgreSQL :
 
 
 | Type Primitif JSON | Type PostgreSQL |
@@ -1840,7 +1840,7 @@ Il existe 4 types primitif en JSON. Voici le tableau de correspondance avec les 
 |  boolean           |  boolean        |
 |  null              |  (aucun)        |
 
-S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type text :
+S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type text :
 ```sql
 v10=# SELECT 'true'::jsonb::boolean;
 ERROR:  cannot cast type jsonb to boolean
@@ -1863,7 +1863,7 @@ v10=# SELECT '3.141592'::jsonb::text::float;
 (1 ligne)
 ```
 
-Il est dorénavant possible de convertir des données de type jsonb vers les types booléen et numérique :
+Il est dorénavant possible de convertir des données de type jsonb vers les types booléen et numérique :
 ```sql
 v11=# SELECT 'true'::jsonb::boolean;
  bool
@@ -1884,7 +1884,7 @@ Une transformation a été ajoutée en PL/Perl pour transformer les champs jsonb
 
 Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur RedHat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
 
-Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
+Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
 ```sql
 v11=# CREATE EXTENSION jsonb_plperl CASCADE;
@@ -1920,7 +1920,7 @@ Une transformation a été ajoutée en PL/Python pour transformer les champs jso
 
 Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpyhton-11.0` sur RedHat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
 
-Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
+Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
 ```sql
 v11=# CREATE EXTENSION jsonb_plpythonu CASCADE;
@@ -1962,13 +1962,13 @@ La fonction prend en premier paramètre la langue et en deuxième
 paramètre la structure JSON à analyser. Le troisième paramètre permet
 de choisir les valeur à filter :
 
-  * _string_ : les chaines de caractères,
-  * _numeric_ : les valeur numérique,
-  * _boolean_ : les booléen (`true` et `false`),
-  * _key_ : pour inclure toutes les clés de la structure JSON,
-  * _all_ : pour inclure tous les champs ci-dessus.
+  * _string_ : les chaines de caractères,
+  * _numeric_ : les valeur numérique,
+  * _boolean_ : les booléen (`true` et `false`),
+  * _key_ : pour inclure toutes les clés de la structure JSON,
+  * _all_ : pour inclure tous les champs ci-dessus.
 
-Voici ce que donnait la fonction `to_tsvector` :
+Voici ce que donnait la fonction `to_tsvector` :
 ```sql
 v11=# select to_tsvector('french',
     '{ "a": "Vive la v11 !",
@@ -1980,7 +1980,7 @@ v11=# select to_tsvector('french',
 (1 ligne)
 ```
 
-En choisissant l'option de filtre `string`, on obtient le même résultat :
+En choisissant l'option de filtre `string`, on obtient le même résultat :
 ```sql
 v11=# select jsonb_to_tsvector('french',
     '{ "a": "Vive la v11 !",
@@ -2094,7 +2094,7 @@ FIXME
   * Variables de suivi des erreurs de requêtes
     * `ERROR`, `SQLSTATE` et `ROW_COUNT`
   * `exit` et `quit` à la place de `\q` pour quitter psql
-  * fonctionnalités psql, donc utilisable sur des bases < 11
+  * fonctionnalités psql, donc utilisable sur des instances < 11
 
 </div>
 <div class="notes">
@@ -2184,11 +2184,11 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 ### initdb
 <div class="slide-content">
 
-  * option `--wal-segsize` :
+  * option `--wal-segsize` :
     * spécifie la taille des fichier WAL à l'initialisation (1 Mo à 1 Go)
-  * option `--allow-group-access` :
+  * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
-    * Droit sur les fichiers : `drwxr-x---`
+    * Droit sur les fichiers : `drwxr-x---`
 </div>
 
 
@@ -2196,12 +2196,12 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
 
 L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
 
-Exemple pour des WAL de 1 Go  :
+Exemple pour des WAL de 1 Go  :
 ```bash
 initdb -D /var/lib/postgresql/11/workshop --wal-segsize=1024
 ```
 
-L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de lecture à un outil de sauvegarde.
+L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de lecture à un outil de sauvegarde.
 
 </div>
 
@@ -2212,15 +2212,16 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 
   * `pg_dumpall`
     * option `--encoding` pour spécifier l'encodage de sortie
-    * l'option `-g` ne charge plus les permissions et les configurations de variables
-  * `pg_dump` et `pg_restore` gèrent maintenant les permissions et les configurations de variables
+    * `-g` ne sort  plus les permissions et les configurations de variables
+  * Ajouter `--create` à `pg_dump -Fp` ou `pg_restore` pour cela !
+   * Révisez vos scripts !
   * `pg_basebackup`
     * option `--create-slot` pour créer un slot de réplication.
 
 </div>
 
 <div class="notes">
-Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`.
+Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont à présent gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`. `pg_dump -Fp` (format texte) et un `pg_restore` n'appliqueront ces modifications qu'avec l'option `--create`. Vérifiez vos scripts de restauration !
 
 `pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump.
 
@@ -2232,7 +2233,7 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 ### pg_rewind
 <div class="slide-content">
 
-  * `pg_rewind` : optimisations de fichiers inutiles
+  * `pg_rewind` : optimisations de fichiers inutiles
   * interdit en tant que root
   * possible avec un accès non-superuser sur le maître
 
@@ -2291,11 +2292,11 @@ préciser le rythme des sauvegardes. Les sauvegardes seront stockées dans le
 fichier `$PGDATA/autoprewarm.blocks`.
 
 Deux nouvelles fonctions font leur apparition. Elles sont surtout utiles si le
-préchauffage n'est pas activé :
+préchauffage n'est pas activé :
 
-  * `autoprewarm_start_worker()` : permet de lancer le processus de sauvegarde
+  * `autoprewarm_start_worker()` : permet de lancer le processus de sauvegarde
     automatique des blocs du _shared buffers_, le _autoprewarm worker_,
-  * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde.
+  * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde.
 
 Le préchauffage des caches est typiquement plus utile au démarrage, quand les
 caches sont majoritairement vides. Il n'est cependant pas garanti que les
@@ -2425,7 +2426,7 @@ La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
 Les _commit fests_ nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
-suivants : parallélisme, partitionnement et JIT.
+suivants : parallélisme, partitionnement et JIT.
 
 Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
 modifications validées pour chaque commit fest :
@@ -2436,7 +2437,7 @@ modifications validées pour chaque commit fest :
   * [janvier 2019](https://commitfest.postgresql.org/21/?status=4)
   * [mars 2019](https://commitfest.postgresql.org/22/?status=4)
 
-Quelques sources :
+Quelques sources :
 * [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
 * [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
 * [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
@@ -2511,7 +2512,7 @@ Dependency Installed:
   postgresql11-libs.x86_64 0:11.0-beta2_1PGDG.rhel6
 ```
 
-On peut ensuite initialiser une instance :
+On peut ensuite initialiser une instance :
 
 ```
 # service postgresql-11 initdb
@@ -2519,20 +2520,20 @@ Initializing database:                                     [  OK  ]
 ```
 
 Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
-RedHat et CentOS :
+RedHat et CentOS :
 
 ```
 # service postgresql-11 start
 Starting postgresql-11 service:                            [  OK  ]
 ```
 
-Pour se connecter à l'instance sans modifier `pg_hba.conf` :
+Pour se connecter à l'instance sans modifier `pg_hba.conf` :
 
 ```
 # sudo -iu postgres /usr/pgsql-11/bin/psql
 ```
 
-Enfin, on vérifie la version :
+Enfin, on vérifie la version :
 
 ```sql
 postgres=# select version();
@@ -2545,7 +2546,7 @@ postgres=# select version();
 On répète ensuite le processus d'installation de façon à installer PostgreSQL
 10 aux côtés de PostgreSQL 11.
 
-Le RPM du dépôt est `pgdg-centos10-10-2.noarch.rpm` :
+Le RPM du dépôt est `pgdg-centos10-10-2.noarch.rpm` :
 
 ```
 # pgdg_yum_10=https://download.postgresql.org/pub/repos/yum
@@ -2577,7 +2578,7 @@ Starting postgresql-10 service:                           [  OK  ]
 # sudo -iu postgres /usr/pgsql-10/bin/psql -p 5433
 ```
 
-Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
+Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 ```
 \pset columns 80
@@ -2593,13 +2594,13 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 La table partitionné est créé sur les deux instances en version 10 et 11.
 
-  * Création d'une table partitionné par intervalle :
+  * Création d'une table partitionné par intervalle :
 
 ```sql
 CREATE TABLE liste_dates (d timestamptz) PARTITION BY RANGE(d);
 ```
 
-  * Création des partitions :
+  * Création des partitions :
 
 ```sql
 CREATE TABLE liste_dates_a PARTITION OF liste_dates
@@ -2612,7 +2613,7 @@ CREATE TABLE liste_dates_d partition of liste_dates
        FOR VALUES FROM ('2018-10-01') to ('2018-12-31');
 ```
 
-  * Insertion de données dans les partitions :
+  * Insertion de données dans les partitions :
 
 ```sql
 INSERT INTO liste_dates VALUES ('2018-01-15');
@@ -2626,7 +2627,7 @@ INSERT INTO liste_dates VALUES ('2018-11-30');
 INSERT INTO liste_dates VALUES ('2018-12-19');
 ```
 
-  * Vérification du contenu des tables sur les deux instances :
+  * Vérification du contenu des tables sur les deux instances :
 
 ```sql
 =# SELECT * FROM liste_dates ;
@@ -2671,7 +2672,7 @@ INSERT INTO liste_dates VALUES ('2018-12-19');
 
 ### UPDATE en version 10
 
-En version 10, la mise à jour avec UPDATE retourne une erreur :
+En version 10, la mise à jour avec `UPDATE` retourne une erreur :
 
 ```sql
 v10=# UPDATE liste_dates SET d='2018-09-22' WHERE d='2018-01-15';
@@ -2735,14 +2736,14 @@ v10=# SELECT * FROM liste_dates_c;
 
 ### UPDATE en version 11
 
-La mise à jour avec UPDATE fonctionne :
+La mise à jour avec `UPDATE` fonctionne :
 
 ```sql
 v11=# UPDATE liste_dates SET d='2018-09-22' WHERE d='2018-01-15';
 UPDATE 1
 ```
 
-Les données sont automatiquement redirigées vers les bonnes partitions :
+Les données sont automatiquement redirigées vers les bonnes partitions :
 
 ```sql
 v11=# SELECT * FROM liste_dates ;
@@ -2780,13 +2781,13 @@ v11=# SELECT * FROM liste_dates_c ;
 
 <div class="notes">
 
-Le test se déroulera à partir de deux instances :
+Le test se déroulera à partir de deux instances :
 L'instance `data` est en écoute sur le port 5435.
 L'instance `data2` est en écoute sur le port 5436.
 
 
 Sur la première instance `data` dans la base `workshop11`,
-création de la table `t1` et insertion de quelques valeurs :
+création de la table `t1` et insertion de quelques valeurs :
 
 ```sql
 workshop11=# CREATE TABLE t1 (c1 int);
@@ -2809,7 +2810,7 @@ workshop11=# SELECT * FROM t1;
 (10 rows)
 ```
 
-Création de la publication `p1` :
+Création de la publication `p1` :
 
 ```sql
 workshop11=# CREATE PUBLICATION p1 FOR TAABLE t1;
@@ -2823,7 +2824,7 @@ création d'une table `t1` sans aucune donnée.
 workshop11_2=# CREATE TABLE t1 (c1 int);
 CREATE TABLE
 ```
-Création de la souscription `s1` :
+Création de la souscription `s1` :
 ```sql
 workshop11_2=# CREATE SUBSCRIPTION s1
                CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
@@ -2831,7 +2832,7 @@ NOTICE:  created replication slot "s1" on publisher
 CREATE SUBSCRIPTION
 
 ```
-Vérification de la réplication des données :
+Vérification de la réplication des données :
 
 ```sql
 workshop11_2=# SELECT * FROM t1;
@@ -2849,14 +2850,14 @@ workshop11_2=# SELECT * FROM t1;
  10
 (10 rows)
 ```
-Sur l'instance `data` nous vidons la table avec la commande `TRUNCATE` :
+Sur l'instance `data` nous vidons la table avec la commande `TRUNCATE` :
 
 ```sql
 workshop11=# TRUNCATE t1;
 TRUNCATE TABLE
 ```
 
-La table `t1` est vide :
+La table `t1` est vide :
 
 ```sql
 workshop11=# select * from t1;
@@ -2865,7 +2866,7 @@ workshop11=# select * from t1;
 (0 rows)
 ```
 
-Sur l'instance `data2` nous vérifions que la réplication a été effectuée et que la table a bien été vidée :
+Sur l'instance `data2` nous vérifions que la réplication a été effectuée et que la table a bien été vidée :
 
 ```
 workshop11_2=# select * from t1;
@@ -3826,7 +3827,7 @@ object final (_Emission Time_) :
 Durée : 39286,546 ms (00:39,287)
 ```
 
-Comparons avec le temps d'exécution, sans le JIT :
+Comparons avec le temps d'exécution, sans le JIT :
 
 ```sql
 SET jit TO off;
