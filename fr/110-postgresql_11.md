@@ -100,10 +100,10 @@ hide_author_in_slide: true
 
 # Nouveautés de PostgreSQL 11
 
-![PostgreSQL](medias/africa-tanzania-trangire-elephant-wild-animal.jpg)
+![PostgreSQL](medias/The_Big_Boss_Elephant.jpeg)
 
 <div class="notes">
-Photographie obtenue sur [urltarget.com](http://www.urltarget.com/images/africa-tanzania-trangire-elephant-wild-animal.jpg).
+Photographie obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
 
 Public Domain CC0.
 </div>
