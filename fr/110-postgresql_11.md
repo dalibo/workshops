@@ -100,10 +100,10 @@ hide_author_in_slide: true
 
 # Nouveautés de PostgreSQL 11
 
-![PostgreSQL](medias/Elephant_Amboseli.jpg)
+![PostgreSQL](medias/africa-tanzania-trangire-elephant-wild-animal.jpg)
 
 <div class="notes">
-Photographie obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Elephant_Amboseli.jpg).
+Photographie obtenue sur [urltarget.com](http://www.urltarget.com/images/africa-tanzania-trangire-elephant-wild-animal.jpg).
 
 Public Domain CC0.
 </div>
