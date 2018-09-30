@@ -181,6 +181,8 @@ des articles en anglais :
 
 -----
 
+\newpage
+
 ## Nouveautés sur le partitionnement
 <div class="slide-content">
 
@@ -199,10 +201,9 @@ des articles en anglais :
 
 Le partitionnement natif était une fonctionnalité très attendue de
 PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient
-dissuader de l'utilisation de celui-ci.
+dissuader de l'utiliser.
 
-La version 11 apporte plusieurs améliorations au niveau du partitionnement et
-corrige certaines limites impactant la version 10.
+La version 11 corrige une bonne partie de ces limites.
 
 </div>
 
@@ -213,8 +214,8 @@ corrige certaines limites impactant la version 10.
 ### Partitionnement par hachage
 <div class="slide-content">
 
-  * Répartition des données suivant la valeur de hachage de la clé de partition
-  * Très utile pour les partitions destinées à grandir
+  * Répartition des données suivant le hachage de la clé de partition
+  * Partitions destinées à grandir de manière uniforme
 </div>
 
 <div class="notes">
@@ -224,11 +225,12 @@ plusieurs partitions selon la valeur de hachage de la clé de partition.
 
 Ce mode de partitionnement est utile lorsqu'on cherche à séparer les données en
 plusieurs parties sans rechercher un classement particulier des
-enregistrements.
+enregistrements, par exemple pour répartir la charge des I/O sur plusieurs
+disques uniformément.
 
 Les partitionnements par liste ou par intervalles permettent de facilement
-archiver ou supprimer des données. Le partitionnement par hachage va être utile
-pour les partitions destinées à s’agrandir et pour lesquelles il n'y a pas de
+archiver ou supprimer des données. Ce n'est pas le but du partitionnement
+par hachage va être utile plus destiné au cas où il n'y a pas de
 clé de partitionnement naturelle.
 
 Tous les modes de partitionnement permettent d'accélérer les opérations de
@@ -240,17 +242,17 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 ### Exemple de partitionnement par hachage
 <div class="slide-content">
 
-  * Créer une table partitionnée :
+  * Créer une table partitionnée : \
     `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
-  * Ajouter une partition :
-    `CREATE TABLE t1_a PARTITION OF t1`
+  * Ajouter une partition : \
+    `CREATE TABLE t1_a PARTITION OF t1` \
     `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
 </div>
 
 <div class="notes">
 
-On fixe la valeur initiale du modulo au nombre de partitions à créer. On doit
+On fixe la valeur initiale du diviseur au nombre de partitions à créer. On doit
 créer les tables partitionnées pour tous les restes de la division entière car
 il n'est pas possible de définir de table par défaut avec les partitions par hachage.
 
@@ -286,7 +288,8 @@ Partitions: t1_a FOR VALUES WITH (modulus 3, remainder 0),
 Pour trier les données dans la bonne colonne, la classe d'opérateur par hachage
 par défaut des colonnes de la clé est utilisé. Il ne s'agit pas de l'opération
 modulo mathématique. On le voit bien en regardant le nombre d'insertions dans
-chaque partition pour une liste d'entiers de 0 à 10000.
+chaque partition pour une liste d'entiers de 0 à 10 000, très homogène, et les
+valeurs dans une partition :
 
 ```sql
 v11=# INSERT INTO t1 SELECT generate_series(0,10000);
@@ -302,23 +305,42 @@ v11=# SELECT count(*) FROM t1_a;
 -------
   3277
 (1 ligne)
-
+CREATE TABLE t1_a PARTITION OF t1 FOR VALUES WITH (modulus 3,remainder 0);
 v11=# SELECT count(*) FROM t1_b;
  count
 -------
   3369
 (1 ligne)
 
-v11=# select COUNT(*) FROM t1_c;
+v11=# SELECT COUNT(*) FROM t1_c;
  count
 -------
   3355
 (1 ligne)
+
+v11=# SELECT * FROM t1_c limit 10 ;
+ c1 
+----
+  0
+  1
+  5
+  9
+ 11
+ 12
+ 17
+ 22
+ 23
+ 24
+
 ```
 
 Il n'existe pas de commande permettant d'étendre automatiquement le nombre de
-partitions d'une table partitionnée par hachage. On peut contourner en
-détachant une partition et créant des « sous-partitions » (en terme de modulo)
+partitions d'une table partitionnée par hachage. 
+Cependant, la [documentation officielle](https://docs.postgresql.fr/11/sql-createtable.html) dit ceci : 
+« il n'est pas obligatoire que chaque partition ait le même diviseur, juste que chaque diviseur apparaissant dans une table partitionnée par hachage soit un facteur du diviseur immédiatement supérieur. Cela permet d'augmenter le nombre de partitions de manière incrémentale sans avoir besoin de déplacer toutes les données d'un coup. »
+
+On peut donc contourner en
+détachant une partition et créant des « sous-partitions » (en changeant le diviseur)
 de cette partition et réinsérer les données de la table détachée dans la table
 mère.
 
@@ -363,6 +385,7 @@ Partitions: t1_aa FOR VALUES WITH (modulus 6, remainder 0),
 Toutes les lignes de la table recoupée `t1_a` ont bien été insérées dans les 2
 nouvelles partitions `t1_aa` et `t1_ab`.
 
+
 </div>
 
 -----
@@ -393,7 +416,8 @@ v10=# CREATE INDEX ON livres (titre);
 ERROR:  cannot create index on partitioned table "livres"
 ```
 
-En version 11, les index sont créés sur chaque partition :
+En version 11, les index apparaissent sur la table partitionnée mais sont bien
+créés sur chaque partition :
 ```sql
 v11=# CREATE INDEX ON livres (titre);
 CREATE INDEX
@@ -433,6 +457,9 @@ Partition de : livres FOR VALUES FROM ('0') TO ('a')
 Index :
     "livres_0_9_titre_idx" btree (titre)
 ```
+
+L'exemple ci-dessus concerne une colonne de la clé de partitionnement, mais
+cela fonctionne avec toute colonne.
 
 </div>
 
@@ -583,7 +610,7 @@ En version 11, PostgreSQL rend la chose transparente.
 ### Partition par défaut
 <div class="slide-content">
 
-  * Pour les données n'appartenant à aucune autre partition :
+  * Pour les données n'appartenant à aucune autre partition : \
   `CREATE TABLE livres_default PARTITION OF livres DEFAULT;`
 
 </div>
@@ -663,7 +690,8 @@ temps de planification. Pour cette raison, le paramètre est fixé à la valeur
 tables partitionnées.
 
 Si ce paramètre existe toujours en version 11, il ne s'applique plus qu'aux
-tables partitionnées par héritage (l'ancienne méthode).  
+tables partitionnées par héritage (l'ancienne méthode, toujours utilisable),
+donc si des contraintes `CHECK` sont aussi utilisées.
 Le paramètre `enable_partition_pruning`, activé par défaut, a été ajouté pour
 gèrer l'élagage des partitions natives.
 
@@ -710,8 +738,11 @@ SELECT * FROM livres WHERE titre BETWEEN 'a' AND (SELECT 'c');
 ```
 
 Lorsque l'élagage est activé, le moteur détecte qu'il n'a pas besoin de
-parcourir la partition `livres_0_9`, et ce dès la phase de planification. Par
-contre il prévoit de parcourir `livres_m_z` :
+parcourir la partition `livres_0_9`, et ce dès la phase de planification, et
+sans qu'il y ait besoin d'un index sur la clé, puisque que la valeur minimum
+'a' est en clair dans la requête.
+Par contre le planificateur prévoit de parcourir `livres_m_z` car il n'est pas
+immédiat pour lui que l'on s'arrêtera à 'c' :
 
 ```sql
 v11=# SET enable_partition_pruning = on;
@@ -730,9 +761,7 @@ SELECT * FROM livres l WHERE titre BETWEEN 'a' AND (SELECT 'c');
 (7 lignes)
 ```
 
-Or nous savons bien qu'il n'a pas besoin de parcourir la partition `livres_m_z`,
-puisque la recherche s'arrête aux titres commençant par la lettre `c`.
-Regardons le plan d'une exécution réelle :
+Regardons toutefois le plan d'une exécution réelle :
 
 ```sql
 v11=# EXPLAIN (ANALYSE, COSTS off)
@@ -758,9 +787,11 @@ Nous constatons que lors de l'exécution, le parcours de la partition
 
 Cet élagage dynamique pourra être effectué sur toute expression stable. Par
 exemple, un appel à une fonction _stable_ ou _immutable_ (donc une expression
-constante, un calcul, la fonction `now()`, mais pas la fonction`random()` par exemple).
+constante, un calcul, la fonction `now()`, mais pas la fonction `random()` par exemple).
 
-L'élagage dynamique est également activé dans les instructions préparées.
+L'élagage dynamique est également utilisable dans les instructions préparées et les
+jointures en _Nested Loops_ comem décrit dans
+[ce billet de blog de Thomas Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
 
 </div>
 
@@ -770,7 +801,7 @@ L'élagage dynamique est également activé dans les instructions préparées.
 <div class="slide-content">
 
   * Clause `INSERT ON CONFLICT`
-  * _Partition-Wise Aggregate_
+  * _Partition-Wise Aggregate_ (par défaut : `off`)
   * `FOR EACH ROW trigger`
 </div>
 
@@ -794,7 +825,10 @@ INSERT 0 0
 _Partition-Wise Aggregate_ :
 
 Les paramètres `enable_partitionwise_join` et `enable_partitionwise_aggregate`
-ont été ajoutés. Ils sont désactivés par défaut. En cas de jointure entre
+ont été ajoutés. Ils sont désactivés par défaut en raison du coût supplémentaire
+qu'ils entraînent dans la planification.
+
+En cas de jointure entre
 plusieurs tables partitionnées avec les mêmes contraintes, le moteur va d'abord
 effectuer des jointures entre les différentes partitions de chaque table. Il
 joindra dans un deuxième temps ces résultats entre eux.
