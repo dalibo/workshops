@@ -3716,6 +3716,40 @@ postgres@v11=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW vue_t1 AS SELECT * FROM 
 (8 lignes)
 ```
 
+Création d'une table avec SELECT INTO :
+
+En version 10 :
+```sql
+postgres@v10=# EXPLAIN ANALYSE SELECT * INTO t3 FROM t1 WHERE i < 100000;
+                                                QUERY PLAN                                                 
+-----------------------------------------------------------------------------------------------------------
+ Seq Scan on t1  (cost=0.00..169247.71 rows=97156 width=4) (actual time=0.169..650.296 rows=99999 loops=1)
+   Filter: (i < 100000)
+   Rows Removed by Filter: 9900001
+ Planning time: 0.402 ms
+ Execution time: 721.953 ms
+(5 lignes)
+
+
+```
+
+En version 11 :
+```sql
+postgres@v11=# EXPLAIN ANALYSE SELECT * INTO t3 FROM t1 WHERE i < 100000;
+                                                       QUERY PLAN                                                        
+-------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..106811.71 rows=94805 width=4) (actual time=3.970..330.662 rows=99999 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on t1  (cost=0.00..96331.21 rows=39502 width=4) (actual time=0.066..312.041 rows=33333 loops=3)
+         Filter: (i < 100000)
+         Rows Removed by Filter: 3300000
+ Planning Time: 5.373 ms
+ Execution Time: 397.515 ms
+(8 lignes)
+
+```
+
 </div>
 
 -----
