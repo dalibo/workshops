@@ -2515,6 +2515,9 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 </div>
 
 -----
+
+\newpage
+
 # Atelier
 
 <div class="slide-content">
@@ -2522,16 +2525,15 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 À présent, place à l'atelier...
 
   * Installation
-  * Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique
   * Mise à jour d'une partition avec un `UPDATE`
-  * Tester le support de `TRUNCATE` avec la réplication logique
-  * Création d'un partitionnement par `hachage`
-  * JIT
-  * pg_prewarm
-  * Tester les nouveaux rôles
-  * Création de slot avec pg_basebackup
-  * Parallélisation
+  * Manipulation du partitionnement par hachage
+  * `TRUNCATE` avec la réplication logique
+  * Mise à jour PostgreSQL 10 vers 11 avec la réplication logique
   * Index couvrants
+  * Parallélisation
+  * Sauvegarde des droits avec `pg_dump`
+  * l'extension pg_prewarm
+  * Test du JIT
 
 </div>
 
@@ -2836,6 +2838,16 @@ v11=# SELECT * FROM liste_dates_c ;
 
 -----
 
+## Manipulation du partitionnement par hachage
+
+<div class="notes">
+
+FIXME
+
+</div>
+
+-----
+
 ## Support du TRUNCATE dans la réplication logique
 
 <div class="notes">
@@ -2933,188 +2945,6 @@ workshop11_2=# select * from t1;
 ----
 (0 rows)
 ```
-
-</div>
-
------
-
-## Index couvrants
-
-<div class="notes">
-
-
-Soit une table avec des données et une contrainte d'unicité sur 2 colonnes :
-```sql
-v11=# CREATE TABLE t2 (a int, b int, c varchar(10));
-CREATE TABLE
-v11=# INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
-        FROM generate_series(1,10000000) AS i);
-INSERT 0 10000000
-v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
-CREATE INDEX
-```
-
-Pour simplifier les plans, on désactive le parallélisme :
-```sql
-SET max_parallel_workers_per_gather TO 0 ;
-```
-
-En cas de recherche sur la colonne _a_, on va pouvoir récupérer les colonnes
-_a_ et _b_ grâce à un _Index Only Scan_ :
-```sql
-v11=# EXPLAIN ANALYSE SELECT a,b FROM t2 WHERE a>110000 and a<158000;
-                   QUERY PLAN
------------------------------------------------------
- Index Only Scan using t2_a_b_unique_idx on t2
-     (cost=0.43..1953.87 rows=1100 width=8)
-     (actual time=0.078..28.066 rows=47999 loops=1)
-   Index Cond: ((a > 1000) AND (a < 2000))
-   Heap Fetches: 0
- Planning Time: 0.225 ms
- Execution Time: 12.628 ms
-(5 lignes)
-```
-
-Cependant, si on veut récupérer également la colonne _c_, on passera par un
-_Index Scan_ et un accès à la table :
-```sql
-v11=# EXPLAIN ANALYSE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
-                   QUERY PLAN
------------------------------------------------------
- Index Scan using t2_a_b_unique_idx on t2
-     (cost=0.43..61372.04 rows=46652 width=19)
-     (actual time=0.063..13.073 rows=47999 loops=1)
-   Index Cond: ((a > 110000) AND (a < 158000))
- Planning Time: 0.223 ms
- Execution Time: 16.034 ms
-(4 lignes)
-```
-
-Dans notre exemple, le temps réel n'est pas vraiment différent entre les 2
-requêtes. Si l'optimisation de cette requête est cependant cruciale, nous
-pouvons créer un index spécifique incluant la colonne _c_ et permettre
-l'utilisation d'un _Index Only Scan_ :
-```sql
-v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
-CREATE INDEX
-v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
-                   QUERY PLAN
------------------------------------------------------
- Index Only Scan using t2_a_b_c_idx on t2
-     (cost=0.56..1861.60 rows=46652 width=19)
-     (actual time=0.048..11.241 rows=47999 loops=1)
-   Index Cond: ((a > 110000) AND (a < 158000))
-   Heap Fetches: 0
- Planning Time: 0.265 ms
- Execution Time: 14.329 ms
-(5 lignes)
-```
-
-La taille cumulée de nos index est de 602 Mo :
-```sql
-v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_idx'));
- pg_size_pretty
-----------------
- 214 MB
-(1 ligne)
-
-v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_c_idx'));
- pg_size_pretty
-----------------
- 387 MB
-(1 ligne)
-```
-
-En v11 nous pouvons utiliser à la place un seul index appliquant toujours la
-contrainte d'unicité sur les colonnes _a_ et _b_ **et** couvrant la colonne
-_c_ :
-```sql
-v11=# CREATE UNIQUE INDEX t2_a_b_unique_covering_c_idx ON t2 (a,b) INCLUDE (c);
-CREATE INDEX
-v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
-                   QUERY PLAN
-----------------------------------------------------------
- Index Only Scan using t2_a_b_unique_covering_c_idx on t2
-     (cost=0.43..1857.47 rows=46652 width=19)
-     (actual time=0.045..11.945 rows=47999 loops=1)
-   Index Cond: ((a > 110000) AND (a < 158000))
-   Heap Fetches: 0
- Planning Time: 0.228 ms
- Execution Time: 14.263 ms
-(5 lignes)
-v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_covering_c_idx'));
- pg_size_pretty
-----------------
- 386 MB
-(1 ligne)
-```
-
-La nouvelle fonctionnalité sur les index couvrants nous a permit d'éviter la
-création de 2 index pour un gain de 35% d'espace disque !
-
-Noter que la colonne `c` est renseignée depuis l'index, mais elle n'est pas
-triée (comme dans un index normal), et donc un `ORDER BY` n'en profite pas
-(étape _Sort_ nécessaire) :
-```sql
-v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b ;
-                   QUERY PLAN
-----------------------------------------------------------
- Index Only Scan using t2_a_b_unique_covering_c_idx on t2
-             (cost=0.43..347752.43 rows=10000000 width=19)
-```
-
-```sql
-v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b,c ;
-                   QUERY PLAN
-----------------------------------------------------------
- Sort  (cost=1736527.83..1761527.83 rows=10000000 width=19)
-   Sort Key: a, b, c
-   ->  Seq Scan on t2  (cost=0.00..163695.00 rows=10000000 width=19)
-```
-
-
-Les performances en insertion vont également être meilleures car un seul index
-doit être maintenu :
-```sql
-v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
-        FROM generate_series(10000001,10100000) AS i);
-                   QUERY PLAN
--------------------------------------------------------------
- Insert on t2
-     (cost=0.00..25.00 rows=1000 width=46)
-     (actual time=502.111..502.111 rows=0 loops=1)
-   ->  Function Scan on generate_series i
-           (cost=0.00..25.00 rows=1000 width=46)
-	   (actual time=14.356..107.205 rows=100000 loops=1)
- Planning Time: 0.132 ms
- Execution Time: 502.594 ms
-(4 lignes)
-```
-
-Si on supprime l'index couvrant et que l'on recrée les 2 index :
-```sql
-v11=# DROP INDEX t2_a_b_unique_covering_c_idx ;
-DROP INDEX
-v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
-CREATE INDEX
-v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
-CREATE INDEX
-v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
-        FROM generate_series(10100001,10200000) AS i);
-                   QUERY PLAN
--------------------------------------------------------------
- Insert on t2
-     (cost=0.00..25.00 rows=1000 width=46)
-     (actual time=842.455..842.455 rows=0 loops=1)
-   ->  Function Scan on generate_series i
-           (cost=0.00..25.00 rows=1000 width=46)
-	   (actual time=14.708..127.441 rows=100000 loops=1)
- Planning Time: 0.155 ms
- Execution Time: 843.147 ms
-(4 lignes)
-```
-
-On a un gain de performance à l'insertion de 40%.
 
 </div>
 
@@ -3629,6 +3459,375 @@ DROP PUBLICATION
 
 -----
 
+## Index couvrants
+
+<div class="notes">
+
+
+Soit une table avec des données et une contrainte d'unicité sur 2 colonnes :
+```sql
+v11=# CREATE TABLE t2 (a int, b int, c varchar(10));
+CREATE TABLE
+v11=# INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(1,10000000) AS i);
+INSERT 0 10000000
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
+CREATE INDEX
+```
+
+Pour simplifier les plans, on désactive le parallélisme :
+```sql
+SET max_parallel_workers_per_gather TO 0 ;
+```
+
+En cas de recherche sur la colonne _a_, on va pouvoir récupérer les colonnes
+_a_ et _b_ grâce à un _Index Only Scan_ :
+```sql
+v11=# EXPLAIN ANALYSE SELECT a,b FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Only Scan using t2_a_b_unique_idx on t2
+     (cost=0.43..1953.87 rows=1100 width=8)
+     (actual time=0.078..28.066 rows=47999 loops=1)
+   Index Cond: ((a > 1000) AND (a < 2000))
+   Heap Fetches: 0
+ Planning Time: 0.225 ms
+ Execution Time: 12.628 ms
+(5 lignes)
+```
+
+Cependant, si on veut récupérer également la colonne _c_, on passera par un
+_Index Scan_ et un accès à la table :
+```sql
+v11=# EXPLAIN ANALYSE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Scan using t2_a_b_unique_idx on t2
+     (cost=0.43..61372.04 rows=46652 width=19)
+     (actual time=0.063..13.073 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+ Planning Time: 0.223 ms
+ Execution Time: 16.034 ms
+(4 lignes)
+```
+
+Dans notre exemple, le temps réel n'est pas vraiment différent entre les 2
+requêtes. Si l'optimisation de cette requête est cependant cruciale, nous
+pouvons créer un index spécifique incluant la colonne _c_ et permettre
+l'utilisation d'un _Index Only Scan_ :
+```sql
+v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
+CREATE INDEX
+v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+-----------------------------------------------------
+ Index Only Scan using t2_a_b_c_idx on t2
+     (cost=0.56..1861.60 rows=46652 width=19)
+     (actual time=0.048..11.241 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+   Heap Fetches: 0
+ Planning Time: 0.265 ms
+ Execution Time: 14.329 ms
+(5 lignes)
+```
+
+La taille cumulée de nos index est de 602 Mo :
+```sql
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_idx'));
+ pg_size_pretty
+----------------
+ 214 MB
+(1 ligne)
+
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_c_idx'));
+ pg_size_pretty
+----------------
+ 387 MB
+(1 ligne)
+```
+
+En v11 nous pouvons utiliser à la place un seul index appliquant toujours la
+contrainte d'unicité sur les colonnes _a_ et _b_ **et** couvrant la colonne
+_c_ :
+```sql
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_covering_c_idx ON t2 (a,b) INCLUDE (c);
+CREATE INDEX
+v11=# EXPLAIN ANALYZE SELECT a,b,c FROM t2 WHERE a>110000 and a<158000;
+                   QUERY PLAN
+----------------------------------------------------------
+ Index Only Scan using t2_a_b_unique_covering_c_idx on t2
+     (cost=0.43..1857.47 rows=46652 width=19)
+     (actual time=0.045..11.945 rows=47999 loops=1)
+   Index Cond: ((a > 110000) AND (a < 158000))
+   Heap Fetches: 0
+ Planning Time: 0.228 ms
+ Execution Time: 14.263 ms
+(5 lignes)
+v11=# SELECT pg_size_pretty(pg_relation_size('t2_a_b_unique_covering_c_idx'));
+ pg_size_pretty
+----------------
+ 386 MB
+(1 ligne)
+```
+
+La nouvelle fonctionnalité sur les index couvrants nous a permit d'éviter la
+création de 2 index pour un gain de 35% d'espace disque !
+
+Noter que la colonne `c` est renseignée depuis l'index, mais elle n'est pas
+triée (comme dans un index normal), et donc un `ORDER BY` n'en profite pas
+(étape _Sort_ nécessaire) :
+```sql
+v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b ;
+                   QUERY PLAN
+----------------------------------------------------------
+ Index Only Scan using t2_a_b_unique_covering_c_idx on t2
+             (cost=0.43..347752.43 rows=10000000 width=19)
+```
+
+```sql
+v11=# EXPLAIN SELECT * FROM t2 ORDER BY a,b,c ;
+                   QUERY PLAN
+----------------------------------------------------------
+ Sort  (cost=1736527.83..1761527.83 rows=10000000 width=19)
+   Sort Key: a, b, c
+   ->  Seq Scan on t2  (cost=0.00..163695.00 rows=10000000 width=19)
+```
+
+
+Les performances en insertion vont également être meilleures car un seul index
+doit être maintenu :
+```sql
+v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(10000001,10100000) AS i);
+                   QUERY PLAN
+-------------------------------------------------------------
+ Insert on t2
+     (cost=0.00..25.00 rows=1000 width=46)
+     (actual time=502.111..502.111 rows=0 loops=1)
+   ->  Function Scan on generate_series i
+           (cost=0.00..25.00 rows=1000 width=46)
+	   (actual time=14.356..107.205 rows=100000 loops=1)
+ Planning Time: 0.132 ms
+ Execution Time: 502.594 ms
+(4 lignes)
+```
+
+Si on supprime l'index couvrant et que l'on recrée les 2 index :
+```sql
+v11=# DROP INDEX t2_a_b_unique_covering_c_idx ;
+DROP INDEX
+v11=# CREATE UNIQUE INDEX t2_a_b_unique_idx ON t2 (a,b);
+CREATE INDEX
+v11=# CREATE INDEX t2_a_b_c_idx ON t2 (a,b,c);
+CREATE INDEX
+v11=# EXPLAIN ANALYSE INSERT INTO t2 (SELECT i, 2*i, substr(md5(i::text), 1, 10)
+        FROM generate_series(10100001,10200000) AS i);
+                   QUERY PLAN
+-------------------------------------------------------------
+ Insert on t2
+     (cost=0.00..25.00 rows=1000 width=46)
+     (actual time=842.455..842.455 rows=0 loops=1)
+   ->  Function Scan on generate_series i
+           (cost=0.00..25.00 rows=1000 width=46)
+	   (actual time=14.708..127.441 rows=100000 loops=1)
+ Planning Time: 0.155 ms
+ Execution Time: 843.147 ms
+(4 lignes)
+```
+
+On a un gain de performance à l'insertion de 40%.
+
+</div>
+
+-----
+
+## parallélisation
+
+<div class="notes">
+
+FIXME
+
+</div>
+
+-----
+
+## Sauvegarde des droits avec `pg_dump`
+
+<div class="notes">
+
+FIXME
+
+</div>
+
+-----
+
+## pg_prewarm
+
+<div class="notes">
+
+Ce qui suit suppose un paramètre `shared_buffers` assez grand :
+
+```
+shared_buffers = '512MB'  # redémarrage nécessaire en cas de changement
+```
+
+Créons une table de 346 Mo puis exécutons une requête dessus :
+
+```sql
+CREATE TABLE matable AS SELECT i FROM generate_series(1,10000000) i;
+
+EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+												 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.007..694.690 rows=10000000 loops=1)
+Buffers: shared hit=44248
+Planning Time: 0.065 ms
+Execution Time: 1080.083 ms
+```
+La requête a été lue depuis le cache de PostgreSQL comme en témoigne le nombre
+de blocs de 8 ko en _shared hits_.
+
+
+On redémarre PostgreSQL :
+
+```console
+service postgresql-11 restart
+```
+
+La première rééxécution de la requête est bien plus lente car les blocs sont lus
+depuis le disque (_shared read_), ou avec de la chance depuis la cache de l'OS.
+Cela reste valable pour le deuxième ou troisième appel, car lors d'un parcours
+complet d'une grosse table, tous les blocs ne sont pas chargés en mémoire
+d'entrée :
+
+```sql
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.098..948.179 rows=10000000 loops=1)
+Buffers: shared read=44248
+Planning Time: 0.514 ms
+Execution Time: 1428.741 ms
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.128..796.596 rows=10000000 loops=1)
+Buffers: shared hit=32 read=44216
+Planning Time: 0.091 ms
+Execution Time: 1215.664 ms
+(4 lignes)
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.147..829.618 rows=10000000 loops=1)
+Buffers: shared hit=64 read=44184
+Planning Time: 0.109 ms
+Execution Time: 1263.430 ms
+(4 lignes)
+
+```
+
+Avec `pg_prewarm`, on peut accélérer ce chargement :
+
+```sql
+postgres=# CREATE EXTENSION pg_prewarm ;
+CREATE EXTENSION
+
+postgres=# SELECT pg_prewarm ('matable','buffer') ;
+
+pg_prewarm
+------------
+  44248
+(1 ligne)
+
+postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
+							 QUERY PLAN
+-------------------------------------------------------------------------------
+Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                     (actual time=0.016..715.889 rows=10000000 loops=1)
+Buffers: shared hit=44248
+Planning Time: 0.038 ms
+Execution Time: 1123.740 ms
+(4 lignes)
+
+```
+
+L'extension `pg_buffercache` permet de voir le contenu des _shared buffers_ (ici
+on filtre les tables et index systèmes pour la lisibilité) :
+
+```sql
+postgres=# CREATE EXTENSION pg_buffercache ;
+CREATE EXTENSION
+
+postgres=# SELECT c.relname, count(*) AS buffers,
+   pg_size_pretty(count(*)*8192) as taille_mem
+   FROM pg_buffercache b INNER JOIN pg_class c
+   ON b.relfilenode = pg_relation_filenode(c.oid) AND
+	  b.reldatabase IN (0, (SELECT oid FROM pg_database
+							WHERE datname = current_database()))
+   WHERE relname not like 'pg_%'
+   GROUP BY c.relname ;
+
+relname | buffers | taille_mem
+---------+---------+------------
+matable |   44248 | 346 MB
+(1 ligne)
+```
+
+Faisons en sorte que PostgreSQL charge la table dès le démarrage. Dans
+`postgresql.conf` :
+```
+shared_preload_libraries = 'pg_prewarm'
+pg_prewarm.autoprewarm = true
+```
+
+Avant de redémarrer PostgreSQL on demande à sauvegarder le contenu du cache :
+
+```sql
+postgres=# SELECT autoprewarm_dump_now() ;
+
+autoprewarm_dump_now
+----------------------
+			44537
+(1 ligne)
+
+```
+
+On redémarre :
+```console
+service postgresql-11 restart
+```
+
+Et l'on vérifie qu'avant toute requête la table est déjà en cache avec la
+requête ci-dessus sur `pg_buffercache` :
+```sql
+relname | buffers | taille_mem
+---------+---------+------------
+matable |   44248 | 346 MB
+
+postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
+
+                          QUERY PLAN
+------------------------------------------------------------------------------
+ Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
+                      (actual time=0.042..713.662 rows=10000000 loops=1)
+   Buffers: shared hit=44248
+ Planning Time: 0.348 ms
+ Execution Time: 1107.820 ms
+(4 lignes)
+```
+
+-----
+
 ## JIT
 
 <div class="notes">
@@ -3908,170 +4107,4 @@ de plus en plus important. Si possible, monter `shared_buffers` à 4 Go.
 
 </div>
 
------
-
-## pg_prewarm
-
-<div class="notes">
-
-Ce qui suit suppose un paramètre `shared_buffers` assez grand :
-
-```
-shared_buffers = '512MB'  # redémarrage nécessaire en cas de changement
-```
-
-Créons une table de 346 Mo puis exécutons une requête dessus :
-
-```sql
-CREATE TABLE matable AS SELECT i FROM generate_series(1,10000000) i;
-
-EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
-												 QUERY PLAN
--------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                     (actual time=0.007..694.690 rows=10000000 loops=1)
-Buffers: shared hit=44248
-Planning Time: 0.065 ms
-Execution Time: 1080.083 ms
-```
-La requête a été lue depuis le cache de PostgreSQL comme en témoigne le nombre
-de blocs de 8 ko en _shared hits_.
-
-
-On redémarre PostgreSQL :
-
-```console
-service postgresql-11 restart
-```
-
-La première rééxécution de la requête est bien plus lente car les blocs sont lus
-depuis le disque (_shared read_), ou avec de la chance depuis la cache de l'OS.
-Cela reste valable pour le deuxième ou troisième appel, car lors d'un parcours
-complet d'une grosse table, tous les blocs ne sont pas chargés en mémoire
-d'entrée :
-
-```sql
-postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
-
-							 QUERY PLAN
--------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                     (actual time=0.098..948.179 rows=10000000 loops=1)
-Buffers: shared read=44248
-Planning Time: 0.514 ms
-Execution Time: 1428.741 ms
-
-postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
-
-							 QUERY PLAN
--------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                     (actual time=0.128..796.596 rows=10000000 loops=1)
-Buffers: shared hit=32 read=44216
-Planning Time: 0.091 ms
-Execution Time: 1215.664 ms
-(4 lignes)
-
-postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
-
-							 QUERY PLAN
--------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                     (actual time=0.147..829.618 rows=10000000 loops=1)
-Buffers: shared hit=64 read=44184
-Planning Time: 0.109 ms
-Execution Time: 1263.430 ms
-(4 lignes)
-
-```
-
-Avec `pg_prewarm`, on peut accélérer ce chargement :
-
-```sql
-postgres=# CREATE EXTENSION pg_prewarm ;
-CREATE EXTENSION
-
-postgres=# SELECT pg_prewarm ('matable','buffer') ;
-
-pg_prewarm
-------------
-  44248
-(1 ligne)
-
-postgres=# EXPLAIN (ANALYZE,BUFFERS) SELECT * FROM matable ;
-							 QUERY PLAN
--------------------------------------------------------------------------------
-Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                     (actual time=0.016..715.889 rows=10000000 loops=1)
-Buffers: shared hit=44248
-Planning Time: 0.038 ms
-Execution Time: 1123.740 ms
-(4 lignes)
-
-```
-
-L'extension `pg_buffercache` permet de voir le contenu des _shared buffers_ (ici
-on filtre les tables et index systèmes pour la lisibilité) :
-
-```sql
-postgres=# CREATE EXTENSION pg_buffercache ;
-CREATE EXTENSION
-
-postgres=# SELECT c.relname, count(*) AS buffers,
-   pg_size_pretty(count(*)*8192) as taille_mem
-   FROM pg_buffercache b INNER JOIN pg_class c
-   ON b.relfilenode = pg_relation_filenode(c.oid) AND
-	  b.reldatabase IN (0, (SELECT oid FROM pg_database
-							WHERE datname = current_database()))
-   WHERE relname not like 'pg_%'
-   GROUP BY c.relname ;
-
-relname | buffers | taille_mem
----------+---------+------------
-matable |   44248 | 346 MB
-(1 ligne)
-```
-
-Faisons en sorte que PostgreSQL charge la table dès le démarrage. Dans
-`postgresql.conf` :
-```
-shared_preload_libraries = 'pg_prewarm'
-pg_prewarm.autoprewarm = true
-```
-
-Avant de redémarrer PostgreSQL on demande à sauvegarder le contenu du cache :
-
-```sql
-postgres=# SELECT autoprewarm_dump_now() ;
-
-autoprewarm_dump_now
-----------------------
-			44537
-(1 ligne)
-
-```
-
-On redémarre :
-```console
-service postgresql-11 restart
-```
-
-Et l'on vérifie qu'avant toute requête la table est déjà en cache avec la
-requête ci-dessus sur `pg_buffercache` :
-```sql
-relname | buffers | taille_mem
----------+---------+------------
-matable |   44248 | 346 MB
-
-postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
-
-                          QUERY PLAN
-------------------------------------------------------------------------------
- Seq Scan on matable  (cost=0.00..144247.77 rows=9999977 width=4)
-                      (actual time=0.042..713.662 rows=10000000 loops=1)
-   Buffers: shared hit=44248
- Planning Time: 0.348 ms
- Execution Time: 1107.820 ms
-(4 lignes)
-```
 -----
