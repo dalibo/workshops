@@ -2838,12 +2838,12 @@ v11=# SELECT * FROM liste_dates_c ;
 
 -----
 
-## Manipulation du partitionnement par hachage
+## Partitionnement par hachage
 
 <div class="notes">
 
 Nous allons manipuler une table partitionnée par hachage et comparer ses
-performance par rapport à une table non paritionnée.
+performances par rapport à une table non partitionnée.
 
 Créons les tables `commandes_normale` et `commandes` :
 
@@ -2871,7 +2871,7 @@ ERROR:  no partition of relation "commandes" found for row
 DÉTAIL : Partition key of the failing row contains (id) = (1).
 ```
 
-Nous n'avons pas encore fixé le nombre de partition. fixons le à 5 et créons
+Nous n'avons pas encore fixé le nombre de partitions. Fixons-le à 5 et créons
 toutes les partitions :
 
 ```sql
@@ -2885,6 +2885,12 @@ CREATE TABLE commandes_3_5 PARTITION OF commandes
   FOR VALUES WITH (modulus 5,remainder 3);
 CREATE TABLE commandes_4_5 PARTITION OF commandes
   FOR VALUES WITH (modulus 5,remainder 4);
+```
+
+Fixons certains paramètres :
+```sql
+SET jit TO off;
+SET max_parallel_workers TO 0 ;
 ```
 
 Nous allons maintenant pouvoir comparer les performances en insertion :
@@ -2906,7 +2912,7 @@ Durée : 8107,349 ms (00:08,107)
 
 Les performances en insertion sont très proches entre les 2 tables.
 
-Insérons d'autres lignes :
+Insérons d'autres lignes, pour un total de 3 millions par table :
 
 ```sql
 INSERT INTO commandes_normale (c1, c2)
@@ -2918,6 +2924,27 @@ INSERT INTO commandes_normale (c1, c2)
 INSERT INTO commandes (c1, c2)
   SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
 ```
+
+Remarquons que les tailles des partitions sont quasi identiques :
+
+```
+v11=# \d+
+                                  Liste des relations
+ Schéma |           Nom            |   Type   | Propriétaire |   Taille   | Description
+--------+--------------------------+----------+--------------+------------+-------------
+...
+ public | commandes                | table    | postgres     | 0 bytes    |
+ public | commandes_0_5            | table    | postgres     | 39 MB      |
+ public | commandes_1_5            | table    | postgres     | 39 MB      |
+ public | commandes_2_5            | table    | postgres     | 39 MB      |
+ public | commandes_3_5            | table    | postgres     | 39 MB      |
+ public | commandes_4_5            | table    | postgres     | 39 MB      |
+ public | commandes_id_seq         | séquence | postgres     | 8192 bytes |
+ public | commandes_normale        | table    | postgres     | 193 MB     |
+ public | commandes_normale_id_seq | séquence | postgres     | 8192 bytes |
+
+```
+
 
 Testons ensuite les performances en mise à jour en mettant à jour 15 % des
 lignes :
@@ -2935,8 +2962,8 @@ v11=# UPDATE commandes_normale SET
 UPDATE 449409
 Durée : 15230,346 ms (00:15,230)
 ```
-
-On a des meilleurs performances pour la table partitionnée.
+FIXME : ça reste à prouver
+Les performances sont nettement meilleures pour la table partitionnée.
 
 Effaçons 15 % des lignes :
 ```sql
@@ -2961,12 +2988,14 @@ VACUUM
 Durée : 10339,478 ms (00:10,339)
 ```
 
-On a cette fois ci des meilleures performances avec la table non partitionnée.  
+On a cette fois de meilleures performances avec la table non partitionnée.  
+FIXME : ça reste à prouver et à expliquer 
+
 L'avantage des tables partitionnées est que l'on pourra effectuer le _VACUUM_
 sur chaque partition, évitant de surcharger le serveur.
 
 Les performances vont être très dépendantes de l'infrastructure (disque, CPU),
-du type de données et du nombre de partition. Si vous souhaitez utiliser les
+du type de données et du nombre de partitions. Si vous souhaitez utiliser les
 tables partitionnées par hachage, il est important de tester l'impact sur
 chaque type d'opération.
 
