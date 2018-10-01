@@ -2842,7 +2842,133 @@ v11=# SELECT * FROM liste_dates_c ;
 
 <div class="notes">
 
-FIXME
+Nous allons manipuler une table partitionnée par hachage et comparer ses
+performance par rapport à une table non paritionnée.
+
+Créons les tables `commandes_normale` et `commandes` :
+
+```sql
+CREATE TABLE commandes_normale (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  date_commande timestamp DEFAULT now(),
+  c1 integer, c2 text
+  );
+
+CREATE TABLE commandes (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  date_commande timestamp DEFAULT now(),
+  c1 integer, c2 text
+  ) PARTITION BY HASH (id);
+```
+
+Si nous essayons dès maintenant d'insérer des données dans la table
+partitionnée, nous obtenons l'erreur suivante :
+
+```sql
+v11=# INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+ERROR:  no partition of relation "commandes" found for row
+DÉTAIL : Partition key of the failing row contains (id) = (1).
+```
+
+Nous n'avons pas encore fixé le nombre de partition. fixons le à 5 et créons
+toutes les partitions :
+
+```sql
+CREATE TABLE commandes_0_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 0);
+CREATE TABLE commandes_1_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 1);
+CREATE TABLE commandes_2_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 2);
+CREATE TABLE commandes_3_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 3);
+CREATE TABLE commandes_4_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 4);
+```
+
+Nous allons maintenant pouvoir comparer les performances en insertion :
+
+```sql
+v11=# \timing on
+Chronométrage activé.
+
+v11=# INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+Durée : 8946,142 ms (00:08,946)
+
+v11=# INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT 0 1000000
+Durée : 8107,349 ms (00:08,107)
+```
+
+Les performances en insertion sont très proches entre les 2 tables.
+
+Insérons d'autres lignes :
+
+```sql
+INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+```
+
+Testons ensuite les performances en mise à jour en mettant à jour 15 % des
+lignes :
+
+```sql
+v11=# UPDATE commandes SET
+  date_commande=now(),c1=c1+1000000,c2='Ligne '||c1+1000000
+  WHERE random()>0.85;
+UPDATE 450526
+Durée : 5824,306 ms (00:05,824)
+
+v11=# UPDATE commandes_normale SET
+  date_commande=now(),c1=c1+1000000,c2= 'Ligne '||c1+1000000
+  WHERE random()>0.85;
+UPDATE 449409
+Durée : 15230,346 ms (00:15,230)
+```
+
+On a des meilleurs performances pour la table partitionnée.
+
+Effaçons 15 % des lignes :
+```sql
+v11=# DELETE FROM commandes WHERE random()>0.85;
+DELETE 448865
+Durée : 2954,842 ms (00:02,955)
+
+v11=# DELETE FROM commandes_normale WHERE random()>0.85;
+DELETE 449666
+Durée : 2205,243 ms (00:02,205)
+```
+
+Testons les performances du _VACUUM_ :
+
+```sql
+v11=# VACUUM commandes;
+VACUUM
+Durée : 12232,645 ms (00:12,233)
+
+v11=# VACUUM commandes_normale;
+VACUUM
+Durée : 10339,478 ms (00:10,339)
+```
+
+On a cette fois ci des meilleures performances avec la table non partitionnée.  
+L'avantage des tables partitionnées est que l'on pourra effectuer le _VACUUM_
+sur chaque partition, évitant de surcharger le serveur.
+
+Les performances vont être très dépendantes de l'infrastructure (disque, CPU),
+du type de données et du nombre de partition. Si vous souhaitez utiliser les
+tables partitionnées par hachage, il est important de tester l'impact sur
+chaque type d'opération.
 
 </div>
 
