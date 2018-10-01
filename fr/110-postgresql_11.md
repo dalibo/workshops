@@ -3645,7 +3645,45 @@ On a un gain de performance à l'insertion de 40%.
 
 <div class="notes">
 
-FIXME
+Parallélisation sur les requêtes CREATE TABLE AS SELECT
+
+Création d'une table t1 comportant 10000000 de lignes : 
+```sql
+CREATE TABLE t1 AS SELECT i FROM generate_serie
+```
+En version 10 lorsque nous créons une autre table avec CREATE TABLE ... AS on obtient le plan d'exectution suivant :
+
+```sql
+postgres@v10=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 10000;
+
+                                            QUERY PLAN                                                 
+-----------------------------------------------------------------------------------------------------------
+ Seq Scan on a  (cost=0.00..185288.50 rows=3761080 width=4) (actual time=0.057..931.101 rows=9999 loops=1)
+   Filter: (i < 10000)
+   Rows Removed by Filter: 9990001
+ Planning time: 7.127 ms
+ Execution time: 952.130 ms
+(5 lignes)
+```
+
+En version 11 l'optimiseur effectue un scan séquentiel en parallèle :
+
+```sql
+postgres@v11=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 10000;
+                                                       QUERY PLAN                                                       
+------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..98278.41 rows=9472 width=4) (actual time=3.506..372.195 rows=9999 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on a  (cost=0.00..96331.21 rows=3947 width=4) (actual time=237.366..358.676 rows=3333 loops=3)
+         Filter: (i < 10000)
+         Rows Removed by Filter: 3330000
+ Planning Time: 7.249 ms
+ Execution Time: 382.184 ms
+(8 lignes)
+
+```
+
 
 </div>
 
