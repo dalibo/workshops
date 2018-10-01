@@ -161,6 +161,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 </div>
 
 <div class="notes">
+
 PostgreSQL 11 apporte un grand nombre de nouvelles fonctionnalités, qui sont
 d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers
 des articles en anglais :
@@ -186,6 +187,7 @@ des articles en anglais :
 </div>
 
 <div class="notes">
+
 Le partitionnement natif était une fonctionnalité très attendue de
 PostgreSQL 10. Cependant, elle souffrait de plusieurs limitations qui pouvaient
 dissuader de l'utilisation de celui-ci.
@@ -366,6 +368,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 </div>
 
 <div class="notes">
+
 Soit la table partitionnée par intervalles :
 ```sql
 CREATE TABLE livres (titre text, parution timestamp with time zone)
@@ -577,6 +580,7 @@ En version 11, PostgreSQL rend la chose transparente.
 </div>
 
 <div class="notes">
+
 PostgreSQL génère une erreur lorsque les données n'appartiennent à aucune
 partition :
 ```sql
@@ -762,6 +766,7 @@ L'élagage dynamique est également activé dans les instructions préparées.
 </div>
 
 <div class="notes">
+
 En version 10, la clause `ON CONFLICT` n'était pas supportée sur le
 partitionnement :
 ```sql
@@ -1054,6 +1059,7 @@ requêtes.
 ### JIT
 
 <div class="slide-content">
+
   Exemple de JIT en fin de plan d'exécution :
 
 ```
@@ -1092,6 +1098,7 @@ Sans JIT la durée de la requête était d'environ 33 s.
 ### JIT
 
 <div class="slide-content">
+
   Quand le JIT est-il utile ?
 
   * Pas de limitation par les I/O
