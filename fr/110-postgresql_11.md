@@ -230,7 +230,7 @@ disques uniformément.
 
 Les partitionnements par liste ou par intervalles permettent de facilement
 archiver ou supprimer des données. Ce n'est pas le but du partitionnement
-par hachage va être utile plus destiné au cas où il n'y a pas de
+par hachage qui est plus destiné au cas où il n'y a pas de
 clé de partitionnement naturelle.
 
 Tous les modes de partitionnement permettent d'accélérer les opérations de
@@ -243,10 +243,10 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 <div class="slide-content">
 
   * Créer une table partitionnée : \
-    `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
+  `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
   * Ajouter une partition : \
-    `CREATE TABLE t1_a PARTITION OF t1` \
-    `  FOR VALUES WITH (modulus 3,remainder 0)`
+  `CREATE TABLE t1_a PARTITION OF t1`
+  `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
 </div>
 
