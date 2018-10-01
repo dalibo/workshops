@@ -2842,8 +2842,14 @@ v11=# SELECT * FROM liste_dates_c ;
 
 <div class="notes">
 
-Nous allons manipuler une table partitionnée par hachage et comparer ses
-performances par rapport à une table non partitionnée.
+Nous allons manipuler deux tables contenant les mêmes information : une table
+non partitionnée et une table partitionnée par hachage. Nous allons comparer
+les plans d'exécution et les performances entre ces 2 tables.
+
+Les performances vont être très dépendantes de l'infrastructure (disque, CPU),
+du type de données et du nombre de partitions. Si vous souhaitez utiliser les
+tables partitionnées par hachage, il est important de tester l'impact sur
+chaque type d'opération.
 
 Créons les tables `commandes_normale` et `commandes` :
 
@@ -2890,27 +2896,19 @@ CREATE TABLE commandes_4_5 PARTITION OF commandes
 Fixons certains paramètres :
 ```sql
 SET jit TO off;
-SET max_parallel_workers TO 0 ;
+SET max_parallel_workers TO 0;
+\timing on
 ```
 
 Nous allons maintenant pouvoir comparer les performances en insertion :
 
 ```sql
-v11=# \timing on
-Chronométrage activé.
-
-v11=# INSERT INTO commandes_normale (c1, c2)
+INSERT INTO commandes_normale (c1, c2)
   SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
-INSERT 0 1000000
-Durée : 8946,142 ms (00:08,946)
 
-v11=# INSERT INTO commandes (c1, c2)
+INSERT INTO commandes (c1, c2)
   SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
-INSERT 0 1000000
-Durée : 8107,349 ms (00:08,107)
 ```
-
-Les performances en insertion sont très proches entre les 2 tables.
 
 Insérons d'autres lignes, pour un total de 3 millions par table :
 
@@ -2927,12 +2925,11 @@ INSERT INTO commandes (c1, c2)
 
 Remarquons que les tailles des partitions sont quasi identiques :
 
-```
+```sql
 v11=# \d+
                                   Liste des relations
- Schéma |           Nom            |   Type   | Propriétaire |   Taille   | Description
---------+--------------------------+----------+--------------+------------+-------------
-...
+ Schéma |           Nom            |   Type   | Propriétaire |   Taille   |
+--------+--------------------------+----------+--------------+------------+
  public | commandes                | table    | postgres     | 0 bytes    |
  public | commandes_0_5            | table    | postgres     | 39 MB      |
  public | commandes_1_5            | table    | postgres     | 39 MB      |
@@ -2942,62 +2939,122 @@ v11=# \d+
  public | commandes_id_seq         | séquence | postgres     | 8192 bytes |
  public | commandes_normale        | table    | postgres     | 193 MB     |
  public | commandes_normale_id_seq | séquence | postgres     | 8192 bytes |
-
 ```
 
+Le nombre de lignes dans chaque partition n'est cependant pas strictement égal :
+
+```sql
+v11=# SELECT count(*) com1 FROM commandes_0_5;
+ count
+--------
+ 600337
+(1 ligne)
+
+v11=# SELECT count(*) com1 FROM commandes_1_5;
+ count
+--------
+ 600316
+(1 ligne)
+```
 
 Testons ensuite les performances en mise à jour en mettant à jour 15 % des
 lignes :
 
 ```sql
-v11=# UPDATE commandes SET
+UPDATE commandes SET
   date_commande=now(),c1=c1+1000000,c2='Ligne '||c1+1000000
   WHERE random()>0.85;
-UPDATE 450526
-Durée : 5824,306 ms (00:05,824)
 
-v11=# UPDATE commandes_normale SET
+UPDATE commandes_normale SET
   date_commande=now(),c1=c1+1000000,c2= 'Ligne '||c1+1000000
   WHERE random()>0.85;
-UPDATE 449409
-Durée : 15230,346 ms (00:15,230)
 ```
-FIXME : ça reste à prouver
-Les performances sont nettement meilleures pour la table partitionnée.
 
 Effaçons 15 % des lignes :
 ```sql
-v11=# DELETE FROM commandes WHERE random()>0.85;
-DELETE 448865
-Durée : 2954,842 ms (00:02,955)
+DELETE FROM commandes WHERE random()>0.85;
 
-v11=# DELETE FROM commandes_normale WHERE random()>0.85;
-DELETE 449666
-Durée : 2205,243 ms (00:02,205)
+DELETE FROM commandes_normale WHERE random()>0.85;
+```
+
+Regardons les plans d'exécution des requêtes précédentes sur la table
+partitionnée :
+
+```sql
+v11=# EXPLAIN (costs OFF) UPDATE commandes SET
+  date_commande=now(),c1=c1+1000000,c2='Ligne '||c1+1000000
+  WHERE random()>0.85;
+                      QUERY PLAN
+-------------------------------------------------------
+ Update on commandes
+   Update on commandes_0_5
+   Update on commandes_1_5
+   Update on commandes_2_5
+   Update on commandes_3_5
+   Update on commandes_4_5
+   ->  Seq Scan on commandes_0_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_1_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_2_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_3_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_4_5
+         Filter: (random() > '0.85'::double precision)
+(16 lignes)
+
+v11=# EXPLAIN (costs OFF) DELETE FROM commandes WHERE random()>0.85;
+                      QUERY PLAN
+-------------------------------------------------------
+ Delete on commandes
+   Delete on commandes_0_5
+   Delete on commandes_1_5
+   Delete on commandes_2_5
+   Delete on commandes_3_5
+   Delete on commandes_4_5
+   ->  Seq Scan on commandes_0_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_1_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_2_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_3_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_4_5
+         Filter: (random() > '0.85'::double precision)
+(16 lignes)
+```
+
+Ici, nous agissons sur toutes les lignes, il ne peut y avoir d'élagage de
+partition. Cette fonctionnalité est cependant disponible pour les tables
+partitionnées par hachage :
+
+```sql
+v11=# EXPLAIN (costs off) SELECT * FROM commandes WHERE id=400;
+                         QUERY PLAN
+------------------------------------------------------------
+ Append
+   ->  Index Scan using commandes_3_5_pkey on commandes_3_5
+         Index Cond: (id = 400)
+(3 lignes)
 ```
 
 Testons les performances du _VACUUM_ :
 
 ```sql
-v11=# VACUUM commandes;
-VACUUM
-Durée : 12232,645 ms (00:12,233)
+VACUUM commandes;
 
-v11=# VACUUM commandes_normale;
-VACUUM
-Durée : 10339,478 ms (00:10,339)
+VACUUM commandes_normale;
 ```
 
-On a cette fois de meilleures performances avec la table non partitionnée.  
-FIXME : ça reste à prouver et à expliquer 
-
 L'avantage des tables partitionnées est que l'on pourra effectuer le _VACUUM_
-sur chaque partition, évitant de surcharger le serveur.
+sur chaque partition, évitant de surcharger le serveur :
 
-Les performances vont être très dépendantes de l'infrastructure (disque, CPU),
-du type de données et du nombre de partitions. Si vous souhaitez utiliser les
-tables partitionnées par hachage, il est important de tester l'impact sur
-chaque type d'opération.
+```sql
+SELECT 'VACUUM commandes_'||i||'_5;' FROM generate_series(0,4) i;
+\gexec
+```
 
 </div>
 
