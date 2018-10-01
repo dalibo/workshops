@@ -3648,10 +3648,11 @@ On a un gain de performance à l'insertion de 40%.
 Parallélisation sur les requêtes CREATE TABLE AS SELECT
 
 Création d'une table t1 comportant 10000000 de lignes : 
+
 ```sql
-CREATE TABLE t1 AS SELECT i FROM generate_serie
+CREATE TABLE t1 AS SELECT i FROM generate_series (1,10000000) i ;
 ```
-En version 10 lorsque nous créons une autre table avec CREATE TABLE ... AS on obtient le plan d'exectution suivant :
+En version 10 lorsque nous créons une autre table avec CREATE TABLE ... AS on obtient le plan d'execution suivant :
 
 ```sql
 postgres@v10=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 10000;
