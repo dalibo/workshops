@@ -242,10 +242,10 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
 ### Exemple de partitionnement par hachage
 <div class="slide-content">
 
-  * Créer une table partitionnée : \
+  * Créer une table partitionnée :  
   `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
-  * Ajouter une partition : \
-  `CREATE TABLE t1_a PARTITION OF t1`
+  * Ajouter une partition :  
+  `CREATE TABLE t1_a PARTITION OF t1`  
   `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
 </div>
