@@ -2463,16 +2463,16 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 À présent, place à l'atelier...
 
   * Installation
-  * Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique.
-  * Mise à jour d'une partition avec un `UPDATE`.
-  * Tester le support de `TRUNCATE` avec la réplication logique.
-  * Création d'un partitionnement par `hachage`.
+  * Mise à jour PostgreSQL 10 vers 11 avec la réplication Logique
+  * Mise à jour d'une partition avec un `UPDATE`
+  * Tester le support de `TRUNCATE` avec la réplication logique
+  * Création d'un partitionnement par `hachage`
   * JIT
+  * pg_prewarm
   * Tester les nouveaux rôles
   * Création de slot avec pg_basebackup
   * Parallélisation
   * Index couvrants
-  * Élagage de partition
 
 </div>
 
