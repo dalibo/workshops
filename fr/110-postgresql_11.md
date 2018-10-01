@@ -119,8 +119,8 @@ Public Domain CC0.
   * Bêta 2 le 28 juin
   * Bêta 3 le 9 août
   * Bêta 4 le 17 septembre
-  * Version finale espérée septembre ou octobre 2018
-  * Plus de 1,5 millions de lignes de code
+  * Version finale espérée octobre 2018
+  * Plus de 1,5 millions de lignes de code C
   * Des centaines de contributeurs
 </div>
 
@@ -131,10 +131,14 @@ démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un
 _feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
 le 17 septembre.
 
-La version finale est espérée fin septembre ou début octobre 2018.
+La version finale est espérée en octobre 2018.
 
-La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code *C*.
-1 509 660 lignes pour être précis. Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
+La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code,
+essentiellement du C avec environ 23 % de commentaires, garants de la
+qualité du code.
+(Source : [openhub.net](https://www.openhub.net/p/postgres/analyses/latest/languages_summary))
+
+Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
 Si vous voulez en savoir plus sur le fonctionnement de la communauté PostgreSQL,
 une présentation récente de *Daniel Vérité* est disponible en ligne :
@@ -166,8 +170,13 @@ PostgreSQL 11 apporte un grand nombre de nouvelles fonctionnalités, qui sont
 d'ores et déjà détaillées dans de nombreux articles. Voici quelques liens vers
 des articles en anglais :
 
-  * [New in postgres 11](https://dali.bo/new-in-postgres-11) du projet PostgreSQL
-  * ...
+  * [Major features of PostgreSQL 11](https://www.postgresql.org/about/news/1855/), annonce de la bêta 1 par le PGDG, 24 mai 2018
+  * [Release Notes de la v11](https://www.postgresql.org/docs/11/static/release-11.html), documentation officielle PostgreSQL
+  * [What we (already) know about PostgreSQL 11](https://www.pgday.ch/common/slides/2018_westermann_WhatWeAlreadyKnowAboutPostgreSQL11.pdf), Daniel Westermann, dbi services, pgDay.ch, 29 juin 2018
+  * [PostgreSQL 11 New Features With Examples (Beta 1)](https://h50146.www5.hpe.com/products/software/oe/linux/mainstream/support/lcc/pdf/PostgreSQL_11_New_Features_beta1_en_20180525-1.pdf) (PDF), Noriyoshi Shinoda, Hewlett-Packard Japon, mai 2018
+  * [Waiting for PostgreSQL 11](https://www.depesz.com/), articles de blog de Teodor Sigaev tout le long du développement de la v11 entre septembre 2017 et juin 2018
+  * [Postgres 11 Highlight](https://paquier.xyz/tag/11/), série d'articles de Michael Paquier sur la même période
+
 </div>
 
 -----
