@@ -3684,6 +3684,37 @@ postgres@v11=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 1000
 
 ```
 
+A partir de la même table t1, nous créons une vue materialisé :
+
+En version 10 :
+```sql
+postgres@v10=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW vue_t1 AS SELECT * FROM t1 WHERE i < 100000;
+                                                 QUERY PLAN                                                  
+-------------------------------------------------------------------------------------------------------------
+ Seq Scan on t1  (cost=0.00..185288.50 rows=3761080 width=4) (actual time=0.085..949.714 rows=99999 loops=1)
+   Filter: (i < 100000)
+   Rows Removed by Filter: 9900001
+ Planning time: 1.389 ms
+ Execution time: 1022.064 ms
+(5 lignes)
+```
+
+En version 11 :
+```sql
+
+postgres@v11=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW vue_t1 AS SELECT * FROM t1 WHERE i < 100000;
+                                                       QUERY PLAN                                                        
+-------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..106811.71 rows=94805 width=4) (actual time=0.943..318.016 rows=99999 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   ->  Parallel Seq Scan on t1  (cost=0.00..96331.21 rows=39502 width=4) (actual time=0.084..296.022 rows=33333 loops=3)
+         Filter: (i < 100000)
+         Rows Removed by Filter: 3300000
+ Planning Time: 0.240 ms
+ Execution Time: 397.267 ms
+(8 lignes)
+```
 
 </div>
 
