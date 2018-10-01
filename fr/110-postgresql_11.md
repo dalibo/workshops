@@ -610,7 +610,7 @@ En version 11, PostgreSQL rend la chose transparente.
 ### Partition par défaut
 <div class="slide-content">
 
-  * Pour les données n'appartenant à aucune autre partition : \
+  * Pour les données n'appartenant à aucune autre partition :  
   `CREATE TABLE livres_default PARTITION OF livres DEFAULT;`
 
 </div>
