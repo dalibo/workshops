@@ -4094,21 +4094,22 @@ l'outil `pg_dumpall`. Ceci dans les version 10 et 11 :
 /usr/lib/postgresql/10/bin/pg_dumpall -p5433 -g > /tmp/pg_dumpall_v10.sql
 ```
 
-L'ordre SQL `ALTER ROLE alice IN DATABASE droits SET work_mem TO '100MB';`
-apparaît :
+Avec la commande `grep work_mem /tmp/*.sql` vérifiez que l'ordre SQL `ALTER
+ROLE alice IN DATABASE droits SET work_mem TO '100MB';` apparaît :
 
   * en version 10 dans la sortie de `pg_dumpall -g`,
   * en version 11 dans la sortie de `pg_dump --create`.
 
-Les ordres suivants n'apparaîssent que dans `pg_dump --create` en version 11 :
+Avec des commandes `grep` bien choisies, vérifiez que les ordres suivants
+n'apparaîssent que dans `pg_dump --create` en version 11 :
 
   * `ALTER DATABASE droits SET search_path TO 'appli', 'public';`
   * `GRANT CONNECT,TEMPORARY ON DATABASE droits TO bob;`
   * `REVOKE CONNECT,TEMPORARY ON DATABASE droits FROM PUBLIC;`
 
-En mode de sauvegarde logique _custom_, ces ordres seront sauvegardés. Ils ne
-seront cependant restaurés que si l'option `--create` de l'outil `pg_restore`
-est précisé.
+En mode de sauvegarde logique _custom_ et _directory_, ces ordres seront
+sauvegardés. Ils ne seront cependant restaurés que si l'option `--create` de
+l'outil `pg_restore` est précisé.
 
 Suite à ces changements, il est important avant un passage en version 11, de
 vérifier attentivement le fonctionnement de ses scripts de sauvegardes. Et au
