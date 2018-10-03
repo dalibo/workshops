@@ -134,9 +134,9 @@ le 17 septembre.
 La version finale est espérée en octobre 2018.
 
 La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code,
-essentiellement du C avec environ 23 % de commentaires, garants de la
-qualité du code.
-(Source : [openhub.net](https://www.openhub.net/p/postgres/analyses/latest/languages_summary))
+essentiellement du C avec environ 23 % de commentaires, garants de la qualité
+du code (Source :
+[openhub.net](https://www.openhub.net/p/postgres/analyses/latest/languages_summary)).
 
 Son développement est assuré par des centaines de contributeurs répartis partout dans le monde.
 
@@ -145,6 +145,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
 
   * [Vidéo](https://youtu.be/NPRw0oJETGQ)
   * [Slides](https://dali.bo/daniel-verite-communaute-dev-pgday)
+
 </div>
 
 -----
@@ -162,6 +163,7 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
   * Réplication
   * Compatibilité
   * Futur
+
 </div>
 
 <div class="notes">
@@ -214,6 +216,7 @@ La version 11 corrige une bonne partie de ces limites.
 
   * Répartition des données suivant le hachage de la clé de partition
   * Partitions destinées à grandir de manière uniforme
+
 </div>
 
 <div class="notes">
@@ -231,13 +234,15 @@ archiver ou supprimer des données. Ce n'est pas le but du partitionnement
 par hachage qui est plus destiné au cas où il n'y a pas de
 clé de partitionnement naturelle.
 
-Tous les modes de partitionnement permettent d'accélérer les opérations de
-`VACUUM`.  
+Le partitionnement par hachage, comme les autres modes de partitionnement
+permettent d'accélérer les opérations de `VACUUM`.
+
 </div>
 
 -----
 
 ### Exemple de partitionnement par hachage
+
 <div class="slide-content">
 
   * Créer une table partitionnée :  
@@ -246,6 +251,7 @@ Tous les modes de partitionnement permettent d'accélérer les opérations de
   `CREATE TABLE t1_a PARTITION OF t1`  
   `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
+
 </div>
 
 <div class="notes">
@@ -280,7 +286,6 @@ Index :
 Partitions: t1_a FOR VALUES WITH (modulus 3, remainder 0),
             t1_b FOR VALUES WITH (modulus 3, remainder 1),
             t1_c FOR VALUES WITH (modulus 3, remainder 2)
-
 ```
 
 Pour trier les données dans la bonne colonne, la classe d'opérateur par hachage
@@ -329,18 +334,20 @@ v11=# SELECT * FROM t1_c limit 10 ;
  22
  23
  24
-
 ```
 
 Il n'existe pas de commande permettant d'étendre automatiquement le nombre de
-partitions d'une table partitionnée par hachage. 
-Cependant, la [documentation officielle](https://docs.postgresql.fr/11/sql-createtable.html) dit ceci : 
-« il n'est pas obligatoire que chaque partition ait le même diviseur, juste que chaque diviseur apparaissant dans une table partitionnée par hachage soit un facteur du diviseur immédiatement supérieur. Cela permet d'augmenter le nombre de partitions de manière incrémentale sans avoir besoin de déplacer toutes les données d'un coup. »
+partitions d'une table partitionnée par hachage.  Cependant, la [documentation
+officielle](https://docs.postgresql.fr/11/sql-createtable.html) dit ceci : « il
+n'est pas obligatoire que chaque partition ait le même diviseur, juste que
+chaque diviseur apparaissant dans une table partitionnée par hachage soit un
+facteur du diviseur immédiatement supérieur. Cela permet d'augmenter le nombre
+de partitions de manière incrémentale sans avoir besoin de déplacer toutes les
+données d'un coup. »
 
-On peut donc contourner en
-détachant une partition et créant des « sous-partitions » (en changeant le diviseur)
-de cette partition et réinsérer les données de la table détachée dans la table
-mère.
+On peut donc contourner en détachant une partition et créant des «
+sous-partitions » (en changeant le diviseur) de cette partition et réinsérer
+les données de la table détachée dans la table mère.
 
 ```sql
 v11=# BEGIN;
@@ -377,12 +384,10 @@ Partitions: t1_aa FOR VALUES WITH (modulus 6, remainder 0),
             t1_ab FOR VALUES WITH (modulus 6, remainder 3),
             t1_b FOR VALUES WITH (modulus 3, remainder 1),
             t1_c FOR VALUES WITH (modulus 3, remainder 2)
-
 ```
 
 Toutes les lignes de la table recoupée `t1_a` ont bien été insérées dans les 2
 nouvelles partitions `t1_aa` et `t1_ab`.
-
 
 </div>
 
@@ -400,6 +405,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 <div class="notes">
 
 Soit la table partitionnée par intervalles :
+
 ```sql
 CREATE TABLE livres (titre text, parution timestamp with time zone)
   PARTITION BY RANGE (titre);
@@ -409,6 +415,7 @@ CREATE TABLE livres_m_z PARTITION OF livres FOR VALUES FROM ('m') TO ('zzz');
 
 En version 10, il n'était pas possible de créer un index sur une table
 partitionnée :
+
 ```sql
 v10=# CREATE INDEX ON livres (titre);
 ERROR:  cannot create index on partitioned table "livres"
@@ -416,6 +423,7 @@ ERROR:  cannot create index on partitioned table "livres"
 
 En version 11, les index apparaissent sur la table partitionnée mais sont bien
 créés sur chaque partition :
+
 ```sql
 v11=# CREATE INDEX ON livres (titre);
 CREATE INDEX
@@ -442,6 +450,7 @@ Index :
 ```
 
 Si on crée une nouvelle partition, l'index sera créé automatiquement :
+
 ```sql
 v11=# CREATE TABLE livres_0_9 PARTITION OF livres FOR VALUES FROM ('0') TO ('a');
 CREATE TABLE
@@ -469,6 +478,7 @@ cela fonctionne avec toute colonne.
   * Support des index `UNIQUE`
   * Permet la création de clés primaires
   * Uniquement si l'index comprend la clé de partition
+
 </div>
 
 <div class="notes">
@@ -476,6 +486,7 @@ cela fonctionne avec toute colonne.
 La version 11 offre la possibilité de créer des index sur des tables
 partitionnées. Si l'index contient la clé de partition, il est possible de
 créer un index unique :
+
 ```sql
 v11=# CREATE UNIQUE INDEX ON livres (titre);
 CREATE INDEX
@@ -492,6 +503,7 @@ Nombre de partitions : 3 (utilisez \d+ pour les lister)
 ```
 
 Cela n'est pas possible sur des colonnes en dehors de la clé de partition :
+
 ```sql
 v11=# CREATE UNIQUE INDEX ON livres (parution);
 ERROR:  insufficient columns in UNIQUE constraint definition
@@ -501,6 +513,7 @@ DÉTAIL : UNIQUE constraint on table "livres" lacks column "titre" which is part
 
 Cette nouvelle fonctionnalité permet la création de clés primaires sur la clé
 de partition :
+
 ```sql
 v11=# CREATE TABLE livres_primary_key (
     titre text PRIMARY KEY, parution timestamp with time zone)
@@ -534,6 +547,7 @@ Number of partitions: 0
 <div class="notes">
 
 En version 10 les clés étrangères ne sont pas supportées dans une partition :
+
 ```sql
 v10=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
@@ -545,8 +559,9 @@ LIGNE 2 :                      auteur text REFERENCES auteurs(nom))
                                            ^
 ```
 
-La version 11 supporte les clés étrangères sur les partitions. Il faut bien sûr une
-contrainte :
+La version 11 supporte les clés étrangères sur les partitions. Il faut bien sûr
+une contrainte :
+
 ```sql
 v11=# CREATE TABLE auteurs (nom text PRIMARY KEY);
 CREATE TABLE
@@ -675,6 +690,7 @@ COMMIT
   * Amélioration de l'algorithme d'élagage
   * `enable_partition_pruning` 
   * Élagage dynamique des partitions, à l'exécution
+
 </div>
 
 <div class="notes">
@@ -711,10 +727,10 @@ SELECT md5(i::text)::text, now() - i*'1 week'::interval
 FROM generate_series(1,100000) i;
 ```
 
-Nous allons rechercher tous les livres avec des titres commençant par les lettres `a`
-à `c`. On va cependant émuler le cas où le deuxième paramètre provient d'une
-sous-requête. Si on désactive l'élagage des partitions, on obtient un parcours
-de toutes les partitions :
+Nous allons rechercher tous les livres avec des titres commençant par les
+lettres `a` à `c`. On va cependant émuler le cas où le deuxième paramètre
+provient d'une sous-requête. Si on désactive l'élagage des partitions, on
+obtient un parcours de toutes les partitions :
 
 ```sql
 v11=# SET enable_partition_pruning = off;
@@ -738,7 +754,7 @@ SELECT * FROM livres WHERE titre BETWEEN 'a' AND (SELECT 'c');
 Lorsque l'élagage est activé, le moteur détecte qu'il n'a pas besoin de
 parcourir la partition `livres_0_9`, et ce dès la phase de planification, et
 sans qu'il y ait besoin d'un index sur la clé, puisque que la valeur minimum
-'a' est en clair dans la requête.
+'a' est en clair dans la requête.  
 Par contre le planificateur prévoit de parcourir `livres_m_z` car il n'est pas
 immédiat pour lui que l'on s'arrêtera à 'c' :
 
@@ -780,16 +796,15 @@ SELECT * FROM livres l WHERE titre BETWEEN 'a' and (select 'c');
 ```
 
 Nous constatons que lors de l'exécution, le parcours de la partition
-`livres_m_z` prévu par le planificateur est annulé :
-`never executed`.
+`livres_m_z` prévu par le planificateur est annulé : `never executed`.
 
 Cet élagage dynamique pourra être effectué sur toute expression stable. Par
-exemple, un appel à une fonction _stable_ ou _immutable_ (donc une expression
-constante, un calcul, la fonction `now()`, mais pas la fonction `random()` par exemple).
+exemple, un appel à une fonction _stable_ ou _immutable_, donc une expression
+constante, un calcul, la fonction `now()`, mais pas la fonction `random()`.
 
-L'élagage dynamique est également utilisable dans les instructions préparées et les
-jointures en _Nested Loops_ comem décrit dans
-[ce billet de blog de Thomas Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
+L'élagage dynamique est également utilisable dans les instructions préparées et
+les jointures en _Nested Loops_ comme décrit dans [ce billet de blog de Thomas
+Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
 
 </div>
 
@@ -801,18 +816,21 @@ jointures en _Nested Loops_ comem décrit dans
   * Clause `INSERT ON CONFLICT`
   * _Partition-Wise Aggregate_ (par défaut : `off`)
   * `FOR EACH ROW trigger`
+
 </div>
 
 <div class="notes">
 
 En version 10, la clause `ON CONFLICT` n'était pas supportée sur le
 partitionnement :
+
 ```sql
 v10=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 ERROR:  ON CONFLICT clause is not supported with partitioned tables
 ```
 
 En version 11 la clause fonctionne :
+
 ```sql
 v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 INSERT 0 1
@@ -947,7 +965,8 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 
 -----
 
-### JIT
+### JIT : la compilation à la volée
+
 <div class="slide-content">
 
   * Compilation _Just In Time_ des requêtes
@@ -1016,10 +1035,9 @@ La documentation officielle est assez accessible :
 
 -----
 
-### JIT
-<div class="slide-content">
+### JIT : qu'est-ce qui compilé ?
 
- Qu'est-ce qui compilé ?
+<div class="slide-content">
 
   * _Tuple deforming_
   * Évaluation d'expressions :
@@ -1054,10 +1072,9 @@ par l'auteur principal du JIT, Andres Freund.
 
 -----
 
-### JIT
+### JIT : algorithme « _naïf_ »
 
 <div class="slide-content">
-  Algorithme « naïf » :
 
   * `jit` (défaut : `off`)
   * `jit_above_cost` (défaut : 100 000)
@@ -1097,11 +1114,9 @@ requêtes.
 
 -----
 
-### JIT
+### Exemple de plan d'exécution avec JIT
 
 <div class="slide-content">
-
-  Exemple de JIT en fin de plan d'exécution :
 
 ```
  Planning Time: 0.553 ms
@@ -1127,26 +1142,27 @@ fin, des informations suivantes :
   * les temps de génération, d'inclusion des fonctions, d'optimisation du code
 compilé...
 
-Dans l'exemple ci-dessus, on peut constater que ces coûts ne sont pas négligeables
-par rapport au temps total. Il reste à voir si ce temps perdu est récupéré sur
-le temps d'exécution de la requête, ce qui en pratique n'a rien d'évident.
+Dans l'exemple ci-dessus, on peut constater que ces coûts ne sont pas
+négligeables par rapport au temps total. Il reste à voir si ce temps perdu est
+récupéré sur le temps d'exécution de la requête, ce qui en pratique n'a rien
+d'évident.
 
 Sans JIT la durée de la requête était d'environ 33 s.
+
 </div>
 
 -----
 
-### JIT
+### Quand le JIT est-il utile ?
 
 <div class="slide-content">
-
-  Quand le JIT est-il utile ?
 
   * Pas de limitation par les I/O
   * Requêtes complexes (calculs, agrégats, appels de fonctions...)
   * Beaucoup de lignes
   * Assez longues pour « rentabiliser » le JIT
   * Analytiques, pas ERP
+
 </div>
 
 <div class="notes">
@@ -1167,23 +1183,23 @@ augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
 
 Documentation officielle :
 <https://docs.postgresql.fr/11/jit-decision.html>
-</div>
 
+</div>
 
 -----
 
-### Parallélisme
+### Parallélisme : nouvelles améliorations
 
 <div class="slide-content">
-
-**Améliorations du parallélisme**
 
   * Nœuds Append (`UNION ALL`)
   * Jointures type Hash
   * `CREATE TABLE AS SELECT...`
   * `CREATE MATERIALIZED VIEW`
   * `SELECT INTO`
-  * `CREATE INDEX` (`max_parallel_maintenance_workers`)
+  * `CREATE INDEX`
+    * nouveau paramètre `max_parallel_maintenance_workers`
+
 </div>
 
 <div class="notes">
@@ -1193,10 +1209,13 @@ certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
 uniquement. La version 10 avait étendu à d'autres nœuds.
 
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
-de type _Append_, qui servent aux `UNION ALL` notamment :
+de type _Append_, qui servent aux `UNION ALL` notamment.
+
+**Jointure type _Hash_**
 
 Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
-hachage). Soit les tables suivantes :
+hachage).  
+Soit les tables suivantes :
 
 ```sql
 CREATE TABLE a AS SELECT i FROM generate_series(1,10000000) i ;
@@ -1208,6 +1227,7 @@ SET max_parallel_workers_per_gather TO 2;
 ```
 
 Dans la version 10, le _hash join_ est déjà parallélisé :
+
 ```sql
 v10=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
         WHERE a.i BETWEEN 500000 AND 900000;
@@ -1249,10 +1269,12 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 L'auteur de cette optimisation a écrit un article assez complet sur le sujet :
 <https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
 
+**Création d'index**
+
 La création d'index peut à présent être parallélisée, ce qui va permettre de
 gros gains de temps dans certains cas. La parallélisation est activée par
 défaut et est contrôlée par un nouveau paramètre,
-`max_parallel_maintenance_workers` (défaut : 2) et non l'habituel
+`max_parallel_maintenance_workers`, par défaut à 2, et non l'habituel
 `max_parallel_workers_per_gather`.
 
 ```sql
@@ -1394,16 +1416,17 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 </div>
 
 <div class="notes">
-PostgreSQL 11 ajoute de nouveaux rôles de sécurité permettant d'affiner les
-permissions des utilisateurs. Ces nouveaux rôle pourront notamment être
-utiles pour l'import ou l'export de fichier de données situés **sur le serveur**
-avec l'ordre `COPY`.
-(Rappelons que des fichiers situés sur un poste **client** peuvent être chargés
-depuis psql avec `\COPY`, comme le rappellent les messages d'erreurs ci-dessous.)
 
-Nous voulons charger le fichier `t1.csv` :
+PostgreSQL 11 ajoute de nouveaux rôles de sécurité permettant d'affiner les
+permissions des utilisateurs. Ces nouveaux rôle pourront notamment être utiles
+pour l'import ou l'export de fichier de données situés **sur le serveur** avec
+l'ordre `COPY`.  (Rappelons que des fichiers situés sur un poste **client**
+peuvent être chargés depuis psql avec `\COPY`, comme le rappellent les messages
+d'erreurs ci-dessous.)
+
+Nous voulons charger le fichier `t_read.csv` :
 ```sql
-$ cat /tmp/t1.csv
+$ cat /tmp/t_read.csv
 1
 2
 3
@@ -1420,17 +1443,23 @@ En version 10 il était nécessaire d'être super-utilisateur pour pouvoir impor
 les données d'une table depuis un fichier externe.
 
 Création d'un utilisateur standard :
+
 ```sql
 postgres@v10=# CREATE USER user_r;
 CREATE ROLE
 ```
+
 Création de la table qui récupérera les données :
+
 ```sql
-user_r@v10=> CREATE TABLE t1(data int);
+user_r@v10=> CREATE TABLE t_read(data int);
 ```
-Avec l'utilisateur standard l'import de données depuis un fichier externe retourne l'erreur suivante :
+
+Avec l'utilisateur standard l'import de données depuis un fichier externe
+retourne l'erreur suivante :
+
 ```sql
-user_r@v10=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+user_r@v10=> COPY t_read FROM '/tmp/t_read.csv' CSV ;
 ERROR:  must be superuser to COPY to or from a file
 HINT : Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone.
 ```
@@ -1449,16 +1478,16 @@ GRANT ROLE
 
 Import des données depuis un fichier externe csv :
 ```sql
-user_r@v11=> CREATE TABLE t1(data int);
+user_r@v11=> CREATE TABLE t_read(data int);
 CREATE TABLE
 
-user_r@v11=> COPY t1 FROM '/tmp/t1.csv' CSV ;
+user_r@v11=> COPY t_read FROM '/tmp/t_read.csv' CSV ;
 COPY 10
 ```
 
-Vérification des données sur la table t1;
+Vérification des données sur la table t_read;
 ```sql
-user_r@v11=> select * from t1;
+user_r@v11=> select * from t_read;
  data
 ------
     1
@@ -1477,34 +1506,39 @@ Par la suite, si l'utilisateur tente d'envoyer les données d'une table vers un
 fichier externe, le message suivant apparaît :
 
 ```sql
-user_r@v11=> COPY t1 TO '/tmp/t1.csv' CSV ;
+user_r@v11=> COPY t_read TO '/tmp/t_read.csv' CSV ;
 ERROR:  must be superuser or a member of the pg_write_server_files role to
-															COPY to a file
+        COPY to a file
 ASTUCE : Anyone can COPY to stdout or from stdin. psql's \copy command
-													also works for anyone.
+         also works for anyone.
 ```
 
 Le rôle `pg_write_server_file` va permettre d'envoyer les données les données
-d'une table vers un fichier externe :
+d'une table vers un fichier externe.
 
 Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` :
+
 ```sql
 postgres@v11=# CREATE USER user_w;
 CREATE ROLE
 postgres@v11=# GRANT pg_write_server_files TO user_w;
 GRANT ROLE
 ```
-Création de la table `t2` (l'utilisateur doit être le propriétaire de la table) :
+
+Création de la table `t_write` (l'utilisateur doit être le propriétaire de la
+table) :
+
 ```sql
-user_w@v11=> CREATE TABLE t2(data int);
+user_w@v11=> CREATE TABLE t_write(data int);
 CREATE TABLE
-user_w@v11=> INSERT INTO t2 SELECT * from generate_series(1,10);
-INSERT 0 10
+user_w@v11=> INSERT INTO t_write SELECT * from generate_series(1,5);
+INSERT 0 5
 ```
 
-Contenu de la table `t2` :
+Contenu de la table `t_write` :
+
 ```sql
-user_w@v11=> select * from t2;
+user_w@v11=> select * from t_write;
  data
 ------
     1
@@ -1512,32 +1546,24 @@ user_w@v11=> select * from t2;
     3
     4
     5
-    6
-    7
-    8
-    9
-   10
 ```
 
 Export des données de la table dans un fichier CSV :
 
 ```sql
-user_w@v11=> COPY t2 TO '/tmp/t2.csv' CSV ;
+user_w@v11=> COPY t_write TO '/tmp/t_write.csv' CSV ;
 COPY 10
 ```
+
 Vérification des données dans le fichier :
+
 ```sql
-$ cat /tmp/t2.csv
+$ cat /tmp/t_write.csv
 1
 2
 3
 4
 5
-6
-7
-8
-9
-10
 ```
 
 </div>
@@ -1551,14 +1577,15 @@ $ cat /tmp/t2.csv
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
     * v10 : 2 fonctions de vérification de l'intégrité des index
-	  * v11 : vérification de la cohérence avec la table (probabiliste)
+	* v11 : vérification de la cohérence avec la table (probabiliste)
+
 </div>
 
 <div class="notes">
 
 La commande `pg_verify_checksums` vérifie les sommes de contrôles sur les bases
-de données à froid. L'instance doit être arrêtée proprement avant lancer la
-commande.
+de données à froid. L'instance doit être arrêtée proprement avant le lancement
+de la commande.
 
 Les sommes de contrôles, si elles sont là,
 sont à présent vérifiées par défaut sur `pg_basebackup`. En cas
@@ -1604,14 +1631,13 @@ plus simple et facile, mais tout dépend de la cause du problème.
 Soit `unetable_pkey`, un index de 10 Go sur un entier :
 
 ```sql
-postgres=# CREATE EXTENSION amcheck ;
+v11=# CREATE EXTENSION amcheck ;
 CREATE EXTENSION
 
-postgres=# SELECT bt_index_check('unetable_pkey');
+v11=# SELECT bt_index_check('unetable_pkey');
 Durée : 63753,257 ms (01:03,753)
 
-v11=# EXPLAIN (ANALYZE, VERBOSE, BUFFERS)
-  SELECT bt_index_check('unetable_pkey', true);
+v11=# SELECT bt_index_check('unetable_pkey', true);
 Durée : 234200,678 ms (03:54,201)
 ```
 
@@ -1776,6 +1802,7 @@ Les mots clés sont différents suivants les langages :
   * PL/Tcl : `commit` et `rollback`
 
 Voici un exemple avec `COMMIT` ou `ROLLBACK` suivant que le nombre est pair ou impair :
+
 ```sql
 v11=# CREATE TABLE test1 (a int) ;
 CREATE TABLE
@@ -1813,6 +1840,7 @@ v11=# SELECT * FROM test1;
 Noter qu'il n'y a pas de `BEGIN` explicite dans la gestion des transactions.
 
 On ne peut pas imbriquer des transactions :
+
 ```sql
 v11=# BEGIN ; CALL transaction_test1() ;
 BEGIN
@@ -1821,18 +1849,20 @@ ERROR:  invalid transaction termination
 CONTEXTE : PL/pgSQL function transaction_test1() line 6 at COMMIT
 ```
 
-On ne peut pas utiliser en même une clause `EXCEPTION` et le contrôle transactionnel :
+On ne peut pas utiliser en même temps une clause `EXCEPTION` et le contrôle
+transactionnel :
+
 ```sql
 v11=# DO LANGUAGE plpgsql $$
-      BEGIN
         BEGIN
+          BEGIN
           INSERT INTO test1 (a) VALUES (1);
           COMMIT;
-          INSERT INTO test1 (a) VALUES (1/0);
-          COMMIT;
+        INSERT INTO test1 (a) VALUES (1/0);
+        COMMIT;
         EXCEPTION
-          WHEN division_by_zero THEN
-             RAISE NOTICE 'caught division_by_zero';
+        WHEN division_by_zero THEN
+           RAISE NOTICE 'caught division_by_zero';
         END;
       END;
       $$;
@@ -1852,6 +1882,7 @@ Pour plus de détails, par exemple sur les curseurs :
 
   * Ajout d'une clause `CONSTANT` à une variable
   * Contrainte `NOT NULL` à une variable
+
 </div>
 
 <div class="notes">
@@ -1869,6 +1900,7 @@ Pour plus de détails, par exemple sur les curseurs :
     * en PL/Perl : tableau et _hash_
     * en PL/Python : `dict` et `list`
   * Conversion JSON en tsvector pour la _Full text Search_
+
 </div>
 
 <div class="notes">
@@ -1877,8 +1909,8 @@ Pour plus de détails, par exemple sur les curseurs :
 
 **jsonb <=> SQL**
 
-Il existe 4 types primitifs en JSON. Voici le tableau de correspondance avec les types PostgreSQL :
-
+Il existe 4 types primitifs en JSON. Voici le tableau de correspondance avec
+les types PostgreSQL :
 
 | Type Primitif JSON | Type PostgreSQL |
 |:------------------:|:---------------:|
@@ -1887,7 +1919,9 @@ Il existe 4 types primitifs en JSON. Voici le tableau de correspondance avec les
 |  boolean           |  boolean        |
 |  null              |  (aucun)        |
 
-S'il était déjà possible de convertir des données PostgreSQL natives vers le type jsonb, l'inverse n'était possible que vers le type text :
+S'il était déjà possible de convertir des données PostgreSQL natives vers le
+type jsonb, l'inverse n'était possible que vers le type text :
+
 ```sql
 v10=# SELECT 'true'::jsonb::boolean;
 ERROR:  cannot cast type jsonb to boolean
@@ -2132,8 +2166,8 @@ VACUUM t1, t2
 <div class="slide-content">
 
   * `SELECT ... FROM ... \gdesc`
-    * types des colonnes
     * ou `\gdesc` seul après exécution
+    * retourne le type des colonnes
   * Variables de suivi des erreurs de requêtes
     * `ERROR`, `SQLSTATE` et `ROW_COUNT`
   * `exit` et `quit` à la place de `\q` pour quitter psql
@@ -2142,11 +2176,14 @@ VACUUM t1, t2
 </div>
 <div class="notes">
 
-PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes psql.
+PostgreSQL 11 apporte quelques améliorations notables au niveau des commandes
+psql.
 
-La commande `\gdesc` retourne le nom et le type des colonnes de la dernière requête exécutée.
+La commande `\gdesc` retourne le nom et le type des colonnes de la dernière
+requête exécutée.
+
 ```sql
-v11=# select * from t1;
+v11=# select * from t_write;
  c1
 ----
   1
@@ -2154,30 +2191,28 @@ v11=# select * from t1;
   3
   4
   5
-  6
-  7
-  8
-  9
- 10
-(10 rows)
+(5 rows)
 
 v11=# \gdesc
- Column |  Type   
+ Column |  Type
 --------+---------
  c1     | integer
 (1 row)
 ```
 
 On peut aussi tester les types retournés par une requête sans l'exécuter :
+
 ```sql
 v11=# select 3.0/2 as ratio, now() as maintenant \gdesc
-   Column   |           Type           
+   Column   |           Type
 ------------+--------------------------
  ratio      | numeric
  maintenant | timestamp with time zone
 ```
 
-Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de la dernière requête exécutée.
+Les variables `ERROR`, `SQLSTATE` et `ROW_COUNT` permettent de suivre l'état de
+la dernière requête exécutée.
+
 ```sql
 v11=# \d t1
                  Table "public.t1"
@@ -2189,25 +2224,34 @@ v11=# select c2 from t1;
 ERROR:  column "c2" does not exist
 ```
 
-La variable `ERROR` renvoie une valeur booléenne précisant si la dernière requête exécutée a bien reçu un message d'erreur.
+La variable `ERROR` renvoie une valeur booléenne précisant si la dernière
+requête exécutée a bien reçu un message d'erreur :
+
 ```sql
 v11=# \echo :ERROR
 true
 ```
 
-La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas d'erreur.
+La variable `SQLSTATE` retourne le code de l'erreur ou 00000 s'il n'y a pas
+d'erreur :
+
 ```sql
 v11=# \echo :SQLSTATE
 42703
 ```
 
-La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de l’exécution de la dernière requête.
+La variable `ROW_COUNT` renvoie le nombre de lignes retournées lors de
+l’exécution de la dernière requête :
+
 ```sql
 v11=# \echo :ROW_COUNT
 0
 ```
 
-Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui renvoient le dernier message d'erreur retourné et le code de la dernière erreur.
+Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui
+renvoient le dernier message d'erreur retourné et le code de la dernière
+erreur.
+
 ```sql
 v11=# \echo :LAST_ERROR_MESSAGE
 column "c2" does not exist
@@ -2216,9 +2260,11 @@ v11=# \echo :LAST_ERROR_SQLSTATE
 42703
 ```
 
-Les commandes `exit` et `quit` ont été ajoutées pour quitter psql afin que cela soit plus intuitif pour les nouveaux utilisateurs.
+Les commandes `exit` et `quit` ont été ajoutées pour quitter psql afin que cela
+soit plus intuitif pour les nouveaux utilisateurs.
 
-Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent être utilisées même si le serveur reste dans une version antérieure.
+Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent être
+utilisées même si le serveur reste dans une version antérieure.
 
 </div>
 
@@ -2232,19 +2278,28 @@ Toutes ces fonctionnalités sont liées à l'outil client psql, donc peuvent êt
   * option `--allow-group-access` :
     * Droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance.
     * Droit sur les fichiers : `drwxr-x---`
+
 </div>
 
 
 <div class="notes">
 
-L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la taille en fonction de l'activité, principalement pour les instances générant beaucoup de journaux, surtout s'il faut les archiver.
+L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de
+l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut
+à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la
+taille en fonction de l'activité, principalement pour les instances générant
+beaucoup de journaux, surtout s'il faut les archiver.
 
 Exemple pour des WAL de 1 Go  :
+
 ```bash
 initdb -D /var/lib/postgresql/11/workshop --wal-segsize=1024
 ```
 
-L'option `--allow-group-access` autorise les droits de lecture et d’exécution au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de lecture à un outil de sauvegarde.
+L'option `--allow-group-access` autorise les droits de lecture et d’exécution
+au groupe auquel appartient l'utilisateur initialisant l'instance. Droit sur
+les fichiers : `drwxr-x---`. Cela peut servir pour ne donner que des droits de
+lecture à un outil de sauvegarde.
 
 </div>
 
@@ -2264,11 +2319,23 @@ L'option `--allow-group-access` autorise les droits de lecture et d’exécution
 </div>
 
 <div class="notes">
-Les permissions par `GRANT` et `REVOKE` et les configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE SET` sont à présent gérées par `pg_dump`  et `pg_restore` et non plus par `pg_dumpall`. `pg_dump -Fp` (format texte) et un `pg_restore` n'appliqueront ces modifications qu'avec l'option `--create`. Vérifiez vos scripts de restauration !
 
-`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage de sortie d'un dump.
+Les permissions par `GRANT` et `REVOKE` sur une base de données et les
+configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE
+SET` sont à présent gérées par `pg_dump` et `pg_restore` et non plus par
+`pg_dumpall`. `pg_dump -Fp` (format texte) et un `pg_restore` n'appliqueront
+ces modifications qu'avec l'option `--create`. Vérifiez vos scripts de
+restauration !
 
-Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permettant de créer directement un slot de réplication. Elle doit donc être utilisée en complément de l'option `--slot`. Le slot de réplication est conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà, la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.  
+`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage
+de sortie d'un dump.
+
+Une nouvelle option `--create-slot` est disponible dans `pg_basebackup`
+permettant de créer directement un slot de réplication. Elle doit donc être
+utilisée en complément de l'option `--slot`. Le slot de réplication est
+conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà,
+la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.
+
 </div>
 
 -----
@@ -2284,8 +2351,8 @@ Une nouvelle option `--create-slot` est disponible dans `pg_basebackup` permetta
 
 <div class="notes">
 
-`pg_rewind` est un outil permettant de reconstruire une instance secondaire qui a
-« décroché » sans la reconstruire complètement, à partir d'un primaire.
+`pg_rewind` est un outil permettant de reconstruire une instance secondaire qui
+a « décroché » sans la reconstruire complètement, à partir d'un primaire.
 
 Quelques fichiers inutiles sont à présent ignorés. La sécurité pour certains
 environnements a été améliorée en interdisant le fonctionnement du binaire sous
@@ -2393,7 +2460,7 @@ en mode FIFO idéal pour ce besoin
 (cf. <https://commitfest.postgresql.org/14/1239/>).
 
 Enfin, les premières migrations majeures utilisant la réplication logique sans
-outil tiers pourront avoir lieu entre des versions 10 et 11.
+outil tiers pourront avoir lieu entre des instances en versions 10 et 11.
 
 </div>
 
@@ -2403,23 +2470,33 @@ outil tiers pourront avoir lieu entre des versions 10 et 11.
 <div class="slide-content">
 
   * Suppression du second checkpoint
+
 </div>
 
 <div class="notes">
 
-Un checkpoint est un « point de vérification » au cours duquel les fichiers de données sont mis à jour pour refléter les informations des journaux de transactions.
+Un checkpoint est un « point de vérification » au cours duquel les fichiers de
+données sont mis à jour pour refléter les informations des journaux de
+transactions.
 
-En version 10, les fichiers de journaux de transactions étaient conservés le temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre de pouvoir revenir au précédent checkpoint au cas où le dernier soit introuvable ou illisible.
+En version 10, les fichiers de journaux de transactions étaient conservés le
+temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint
+étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre
+de pouvoir revenir au précédent checkpoint au cas où le dernier soit
+introuvable ou illisible.
 
 Il a été décidé qu'il n'était finalement pas nécessaire de conserver ce second
-checkpoint et que cela pouvait même être [plus dangereux qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
-La suppression de ce second checkpoint permet aussi de simplifier un peu le code.
+checkpoint et que cela pouvait même être [plus dangereux
+qu'utile](https://www.postgresql.org/message-id/flat/20160201235854.GO8743%40awork2.anarazel.de).
+La suppression de ce second checkpoint permet aussi de simplifier un peu le
+code.
 
-En conséquence, à `max_wal_size` égal, on va ainsi
-réduire d'environ 33% la fréquence des checkpoints, et on augmentera le temps
-pour terminer la récupération après un crash.
+En conséquence, à `max_wal_size` égal, on va ainsi réduire d'environ 33% la
+fréquence des checkpoints, et on augmentera le temps pour terminer la
+récupération après un crash.
 
-Michael Paquier a écrit un [petit article sur le sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
+Michael Paquier a écrit un [petit article sur le
+sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
 
 </div>
 
@@ -2493,14 +2570,14 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 
 <div class="slide-content">
 
-  * Développement de la version 12 entamé été 2017
+  * Développement de la version 12 entamé durant l'été 2018
   * ... quelques améliorations déjà présentes :
     * Amélioration du partitionnement
     * Amélioration du parallélisme
     * Amélioration du JIT
-    * Index couvrants sur GIST
+    * Index couvrants sur GiST
     * Requêtes parallèles sur transactions `SERIALIZABLE`
-    * Clause SQL MERGE
+    * Clause `SQL MERGE`
     * Filtrage des lignes pour la réplication logique
     * Support de GnuTLS
     * `ANALYZE nom_index`
@@ -2513,8 +2590,8 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
-Les _commit fests_ nous laissent entrevoir une continuité dans l'évolution des thèmes principaux
-suivants : parallélisme, partitionnement et JIT.
+Les _commit fests_ nous laissent entrevoir une continuité dans l'évolution des
+thèmes principaux suivants : parallélisme, partitionnement et JIT.
 
 Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
 modifications validées pour chaque commit fest :
@@ -2526,11 +2603,13 @@ modifications validées pour chaque commit fest :
   * [mars 2019](https://commitfest.postgresql.org/22/?status=4)
 
 Quelques sources :
-* [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
-* [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
-* [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
 
-Tout cela est encore en développement et test, rien ne garantit que ces améliorations seront présentes dans la version finale de PostgreSQL 12.
+  * [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
+  * [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
+  * [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+
+Tout cela est encore en développement et test, rien ne garantit que ces
+améliorations seront présentes dans la version finale de PostgreSQL 12.
 
 </div>
 
@@ -3963,7 +4042,7 @@ L'optimiseur utilise alors un scan séquentiel classique :
 
 ```sql
 v11=# EXPLAIN ANALYSE
-  CREATE TABLE numbers2 AS SELECT * FROM numbers WHERE i < 10000;
+  CREATE TABLE numbers2_bis AS SELECT * FROM numbers WHERE i < 10000;
                          QUERY PLAN
 ---------------------------------------------------------------------
  Seq Scan on numbers  (cost=0.00..169247.71 rows=9472 width=4)
@@ -3986,33 +4065,35 @@ v10=# EXPLAIN ANALYSE
   CREATE MATERIALIZED VIEW view_numbers AS SELECT * FROM numbers WHERE i < 10000;
                          QUERY PLAN
 ---------------------------------------------------------------------
- Seq Scan on numbers  (cost=0.00..169247.71 rows=8279 width=4)
-                      (actual time=0.057..583.214 rows=9999 loops=1)
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=11751 width=4)
+                      (actual time=0.103..745.242 rows=9999 loops=1)
    Filter: (i < 10000)
    Rows Removed by Filter: 9990001
- Planning time: 0.106 ms
- Execution time: 598.022 ms
+ Planning time: 0.061 ms
+ Execution time: 1969.551 ms
 (5 lignes)
 ```
 
 En version 11 :
 
 ```sql
+v11=# SET max_parallel_workers_per_gather TO 2;
+SET
 v11=# EXPLAIN ANALYSE
   CREATE MATERIALIZED VIEW view_numbers AS SELECT * FROM numbers WHERE i < 10000;
                          QUERY PLAN
----------------------------------------------------------
- Gather  (cost=1000.00..119724.44 rows=9472 width=4)
-         (actual time=2.494..302.414 rows=9999 loops=1)
-   Workers Planned: 1
-   Workers Launched: 1
+-----------------------------------------------------------
+ Gather  (cost=1000.00..98303.61 rows=9724 width=4)
+         (actual time=704.848..815.472 rows=9999 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
    ->  Parallel Seq Scan on numbers
-          (cost=0.00..117777.24 rows=5572 width=4)
-		  (actual time=0.191..291.289 rows=5000 loops=2)
+          (cost=0.00..96331.21 rows=4052 width=4)
+		  (actual time=695.337..798.511 rows=3333 loops=3)
          Filter: (i < 10000)
-         Rows Removed by Filter: 4995000
- Planning Time: 1.303 ms
- Execution Time: 335.058 ms
+         Rows Removed by Filter: 3330000
+ Planning Time: 0.141 ms
+ Execution Time: 829.369 ms
 (8 lignes)
 ```
 
@@ -4024,12 +4105,12 @@ En version 10 :
 v10=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
                          QUERY PLAN
 ---------------------------------------------------------------------
- Seq Scan on numbers  (cost=0.00..169247.71 rows=8279 width=4)
-                      (actual time=0.243..583.370 rows=9999 loops=1)
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=11751 width=4)
+                      (actual time=0.154..790.222 rows=9999 loops=1)
    Filter: (i < 10000)
    Rows Removed by Filter: 9990001
- Planning time: 1.209 ms
- Execution time: 611.817 ms
+ Planning time: 0.108 ms
+ Execution time: 817.480 ms
 (5 lignes)
 ```
 
@@ -4039,17 +4120,17 @@ En version 11 :
 v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
                          QUERY PLAN
 ---------------------------------------------------------
- Gather  (cost=1000.00..119724.44 rows=9472 width=4)
-         (actual time=1.967..310.618 rows=9999 loops=1)
-   Workers Planned: 1
-   Workers Launched: 1
+ Gather  (cost=1000.00..98303.61 rows=9724 width=4)
+         (actual time=0.683..433.006 rows=9999 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
    ->  Parallel Seq Scan on numbers
-          (cost=0.00..117777.24 rows=5572 width=4)
-          (actual time=0.123..298.739 rows=5000 loops=2)
+          (cost=0.00..96331.21 rows=4052 width=4)
+          (actual time=0.047..429.656 rows=3333 loops=3)
          Filter: (i < 10000)
-         Rows Removed by Filter: 4995000
- Planning Time: 1.253 ms
- Execution Time: 339.003 ms
+         Rows Removed by Filter: 3330000
+ Planning Time: 0.144 ms
+ Execution Time: 446.445 ms
 (8 lignes)
 ```
 
@@ -4097,12 +4178,12 @@ avec et sans l'option `--create` en mode _plain_ puis les objets globaux avec
 l'outil `pg_dumpall`. Ceci dans les version 10 et 11 :
 
 ```bash
-/usr/lib/postgresql/11/bin/pg_dump -d droits -Fp > /tmp/droits_base_v11.sql
-/usr/lib/postgresql/11/bin/pg_dump -d droits -Fp --create > /tmp/droits_create_v11.sql
-/usr/lib/postgresql/11/bin/pg_dumpall -g > /tmp/pg_dumpall_v11.sql
-/usr/lib/postgresql/10/bin/pg_dump -p5433 -d droits -Fp > /tmp/droits_base_v10.sql
-/usr/lib/postgresql/10/bin/pg_dump -p5433 -d droits -Fp --create > /tmp/droits_create_v10.sql
-/usr/lib/postgresql/10/bin/pg_dumpall -p5433 -g > /tmp/pg_dumpall_v10.sql
+/usr/pgsql-11/bin/pg_dump -d droits -Fp > /tmp/droits_base_v11.sql
+/usr/pgsql-11/bin/pg_dump -d droits -Fp --create > /tmp/droits_create_v11.sql
+/usr/pgsql-11/bin/pg_dumpall -g > /tmp/pg_dumpall_v11.sql
+/usr/pgsql-10/bin/pg_dump -p5433 -d droits -Fp > /tmp/droits_base_v10.sql
+/usr/pgsql-10/bin/pg_dump -p5433 -d droits -Fp --create > /tmp/droits_create_v10.sql
+/usr/pgsql-10/bin/pg_dumpall -p5433 -g > /tmp/pg_dumpall_v10.sql
 ```
 
 Avec la commande `grep work_mem /tmp/*.sql` vérifiez que l'ordre SQL `ALTER
