@@ -2872,11 +2872,222 @@ v11=# SELECT * FROM liste_dates_c ;
 
 -----
 
-## Manipulation du partitionnement par hachage
+## Partitionnement par hachage
 
 <div class="notes">
 
-FIXME
+Nous allons manipuler deux tables contenant les mêmes information : une table
+non partitionnée et une table partitionnée par hachage. Nous allons comparer
+les plans d'exécution et les performances entre ces 2 tables.
+
+Les performances vont être très dépendantes de l'infrastructure (disque, CPU),
+du type de données et du nombre de partitions. Si vous souhaitez utiliser les
+tables partitionnées par hachage, il est important de tester l'impact sur
+chaque type d'opération.
+
+Créons les tables `commandes_normale` et `commandes` :
+
+```sql
+CREATE TABLE commandes_normale (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  date_commande timestamp DEFAULT now(),
+  c1 integer, c2 text
+  );
+
+CREATE TABLE commandes (
+  id integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+  date_commande timestamp DEFAULT now(),
+  c1 integer, c2 text
+  ) PARTITION BY HASH (id);
+```
+
+Si nous essayons dès maintenant d'insérer des données dans la table
+partitionnée, nous obtenons l'erreur suivante :
+
+```sql
+v11=# INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+ERROR:  no partition of relation "commandes" found for row
+DÉTAIL : Partition key of the failing row contains (id) = (1).
+```
+
+Nous n'avons pas encore fixé le nombre de partitions. Fixons-le à 5 et créons
+toutes les partitions :
+
+```sql
+CREATE TABLE commandes_0_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 0);
+CREATE TABLE commandes_1_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 1);
+CREATE TABLE commandes_2_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 2);
+CREATE TABLE commandes_3_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 3);
+CREATE TABLE commandes_4_5 PARTITION OF commandes
+  FOR VALUES WITH (modulus 5,remainder 4);
+```
+
+Fixons certains paramètres :
+```sql
+SET jit TO off;
+SET max_parallel_workers TO 0;
+\timing on
+```
+
+Nous allons maintenant pouvoir comparer les performances en insertion :
+
+```sql
+INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+
+INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+```
+
+Insérons d'autres lignes, pour un total de 3 millions par table :
+
+```sql
+INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes_normale (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+INSERT INTO commandes (c1, c2)
+  SELECT i, 'Ligne '||i FROM generate_series(1, 1000000) i;
+```
+
+Remarquons que les tailles des partitions sont quasi identiques :
+
+```sql
+v11=# \d+
+                                  Liste des relations
+ Schéma |           Nom            |   Type   | Propriétaire |   Taille   |
+--------+--------------------------+----------+--------------+------------+
+ public | commandes                | table    | postgres     | 0 bytes    |
+ public | commandes_0_5            | table    | postgres     | 39 MB      |
+ public | commandes_1_5            | table    | postgres     | 39 MB      |
+ public | commandes_2_5            | table    | postgres     | 39 MB      |
+ public | commandes_3_5            | table    | postgres     | 39 MB      |
+ public | commandes_4_5            | table    | postgres     | 39 MB      |
+ public | commandes_id_seq         | séquence | postgres     | 8192 bytes |
+ public | commandes_normale        | table    | postgres     | 193 MB     |
+ public | commandes_normale_id_seq | séquence | postgres     | 8192 bytes |
+```
+
+Le nombre de lignes dans chaque partition n'est cependant pas strictement égal :
+
+```sql
+v11=# SELECT count(*) com1 FROM commandes_0_5;
+ count
+--------
+ 600337
+(1 ligne)
+
+v11=# SELECT count(*) com1 FROM commandes_1_5;
+ count
+--------
+ 600316
+(1 ligne)
+```
+
+Testons ensuite les performances en mise à jour en mettant à jour 15 % des
+lignes :
+
+```sql
+UPDATE commandes SET
+  date_commande=now(),c1=c1+1000000,c2='Ligne '||c1+1000000
+  WHERE random()>0.85;
+
+UPDATE commandes_normale SET
+  date_commande=now(),c1=c1+1000000,c2= 'Ligne '||c1+1000000
+  WHERE random()>0.85;
+```
+
+Effaçons 15 % des lignes :
+```sql
+DELETE FROM commandes WHERE random()>0.85;
+
+DELETE FROM commandes_normale WHERE random()>0.85;
+```
+
+Regardons les plans d'exécution des requêtes précédentes sur la table
+partitionnée :
+
+```sql
+v11=# EXPLAIN (costs OFF) UPDATE commandes SET
+  date_commande=now(),c1=c1+1000000,c2='Ligne '||c1+1000000
+  WHERE random()>0.85;
+                      QUERY PLAN
+-------------------------------------------------------
+ Update on commandes
+   Update on commandes_0_5
+   Update on commandes_1_5
+   Update on commandes_2_5
+   Update on commandes_3_5
+   Update on commandes_4_5
+   ->  Seq Scan on commandes_0_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_1_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_2_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_3_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_4_5
+         Filter: (random() > '0.85'::double precision)
+(16 lignes)
+
+v11=# EXPLAIN (costs OFF) DELETE FROM commandes WHERE random()>0.85;
+                      QUERY PLAN
+-------------------------------------------------------
+ Delete on commandes
+   Delete on commandes_0_5
+   Delete on commandes_1_5
+   Delete on commandes_2_5
+   Delete on commandes_3_5
+   Delete on commandes_4_5
+   ->  Seq Scan on commandes_0_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_1_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_2_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_3_5
+         Filter: (random() > '0.85'::double precision)
+   ->  Seq Scan on commandes_4_5
+         Filter: (random() > '0.85'::double precision)
+(16 lignes)
+```
+
+Ici, nous agissons sur toutes les lignes, il ne peut y avoir d'élagage de
+partition. Cette fonctionnalité est cependant disponible pour les tables
+partitionnées par hachage :
+
+```sql
+v11=# EXPLAIN (costs off) SELECT * FROM commandes WHERE id=400;
+                         QUERY PLAN
+------------------------------------------------------------
+ Append
+   ->  Index Scan using commandes_3_5_pkey on commandes_3_5
+         Index Cond: (id = 400)
+(3 lignes)
+```
+
+Testons les performances du _VACUUM_ :
+
+```sql
+VACUUM commandes;
+
+VACUUM commandes_normale;
+```
+
+L'avantage des tables partitionnées est que l'on pourra paralléliser les _VACUUM_
+sur chaque partition :
+
+```bash
+for i in $( seq 0 4 ) ;do vacuumdb -v -t commandes_${i}_5 v11 & done; wait
+```
 
 </div>
 
