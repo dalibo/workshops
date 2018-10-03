@@ -4083,7 +4083,7 @@ psql -p5433 -f create_db_droits.sql
 
 Nous allons maintenant sauvegarder la base de données avec l'outil `pg_dump`
 avec et sans l'option `--create` en mode _plain_ puis les objets globaux avec
-l'outil g_dumpall`. Ceci dans les version 10 et 11 :
+l'outil `pg_dumpall`. Ceci dans les version 10 et 11 :
 
 ```bash
 /usr/lib/postgresql/11/bin/pg_dump -d droits -Fp > /tmp/droits_base_v11.sql
@@ -4093,9 +4093,6 @@ l'outil g_dumpall`. Ceci dans les version 10 et 11 :
 /usr/lib/postgresql/10/bin/pg_dump -p5433 -d droits -Fp --create > /tmp/droits_create_v10.sql
 /usr/lib/postgresql/10/bin/pg_dumpall -p5433 -g > /tmp/pg_dumpall_v10.sql
 ```
-
-Les différences entre les versions 10 et 11 portent sur les ordres _ALTER
-DATABASE ... SET ..._ et _ALTER ROLE ... IN DATABASE ... SET ..._.
 
 L'ordre SQL `ALTER ROLE alice IN DATABASE droits SET work_mem TO '100MB';`
 apparaît :
