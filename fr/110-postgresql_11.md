@@ -4051,8 +4051,66 @@ v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
 ## Sauvegarde des droits avec `pg_dump`
 
 <div class="notes">
+[Atelier] pg_dumpall, pg_dump , --create
 
-FIXME
+Ce changement de comportement est dangereux et nécessite au moins un exemple dans la doc, sinon un petit TP:
+
+Exemple : ALTER ROLE postgres IN DATABASE postgres SEt work_mem TO '100MB';
+
+    pg_dumpall -g n'affichera plus ces droits
+    pg_dump -Fp ne les affiche qu'avec --create
+    Ils sont contenus dans un pg_dump -Fp par exemple, mais la restauration nécessite un pg_restore --create
+
+Tester aussi avec des GRANT!
+
+```sql
+CREATE DATABASE droits;
+\c droits
+CREATE ROLE alice;
+ALTER DATABASE droits OWNER TO alice;
+ALTER ROLE alice IN DATABASE droits SET work_mem to '100MB';
+CREATE SCHEMA appli;
+ALTER DATABASE droits SET search_path TO appli, public;
+CREATE ROLE bob;
+GRANT ALL ON SCHEMA appli TO bob;
+```
+
+TODO & TEST
+
+```sql
+REVOKE ALL ON DATABASE droits FROM PUBLIC;
+REVOKE ALL ON DATABASE droits FROM "postgres";
+GRANT ALL ON DATABASE droits TO "postgres";
+GRANT CONNECT,TEMPORARY ON DATABASE droits TO PUBLIC;
+GRANT CONNECT ON DATABASE droits TO bob;
+```
+
+
+```bash
+/usr/lib/postgresql/11/bin/pg_dump -d droits -Fp > /tmp/droits_base_v11.sql
+/usr/lib/postgresql/11/bin/pg_dump -d droits -Fp --create > /tmp/droits_create_v11.sql
+/usr/lib/postgresql/11/bin/pg_dumpall -g > /tmp/pg_dumpall_v11.sql
+/usr/lib/postgresql/10/bin/pg_dump -p5433 -d droits -Fp > /tmp/droits_base_v10.sql
+/usr/lib/postgresql/10/bin/pg_dump -p5433 -d droits -Fp --create > /tmp/droits_create_v10.sql
+/usr/lib/postgresql/10/bin/pg_dumpall -p5433 -g > /tmp/pg_dumpall_v10.sql
+```
+
+Les différences entre les versions 10 et 11 portent sur les ordres _ALTER
+DATABASE ... SET ..._ et _ALTER ROLE ... IN DATABASE ... SET ..._.
+
+L'ordre SQL `ALTER ROLE alice IN DATABASE droits SET work_mem TO '100MB';` apparaît :
+
+  * en version 10 dans la sortie de `pg_dumpall -g`,
+  * en version 11 dans la sortie de `pg_dump --create`.
+
+
+```sql
+ALTER DATABASE droits SET search_path TO 'appli', 'public';
+```
+
+N'apparaît que dans `pg_dump --create` en version 11.
+
+
 
 </div>
 
