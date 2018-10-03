@@ -3052,7 +3052,7 @@ L'avantage des tables partitionnées est que l'on pourra paralléliser les _VACU
 sur chaque partition :
 
 ```bash
-for i in $( seq 0 4 ) ;do vacuumdb -t commandes_${i}_5 v11 & done; wait
+for i in $( seq 0 4 ) ;do vacuumdb -v -t commandes_${i}_5 v11 & done; wait
 ```
 
 </div>
