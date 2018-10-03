@@ -4051,40 +4051,39 @@ v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
 ## Sauvegarde des droits avec `pg_dump`
 
 <div class="notes">
-[Atelier] pg_dumpall, pg_dump , --create
 
-Ce changement de comportement est dangereux et nécessite au moins un exemple dans la doc, sinon un petit TP:
+Nous allons tester les évolutions dans les outils de sauvegarde logique
+`pg_dump` et `pg_dumpall`.
 
-Exemple : ALTER ROLE postgres IN DATABASE postgres SEt work_mem TO '100MB';
+Créons une nouvelle base de données, créons 2 utilisateurs avec des droits
+spécifiques. Nous allons tout d'abord créer un fichier avec les ordres SQL puis
+les charger en version 10 et 11 :
 
-    pg_dumpall -g n'affichera plus ces droits
-    pg_dump -Fp ne les affiche qu'avec --create
-    Ils sont contenus dans un pg_dump -Fp par exemple, mais la restauration nécessite un pg_restore --create
-
-Tester aussi avec des GRANT!
-
-```sql
+```bash
+cat  >> create_db_droits.sql <<EOF
 CREATE DATABASE droits;
 \c droits
+REVOKE ALL ON DATABASE droits FROM PUBLIC;
 CREATE ROLE alice;
 ALTER DATABASE droits OWNER TO alice;
 ALTER ROLE alice IN DATABASE droits SET work_mem to '100MB';
 CREATE SCHEMA appli;
 ALTER DATABASE droits SET search_path TO appli, public;
 CREATE ROLE bob;
+GRANT CONNECT,TEMPORARY ON DATABASE droits TO bob;
 GRANT ALL ON SCHEMA appli TO bob;
+ALTER DEFAULT PRIVILEGES IN SCHEMA appli GRANT ALL ON TABLES TO bob;
+EOF
 ```
 
-TODO & TEST
-
-```sql
-REVOKE ALL ON DATABASE droits FROM PUBLIC;
-REVOKE ALL ON DATABASE droits FROM "postgres";
-GRANT ALL ON DATABASE droits TO "postgres";
-GRANT CONNECT,TEMPORARY ON DATABASE droits TO PUBLIC;
-GRANT CONNECT ON DATABASE droits TO bob;
+```bash
+psql -f create_db_droits.sql
+psql -p5433 -f create_db_droits.sql
 ```
 
+Nous allons maintenant sauvegarder la base de données avec l'outil `pg_dump`
+avec et sans l'option `--create` en mode _plain_ puis les objets globaux avec
+l'outil g_dumpall`. Ceci dans les version 10 et 11 :
 
 ```bash
 /usr/lib/postgresql/11/bin/pg_dump -d droits -Fp > /tmp/droits_base_v11.sql
@@ -4098,19 +4097,25 @@ GRANT CONNECT ON DATABASE droits TO bob;
 Les différences entre les versions 10 et 11 portent sur les ordres _ALTER
 DATABASE ... SET ..._ et _ALTER ROLE ... IN DATABASE ... SET ..._.
 
-L'ordre SQL `ALTER ROLE alice IN DATABASE droits SET work_mem TO '100MB';` apparaît :
+L'ordre SQL `ALTER ROLE alice IN DATABASE droits SET work_mem TO '100MB';`
+apparaît :
 
   * en version 10 dans la sortie de `pg_dumpall -g`,
   * en version 11 dans la sortie de `pg_dump --create`.
 
+Les ordres suivants n'apparaîssent que dans `pg_dump --create` en version 11 :
 
-```sql
-ALTER DATABASE droits SET search_path TO 'appli', 'public';
-```
+  * `ALTER DATABASE droits SET search_path TO 'appli', 'public';`
+  * `GRANT CONNECT,TEMPORARY ON DATABASE droits TO bob;`
+  * `REVOKE CONNECT,TEMPORARY ON DATABASE droits FROM PUBLIC;`
 
-N'apparaît que dans `pg_dump --create` en version 11.
+En mode de sauvegarde logique _custom_, ces ordres seront sauvegardés. Ils ne
+seront cependant restaurés que si l'option `--create` de l'outil `pg_restore`
+est précisé.
 
-
+Suite à ces changements, il est important avant un passage en version 11, de
+vérifier attentivement le fonctionnement de ses scripts de sauvegardes. Et au
+besoin, de les adapter pour ne pas perdre d'informations.
 
 </div>
 
