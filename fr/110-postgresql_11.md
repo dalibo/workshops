@@ -3048,12 +3048,11 @@ VACUUM commandes;
 VACUUM commandes_normale;
 ```
 
-L'avantage des tables partitionnées est que l'on pourra effectuer le _VACUUM_
-sur chaque partition, évitant de surcharger le serveur :
+L'avantage des tables partitionnées est que l'on pourra paralléliser les _VACUUM_
+sur chaque partition :
 
-```sql
-SELECT 'VACUUM commandes_'||i||'_5;' FROM generate_series(0,4) i;
-\gexec
+```bash
+for i in $( seq 0 4 ) ;do vacuumdb -t commandes_${i}_5 v11 & done; wait
 ```
 
 </div>
