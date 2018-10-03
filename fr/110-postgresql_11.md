@@ -3645,108 +3645,131 @@ On a un gain de performance à l'insertion de 40%.
 
 <div class="notes">
 
-Parallélisation sur les requêtes CREATE TABLE AS SELECT
+Parallélisation sur les requêtes `CREATE TABLE AS SELECT`
 
-Création d'une table t1 comportant 10000000 de lignes : 
+Création d'une table numbers comportant 10000000 de lignes : 
 
 ```sql
-CREATE TABLE t1 AS SELECT i FROM generate_series (1,10000000) i ;
+CREATE TABLE numbers AS SELECT i FROM generate_series (1,10000000) i ;
 ```
-En version 10 lorsque nous créons une autre table avec CREATE TABLE ... AS on obtient le plan d'execution suivant :
+
+Modifications des paramêtres `max_parallel_workers` et `max_parallel_workers_per_gather` : 
+```sql
+SET max_parallel_workers TO 2;
+SET max_parallel_workers_per_gather TO 1;
+```
+
+En version 10 lorsque nous créons une autre table avec `CREATE TABLE ... AS` on obtient le plan d'exécution suivant :
 
 ```sql
-postgres@v10=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 10000;
-
-                                            QUERY PLAN                                                 
------------------------------------------------------------------------------------------------------------
- Seq Scan on a  (cost=0.00..185288.50 rows=3761080 width=4) (actual time=0.057..931.101 rows=9999 loops=1)
+postgres@v10=# EXPLAIN ANALYSE CREATE TABLE numbers2 AS SELECT * FROM numbers WHERE i < 10000;
+                                                  QUERY PLAN                                                  
+--------------------------------------------------------------------------------------------------------------
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=8279 width=4) (actual time=0.110..592.257 rows=9999 loops=1)
    Filter: (i < 10000)
    Rows Removed by Filter: 9990001
- Planning time: 7.127 ms
- Execution time: 952.130 ms
+ Planning time: 0.865 ms
+ Execution time: 621.130 ms
 (5 lignes)
+
 ```
 
 En version 11 l'optimiseur effectue un scan séquentiel en parallèle :
 
 ```sql
-postgres@v11=# EXPLAIN ANALYSE CREATE TABLE t2 AS SELECT * FROM a WHERE i < 10000;
-                                                       QUERY PLAN                                                       
-------------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..98278.41 rows=9472 width=4) (actual time=3.506..372.195 rows=9999 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   ->  Parallel Seq Scan on a  (cost=0.00..96331.21 rows=3947 width=4) (actual time=237.366..358.676 rows=3333 loops=3)
+postgres@v11=# EXPLAIN ANALYSE CREATE TABLE numbers2 AS SELECT * FROM numbers WHERE i < 10000;
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..119724.44 rows=9472 width=4) (actual time=1.932..332.705 rows=9999 loops=1)
+   Workers Planned: 1
+   Workers Launched: 1
+   ->  Parallel Seq Scan on numbers  (cost=0.00..117777.24 rows=5572 width=4) (actual time=0.138..320.575 rows=5000 loops=2)
          Filter: (i < 10000)
-         Rows Removed by Filter: 3330000
- Planning Time: 7.249 ms
- Execution Time: 382.184 ms
+         Rows Removed by Filter: 4995000
+ Planning Time: 0.220 ms
+ Execution Time: 363.189 ms
 (8 lignes)
 
 ```
+En version 11, désactivation du paramètre max_parallel_worker_per_gather :
+```sql
+postgres@v11=# SET max_parallel_workers_per_gather TO 0;
+```
+L'optimiseur utilise alors un scan séquentiel classique :
+```sql
+postgres@v11=# EXPLAIN ANALYSE CREATE TABLE numbers2 AS SELECT * FROM numbers WHERE i < 10000;
+                                                  QUERY PLAN                                                  
+--------------------------------------------------------------------------------------------------------------
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=9472 width=4) (actual time=0.169..563.316 rows=9999 loops=1)
+   Filter: (i < 10000)
+   Rows Removed by Filter: 9990001
+ Planning Time: 0.290 ms
+ Execution Time: 592.385 ms
+(5 lignes)
 
-A partir de la même table t1, nous créons une vue materialisé :
+```
+
+A partir de la même table numbers, création d'une vue materialisée :
 
 En version 10 :
 ```sql
-postgres@v10=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW vue_t1 AS SELECT * FROM t1 WHERE i < 100000;
-                                                 QUERY PLAN                                                  
--------------------------------------------------------------------------------------------------------------
- Seq Scan on t1  (cost=0.00..185288.50 rows=3761080 width=4) (actual time=0.085..949.714 rows=99999 loops=1)
-   Filter: (i < 100000)
-   Rows Removed by Filter: 9900001
- Planning time: 1.389 ms
- Execution time: 1022.064 ms
+postgres@v10=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW view_numbers AS SELECT * FROM numbers WHERE i < 10000;
+                                                  QUERY PLAN                                                  
+--------------------------------------------------------------------------------------------------------------
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=8279 width=4) (actual time=0.057..583.214 rows=9999 loops=1)
+   Filter: (i < 10000)
+   Rows Removed by Filter: 9990001
+ Planning time: 0.106 ms
+ Execution time: 598.022 ms
 (5 lignes)
+
 ```
 
 En version 11 :
 ```sql
-
-postgres@v11=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW vue_t1 AS SELECT * FROM t1 WHERE i < 100000;
-                                                       QUERY PLAN                                                        
--------------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..106811.71 rows=94805 width=4) (actual time=0.943..318.016 rows=99999 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   ->  Parallel Seq Scan on t1  (cost=0.00..96331.21 rows=39502 width=4) (actual time=0.084..296.022 rows=33333 loops=3)
-         Filter: (i < 100000)
-         Rows Removed by Filter: 3300000
- Planning Time: 0.240 ms
- Execution Time: 397.267 ms
+postgres@v11=# EXPLAIN ANALYSE CREATE MATERIALIZED VIEW view_numbers AS SELECT * FROM numbers WHERE i < 10000;
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..119724.44 rows=9472 width=4) (actual time=2.494..302.414 rows=9999 loops=1)
+   Workers Planned: 1
+   Workers Launched: 1
+   ->  Parallel Seq Scan on numbers  (cost=0.00..117777.24 rows=5572 width=4) (actual time=0.191..291.289 rows=5000 loops=2)
+         Filter: (i < 10000)
+         Rows Removed by Filter: 4995000
+ Planning Time: 1.303 ms
+ Execution Time: 335.058 ms
 (8 lignes)
-```
 
+```
 Création d'une table avec SELECT INTO :
 
 En version 10 :
 ```sql
-postgres@v10=# EXPLAIN ANALYSE SELECT * INTO t3 FROM t1 WHERE i < 100000;
-                                                QUERY PLAN                                                 
------------------------------------------------------------------------------------------------------------
- Seq Scan on t1  (cost=0.00..169247.71 rows=97156 width=4) (actual time=0.169..650.296 rows=99999 loops=1)
-   Filter: (i < 100000)
-   Rows Removed by Filter: 9900001
- Planning time: 0.402 ms
- Execution time: 721.953 ms
+postgres@v10=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
+                                                  QUERY PLAN                                                  
+--------------------------------------------------------------------------------------------------------------
+ Seq Scan on numbers  (cost=0.00..169247.71 rows=8279 width=4) (actual time=0.243..583.370 rows=9999 loops=1)
+   Filter: (i < 10000)
+   Rows Removed by Filter: 9990001
+ Planning time: 1.209 ms
+ Execution time: 611.817 ms
 (5 lignes)
-
 
 ```
 
 En version 11 :
 ```sql
-postgres@v11=# EXPLAIN ANALYSE SELECT * INTO t3 FROM t1 WHERE i < 100000;
-                                                       QUERY PLAN                                                        
--------------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..106811.71 rows=94805 width=4) (actual time=3.970..330.662 rows=99999 loops=1)
-   Workers Planned: 2
-   Workers Launched: 2
-   ->  Parallel Seq Scan on t1  (cost=0.00..96331.21 rows=39502 width=4) (actual time=0.066..312.041 rows=33333 loops=3)
-         Filter: (i < 100000)
-         Rows Removed by Filter: 3300000
- Planning Time: 5.373 ms
- Execution Time: 397.515 ms
+postgres@v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
+                                                         QUERY PLAN                                                          
+-----------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1000.00..119724.44 rows=9472 width=4) (actual time=1.967..310.618 rows=9999 loops=1)
+   Workers Planned: 1
+   Workers Launched: 1
+   ->  Parallel Seq Scan on numbers  (cost=0.00..117777.24 rows=5572 width=4) (actual time=0.123..298.739 rows=5000 loops=2)
+         Filter: (i < 10000)
+         Rows Removed by Filter: 4995000
+ Planning Time: 1.253 ms
+ Execution Time: 339.003 ms
 (8 lignes)
 
 ```
