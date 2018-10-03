@@ -147,9 +147,9 @@ une présentation récente de *Daniel Vérité* est disponible en ligne :
   * [Slides](https://dali.bo/daniel-verite-communaute-dev-pgday)
 </div>
 
-\newpage
-
 -----
+
+\newpage
 
 ## Au menu
 <div class="slide-content">
@@ -206,8 +206,6 @@ dissuader de l'utiliser.
 La version 11 corrige une bonne partie de ces limites.
 
 </div>
-
-\newpage
 
 -----
 
@@ -932,6 +930,8 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 
 -----
 
+\newpage
+
 ## Performances
 
 <div class="slide-content">
@@ -944,8 +944,6 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 
 <div class="notes">
 </div>
-
-\newpage
 
 -----
 
@@ -1371,8 +1369,9 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
 
 </div>
 
-
 -----
+
+\newpage
 
 ## Sécurité et intégrité
 
@@ -1382,8 +1381,6 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
   * Vérification d'intégrité
 
 </div>
-
-\newpage
 
 -----
 
@@ -1625,6 +1622,8 @@ facteur 4.
 
 -----
 
+\newpage
+
 ## SQL et PL/pgSQL
 
 <div class="slide-content">
@@ -1641,8 +1640,6 @@ facteur 4.
 <div class="notes">
 
 </div>
-
-\newpage
 
 -----
 
@@ -1858,7 +1855,7 @@ Pour plus de détails, par exemple sur les curseurs :
 </div>
 
 <div class="notes">
-FIXME
+
 </div>
 
 -----
@@ -2088,9 +2085,8 @@ v11=# select jsonb_to_tsvector('french',
 
 <div class="notes">
 
-FIXME
-
-https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/
+Pour plus d'information, voir l'explication de
+[depesz](https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/).
 
 </div>
 
@@ -2113,12 +2109,11 @@ https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-
 VACUUM t1, t2
 ```
 
-FIXME
-
-
 </div>
 
 -----
+
+\newpage
 
 ## Outils
 <div class="slide-content">
@@ -2130,8 +2125,6 @@ FIXME
   * `pg_rewind`
 
 </div>
-
-\newpage
 
 -----
 
@@ -2359,6 +2352,8 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 
 -----
 
+\newpage
+
 ## Réplication
 <div class="slide-content">
 
@@ -2370,8 +2365,6 @@ Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 <div class="notes">
 
 </div>
-
-\newpage
 
 -----
 
@@ -2494,6 +2487,8 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 
 -----
 
+\newpage
+
 ## Futur
 
 <div class="slide-content">
@@ -2541,6 +2536,8 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 
 -----
 
+\newpage
+
 ## Questions
 
 <div class="slide-content">
@@ -2571,9 +2568,9 @@ Tout cela est encore en développement et test, rien ne garantit que ces amélio
 
 </div>
 
-\newpage
-
 -----
+
+\newpage
 
 ## Installation
 
@@ -2682,6 +2679,8 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 </div>
 
 -----
+
+\newpage
 
 ## Mise à jour d'une partition avec un `UPDATE`
 
@@ -2871,6 +2870,8 @@ v11=# SELECT * FROM liste_dates_c ;
 </div>
 
 -----
+
+\newpage
 
 ## Partitionnement par hachage
 
@@ -3093,6 +3094,8 @@ for i in $( seq 0 4 ) ;do vacuumdb -v -t commandes_${i}_5 v11 & done; wait
 
 -----
 
+\newpage
+
 ## Support du TRUNCATE dans la réplication logique
 
 <div class="notes">
@@ -3194,6 +3197,8 @@ workshop11_2=# select * from t1;
 </div>
 
 -----
+
+\newpage
 
 ## Mise à jour Majeure avec la réplication logique
 
@@ -3704,6 +3709,8 @@ DROP PUBLICATION
 
 -----
 
+\newpage
+
 ## Index couvrants
 
 <div class="notes">
@@ -3886,6 +3893,8 @@ On a un gain de performance à l'insertion de 40%.
 
 -----
 
+\newpage
+
 ## Parallélisation
 
 <div class="notes">
@@ -4048,6 +4057,8 @@ v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
 
 -----
 
+\newpage
+
 ## Sauvegarde des droits avec `pg_dump`
 
 <div class="notes">
@@ -4118,6 +4129,8 @@ besoin, de les adapter pour ne pas perdre d'informations.
 </div>
 
 -----
+
+\newpage
 
 ## pg_prewarm
 
@@ -4287,6 +4300,8 @@ postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
 </div>
 
 -----
+
+\newpage
 
 ## JIT
 
