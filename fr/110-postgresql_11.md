@@ -289,7 +289,7 @@ Partitions: t1_a FOR VALUES WITH (modulus 3, remainder 0),
 ```
 
 Pour trier les données dans la bonne colonne, la classe d'opérateur par hachage
-par défaut des colonnes de la clé est utilisé. Il ne s'agit pas de l'opération
+par défaut des colonnes de la clé est utilisée. Il ne s'agit pas de l'opération
 modulo mathématique. On le voit bien en regardant le nombre d'insertions dans
 chaque partition pour une liste d'entiers de 0 à 10 000, très homogène, et les
 valeurs dans une partition :
@@ -1207,7 +1207,9 @@ certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
 uniquement. La version 10 avait étendu à d'autres nœuds.
 
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
-de type _Append_, qui servent aux `UNION ALL` notamment.
+de type _Append_, qui servent aux `UNION ALL` notamment :
+
+FIXME
 
 **Jointure type _Hash_**
 
@@ -1266,6 +1268,18 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 
 L'auteur de cette optimisation a écrit un article assez complet sur le sujet :
 <https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
+
+**Opération `CREATE TABLE AS SELECT...`**
+
+FIXME
+
+**Opération `CREATE MATERIALIZED VIEW`**
+
+FIXME
+
+**Opération `SELECT INTO`**
+
+FIXME
 
 **Création d'index**
 
@@ -1564,6 +1578,8 @@ $ cat /tmp/t_write.csv
 4
 5
 ```
+
+FIXME exécution de fichier ???
 
 </div>
 
@@ -1882,6 +1898,8 @@ Pour plus de détails, par exemple sur les curseurs :
 
 <div class="notes">
 
+FIXME
+
 </div>
 
 -----
@@ -2114,6 +2132,8 @@ v11=# select jsonb_to_tsvector('french',
 
 <div class="notes">
 
+FIXME
+
 Pour plus d'information, voir l'explication de
 [depesz](https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/).
 
@@ -2137,6 +2157,8 @@ Pour plus d'information, voir l'explication de
 ```sql
 VACUUM t1, t2
 ```
+
+FIXME
 
 </div>
 
