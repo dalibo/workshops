@@ -980,14 +980,12 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 
 Une des nouveautés les plus visibles et techniquement pointues de la v11
 est la « compilation à la volée » (_Just In Time compilation_, ou JIT)
-des requêtes SQL.
+des requêtes SQL. C'est le fruit de deux ans de travail d'Andres Freund notamment.
 
 Dans certaines requêtes, l'essentiel du temps est passé à décoder
 des enregistrements (_tuple deforming_), à analyser des clauses `WHERE`, à
 effectuer des calculs. L'idée du JIT est de transformer tout ou partie de la
 requête en un programme natif directement exécuté par le processeur.
-
-C'est le fruit de deux ans de travail d'Andres Freund notamment.
 
 Cette compilation est une opération lourde qui ne sera effectuée que pour
 des requêtes qui en valent le coup.
@@ -1106,7 +1104,7 @@ supportées par le JIT sont intégrées dans la compilation. Si
 sont que pour des coûts assez importants.
 
 Ces seuils sont à comparer avec les coûts des requêtes, qui incluent les
-entrées-sorties, donc sans considération du coût CPU. Ces seuils sont un peu
+entrées-sorties, donc pas seulement le coût CPU. Ces seuils sont un peu
 arbitraires et nécessiteront sans doute un certain tuning en fonction de vos
 requêtes.
 
@@ -1159,7 +1157,7 @@ Sans JIT la durée de la requête était d'environ 33 s.
 
   * Pas de limitation par les I/O
   * Requêtes complexes (calculs, agrégats, appels de fonctions...)
-  * Beaucoup de lignes
+  * Beaucoup de lignes, filtres
   * Assez longues pour « rentabiliser » le JIT
   * Analytiques, pas ERP
 
@@ -1168,8 +1166,8 @@ Sans JIT la durée de la requête était d'environ 33 s.
 <div class="notes">
 
 Vu son coût élevé, le JIT n'a d'intérêt que pour les requêtes utilisant
-beaucoup le CPU, donc effectuant des calculs sur beaucoup de lignes : calculs
-d'expression, filtrage, agrégats.
+beaucoup le CPU, donc effectuant des opérations sur beaucoup
+de lignes : calculs d'expression, filtrage, agrégats.
 
 Ce seront donc plus des requêtes analytiques
 brassant beaucoup de lignes que les petites requêtes d'un ERP.
@@ -1179,7 +1177,7 @@ Il n'y a pas non plus de mise en cache du code compilé.
 Si gain il y a, il est relativement modeste en-deçà de quelques millions de
 lignes, et devient de plus important au fur et à mesure que la volumétrie
 augmente. Cela à condition bien sûr que d'autres limites n'apparaissent pas
-(saturation de la bande passante notamment).
+(bande passante...).
 
 Documentation officielle :
 <https://docs.postgresql.fr/11/jit-decision.html>
@@ -1333,7 +1331,7 @@ en bloquant tous les accès.  Sur de grosses tables, l'interruption de service
 La version 11 prend simplement note de la valeur par défaut de la nouvelle
 colonne et n'a pas besoin de l'écrire physiquement pour la restituer ensuite.
 
-Une contrainte est que cette valeur par défaut soit une constante pendant
+Cette valeur par défaut doit être soit une constante pendant
 l'ordre, ce qui est le cas de `DEFAULT 1234`, `DEFAULT now()` ou de toute
 fonction déclarée comme `STABLE` ou `IMMUTABLE`, mais pas de `DEFAULT
 clock_timestamp()` par exemple.  Si la valeur par défaut est fournie par une
@@ -1412,6 +1410,7 @@ Pour les détails, voir <https://brandur.org/postgres-default>.
   * **pg_read_server_files** : permet la lecture de fichier sur le serveur
   * **pg_write_server_files** : permet la modification de fichier sur le serveur
   * **pg_execute_server_program** : permet l’exécution de fichier sur le serveur
+  * Rappel : `\COPY` sans limitation depuis le client
 
 </div>
 
@@ -1476,7 +1475,7 @@ postgres@v11=# GRANT pg_read_server_files TO user_r;
 GRANT ROLE
 ```
 
-Import des données depuis un fichier externe csv :
+Import des données depuis un fichier externe CSV :
 ```sql
 user_r@v11=> CREATE TABLE t_read(data int);
 CREATE TABLE
@@ -1485,7 +1484,7 @@ user_r@v11=> COPY t_read FROM '/tmp/t_read.csv' CSV ;
 COPY 10
 ```
 
-Vérification des données sur la table t_read;
+Vérification des données sur la table `t_read` :
 ```sql
 user_r@v11=> select * from t_read;
  data
@@ -1513,7 +1512,7 @@ ASTUCE : Anyone can COPY to stdout or from stdin. psql's \copy command
          also works for anyone.
 ```
 
-Le rôle `pg_write_server_file` va permettre d'envoyer les données les données
+Le rôle `pg_write_server_file` va permettre d'envoyer les données
 d'une table vers un fichier externe.
 
 Création de l'utilisateur `user_w` membre du rôle `pg_write_server_files` :
@@ -1573,7 +1572,7 @@ $ cat /tmp/t_write.csv
 ### Vérification d'intégrité
 <div class="slide-content">
 
-  * Nouvelle commande `pg_verify_checksums`
+  * Nouvelle commande `pg_verify_checksums` (à froid)
   * Vérification des sommes de contrôles dans `pg_basebackup`
   * Amélioration d'`amcheck`
     * v10 : 2 fonctions de vérification de l'intégrité des index
@@ -1596,7 +1595,7 @@ l'option `--no-verify-checksums`.
 
 Le module `amcheck` était apparu en version 10 pour vérifier la cohérence des
 index et de leur structure interne, et ainsi détecter des bugs, des corruptions
-dues au système de fichier voire à la mémoire. Il défini deux fonctions :
+dues au système de fichier voire à la mémoire. Il définit deux fonctions :
 
   * `bt_index_check` est destinée aux vérifications de
 routine. Elle ne pose qu'un verrou _AccessShareLock_ peu gênant.
@@ -1610,9 +1609,7 @@ Si ce paramètre vaut `true`, chaque fonction effectue une vérification
 supplémentaire en recréant temporairement une structure d'index et en la
 comparant avec l'index original. `bt_index_check` vérifiera que chaque entrée
 de la table possède une entrée dans l'index. `bt_index_parent_check` vérifiera
-en plus que à chaque entrée de l'index correspond une entrée dans la table. Ces
-vérifications sont probabilistes : le taux maximum d'erreur de détection est
-fixé à 2%.
+en plus qu'à chaque entrée de l'index correspond une entrée dans la table.
 
 Les verrous posés par les fonctions ne changent pas. Néanmoins, l'utilisation
 de ce mode a un impact sur la durée d'exécution des vérifications.  
@@ -1620,7 +1617,9 @@ Pour limiter l'impact, l'opération n'a lieu qu'en mémoire, et dans la limite d
 paramètre `maintenance_work_mem`. Ce paramètre atteint ou dépasse souvent
 le gigaoctet sur les serveurs récents.  
 C'est cette restriction mémoire qui implique que la détection de problèmes est
-probabiliste pour les plus grosses tables. Mais rien n'empêche de relancer les
+probabiliste pour les plus grosses tables (selon la documentation, la probabilité
+de rater une incohérence est de 2 % si l'on peut consacrer 2 octets de mémoire à
+chaque ligne). Mais rien n'empêche de relancer les
 vérifications régulièrement, diminuant ainsi les chances de rater une
 erreur.
 
@@ -1713,17 +1712,13 @@ servir aux tris et recherches.
 Les index PostgreSQL étant des objets distincts des tables, ajouter des colonnes
 dans un index duplique de l'information. Cela a un impact en terme de volume sur
 disque mais également en terme de performance d'insertion et de mise à jour de la table.
-
-Les index couvrants ne changent rien côté taille des index. Leur intérêt
-premier est de pouvoir ajouter des colonnes dans un index déjà présent
-(unique notamment) sans devoir déclarer un index distinct.
+L'intérêt premier des index couvrants est de pouvoir ajouter des colonnes
+dans un index déjà présent (unique notamment) sans devoir déclarer un index distinct.
 
 En effet, PostgreSQL utilise un index unique pour implémenter une contrainte
 d'unicité sur une ou un ensemble de colonnes.
-
 Si on veut pouvoir accéder par `Index Only Scan` à une de ces colonnes uniques
 ainsi qu'à une autre colonne, il faut créer un nouvel index.
-
 Un index couvrant va permettre de ne pas créer de nouvel index en intégrant
 l'autre colonne recherchée à l'index unique.
 
@@ -1731,7 +1726,7 @@ l'autre colonne recherchée à l'index unique.
 
 -----
 
-### Objet `PROCEDURE`
+### Objet PROCEDURE
 <div class="slide-content">
 
   * Conforme à la norme SQL
@@ -1897,8 +1892,8 @@ Pour plus de détails, par exemple sur les curseurs :
 
   * Conversion de et vers du type jsonb
     * en SQL : booléen et nombre
-    * en PL/Perl : tableau et _hash_
-    * en PL/Python : `dict` et `list`
+    * en PL/Perl : tableau et _hash_ (extension `jsonb_plperl`)
+    * en PL/Python : `dict` et `list` (extension `jsonb_plpython`)
   * Conversion JSON en tsvector pour la _Full text Search_
 
 </div>
@@ -2031,9 +2026,9 @@ INFO:  JSON keys are: '1' 'example'
 
 #### JSON en tsvector pour la _Full Text Search_
 
-La conversion en tsvector permet la recherche plein texte. Couplé à
-une indexation adéquate, GIN ou GiST, les fonctionnalités sont
-nombreuses et les performances impressionnantes.
+La conversion en tsvector permet la recherche plein texte. Couplée à
+une indexation adéquate, GIN ou GiST, la _Full Text Search_ offre de nombreuses
+fonctionnalités et des performances impressionnantes.
 
 Jusqu'à maintenant, les champs JSON était analysés comme des textes,
 sans tenir compte de la sémantique. La nouvelle fonction
@@ -2167,11 +2162,11 @@ VACUUM t1, t2
 
   * `SELECT ... FROM ... \gdesc`
     * ou `\gdesc` seul après exécution
-    * retourne le type des colonnes
+    * retourne le type des colonnes sans exécution
   * Variables de suivi des erreurs de requêtes
     * `ERROR`, `SQLSTATE` et `ROW_COUNT`
   * `exit` et `quit` à la place de `\q` pour quitter psql
-  * fonctionnalités psql, donc utilisable sur des instances < 11
+  * fonctionnalités psql, donc utilisables sur des instances < 11
 
 </div>
 <div class="notes">
@@ -2248,7 +2243,7 @@ v11=# \echo :ROW_COUNT
 0
 ```
 
-Il existe aussi les variable `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui
+Il existe aussi les variables `LAST_ERROR_MESSAGE` et `LAST_ERROR_SQLSTATE` qui
 renvoient le dernier message d'erreur retourné et le code de la dernière
 erreur.
 
@@ -2286,9 +2281,14 @@ utilisées même si le serveur reste dans une version antérieure.
 
 L'option `--wal-segsize` permet de spécifier la taille des fichiers WAL lors de
 l'initialisation de l'instance (et uniquement à ce moment). Toujours par défaut
-à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go. Cela permet d'ajuster la
+à 16 Mo, ils peuvent à présent aller de 1 Mo à 1 Go.
+
+Cela permet d'ajuster la
 taille en fonction de l'activité, principalement pour les instances générant
-beaucoup de journaux, surtout s'il faut les archiver.
+de très nombreux journaux, surtout s'il faut les archiver. Des journaux plus
+gros et moins nombreux seront alors plus efficaces. Par contre, si les journaux
+sont trop gros par rapport à l'activité, ils ne seront pas archivés assez souvent.
+Le défaut reste à 16 Mo.
 
 Exemple pour des WAL de 1 Go  :
 
@@ -2314,7 +2314,7 @@ lecture à un outil de sauvegarde.
   * Ajouter `--create` à `pg_dump -Fp` ou `pg_restore` pour cela !
    * Révisez vos scripts !
   * `pg_basebackup`
-    * option `--create-slot` pour créer un slot de réplication.
+    * option `--create-slot` pour créer un slot de réplication permanent
 
 </div>
 
@@ -2384,7 +2384,7 @@ via la fonction `pg_prewarm`, donc de façon manuelle uniquement.
 Une nouvelle fonctionnalité de la version 11 permet de sauvegarder
 périodiquement les blocs dans le cache de PostgreSQL. Cette sauvegarde peut
 être effectuée de façon régulière, toutes les 5 minutes par défaut. Elle sera
-effectuée de toutes façons lors d'un arrêt normal de l'instance.
+effectuée de toute façon lors d'un arrêt normal de l'instance.
 
 Grâce à cette sauvegarde, il est désormais possible d'automatiser le chargement
 de la dernière sauvegarde au démarrage de l'instance. La mise en place s'opère
@@ -2408,10 +2408,10 @@ préchauffage n'est pas activé :
     automatique des blocs du _shared buffers_, le _autoprewarm worker_,
   * `autoprewarm_dump_now()` : permet de procéder immédiatement à la sauvegarde.
 
-Le préchauffage des caches est typiquement plus utile au démarrage, quand les
+Le préchauffage du cache est typiquement plus utile au démarrage, quand les
 caches sont majoritairement vides. Il n'est cependant pas garanti que les
-données chargées soient utiles aux requêtes et qu'elles restent dans les caches
-si la base est active et manipule des grands volumes de données.
+données chargées soient utiles aux requêtes et qu'elles restent dans le cache
+si la base est active et manipule de grands volumes de données.
 
 Documentation officielle : <https://docs.postgresql.fr/11/pgprewarm.html>
 
@@ -2455,12 +2455,12 @@ principe de la réplication logique : les données et schémas
 répliquées sont modifiables, et la base cible impose la cohérence de ses
 données au dépend des données source au besoin.
 
-La gestion de la mémoire a été améliorée grâce à un nouvel allocateur mémoire
-en mode FIFO idéal pour ce besoin
-(cf. <https://commitfest.postgresql.org/14/1239/>).
+La gestion de la mémoire a été améliorée grâce à un
+[nouvel allocateur mémoire en mode FIFO idéal pour ce besoin](https://commitfest.postgresql.org/14/1239/).
 
 Enfin, les premières migrations majeures utilisant la réplication logique sans
-outil tiers pourront avoir lieu entre des instances en versions 10 et 11.
+outil tiers pourront avoir lieu entre des instances en versions 10 et 11 (voir
+le TP).
 
 </div>
 
@@ -2479,7 +2479,7 @@ Un checkpoint est un « point de vérification » au cours duquel les fichiers
 données sont mis à jour pour refléter les informations des journaux de
 transactions.
 
-En version 10, les fichiers de journaux de transactions étaient conservés le
+Jusqu'en version 10, les fichiers de journaux de transactions étaient conservés le
 temps de faire 2 checkpoints. Les journaux précédents le premier checkpoint
 étaient alors recyclés. L’intérêt d'avoir deux checkpoints était de permettre
 de pouvoir revenir au précédent checkpoint au cas où le dernier soit
@@ -2608,8 +2608,10 @@ Quelques sources :
   * [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
   * [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
 
+<div class="box warning">
 Tout cela est encore en développement et test, rien ne garantit que ces
-améliorations seront présentes dans la version finale de PostgreSQL 12.
+améliorations seront présentes dans la version finale de PostgreSQL 12 !
+</div>
 
 </div>
 
@@ -4193,7 +4195,7 @@ ROLE alice IN DATABASE droits SET work_mem TO '100MB';` apparaît :
   * en version 11 dans la sortie de `pg_dump --create`.
 
 Avec des commandes `grep` bien choisies, vérifiez que les ordres suivants
-n'apparaîssent que dans `pg_dump --create` en version 11 :
+n'apparaissent que dans `pg_dump --create` en version 11 :
 
   * `ALTER DATABASE droits SET search_path TO 'appli', 'public';`
   * `GRANT CONNECT,TEMPORARY ON DATABASE droits TO bob;`
