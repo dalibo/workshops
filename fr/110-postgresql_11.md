@@ -103,9 +103,8 @@ hide_author_in_slide: true
 ![PostgreSQL](medias/The_Big_Boss_Elephant.jpeg)
 
 <div class="notes">
-Photographie obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
-
-Public Domain CC0.
+Photographie de Rad Dougall, licence [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en),
+obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
 </div>
 
 -----
@@ -119,7 +118,8 @@ Public Domain CC0.
   * Bêta 2 le 28 juin
   * Bêta 3 le 9 août
   * Bêta 4 le 17 septembre
-  * Version finale espérée octobre 2018
+  * Release Candidate 1 le 11 octobre
+  * Version finale : 18 octobre 2018
   * Plus de 1,5 millions de lignes de code C
   * Des centaines de contributeurs
 </div>
@@ -131,7 +131,7 @@ démarrage vers la mi-2017, des _Commit Fests_ tous les deux mois, un
 _feature freeze_ le 7 avril, une première version bêta fin mai, une quatrième
 le 17 septembre.
 
-La version finale est espérée en octobre 2018.
+La version finale est parue le 18 octobre 2018.
 
 La version 11 de PostgreSQL contient plus de 1,5 millions de lignes de code,
 essentiellement du C avec environ 23 % de commentaires, garants de la qualité
@@ -179,6 +179,7 @@ des articles en anglais :
   * [Waiting for PostgreSQL 11](https://www.depesz.com/), articles de blog de Teodor Sigaev tout le long du développement de la v11 entre septembre 2017 et juin 2018
   * [Postgres 11 Highlight](https://paquier.xyz/tag/11/), série d'articles de Michael Paquier sur la même période
 
+
 </div>
 
 -----
@@ -189,7 +190,7 @@ des articles en anglais :
 <div class="slide-content">
 
   * Partitionnement par hachage
-  * Création d'index automatique
+  * Propagation des index
   * Support de clés primaires et clés étrangères
   * Mise à jour de la clé de partition
   * Partition par défaut
@@ -245,10 +246,10 @@ permettent d'accélérer les opérations de `VACUUM`.
 
 <div class="slide-content">
 
-  * Créer une table partitionnée :  
+  * Créer une table partitionnée : \
   `CREATE TABLE t1(c1 int) PARTITION BY HASH (c1)`
-  * Ajouter une partition :  
-  `CREATE TABLE t1_a PARTITION OF t1`  
+  * Ajouter une partition : \
+  `CREATE TABLE t1_a PARTITION OF t1` \
   `  FOR VALUES WITH (modulus 3,remainder 0)`
   * Augmentation du nombre de partitions délicat
 
@@ -393,11 +394,12 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
 -----
 
-### Création d'index automatique sur les partitions
+### Propagation des index sur les partitions
 <div class="slide-content">
 
-  * Index sur une table partitionnée entière
+  * Index sur une table partitionnée
   * Index créé sur chaque partition
+    - Hors partitions étrangères
   * Création automatique sur toute nouvelle partition
 
 </div>
@@ -437,7 +439,6 @@ Clé de partition : RANGE (titre)
 Index :
     "livres_titre_idx" btree (titre)
 Nombre de partitions : 2 (utilisez \d+ pour les lister)
-
 v11=# \d livres_a_m
                           Table « public.livres_a_m »
  Colonne  |           Type           | Collationnement | NULL-able | Par défaut
@@ -467,6 +468,13 @@ Index :
 
 L'exemple ci-dessus concerne une colonne de la clé de partitionnement, mais
 cela fonctionne avec toute colonne.
+
+La propagation ne fonctionne pas sur les partitions qui sont des tables
+étrangères : la création d'index y est impossible, il faut le faire sur la
+table source. Pire : des index à propager existants interdisent d'attacher
+une partition étrangère, et la présence d'une partition étrangère interdit de
+créer tout index sur la table partitionnée. Il faut créer les index
+manuellement sur chaque partition.
 
 </div>
 
@@ -623,7 +631,7 @@ En version 11, PostgreSQL rend la chose transparente.
 ### Partition par défaut
 <div class="slide-content">
 
-  * Pour les données n'appartenant à aucune autre partition :  
+  * Pour les données n'appartenant à aucune autre partition : \
   `CREATE TABLE livres_default PARTITION OF livres DEFAULT;`
 
 </div>
@@ -814,12 +822,19 @@ Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
 <div class="slide-content">
 
   * Clause `INSERT ON CONFLICT`
+    - sauf mise à jour de clé
   * _Partition-Wise Aggregate_ (par défaut : `off`)
-  * `FOR EACH ROW trigger`
+  * Triggers `AFTER ... FOR EACH ROW`
+  * Partitions étrangères : routage pour les insertions
+    * uniquement postgres_fdw
+    * pas de propagation des index
+    * sharding !
 
 </div>
 
 <div class="notes">
+
+**ON CONFLICT**
 
 En version 10, la clause `ON CONFLICT` n'était pas supportée sur le
 partitionnement :
@@ -838,7 +853,12 @@ v11=# INSERT INTO livres VALUES ('mon titre') ON CONFLICT DO NOTHING;
 INSERT 0 0
 ```
 
-_Partition-Wise Aggregate_ :
+Il reste une limite : une clause `ON CONFLICT UPDATE` ne doit pas mettre à jour
+la clé de partition, ce qui ne devrait pas être un problème majeur dans les cas
+d'utilisation des partitions.
+
+
+**Partition-Wise Aggregate**
 
 Les paramètres `enable_partitionwise_join` et `enable_partitionwise_aggregate`
 ont été ajoutés. Ils sont désactivés par défaut en raison du coût supplémentaire
@@ -944,6 +964,43 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
 (14 lignes)
 ```
 
+Les tables partitionnées acceptent à présent les triggers
+`AFTER UPDATE ... FOR EACH ROW`.
+La propagation du trigger, comme les index, est automatique sur chaque partition.
+Les triggers `BEFORE UPDATE` ne sont pas supportés mais il reste possible de les
+créer sur chaque partition.
+
+**Partitions étrangères**
+
+En v10, les tables partitionnées pouvaient déjà être utilisées comme partition,
+et dès la déclaration :
+```sql
+CREATE FOREIGN TABLE capteur_2020
+PARTITION OF capteur 
+FOR VALUES FROM ('01-01-2020') TO ('01-01-2021') 
+SERVER loin OPTIONS (table_name 'capteur_2020') ;
+```
+
+Il était possible de lire sans problème, mais on ne pouvait insérer dans la
+table distante qu'en la désignant explicitement, sous peine d'erreur :
+```sql
+v10=#INSERT INTO capteur SELECT '01-01-2020' ;
+ERROR:  cannot route inserted tuples to a foreign table
+v10=#INSERT INTO capteur_2020 SELECT '01-01-2020' ;
+INSERT 0 1
+```
+
+En v11, cette restriction a disparu, l'insertion directement dans la table
+partitionnée fonctionne.
+
+Cela ouvre d'intéressantes perspectives en terme de _sharding_ (répartition
+d'une table sur plusieurs instances).
+
+Cependant, la création d'un index sur une
+table étrangère n'étant pas possible, la propagation des index reste donc
+manuelle.
+
+
 </div>
 
 -----
@@ -957,6 +1014,7 @@ v11=# EXPLAIN (COSTS off) SELECT count(*) FROM t2 INNER JOIN t3 ON t2.c1=t3.c1;
   * Compilation _Just In Time_ (JIT)
   * Parallélisme étendu à plusieurs commandes
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
+  * `recheck_on_update`
 
 </div>
 
@@ -995,8 +1053,8 @@ choisie pour sa flexibilité.
 L'utilisation nécessite un PostgreSQL compilé avec l'option `--with-llvm` et
 l'installation des bibliothèques de LLVM. Avec les paquets du PGDG,
 c'est le cas par défaut sur Debian/Ubuntu. Sur
-CentOS/RedHat 7 il faut penser à installer le package `postgresql11-llvmjit`.
-CentOS/RedHat 6 ne permettent actuellement pas d’utiliser le JIT.
+CentOS/Red Hat 7 il faut penser à installer le package `postgresql11-llvmjit`.
+CentOS/Red Hat 6 ne permettent actuellement pas d’utiliser le JIT.
 
 Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas
 d'erreur et continue sans tenter de JIT.
@@ -1079,7 +1137,7 @@ par l'auteur principal du JIT, Andres Freund.
   * `jit_inline_above_cost` (défaut : 500 000)
   * `jit_optimize_above_cost` (défaut : 500 000)
   *  à comparer au coût de la requête... I/O comprises
-  * valeurs arbitraires !
+  * Seuils arbitraires !
 
 </div>
 
@@ -1195,7 +1253,7 @@ Documentation officielle :
   * `CREATE TABLE AS SELECT...`
   * `CREATE MATERIALIZED VIEW`
   * `SELECT INTO`
-  * `CREATE INDEX`
+  * `CREATE INDEX` (B-tree)
     * nouveau paramètre `max_parallel_maintenance_workers`
 
 </div>
@@ -1204,12 +1262,10 @@ Documentation officielle :
 
 La parallélisation des requêtes avait été introduite en version 9.6, sur
 certains nœuds d'exécution seulement, et pour les requêtes en lecture seule
-uniquement. La version 10 avait étendu à d'autres nœuds.
+uniquement. La version 10 l'avait étendue à d'autres nœuds.
 
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
 de type _Append_, qui servent aux `UNION ALL` notamment :
-
-FIXME
 
 **Jointure type _Hash_**
 
@@ -1266,25 +1322,13 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 (8 lignes)
 ```
 
-L'auteur de cette optimisation a écrit un article assez complet sur le sujet :
-<https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html>.
-
-**Opération `CREATE TABLE AS SELECT...`**
-
-FIXME
-
-**Opération `CREATE MATERIALIZED VIEW`**
-
-FIXME
-
-**Opération `SELECT INTO`**
-
-FIXME
+L'auteur de cette optimisation a écrit
+[un article assez complet](https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html).
 
 **Création d'index**
 
-La création d'index peut à présent être parallélisée, ce qui va permettre de
-gros gains de temps dans certains cas. La parallélisation est activée par
+La création d'index B-tree peut à présent être parallélisée, ce qui va permettre
+de gros gains de temps dans certains cas. La parallélisation est activée par
 défaut et est contrôlée par un nouveau paramètre,
 `max_parallel_maintenance_workers`, par défaut à 2, et non l'habituel
 `max_parallel_workers_per_gather`.
@@ -1400,6 +1444,37 @@ attmissingval | {16:55:40.017082+02}
 
 
 Pour les détails, voir <https://brandur.org/postgres-default>.
+
+</div>
+
+-----
+### Performances : divers
+
+<div class="slide-content">
+
+  * Clause `recheck_on_update` \
+ `CREATE INDEX nomindex ON nomtable (fonction(colonne))` \
+ `WITH (recheck_on_update = on) ;`
+  * Facilite les mises à jour HOT
+
+</div>
+
+<div class="notes">
+
+Une nouvelle option apparaît pour les créations d'index :
+```sql
+CREATE INDEX nomindex ON nomtable (fonction(colonne)) WITH (recheck_on_update = on) ;
+```
+
+Ce paramètre vise à faciliter les mises à jour HOT (_Heat Only Tuple_),
+c'est-à-dire au sein d'un même bloc (pour peu qu'il y ait de la place), et ainsi
+économiser des écritures et de la fragmentation.
+Ces mises à jour HOT ne sont possibles que si les champs indexés ne sont pas
+modifiés. PostgreSQL 11 cherche à le vérifier aussi pour les index fonctionnels. Or
+cette revérification peut être très coûteuse pour certains index, et la valeur
+`off` permet de la désactiver (rendant les mises à jour HOT impossibles si cet
+index fonctionnel est concerné par la mise à jour). Le défaut est `on` si le
+coût de la fonction est inférieur à 1000.
 
 </div>
 
@@ -1578,8 +1653,6 @@ $ cat /tmp/t_write.csv
 4
 5
 ```
-
-FIXME exécution de fichier ???
 
 </div>
 
@@ -1898,7 +1971,8 @@ Pour plus de détails, par exemple sur les curseurs :
 
 <div class="notes">
 
-FIXME
+Déclarer une variable en tant que `CONSTANT` ou `NOT NULL` permettra de
+supprimer un certain nombre de bugs.
 
 </div>
 
@@ -1976,7 +2050,7 @@ v11=# SELECT '3.141592'::jsonb::float;
 
 Une transformation a été ajoutée en PL/Perl pour transformer les champs jsonb en champs natif Perl.
 
-Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur RedHat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur Red Hat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
 
 Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
@@ -2012,7 +2086,7 @@ NOTICE:  jsonb keys are: '1' 'example'
 
 Une transformation a été ajoutée en PL/Python pour transformer les champs jsonb en champs natif Python.
 
-Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpyhton-11.0` sur RedHat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpython-11.0` sur Red Hat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
 
 Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
@@ -2127,14 +2201,22 @@ v11=# select jsonb_to_tsvector('french',
 
 <div class="slide-content">
 
-  * Support de l'intégralité des fonctions de fenêtrage de la norme **SQL:2011**
+  * Finalisation du support de la norme **SQL:2011** \
+    `{ RANGE | ROWS | GROUPS } frame_start [ frame_exclusion ]` \
+    `{ RANGE | ROWS | GROUPS } BETWEEN frame_start AND frame_end [ frame_exclusion ]`
+  * avec exclusion : \
+  `EXCLUDE {CURRENT ROW|GROUP|TIES|NO OTHERS}`
+
 </div>
 
 <div class="notes">
 
-FIXME
+Le support de la syntaxe `RANGE`, incluant une clause
+`EXCLUDE {CURRENT ROW|GROUP|TIES|NO OTHERS}`
+est la fin d'un travail entamé depuis PostgreSQL 9.4 pour supporter les fonctions
+de fenêtrage.
 
-Pour plus d'information, voir l'explication de
+Pour plus d'information et des exemples, voir l'explication de
 [depesz](https://www.depesz.com/2018/02/13/waiting-for-postgresql-11-support-all-sql2011-options-for-window-frame-clauses/).
 
 </div>
@@ -2146,19 +2228,29 @@ Pour plus d'information, voir l'explication de
 
   * `ANALYSE` et `VACUUM` tables multiples
   * `LOCK TABLE view`
-  * Définir le seuil de conversion en _TOAST_ depuis l'ordre `CREATE TABLE`
-  * Opérateur `^@` pour les index _SP-GiST_ similaire à `LIKE`
-  * Option `recheck_on_update` pour les index fonctionnels
+  * Définir le seuil de conversion en _TOAST_ : \
+   `CREATE TABLE ... WITH (toast_tuple_target = N)`
 
 </div>
 
 <div class="notes">
 
+On peut à présent passer plusieurs tables en paramètre à `ANALYZE`, `VACUUM` ou
+`VACUUM FULL` :
+
 ```sql
-VACUUM t1, t2
+VACUUM VERBOSE t1, t2 ;
 ```
 
-FIXME
+Poser un `LOCK TABLE` sur une vue pose un verrou sur les différentes tables
+impliquées dans cette vue. L'utilisateur n'a besoin des droits que sur la vue
+et pas les tables (si le propriétaire de la vue a ces droits sur les tables.)
+
+Par défaut, les tables _TOAST_ stockent les valeurs de plus de 2 ko dans une
+table _TOAST_ séparée, et les compressent. Cela est transparent pour
+l'utilisateur. La version 11 permet de fixer une autre limite entre 128 et 8160
+octets. L'utilité est ponctuelle, le défaut étant proche de l'optimal.
+
 
 </div>
 
@@ -2333,14 +2425,18 @@ lecture à un outil de sauvegarde.
   * `pg_dumpall`
     * option `--encoding` pour spécifier l'encodage de sortie
     * `-g` ne sort  plus les permissions et les configurations de variables
-  * Ajouter `--create` à `pg_dump -Fp` ou `pg_restore` pour cela !
-   * Révisez vos scripts !
+    * Ajouter `--create` à `pg_dump -Fp` ou `pg_restore` pour cela !
+    * Révisez vos scripts !
+  * `pg_dump --load-via-partition-root` : partitions en bloc
   * `pg_basebackup`
     * option `--create-slot` pour créer un slot de réplication permanent
 
 </div>
 
 <div class="notes">
+
+`pg_dumpall` bénéficie d'une nouvelle option`--encoding` permettant de
+spécifier l'encodage de sortie d'un dump (utile notamment sur Windows).
 
 Les permissions par `GRANT` et `REVOKE` sur une base de données et les
 configurations de variables par `ALTER DATABASE SET` et `ALTER ROLE IN DATABASE
@@ -2349,13 +2445,21 @@ SET` sont à présent gérées par `pg_dump` et `pg_restore` et non plus par
 ces modifications qu'avec l'option `--create`. Vérifiez vos scripts de
 restauration !
 
-`pg_dumpall` bénéficie d'une nouvelle option permettant de spécifier l'encodage
-de sortie d'un dump.
+Avec l'option `--load-via-partition-root`, une table partitionnée est exportée
+en bloc et non partition par partition. Cela permet de réimporter une
+table partitionnée dans une table avec un partitionnement différent, ou sans
+partitionnement. Par défaut, sans cette option, les partitions sont exportées
+séparément, et, à la restauration, réimportées séparément, puis rattachées à
+la table partitionnée. Cela permet de paralléliser l'export et l'import.
+
+Une nouvelle option `--no-comment` permet aussi de supprimer les commentaires.
 
 Une nouvelle option `--create-slot` est disponible dans `pg_basebackup`
 permettant de créer directement un slot de réplication. Elle doit donc être
 utilisée en complément de l'option `--slot`. Le slot de réplication est
-conservé après la fin de la sauvegarde. Si le slot de réplication existe déjà,
+conservé après la fin de la sauvegarde et peut être celui que le serveur
+secondaire utilisera par la suite, réduisant ainsi les manipulations.
+Si le slot de réplication existe déjà,
 la commande `pg_basebackup` s’interrompt et affiche un message d'erreur.
 
 </div>
@@ -2389,9 +2493,9 @@ sur le serveur primaire
 
 <div class="slide-content">
 
-  * `pg_prewarm` : chargement de données en cache (PG ou OS)
+  * `pg_prewarm` : chargement de données en cache (_shared buffers_ ou OS)
   * En v11 :
-    * sauvegarde régulière des blocs dans le cache PG
+    * mémorisation régulière des blocs dans les _shared buffers_
     * chargement automatique de ces blocs au démarrage
 
 </div>
@@ -2539,7 +2643,7 @@ sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
 +----------------------+------------------------------------------------------+
 | pgCluu               | Oui |
 +----------------------+------------------------------------------------------+
-| ora2Pg               | En finalisation |
+| ora2Pg               | Oui |
 +----------------------+------------------------------------------------------+
 | powa-archivist       | oui |
 +----------------------+------------------------------------------------------+
@@ -2563,7 +2667,7 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 +----------------------+------------------------------------------------------+
 | pgCluu               | Oui |
 +----------------------+------------------------------------------------------+
-| ora2Pg               | En finalisation, support du partitionnement par _HASH_ en 19.1 |
+| ora2Pg               | Oui, support du partitionnement par _HASH_ en 19.1 |
 +----------------------+------------------------------------------------------+
 | powa-archivist       | oui, depuis la version 3.1.2 |
 +----------------------+------------------------------------------------------+
@@ -2593,30 +2697,30 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 <div class="slide-content">
 
   * Développement de la version 12 entamé durant l'été 2018
-  * ... quelques améliorations déjà présentes :
+  * Déjà présent ou à venir, **sans garantie** :
     * Amélioration du partitionnement
     * Amélioration du parallélisme
     * Amélioration du JIT
     * Index couvrants sur GiST
-    * Requêtes parallèles sur transactions `SERIALIZABLE`
     * Clause `SQL MERGE`
     * Filtrage des lignes pour la réplication logique
     * Support de GnuTLS
     * `ANALYZE nom_index`
-    * ...
+	* Pluggable Storage API : alternatives à MVCC ?
+    * ... 
 
 </div>
 
 <div class="notes">
 
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
-grandes étapes.
+grandes étapes. 
 
 Les _commit fests_ nous laissent entrevoir une continuité dans l'évolution des
 thèmes principaux suivants : parallélisme, partitionnement et JIT.
 
 Un bon nombre de commits ont déjà eu lieu. Vous pouvez consulter l'ensemble des
-modifications validées pour chaque commit fest :
+modifications validées (ou reportées...) pour chaque commit fest :
 
   * [juillet 2018](https://commitfest.postgresql.org/18/?status=4)
   * [septembre 2018](https://commitfest.postgresql.org/19/?status=4)
@@ -2627,12 +2731,14 @@ modifications validées pour chaque commit fest :
 Quelques sources :
 
   * [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
-  * [GnuTLS support](https://commitfest.postgresql.org/19/1277/)
-  * [Filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+  * [support de GnuTLS](https://commitfest.postgresql.org/19/1277/)
+  * [filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
+  * [le moteur zheap comme alternative à MVCC](https://www.slideshare.net/EnterpriseDB/postgres-vision-2018-the-promise-of-zheap)
 
 <div class="box warning">
-Tout cela est encore en développement et test, rien ne garantit que ces
-améliorations seront présentes dans la version finale de PostgreSQL 12 !
+Tout cela est encore en développement et test. Rien ne garantit que ces
+améliorations seront présentes dans la version finale de PostgreSQL 12 : si elles
+ne sont pas prêtes, elles seront rejetées ou repoussées.
 </div>
 
 </div>
@@ -2715,7 +2821,7 @@ Initializing database:                                     [  OK  ]
 ```
 
 Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
-RedHat et CentOS :
+Red Hat et CentOS :
 
 ```
 # service postgresql-11 start
@@ -2785,7 +2891,7 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 \newpage
 
-## Mise à jour d'une partition avec un `UPDATE`
+## Mise à jour d'une clé de partition avec UPDATE
 
 <div class="notes">
 
@@ -3477,7 +3583,7 @@ $ /usr/pgsql-10/bin/pgbench -h 127.0.0.1 -p 5432 -U bench \
 ### Clés primaires
 
 Il est fortement recommandé d'avoir une clé primaire **sur chaque table à
-répliquer**.  
+répliquer**.
 Si une PK est absente, les risques encourus sont :
 
   * volume de données écrites plus important ;
@@ -4164,7 +4270,7 @@ v11=# EXPLAIN ANALYSE SELECT * INTO numbers3 FROM numbers WHERE i < 10000;
 
 \newpage
 
-## Sauvegarde des droits avec `pg_dump`
+## Sauvegarde des droits avec pg_dump
 
 <div class="notes">
 
@@ -4414,7 +4520,7 @@ postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
 
 Le JIT est difficile à reproduire sur une machine de bureau. Les gains n'étant
 visible que pour des requêtes coûteuses, manipulant et agrégeant de grand volume
-de données.  
+de données.
 Dans le fichier de configuration `postgresql.conf`, monter les paramètres
 suivants au moins à :
 
