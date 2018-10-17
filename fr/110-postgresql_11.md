@@ -119,7 +119,7 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
   * Bêta 3 le 9 août
   * Bêta 4 le 17 septembre
   * Release Candidate 1 le 11 octobre
-  * Version : 18 octobre 2018
+  * Version finale : 18 octobre 2018
   * Plus de 1,5 millions de lignes de code C
   * Des centaines de contributeurs
 </div>
