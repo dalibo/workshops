@@ -1267,8 +1267,6 @@ uniquement. La version 10 l'avait étendue à d'autres nœuds.
 Des nœuds supplémentaires peuvent à présent être parallélisés, notamment ceux
 de type _Append_, qui servent aux `UNION ALL` notamment :
 
-FIXME
-
 **Jointure type _Hash_**
 
 Un nœud déjà parallélisé a été amélioré, le _Hash join_ (jointure par
@@ -1326,18 +1324,6 @@ v11=# EXPLAIN (COSTS off) SELECT * FROM a INNER JOIN b on (a.i=b.i)
 
 L'auteur de cette optimisation a écrit
 [un article assez complet](https://write-skew.blogspot.com/2018/01/parallel-hash-for-postgresql.html).
-
-**Opération `CREATE TABLE AS SELECT...`**
-
-FIXME
-
-**Opération `CREATE MATERIALIZED VIEW`**
-
-FIXME
-
-**Opération `SELECT INTO`**
-
-FIXME
 
 **Création d'index**
 
@@ -1668,8 +1654,6 @@ $ cat /tmp/t_write.csv
 5
 ```
 
-FIXME exécution de fichier ???
-
 </div>
 
 -----
@@ -1987,7 +1971,8 @@ Pour plus de détails, par exemple sur les curseurs :
 
 <div class="notes">
 
-FIXME
+Déclarer une variable en tant que `CONSTANT` ou `NOT NULL` permettra de
+supprimer un certain nombre de bugs.
 
 </div>
 
