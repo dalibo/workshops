@@ -1053,8 +1053,8 @@ choisie pour sa flexibilité.
 L'utilisation nécessite un PostgreSQL compilé avec l'option `--with-llvm` et
 l'installation des bibliothèques de LLVM. Avec les paquets du PGDG,
 c'est le cas par défaut sur Debian/Ubuntu. Sur
-CentOS/RedHat 7 il faut penser à installer le package `postgresql11-llvmjit`.
-CentOS/RedHat 6 ne permettent actuellement pas d’utiliser le JIT.
+CentOS/Red Hat 7 il faut penser à installer le package `postgresql11-llvmjit`.
+CentOS/Red Hat 6 ne permettent actuellement pas d’utiliser le JIT.
 
 Si PostgreSQL ne trouve pas les bibliothèques nécessaires, il ne renvoie pas
 d'erreur et continue sans tenter de JIT.
@@ -2065,7 +2065,7 @@ v11=# SELECT '3.141592'::jsonb::float;
 
 Une transformation a été ajoutée en PL/Perl pour transformer les champs jsonb en champs natif Perl.
 
-Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur RedHat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plperl`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plperl-11.0` sur Red Hat/CentOS et le paquet `postgresql-plperl-11` sur Debian/Ubuntu.
 
 Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
@@ -2101,7 +2101,7 @@ NOTICE:  jsonb keys are: '1' 'example'
 
 Une transformation a été ajoutée en PL/Python pour transformer les champs jsonb en champs natif Python.
 
-Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpyhton-11.0` sur RedHat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
+Cette fonctionnalité nécessite l'installation de l'extension `jsonb_plpython`. Celle-ci n'est pas installée par défaut. On doit installer le paquet `postgresql11-plpython-11.0` sur Red Hat/CentOS. Sur Debian/Ubuntu_ on pourra installer l'extension en version 2 et/ou 3 de Python en utilisant les paquets `postgresql-plpython-11` et `postgresql-plpython3-11`.
 
 Une fois l'extension activée, on précisera la transformation à utiliser pour charger les paramètres avec le mot clé `TRANSFORM` :
 
@@ -2658,7 +2658,7 @@ sujet](https://paquier.xyz/postgresql-2/postgres-11-secondary-checkpoint/).
 +----------------------+------------------------------------------------------+
 | pgCluu               | Oui |
 +----------------------+------------------------------------------------------+
-| ora2Pg               | En finalisation |
+| ora2Pg               | Oui |
 +----------------------+------------------------------------------------------+
 | powa-archivist       | oui |
 +----------------------+------------------------------------------------------+
@@ -2682,7 +2682,7 @@ Voici une grille de compatibilité des outils au 1er octobre 2018 :
 +----------------------+------------------------------------------------------+
 | pgCluu               | Oui |
 +----------------------+------------------------------------------------------+
-| ora2Pg               | En finalisation, support du partitionnement par _HASH_ en 19.1 |
+| ora2Pg               | Oui, support du partitionnement par _HASH_ en 19.1 |
 +----------------------+------------------------------------------------------+
 | powa-archivist       | oui, depuis la version 3.1.2 |
 +----------------------+------------------------------------------------------+
@@ -2746,7 +2746,7 @@ modifications validées (ou reportées...) pour chaque commit fest :
 Quelques sources :
 
   * [clause SQL MERGE](https://commitfest.postgresql.org/19/1446/)
-  * [Support de GnuTLS](https://commitfest.postgresql.org/19/1277/)
+  * [support de GnuTLS](https://commitfest.postgresql.org/19/1277/)
   * [filtrage des ligne pour la réplication logique](https://commitfest.postgresql.org/19/1710/)
   * [le moteur zheap comme alternative à MVCC](https://www.slideshare.net/EnterpriseDB/postgres-vision-2018-the-promise-of-zheap)
 
@@ -2836,7 +2836,7 @@ Initializing database:                                     [  OK  ]
 ```
 
 Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
-RedHat et CentOS :
+Red Hat et CentOS :
 
 ```
 # service postgresql-11 start
