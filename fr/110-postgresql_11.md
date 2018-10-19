@@ -179,6 +179,8 @@ des articles en anglais :
   * [Waiting for PostgreSQL 11](https://www.depesz.com/), articles de blog de Teodor Sigaev tout le long du développement de la v11 entre septembre 2017 et juin 2018
   * [Postgres 11 Highlight](https://paquier.xyz/tag/11/), série d'articles de Michael Paquier sur la même période
 
+En français, Jean-Christophe Arnu a donné
+[une conférence au PG Day de Marseille en juin](https://www.youtube.com/watch?v=tVNo_RIZjdE).
 
 </div>
 
@@ -4519,7 +4521,7 @@ postgres=#  EXPLAIN (ANALYZE,BUFFERS) select * from matable ;
 <div class="notes">
 
 Le JIT est difficile à reproduire sur une machine de bureau. Les gains n'étant
-visible que pour des requêtes coûteuses, manipulant et agrégeant de grand volume
+visibles que pour des requêtes coûteuses, manipulant et agrégeant un grand volume
 de données.
 Dans le fichier de configuration `postgresql.conf`, monter les paramètres
 suivants au moins à :
