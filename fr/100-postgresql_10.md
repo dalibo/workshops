@@ -10,7 +10,7 @@ keywords:
 - workshop
 linkcolor:
 
-                                                                      
+
 licence : PostgreSQL                                                            
 author: Dalibo & Contributors                                                   
 revision: 18.03
@@ -184,7 +184,7 @@ des articles en anglais :
 Ancienne numérotation exprimée sur 3 nombres :
 
 ```
-  9 . 6 . 3 
+  9 . 6 . 3
   Majeure1 . Majeure2 . Mineure
 ```
 
@@ -339,10 +339,10 @@ plus nécessaire de redémarrer l'instance pour activer la réplication.
 | wal_level             | minimal  | replica |
 +-----------------------+----------+---------+  
 | max_wal_senders       | 0        | 10      |
-+-----------------------+----------+---------+ 
-| max_replication_slots | 0        | 10      | 
-+-----------------------+----------+---------+ 
-| hot_standby           | off      | on      | 
++-----------------------+----------+---------+
+| max_replication_slots | 0        | 10      |
++-----------------------+----------+---------+
+| hot_standby           | off      | on      |
 +-----------------------+----------+---------+  
 
 </div>
@@ -379,10 +379,10 @@ poussée du partitionnement.
 
 <div class="notes">
 L'ancienne méthode de partitionnement dans PostgreSQL se base sur un
-contournement de la fonctionnalité d'héritage. L'idée est de créer des 
+contournement de la fonctionnalité d'héritage. L'idée est de créer des
 tables filles d'une table parent par le biais de l'héritage. De ce fait,
 une lecture de la table mère provoquera une lecture des données des tables
-filles. Un ajout ultérieur à PostgreSQL a permis de faire en sorte que 
+filles. Un ajout ultérieur à PostgreSQL a permis de faire en sorte que
 certaines tables filles ne soient pas lues si une contrainte CHECK permet
 de s'assurer qu'elles ne contiennent pas les données recherchées. Les
 lectures sont donc assurées par le biais de l'optimiseur.
@@ -395,7 +395,7 @@ tant qu'on ne met pas à jour les colonnes de la clé de partitionnement.
 Enfin, les suppressions sont gérées correctement de façon automatique.
 
 Tout ceci génère un gros travail de mise en place. La maintenance n'est
-pas forcément plus aisée, car il est nécessaire de s'assurer que les 
+pas forcément plus aisée, car il est nécessaire de s'assurer que les
 partitions sont bien créées en avance, à moins de laisser ce travail
 au trigger sur insertion.
 
@@ -532,7 +532,7 @@ postgres=# INSERT INTO t1 VALUES (5);
 INSERT 0 1
 
 postgres=# SELECT * FROM ONLY t1;
- c1 | c2 
+ c1 | c2
 ----+----
 (0 ligne)
 
@@ -721,7 +721,7 @@ ANALYZE
 
 postgres=# SELECT relname,relispartition,relkind,reltuples
            FROM pg_class WHERE relname LIKE 't2%';
- relname | relispartition | relkind | reltuples 
+ relname | relispartition | relkind | reltuples
 ---------+----------------+---------+-----------
  t2      | f              | p       |         0
  t2_0    | t              | r       |         2
@@ -1234,18 +1234,18 @@ usesysid         | 16405
 usename          | repliuser
 application_name | ma_souscription
 client_addr      | 127.0.0.1
-client_hostname  | 
+client_hostname  |
 client_port      | 59272
 backend_start    | 2017-08-11 16:15:01.505706+02
-backend_xmin     | 
+backend_xmin     |
 state            | streaming
 sent_lsn         | 0/9CA63FA0
 write_lsn        | 0/9CA63FA0
 flush_lsn        | 0/9CA63FA0
 replay_lsn       | 0/9CA63FA0
-write_lag        | 
-flush_lag        | 
-replay_lag       | 
+write_lag        |
+flush_lag        |
+replay_lag       |
 sync_priority    | 0
 sync_state       | async
 ```
@@ -1280,7 +1280,7 @@ database            | bench
 temporary           | f
 active              | t
 active_pid          | 26537
-xmin                | 
+xmin                |
 catalog_xmin        | 115734
 restart_lsn         | 0/9CA63F68
 confirmed_flush_lsn | 0/9CA63FA0
@@ -1347,18 +1347,18 @@ usesysid         | 16405
 usename          | repliuser
 application_name | ma_souscription
 client_addr      | 127.0.0.1
-client_hostname  | 
+client_hostname  |
 client_port      | 59272
 backend_start    | 2017-08-11 16:15:01.505706+02
-backend_xmin     | 
+backend_xmin     |
 state            | streaming
 sent_lsn         | 0/A6131DA0
 write_lsn        | 0/A6131DA0
 flush_lsn        | 0/A611DA10
 replay_lsn       | 0/A6131DA0
-write_lag        | 
-flush_lag        | 
-replay_lag       | 
+write_lag        |
+flush_lag        |
+replay_lag       |
 sync_priority    | 0
 sync_state       | async
 ```
@@ -1452,7 +1452,7 @@ postgres=# EXPLAIN (ANALYZE, BUFFERS, COSTS off) SELECT i FROM test ORDER BY i D
 
 <div class="slide-content">
   * Exécution d'un agrégat par hachage (HashAggregate)
-    * lors de l'utilisation d'un ensemble de regroupement 
+    * lors de l'utilisation d'un ensemble de regroupement
       (par exemple, un GROUP BY)
   * Test avec installation par défaut et disques SSD :
     * 9.6 : 4,9 secondes
@@ -1628,7 +1628,7 @@ La distribution des données est très simple; il n'y a que 100 valeurs
 différentes dans chaque colonne, distribuées de manière uniforme.
 
 L'exemple suivant montre le résultat de l'estimation d'une condition `WHERE` sur
-la colonne a : 
+la colonne a :
 
 ```sql
 postgres=# EXPLAIN (ANALYZE, TIMING OFF) SELECT * FROM t WHERE a = 1;
@@ -1758,7 +1758,7 @@ table qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 qui doit être parcourue pour qu'un parcours parallèle soit envisagé.
 
 `max_parallel_workers` positionne le nombre maximum de workers que le système
-peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8. 
+peut supporter pour le besoin des requêtes parallèles. La valeur par défaut est 8.
 Lorsque cette valeur est augmentée ou diminuée, pensez également à modifier
 `max_parallel_workers_per_gather`.
 
@@ -1801,7 +1801,7 @@ du fichier présent sur le disque et non de la configuration en cours !
 ```sql
 postgres=# SELECT type,database,user_name,auth_method FROM pg_hba_file_rules;
 
- line_number | type  |   database    | user_name | auth_method 
+ line_number | type  |   database    | user_name | auth_method
 -------------+-------+---------------+-----------+-------------
           84 | local | {all}         | {all}     | trust       
           86 | host  | {all}         | {all}     | trust       
@@ -1824,7 +1824,7 @@ question-réponse, qui empêche le _sniffing_ de mot de passe sur les connexions
 non fiables. Cette méthode est plus sûre que la méthode md5, mais peut ne pas
 être supportée par d'anciens clients.
 
-Pour plus d'information à ce sujet, vous pouvez consulter : 
+Pour plus d'information à ce sujet, vous pouvez consulter :
 [SCRAM-SHA-256](https://dali.bo/support-scram-sha-256-authentication)
 </div>
 
@@ -1862,7 +1862,7 @@ l'opérateur booléen `OR`. Depuis la version 10, il est possible de combiner de
 politiques permissives avec des politiques restrictives (combinées en utilisant
 l'opérateur booléen `AND`).
 
-**Remarque** 
+**Remarque**
 
 Afin de rendre l'exemple suivant plus lisible, le prompt psql a été modifié avec
 la commande suivante :
@@ -1917,7 +1917,7 @@ u1@db1=> CREATE POLICY compte_admins ON comptes
 CREATE POLICY
 
 u1@db1=> SELECT * FROM comptes;
- admin | societe | contact_email 
+ admin | societe | contact_email
 -------+---------+---------------
  u1    | dalibo  | u1@dalibo.com
  u2    | dalibo  | u2@dalibo.com
@@ -1933,7 +1933,7 @@ u1@db1=> \c db1 u2
 You are now connected to database "db1" as user "u2".
 
 u2@db1=> SELECT * FROM comptes;
- admin | societe | contact_email 
+ admin | societe | contact_email
 -------+---------+---------------
  u2    | dalibo  | u2@dalibo.com
 (1 row)
@@ -1956,7 +1956,7 @@ u1@db1=> \c db1 u2
 You are now connected to database "db1" as user "u2".
 
 u2@db1=> SELECT * FROM comptes;
- admin | societe | contact_email 
+ admin | societe | contact_email
 -------+---------+---------------
  u2    | dalibo  | u2@dalibo.com
  u3    | paris   | u3@paris.fr
@@ -2006,7 +2006,7 @@ u1@db1=> \c db1 u2
 You are now connected to database "db1" as user "u2".
 
 u2@db1=> SELECT * FROM comptes;
- admin | societe | contact_email 
+ admin | societe | contact_email
 -------+---------+---------------
  u2    | dalibo  | u2@dalibo.com
 (1 row)
@@ -2035,6 +2035,7 @@ Le plan d'exécution indique bien l'application de l'opérateur booléen `AND`.
 </div>
 
 <div class="notes">
+
 PostgreSQL fournit une série de rôles par défaut qui donnent accès à certaines
 informations et fonctionnalités privilégiées, pour lesquelles il est
 habituellement nécessaire d'être super-utilisateur pour en profiter. Les
@@ -2056,11 +2057,11 @@ La version 10 implémente les nouveaux rôles suivants :
 |                      | pg_read_all_settings, pg_read_all_stats et pg_stat_scan_tables. |
 +----------------------+------------------------------------------------------+
 | pg_read_all_settings | Lit toutes les variables de configuration, y compris celles normalement visibles des seuls super-utilisateurs. |
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 | pg_read_all_stats    | Lit toutes les vues pg_stat_* et utilise plusieurs extensions relatives aux statistiques, y compris celles normalement visibles des seuls super-utilisateurs. |
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 | pg_stat_scan_tables  | Exécute des fonctions de monitoring pouvant prendre des verrous ACCESS SHARE sur les tables, potentiellement pour une longue durée. |
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 
 </div>
 
@@ -2069,6 +2070,7 @@ La version 10 implémente les nouveaux rôles suivants :
 ## Administration
 
 <div class="slide-content">
+
   * pg_stat_activity
   * Architecture
   * SQL/MED
@@ -2080,6 +2082,7 @@ La version 10 implémente les nouveaux rôles suivants :
 </div>
 
 <div class="notes">
+
 </div>
 
 -----
@@ -2087,6 +2090,7 @@ La version 10 implémente les nouveaux rôles suivants :
 ### pg_stat_activity
 
 <div class="slide-content">
+
   * Affichage des processus auxiliaires
     * nouvelle colonne `backend_type`
   * Nouveaux types d'événements pour lesquels le processus est en attente
@@ -2101,6 +2105,7 @@ La version 10 implémente les nouveaux rôles suivants :
 </div>
 
 <div class="notes">
+
 `pg_stat_activity` n'affichait que les processus backend, autrement dit les
 processus gérant la communication avec les clients, et donc responsables de
 l'exécution des requêtes SQL. En version 10, cette vue affiche en plus les
@@ -2158,6 +2163,7 @@ mis à jour.
 ### Architecture
 
 <div class="slide-content">
+
   * Amélioration des options de connexion de la librairie *libpq* :
 ```
 psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session_attrs=any"
@@ -2167,7 +2173,8 @@ psql --dbname="postgresql://127.0.0.1:5432,127.0.0.1:5433/ma_db?target_session_a
 </div>
 
 <div class="notes">
-**Amélioration des options de connexion de la librairie libpq **
+
+**Amélioration des options de connexion de la librairie libpq**
 
 Il est possible de spécifier plusieurs instances aux options de connexions host et port.
 
@@ -2206,7 +2213,7 @@ peut désormais être créé temporairement :
 
 ```sql
 postgres=# SELECT pg_create_physical_replication_slot('workshop', true, true);
-pg_create_physical_replication_slot 
+pg_create_physical_replication_slot
 -------------------------------------
 (workshop,0/1620288)
 (1 row)
@@ -2263,6 +2270,7 @@ au collationnement, pensez à vérifier son bon fonctionnement.
 ### SQL/MED, Foreign Data Wrappers
 
 <div class="slide-content">
+
   * `file_fdw`
     * Récupération du résultat d'un programme comme entrée
   * `postgres_fdw`
@@ -2270,12 +2278,13 @@ au collationnement, pensez à vérifier son bon fonctionnement.
 </div>
 
 <div class="notes">
+
 **file_fdw : exemple**
 
 Soit le script bash suivant :
 
 ```bash
-$ cat /opt/postgresql/file_fdw.sh 
+$ cat /opt/postgresql/file_fdw.sh
 #!/bin/bash
 for (( i=0; i <= 1000; i++ ))
 do
@@ -2296,7 +2305,7 @@ CREATE SERVER
 Associons ensuite une table étrangère au script bash :
 
 ```sql
-postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10)) 
+postgres=# CREATE FOREIGN TABLE tfile1 (id NUMERIC, val VARCHAR(10))
              SERVER fs OPTIONS (program '/opt/postgresql/file_fdw.sh', delimiter ',');
 CREATE FOREIGN TABLE
 ```
@@ -2351,7 +2360,7 @@ CREATE EXTENSION
 Création du serveur distant (ici notre base *db1* locale) :
 
 ```sql
-postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw 
+postgres=# CREATE SERVER fs1 FOREIGN DATA WRAPPER postgres_fdw
 	     OPTIONS (host '127.0.0.1', port '5432', dbname 'db1');
 CREATE SERVER
 ```
@@ -2375,7 +2384,7 @@ Vérification de son bon fonctionnement :
 
 ```sql
 postgres=# SELECT * FROM remote_t1 LIMIT 3;
- c1 
+ c1
 ----
   0
   1
@@ -2410,7 +2419,7 @@ postgres=# EXPLAIN (VERBOSE, COSTS off) SELECT COUNT(*), AVG(c1), SUM(c1) FROM r
 (5 rows)
 ```
 
-Pour plus d'information à ce sujet, vous pouvez consulter : 
+Pour plus d'information à ce sujet, vous pouvez consulter :
 [postgres_fdw: Push down aggregates to remote servers](https://dali.bo/waiting-for-postgresql-10-postgres_fdw-push-down-aggregates-to-remote-servers)
 </div>
 
@@ -2419,17 +2428,18 @@ Pour plus d'information à ce sujet, vous pouvez consulter :
 ### Quorum réplication synchrone
 
 <div class="slide-content">
+
   * Possibilités existantes de réplication synchrone avec une liste de plusieurs esclaves
-    * Tous : 
+    * Tous :
 
        `synchronous_standby_names = (s1, s2, s3, s4)`
 
-    * Certains par ordre de priorité : 
+    * Certains par ordre de priorité :
 
        `synchronous_standby_names = [FIRST] 3 (s1, s2, s3, s4)`
 
   * Nouveauté
-    * Certains sur la base d'un quorum : 
+    * Certains sur la base d'un quorum :
 
        `synchronous_standby_names = [ANY] 3 (s1, s2, s3, s4)`
 </div>
@@ -2466,6 +2476,7 @@ aient répondu, quels qu'ils soient.
 ### Changements dans pg_basebackup
 
 <div class="slide-content">
+
   * Suppression de l'option `-x`
   * Modification de la méthode de transfert des WAL par défaut
     * `none` : pas de récupération des WAL
@@ -2477,6 +2488,7 @@ aient répondu, quels qu'ils soient.
 </div>
 
 <div class="notes">
+
 Le projet PostgreSQL a considéré que dans la majeure partie des cas, les
 utilisateurs de `pg_basebackup` souhaitaient obtenir une copie cohérente des
 données, sans dépendre de l'archivage. La méthode `stream` est donc devenue le
@@ -2488,12 +2500,14 @@ choix par défaut.
 ### pg_receivewal
 
 <div class="slide-content">
+
   * Gestion de la compression dans `pg_receivewal`
     * niveau 0 : pas de compression
     * niveau 9 : meilleure compression possible
 </div>
 
 <div class="notes">
+
 L'option `-Z`/`--compress` active la compression des journaux de transaction, et
 spécifie le niveau de compression (de 0 à 9, 0 étant l'absence de compression et
 9 étant la meilleure compression). Le suffixe .gz sera automatiquement ajouté à
@@ -2505,12 +2519,14 @@ tous les noms de fichiers.
 ### Index Hash
 
 <div class="slide-content">
+
   * Journalisation
   * Amélioration des performances
   * Amélioration de l'efficacité sur le grossissement de ces index
 </div>
 
 <div class="notes">
+
 Les index de type Hash sont désormais journalisés. Ils résistent donc
 désormais aux éventuels crashs et sont utilisables sur un environnement
 répliqué.
@@ -2534,6 +2550,7 @@ TO nouvelle_valeur_enum;
 </div>
 
 <div class="notes">
+
 Exemple :
 
 ```sql
@@ -2552,6 +2569,7 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 ## Utilisateurs
 
 <div class="slide-content">
+
   * Full Text Search sur du json
   * Nouvelle fonction XMLTABLE
   * psql, nouvelles méta-commandes
@@ -2568,11 +2586,13 @@ Documentation complète : [ALTER TYPE](https://dali.bo/sql-altertype)
 ### Full Text Search sur du json
 
 <div class="slide-content">
+
   * Type `json` et `jsonb`
   * Impacte les fonctions `ts_headline()` et `to_tsvector()`
 </div>
 
 <div class="notes">
+
 Les fonctions `ts_headline()` et `to_tsvector()` peuvent désormais être
 utilisées sur des colonnes de type *JSON* et *JSONB*.
 
@@ -2685,11 +2705,13 @@ Plus d'information : [Full Text Search support for json and jsonb](https://dali.
 ### XMLTABLE
 
 <div class="slide-content">
+
   * Transformation d'un document XML en table
   * Nécessite libxml
 </div>
 
 <div class="notes">
+
 La fonction `xmltable()` produit une table basée sur la valeur XML donnée. Cette
 table pourra ensuite être utilisée par exemple comme table primaire d'une clause
 `FROM`.
@@ -2729,7 +2751,7 @@ FROM
             last_name text,
             nick_name text PATH 'nick'
     ) AS decoded;
-    
+
 first_name |  last_name  |    nick     
 ------------+-------------+-------------
 Hubert     | Lubaczewski | depesz
@@ -2750,11 +2772,13 @@ Pour en savoir plus :
 ### psql, nouvelles méta-commandes
 
 <div class="slide-content">
+
   * \\gx, force l'affichage étendu de \\g
   * structure conditionnelle \\if, \\elif, \\else, \\endif
 </div>
 
 <div class="notes">
+
 **\\gx**
 
 \\gx est équivalent à \\g, mais force l'affichage étendu pour cette requête.
@@ -2763,14 +2787,14 @@ Exemple :
 
 ```sql
 postgres=# SELECT * FROM t1 LIMIT 2;
- a | b 
+ a | b
 ---+---
  0 | 0
  0 | 0
 (2 rows)
 
 postgres=# \g
- a | b 
+ a | b
 ---+---
  0 | 0
  0 | 0
@@ -2805,6 +2829,7 @@ Pour en savoir plus :
 ### Tables de transition
 
 <div class="slide-content">
+
   * Pour les triggers de type AFTER et de niveau STATEMENT
   * Possibilité de stocker les lignes avant et/ou après modification
     * `REFERENCING OLD TABLE`
@@ -2840,7 +2865,7 @@ pour but de récupérer les enregistrements supprimés de la table t1.
 postgres=# CREATE TABLE t1 (c1 integer, c2 text);
 CREATE TABLE
 
-postgres=# CREATE TABLE archives (id integer GENERATED ALWAYS AS IDENTITY, 
+postgres=# CREATE TABLE archives (id integer GENERATED ALWAYS AS IDENTITY,
 			dlog timestamp DEFAULT now(),
   			t1_c1 integer, t1_c2 text);
 CREATE TABLE
@@ -2894,9 +2919,9 @@ INSERT 0 1000000
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
                                 QUERY PLAN
 --------------------------------------------------------------------------
- Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6)
                (actual time=781.612..781.612 rows=0 loops=1)
-   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6)
                        (actual time=0.113..104.328 rows=1000000 loops=1)
  Planning time: 0.079 ms
  Trigger tr1: time=1501.688 calls=1
@@ -2950,9 +2975,9 @@ INSERT 0 1000000
 postgres=# EXPLAIN (ANALYZE) DELETE FROM t1;
                                 QUERY PLAN
 --------------------------------------------------------------------------
- Delete on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+ Delete on t1  (cost=0.00..14241.98 rows=796798 width=6)
                (actual time=1049.420..1049.420 rows=0 loops=1)
-   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6) 
+   ->  Seq Scan on t1  (cost=0.00..14241.98 rows=796798 width=6)
                        (actual time=0.061..121.701 rows=1000000 loops=1)
  Planning time: 0.096 ms
  Trigger tr1: time=7709.725 calls=1000000
@@ -3032,6 +3057,7 @@ type_donnee`.
 ### Colonne identity
 
 <div class="slide-content">
+
   * Nouvelle contrainte `IDENTITY`
   * Similaire au type `serial` mais conforme au standard SQL
   * Géré par PostgreSQL ou modifiable :
@@ -3043,6 +3069,7 @@ CREATE TABLE t2 (id int PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY) ;
 </div>
 
 <div class="notes">
+
 La contrainte `GENERATED AS IDENTITY` a été ajoutée à l'ordre `CREATE TABLE`
 pour assigner automatiquement une valeur unique à une colonne.
 
@@ -3058,6 +3085,7 @@ Pour en savoir plus :
 ## Compatibilité
 
 <div class="slide-content">
+
   * Changements dans les outils
   * Les outils de la sphère Dalibo
 </div>
@@ -3070,8 +3098,9 @@ Pour en savoir plus :
 ### Changements dans les outils
 
 <div class="slide-content">
+
   * Changements de comportement :
-    * `pg_ctl` attend désormais que l'instance soit démarrée avant de rendre 
+    * `pg_ctl` attend désormais que l'instance soit démarrée avant de rendre
       la main (identique au comportement à l'arrêt)
 
   * Fin de support ou suppression :
@@ -3083,6 +3112,7 @@ Pour en savoir plus :
 </div>
 
 <div class="notes">
+
 Chaque version majeure introduit son lot d'incompatibilités, et il demeure
 important d'opérer régulièrement, en fonction des contraintes métier, des mises
 à jour de PostgreSQL.
@@ -3093,9 +3123,10 @@ important d'opérer régulièrement, en fonction des contraintes métier, des mi
 ### Les outils de la sphère Dalibo
 
 <div class="slide-content">
+
 Les outils Dalibo sont à présent compatibles :
 
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 | Outil                | Compatibilité avec PostgreSQL 10 |
 +======================+======================================================+
 | pgBadger             | Oui |
@@ -3107,7 +3138,7 @@ Les outils Dalibo sont à présent compatibles :
 | pg_stat_kcache       | Oui, depuis 2.0.3 |
 +----------------------+------------------------------------------------------+
 | ldap2pg              | Oui |
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 
 </div>
 
@@ -3115,9 +3146,9 @@ Les outils Dalibo sont à présent compatibles :
 
 Voici une grille de compatibilité des outils Dalibo au 31 janvier 2017 :
 
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 | Outil                | Compatibilité avec PostgreSQL 10 |
-+======================+======================================================+ 
++======================+======================================================+
 | pg_activity          | Oui, depuis 1.4.0 |
 +----------------------+------------------------------------------------------+
 | check_pgactivity     | Oui, depuis 2.3 |
@@ -3141,7 +3172,7 @@ Voici une grille de compatibilité des outils Dalibo au 31 janvier 2017 :
 | temboard             | À venir dans 1.0a3 |
 +----------------------+------------------------------------------------------+
 | ldap2pg              | Oui |
-+----------------------+------------------------------------------------------+ 
++----------------------+------------------------------------------------------+
 
 </div>
 
@@ -3150,6 +3181,7 @@ Voici une grille de compatibilité des outils Dalibo au 31 janvier 2017 :
 ## Futur
 
 <div class="slide-content">
+
   * Branche de développement de la version 11 créée le 15 août
     * ... quelques améliorations déjà présentes
   * Nouvelle fonctionnalité de préchauffage automatique du cache pour
@@ -3166,6 +3198,7 @@ Voici une grille de compatibilité des outils Dalibo au 31 janvier 2017 :
 </div>
 
 <div class="notes">
+
 La [roadmap](https://dali.bo/pg-roadmap) du projet détaille les prochaines
 grandes étapes.
 
@@ -3191,6 +3224,7 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 ## Questions
 
 <div class="slide-content">
+
 `SELECT * FROM questions;`
 </div>
 
@@ -3198,6 +3232,7 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 # Atelier
 
 <div class="slide-content">
+
 À présent, place à l'atelier...
 
   * Installation
@@ -3218,10 +3253,10 @@ Un bon nombre de commits ont déjà eu lieu, que vous pouvez consulter :
 ## Installation
 
 <div class="notes">
-Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo 
+Les machines de la salle de formation utilisent CentOS 6. L'utilisateur dalibo
 peut utiliser sudo pour les opérations système.
 
-Le site postgresql.org propose son propre dépôt RPM, nous allons donc 
+Le site postgresql.org propose son propre dépôt RPM, nous allons donc
 l'utiliser pour installer PostgreSQL 10.
 
 On commence par installer le RPM du dépôt `pgdg-centos10-10-1.noarch.rpm` :
@@ -3249,7 +3284,7 @@ On peut ensuite initialiser une instance :
 Initializing database:                                     [  OK  ]
 ```
 
-Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous 
+Enfin, on démarre l'instance, car ce n'est par défaut pas automatique sous
 RedHat et CentOS :
 
 ```
@@ -3274,7 +3309,7 @@ postgres=# SELECT version();
 (1 ligne)
 ```
 
-On répète ensuite le processus d'installation de façon à installer PostgreSQL 
+On répète ensuite le processus d'installation de façon à installer PostgreSQL
 9.6 aux côtés de PostgreSQL 10.
 
 Le RPM du dépôt est `pgdg-centos96-9.6-3.noarch.rpm` :
@@ -3310,7 +3345,7 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 
 ```
 \pset columns 80
-\pset format wrapped 
+\pset format wrapped
 ```
 </div>
 
@@ -3319,6 +3354,7 @@ Dans cet atelier, les différentes sorties des commandes `psql` utilisent :
 ## Découverte de PostgreSQL 10
 
 <div class="notes">
+
 Vous pouvez à présent consulter l'arborescence des répertoires et fichiers.
 
 Vous devriez pouvoir observer quelque chose de similaire :
@@ -3359,13 +3395,13 @@ drwx------.  2 postgres postgres  4096 Jul 25 14:43 pg_xact
 
 On peut constater la présence des répertoires `pg_wal` et `pg_xact`.
 
-Au niveau des fonctions, on peut également constater les effets des différents 
+Au niveau des fonctions, on peut également constater les effets des différents
 renommages. Par exemple :
 
 ```sql
 postgres=# \df *switch_xlog*
                        List of functions
- Schema | Name | Result data type | Argument data types | Type 
+ Schema | Name | Result data type | Argument data types | Type
 --------+------+------------------+---------------------+------
 (0 rows)
 
@@ -3383,6 +3419,7 @@ postgres=# \df *switch_wal*
 ## Authentification avec SCRAM-SHA-256
 
 <div class="notes">
+
 Créons tout d'abord un utilisateur sans préciser l'algorithme de chiffrement :
 
 ```sql
@@ -3390,12 +3427,12 @@ postgres=# CREATE USER testmd5 WITH PASSWORD 'XXX';
 CREATE ROLE
 ```
 
-Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL, 
-on peut constater que seuls `md5` et `scram-sha-256` sont supportés si l'on 
+Si on veut modifier l'algorithme par défaut au niveau de la session PostgreSQL,
+on peut constater que seuls `md5` et `scram-sha-256` sont supportés si l'on
 demande à psql de compléter l'ordre SQL à l'aide de la touche tabulation :
 
 ```sql
-postgres=# SET password_encryption TO <tab> 
+postgres=# SET password_encryption TO <tab>
 DEFAULT          md5              "scram-sha-256"
 ```
 
@@ -3409,7 +3446,7 @@ postgres=#  CREATE USER testscram WITH PASSWORD 'YYY';
 CREATE ROLE
 ```
 
-Si on regarde la vue `pg_shadow`, on peut constater que l'algorithme est bien 
+Si on regarde la vue `pg_shadow`, on peut constater que l'algorithme est bien
 différent :
 
 ```sql
@@ -3429,13 +3466,13 @@ postgres=# ALTER SYSTEM SET password_encryption TO "scram-sha-256";
 ALTER SYSTEM
 
 postgres=# SELECT pg_reload_conf();
- pg_reload_conf 
+ pg_reload_conf
 ----------------
  t
 (1 row)
 ```
 
-Il est possible d'utiliser une authentification `md5` (dans le fichier 
+Il est possible d'utiliser une authentification `md5` (dans le fichier
 `pg_hba.conf`) avec un mot de passe `scram-sha-256`, mais pas l'inverse.
 </div>
 
@@ -3444,7 +3481,8 @@ Il est possible d'utiliser une authentification `md5` (dans le fichier
 ## Vue pg_hba_file_rules
 
 <div class="notes">
-La vue `pg_hba_file_rules` permet de consulter en lecture les règles d'accès 
+
+La vue `pg_hba_file_rules` permet de consulter en lecture les règles d'accès
 qui sont configurées :
 
 ```sql
@@ -3469,7 +3507,8 @@ Attention, on voit les lignes dès lors qu'elles sont présentes dans le fichier
 ## Vue pg_sequence
 
 <div class="notes">
-On commence par se connecter à PostgreSQL de façon à créer une base de données 
+
+On commence par se connecter à PostgreSQL de façon à créer une base de données
 de test sur les 2 instances en version 9.6 (`workshop96`) et 10 (`workshop10`) :
 
 ```sql
@@ -3480,7 +3519,7 @@ postgres=# \c workshopXX
 You are now connected to database "workshopXX" as user "postgres".
 ```
 
-On peut alors créer deux tables `t1` et `t2` dans l'instance de la version 10 
+On peut alors créer deux tables `t1` et `t2` dans l'instance de la version 10
 en utilisant une colonne d'identité :
 
 ```sql
@@ -3519,14 +3558,14 @@ workshop10=# \d t1
  Column |  Type   | Collation | Nullable |            Default             
 --------+---------+-----------+----------+--------------------------------
  id     | integer |           | not null | generated by default as identity
- data   | text    |           |          | 
+ data   | text    |           |          |
 
 workshop10=# \d t2
                             Table "public.t2"
  Column |  Type   | Collation | Nullable |            Default             
 --------+---------+-----------+----------+--------------------------------
  id     | integer |           | not null | generated by default as identity
- data   | text    |           |          | 
+ data   | text    |           |          |
 ```
 
 ```sql
@@ -3535,17 +3574,17 @@ workshop96=# \d t1
  Column |  Type   |                    Modifiers                    
 --------+---------+-------------------------------------------------
  id     | integer | not null default nextval('t1_id_seq'::regclass)
- data   | text    | 
+ data   | text    |
 
 workshop96=# \d t2
                             Table "public.t2"
  Column |  Type   |                    Modifiers                    
 --------+---------+-------------------------------------------------
  id     | integer | not null default nextval('t2_id_seq'::regclass)
- data   | text    | 
+ data   | text    |
 ```
 
-Dans l'instance utilisant PostgreSQL 9.6, on a uniquement accès aux contenus 
+Dans l'instance utilisant PostgreSQL 9.6, on a uniquement accès aux contenus
 des séquences :
 
 ```sql
@@ -3604,7 +3643,7 @@ is_cycled     | f
 is_called     | t
 ```
 
-Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des 
+Dans l'instance utilisant PostgreSQL 10, on a également accès aux contenus des
 séquences, mais on constate qu'il y a moins d'informations :
 
 ```sql
@@ -3621,8 +3660,8 @@ log_cnt    | 13
 is_called  | t
 ```
 
-Une requête avec un UNION ALL reste possible pour agréger les résultats mais la 
-table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à 
+Une requête avec un UNION ALL reste possible pour agréger les résultats mais la
+table `pg_sequence` et la vue `pg_sequences` permettent d'accéder facilement à
 de telles informations :
 
 ```sql
@@ -3679,6 +3718,7 @@ last_value    | 20
 ## Modifications dans pg_basebackup
 
 <div class="notes">
+
 On commence par regarder l'aide :
 
 ```
@@ -3745,15 +3785,15 @@ On vérifie ensuite qu'il a bien été créé :
 workshop10=# SELECT * FROM pg_replication_slots;
 -[ RECORD 1 ]-------+-----------
 slot_name           | reptest
-plugin              | 
+plugin              |
 slot_type           | physical
-datoid              | 
-database            | 
+datoid              |
+database            |
 temporary           | f
 active              | f
-active_pid          | 
-xmin                | 
-catalog_xmin        | 
+active_pid          |
+xmin                |
+catalog_xmin        |
 restart_lsn         | 3/B7000C88
 confirmed_flush_lsn |
 ```
@@ -3773,13 +3813,13 @@ pg_basebackup: waiting for background process to finish streaming ...
 pg_basebackup: base backup completed
 ```
 
-Il faut noter que les slots de réplication temporaires sont incompatibles par 
-nature. En effet, le slot sera supprimé après le transfert des données, et il 
+Il faut noter que les slots de réplication temporaires sont incompatibles par
+nature. En effet, le slot sera supprimé après le transfert des données, et il
 ne sera donc plus utilisable pour les WAL :
 
 ```sql
 workshop10=# SELECT pg_create_physical_replication_slot('reptest2', 't', 't');
- pg_create_physical_replication_slot 
+ pg_create_physical_replication_slot
 -------------------------------------
  (reptest2,3/B3000028)
 (1 row)
@@ -3794,7 +3834,7 @@ pg_basebackup: initiating base backup, waiting for checkpoint to complete
 pg_basebackup: checkpoint completed
 pg_basebackup: write-ahead log start point: 3/B5000028 on timeline 1
 pg_basebackup: starting background WAL receiver
-pg_basebackup: could not send replication command "START_REPLICATION": 
+pg_basebackup: could not send replication command "START_REPLICATION":
                ERROR:  replication slot "reptest2" does not exist
 [...]
 ```
@@ -3805,29 +3845,30 @@ pg_basebackup: could not send replication command "START_REPLICATION":
 ## Parallélisation
 
 <div class="notes">
+
 Dans les 2 instances, on crée les tables `p1` et `p2` :
 
 ```sql
 workshopXX=# CREATE TABLE p1 AS
    SELECT row_number() OVER() AS id, generate_series%100 AS c_100,
-          generate_series%500 AS c_500 FROM generate_series(1,20000000); 
-SELECT 20000000 
-workshopXX=# ALTER TABLE p1 ADD CONSTRAINT pk_p1 PRIMARY KEY (id); 
-ALTER TABLE 
-workshopXX=# CREATE INDEX idx_p1 ON p1 (c_100); 
+          generate_series%500 AS c_500 FROM generate_series(1,20000000);
+SELECT 20000000
+workshopXX=# ALTER TABLE p1 ADD CONSTRAINT pk_p1 PRIMARY KEY (id);
+ALTER TABLE
+workshopXX=# CREATE INDEX idx_p1 ON p1 (c_100);
 CREATE INDEX
 workshopXX=# CREATE TABLE p2 AS
    SELECT row_number() OVER() AS id, generate_series%100 AS c_100,
           generate_series%500 AS c_500 FROM generate_series(1,200000);
 SELECT 200000
-workshopXX=# ALTER TABLE p2 ADD CONSTRAINT pk_p2 PRIMARY KEY (id); 
+workshopXX=# ALTER TABLE p2 ADD CONSTRAINT pk_p2 PRIMARY KEY (id);
 ALTER TABLE
 workshopXX=# CREATE INDEX idx_p2 ON p2 (c_100);
 CREATE INDEX
 
 ```
 
-On modifie également le paramètre `max_parallel_workers_per_gather` afin de 
+On modifie également le paramètre `max_parallel_workers_per_gather` afin de
 permettre la parallélisation :
 
 ```sql
@@ -3835,7 +3876,7 @@ postgres=# ALTER SYSTEM SET max_parallel_workers_per_gather TO 3;
 ALTER SYSTEM
 
 postgres=# SELECT pg_reload_conf();
- pg_reload_conf 
+ pg_reload_conf
 ----------------
  t
 (1 row)
@@ -3849,15 +3890,15 @@ postgres=# SELECT pg_reload_conf();
 
 <div class="notes">
 
-Pour déclencher la parallélisation d'une requête, le table doit être lue avec 
-une technique permettant la parallélisation. En PostgreSQL 9.6, la seule lecture 
-permettant la parallélisation était le `parallel sequential scan`. Le 
+Pour déclencher la parallélisation d'une requête, le table doit être lue avec
+une technique permettant la parallélisation. En PostgreSQL 9.6, la seule lecture
+permettant la parallélisation était le `parallel sequential scan`. Le
 planificateur devait donc choisir entre utiliser la parallélisation et utiliser
  les index.
 
 En PostgreSQL 10, grâce au `parallel bitmap heap scan`, un processus scanne les
- index et construit une structure de donnée en mémoire partagée indiquant 
-toutes les pages de la pile devant être lues. Les workers peuvent alors lire 
+ index et construit une structure de donnée en mémoire partagée indiquant
+toutes les pages de la pile devant être lues. Les workers peuvent alors lire
 les données de façon parallèle.
 
 
@@ -3993,7 +4034,7 @@ EXPLAIN ANALYSE SELECT count(c_100) FROM p1 WHERE id < 5000000;
 
 ```sql
 workshop96=# EXPLAIN ANALYSE SELECT count(c_100) FROM p1 WHERE id < 5000000;
-                                     QUERY PLAN 
+                                     QUERY PLAN
 --------------------------------------------------------------------------------
  Aggregate  (cost=185582.74..185582.75 rows=1 width=8)
             (actual time=1191.432..1191.433 rows=1 loops=1)
@@ -4036,8 +4077,8 @@ workshop10=# EXPLAIN ANALYSE SELECT count(c_100) FROM p1 WHERE id < 5000000;
 
 <div class="notes">
 
-En effectuant une requête sur une autre session, il est possible en version 10 
-de lire le texte des requêtes effectuées par les différents workers dans la vue 
+En effectuant une requête sur une autre session, il est possible en version 10
+de lire le texte des requêtes effectuées par les différents workers dans la vue
 `pg_stat_activity` :
 
 ```sql
@@ -4057,19 +4098,19 @@ query            | SELECT pid,application_name,backend_start,query
 pid              | 1855
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.902368-04
-query            | 
+query            |
 -[ RECORD 4 ]----+--------------------------------------------------------------
 pid              | 1856
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.902921-04
-query            | 
+query            |
 -[ RECORD 5 ]----+--------------------------------------------------------------
 pid              | 1857
 application_name | psql
 backend_start    | 2017-08-30 10:44:27.903122-04
 query       
 ```
-  
+
 ```sql
 workshop10=# SELECT pid,application_name,backend_start,backend_type,query
 FROM pg_stat_activity WHERE state='active';
@@ -4115,10 +4156,10 @@ query            | EXPLAIN (ANALYZE,BUFFERS,VERBOSE) SELECT COUNT(id) FROM p1;
 
 <div class="notes">
 
-Nous allons étudier les différences entre la version 9.6 et la version 10 en 
+Nous allons étudier les différences entre la version 9.6 et la version 10 en
 termes d'utilisation des tables partitionnées.
 
-Nous allons créer une table de mesure des températures suivant le lieu et la 
+Nous allons créer une table de mesure des températures suivant le lieu et la
 date. Nous allons partitionner ces tables pour chaque lieu et chaque mois.
 
 Ordre de création de la table en version 9.6 :
@@ -4228,8 +4269,8 @@ CREATE TABLE meteo_paris_201710 PARTITION of meteo FOR VALUES
    FROM ('Paris', '2017-10-01 00:00:00') TO ('Paris', '2017-11-01 00:00:00');
 ```
 
-On remarque que la déclaration est bien plus facile en version 10. Comme nous 
-le verrons le plus fastidieux est de faire évoluer la fonction trigger en 
+On remarque que la déclaration est bien plus facile en version 10. Comme nous
+le verrons le plus fastidieux est de faire évoluer la fonction trigger en
 version 9.6.
 
 Voici une fonction permettant d'ajouter des entrées aléatoires dans la table :
@@ -4314,13 +4355,13 @@ workshop10=# CREATE INDEX meteo_heure_mesure_idx ON meteo (heure_mesure);
 ERROR:  cannot create index on partitioned table "meteo"
 ```
 
-Il est donc toujours impossible de créer une clé primaire, une contrainte unique 
+Il est donc toujours impossible de créer une clé primaire, une contrainte unique
 ou une contrainte d'exclusion pouvant s'appliquer sur toutes les partitions.
 
-De ce fait, il est également impossible de référencer via une clé étrangère 
+De ce fait, il est également impossible de référencer via une clé étrangère
 une table partitionnée.
 
-Il est cependant possible de créer des index sur chaque partition fille, comme 
+Il est cependant possible de créer des index sur chaque partition fille, comme
 avec la version 9.6 :
 
 ```sql
@@ -4342,7 +4383,7 @@ DÉTAIL : Failing row contains (5, Nantes, 2017-09-15 05:09:23, 9.43).
 
 **Insertion de données hors limite**
 
-Le partitionnement en version 10 permet de déclarer 
+Le partitionnement en version 10 permet de déclarer
 
 ```sql
 CREATE TABLE meteo_lyon_ancienne PARTITION of meteo FOR VALUES
@@ -4361,7 +4402,7 @@ CREATE TABLE meteo_paris_ancienne PARTITION of meteo FOR VALUES
 
 <div class="notes">
 
-Avec les tables partitionnées via l'héritage, il était nécessaire de lister 
+Avec les tables partitionnées via l'héritage, il était nécessaire de lister
 toutes les tables partitionnées pour effectuer des tâches de maintenance.
 
 ```sql
@@ -4386,7 +4427,7 @@ VACUUM
 VACUUM
 ```
 
-Avec la version 10, il est maintenant possible d'effectuer des opérations de 
+Avec la version 10, il est maintenant possible d'effectuer des opérations de
 VACUUM et ANALYSE sur toutes les tables partitionnées via la table mère.
 
 ```sql
@@ -4414,6 +4455,7 @@ last_analyze | 2017-09-01 08:38:54.068665-04
 ## Performances
 
 <div class="notes">
+
 Importer le dump tp_workshop10.dump dans l'instance PostgreSQL 10 :
 
 ```
@@ -4466,7 +4508,7 @@ SELECT type_client,
 
 Voyons maintenant le gain avec PostgreSQL 10, en prenant soin de désactiver le
 parallélisme :
-```
+```sql
 $ psql -q tp -p 5432
 tp=# SET search_path TO magasin;
 tp=# SET max_parallel_workers = 0;
@@ -4493,8 +4535,8 @@ SELECT type_client,
  Execution time: 2085.996 ms
 ```
 
-Le temps d'exécution de cette requête est quasi doublé en version 9.6. On 
-observe que le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms 
+Le temps d'exécution de cette requête est quasi doublé en version 9.6. On
+observe que le tri sur disque (Sort) est réalisé en 195ms en 10, contre 683ms
 en 9.6.
 
 
@@ -4538,8 +4580,8 @@ GROUP BY CUBE (type_client, code_pays);
  Execution time: 8177.263 ms
 ```
 
-On remarque que l'opération de tri est effectué sur disque. Vérifions le temps 
-d'exécution avec un tri en mémoire : 
+On remarque que l'opération de tri est effectué sur disque. Vérifions le temps
+d'exécution avec un tri en mémoire :
 
 ```sql
 $ psql -q tp -p 5433
@@ -4612,11 +4654,11 @@ GROUP BY CUBE (type_client, code_pays);
  Execution time: 3728.788 ms
 ```
 
-L'amélioration des performances provient du noeud `MixedAggregate` qui fait son 
-apparition en version 10. Il permet de peupler plusieurs tables de hachages 
+L'amélioration des performances provient du noeud `MixedAggregate` qui fait son
+apparition en version 10. Il permet de peupler plusieurs tables de hachages
 en même temps qu'est effectué le tri des groupes.
 
-Les performances sont évidemment améliorées si suffisamment de mémoire est 
+Les performances sont évidemment améliorées si suffisamment de mémoire est
 allouée pour l'opération :
 
 ```sql
@@ -4708,7 +4750,7 @@ psql (11devel)
 Type "help" for help.
 ```
 
-Voici un premier exemple de changement de collationnement : nous voulons que 
+Voici un premier exemple de changement de collationnement : nous voulons que
 les chiffres soient placés après les lettres :
 
 ```sql
@@ -4729,7 +4771,7 @@ postgres=# SELECT * FROM (
 postgres=# CREATE COLLATION digitlast (provider=icu, locale='en-u-kr-latn-digit');
 CREATE COLLATION
 postgres=# SELECT * FROM (
-     SELECT '1a' i UNION SELECT '1b' UNION SELECT '1c' 
+     SELECT '1a' i UNION SELECT '1b' UNION SELECT '1c'
      UNION SELECT 'a1' UNION SELECT 'b2' UNION SELECT 'c3'
   ) j ORDER BY i COLLATE "digitlast";
  i  
@@ -4743,14 +4785,14 @@ postgres=# SELECT * FROM (
 (6 rows)
 ```
 
-Nous pouvons également effectuer un changement de collationnement pour classer 
+Nous pouvons également effectuer un changement de collationnement pour classer
 les majuscules après les minuscules :
 
 ```sql
 postgres=# SELECT * FROM (
     SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
   ) j ORDER BY i COLLATE "en-x-icu";
- i 
+ i
 ---
  a
  A
@@ -4763,7 +4805,7 @@ CREATE COLLATION
 postgres=# SELECT * FROM (
     SELECT 'B' i UNION SELECT 'b' UNION SELECT 'A' UNION SELECT 'a'
   ) j ORDER BY i COLLATE "capitalfirst";
- i 
+ i
 ---
  A
  a
@@ -4796,7 +4838,7 @@ Nous allons créer une base de donnée `souscription` et y répliquer de façon
 logique la table partitionnée `meteo` crée précédemment.
 
 Tout d'abord, nous devons nous assurer que notre instance est configurée pour
-permettre la réplication logique. Le paramètre `wal_level` doit être fixé à 
+permettre la réplication logique. Le paramètre `wal_level` doit être fixé à
 `logical` dans le fichier `postgresql.conf`.
 Ce paramètre a un impact sur les informations stockées dans les fichiers WAL, un
 redémarrage de l'instance est donc nécessaire en cas de changement.
@@ -4809,6 +4851,7 @@ psql -c "CREATE DATABASE souscription"
 
 Dans la base de données `workshop10`, nous allons tenter de créer la publication
 sur la table partitionnée :
+
 ```sql
 workshop10=# CREATE PUBLICATION local_publication FOR TABLE meteo;
 ERROR:  "meteo" is a partitioned table
@@ -4819,6 +4862,7 @@ ASTUCE : You can add the table partitions individually.
 Comme précisé dans le cours, il est impossible de publier les tables parents.
 Nous allons devoir publier chaque partition. Nous partons du principe que seul
 le mois de septembre nous intéresse :
+
 ```sql
 CREATE PUBLICATION local_publication FOR TABLE
   meteo_lyon_201709, meteo_nantes_201709, meteo_paris_201709;
@@ -4870,7 +4914,7 @@ Sans oublier de recharger la configuration :
 
 ```sql
 workshop10=# SELECT pg_reload_conf();
- pg_reload_conf 
+ pg_reload_conf
 ----------------
  t
 (1 ligne)
@@ -4897,7 +4941,7 @@ Nous pouvons maintenant créer la souscription à partir de la base de donnée
 `souscription` :
 
 ```sql
-souscription=# CREATE SUBSCRIPTION souscription 
+souscription=# CREATE SUBSCRIPTION souscription
  CONNECTION 'host=127.0.0.1 port=5432 user=replilogique dbname=workshop10 password=pwd'
  PUBLICATION local_publication with (create_slot=false,slot_name='local_souscription');
 CREATE SUBSCRIPTION
@@ -4924,7 +4968,7 @@ de l'instance en souscription :
 
 ```sql
 souscription=# SELECT * FROM meteo WHERE t_id=1;
- t_id | lieu |    heure_mesure     | temperature 
+ t_id | lieu |    heure_mesure     | temperature
 ------+------+---------------------+-------------
     1 | Lyon | 2017-09-24 04:10:59 |       18.59
 (1 ligne)
@@ -4932,7 +4976,7 @@ souscription=# SELECT * FROM meteo WHERE t_id=1;
 souscription=# DELETE FROM meteo WHERE t_id=1;
 DELETE 1
 souscription=# SELECT * FROM meteo WHERE t_id=1;
- t_id | lieu | heure_mesure | temperature 
+ t_id | lieu | heure_mesure | temperature
 ------+------+--------------+-------------
 (0 ligne)
 ```
@@ -4941,7 +4985,7 @@ Cette suppression n'a pas eu d'impact sur l'instance principale :
 
 ```sql
 workshop10=# SELECT * FROM meteo WHERE t_id=1;
- t_id | lieu |    heure_mesure     | temperature 
+ t_id | lieu |    heure_mesure     | temperature
 ------+------+---------------------+-------------
     1 | Lyon | 2017-09-24 04:10:59 |       18.59
 (1 ligne)
@@ -4979,7 +5023,7 @@ Vérifions l'effet de nos modifications :
 workshop10=# UPDATE meteo SET temperature=25 WHERE temperature<15;
 UPDATE 150310
 workshop10=# SELECT count(*) FROM meteo WHERE temperature<15;
- count 
+ count
 -------
      0
 (1 ligne)
@@ -4990,20 +5034,20 @@ a-t-il produit sur la base de données répliquée :
 
 ```sql
 souscription=# SELECT count(*) FROM meteo WHERE temperature<15;
- count 
+ count
 -------
  75291
 (1 ligne)
 ```
 
-La mise à jour ne semble pas s'être réalisée. Vérifions dans les logs 
+La mise à jour ne semble pas s'être réalisée. Vérifions dans les logs
 applicatifs :
 
 ```
 LOG:  logical replication apply worker for subscription "souscription"
       has started
 LOG:  starting logical decoding for slot "local_souscription"
-DETAIL:  streaming transactions committing after 0/F4FFF450, 
+DETAIL:  streaming transactions committing after 0/F4FFF450,
          reading WAL from 0/F33E5B18
 LOG:  logical decoding found consistent point at 0/F33E5B18
 DETAIL:  There are no running transactions.
@@ -5025,19 +5069,19 @@ principale sur l'instance en réplication.
 souscription=# CREATE UNIQUE INDEX meteo_lyon_201709_pkey
    ON meteo_lyon_201709 (t_id);
 CREATE INDEX
-souscription=# CREATE UNIQUE INDEX meteo_nantes_201709_pkey 
+souscription=# CREATE UNIQUE INDEX meteo_nantes_201709_pkey
    ON meteo_nantes_201709 (t_id);
 CREATE INDEX
-souscription=# CREATE UNIQUE INDEX meteo_paris_201709_pkey 
+souscription=# CREATE UNIQUE INDEX meteo_paris_201709_pkey
    ON meteo_paris_201709 (t_id);
 CREATE INDEX
-souscription=# ALTER TABLE meteo_lyon_201709 REPLICA IDENTITY 
+souscription=# ALTER TABLE meteo_lyon_201709 REPLICA IDENTITY
    USING INDEX meteo_lyon_201709_pkey;
 ALTER TABLE
-souscription=# ALTER TABLE meteo_nantes_201709 REPLICA IDENTITY 
+souscription=# ALTER TABLE meteo_nantes_201709 REPLICA IDENTITY
    USING INDEX meteo_nantes_201709_pkey;
 ALTER TABLE
-souscription=# ALTER TABLE meteo_paris_201709 REPLICA IDENTITY 
+souscription=# ALTER TABLE meteo_paris_201709 REPLICA IDENTITY
    USING INDEX meteo_paris_201709_pkey;
 ALTER TABLE
 ```
@@ -5047,7 +5091,7 @@ effectuées sur la base principale sont dorénavant perdues :
 
 ```sql
 souscription=# SELECT count(*) FROM meteo WHERE temperature<15;
- count 
+ count
 -------
  75291
 (1 ligne)
@@ -5062,13 +5106,13 @@ UPDATE 0
 Vérifions l'effet sur la base de donnée répliquée :
 ```sql
 souscription=# SELECT count(*) FROM meteo WHERE temperature<15;
- count 
+ count
 -------
      0
 (1 ligne)
 
 souscription=# SELECT count(*) FROM meteo WHERE temperature=25;
- count 
+ count
 -------
  75291
 (1 ligne)
