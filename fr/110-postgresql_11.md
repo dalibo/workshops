@@ -107,6 +107,18 @@ Photographie de Rad Dougall, licence [CC BY 3.0](https://creativecommons.org/lic
 obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
 </div>
 
+
+**Participez à ce workshop !** Pour des précisions, compléments, liens, exemples, 
+et autres corrections et suggestions, soumettez vos _Pull Requests_ dans notre dépôt :
+
+<https://github.com/dalibo/workshops/tree/master/fr>
+
+Licence : [PostgreSQL](https://github.com/dalibo/workshops/blob/master/LICENSE.md)
+
+Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 11.
+
+</div>
+
 -----
 
 ## Introduction
