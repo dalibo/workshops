@@ -121,6 +121,7 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
     * PoWA
 	* pgBadger
 	* temBoard
+
 </div>
 
 <div class="notes">
@@ -164,6 +165,7 @@ Elle répond aux préoccupations suivantes :
   * Deux types de supervision :
     * automatique,
     * occasionnelle.
+
 </div>
 
 <div class="notes">
@@ -195,6 +197,7 @@ un outil précis.
   * Pour qui ?
   * Quels critères ?
   * Quels outils
+
 </div>
 
 
@@ -210,6 +213,7 @@ importent à cette personne.
 
 Répondre à ces questions permettra de mieux choisir l'outil de supervision à
 mettre en place, ainsi que sa configuration.
+
 </div>
 
 -----
@@ -221,6 +225,7 @@ mettre en place, ainsi que sa configuration.
   * Améliorer l'applicatif
   * Anticiper / prévenir les incidents
   * Réagir vite en cas de crash
+
 </div>
 
 
@@ -258,6 +263,7 @@ Enfin, une bonne configuration de la supervision implique d'avoir configuré
 finement la gestion des traces de PostgreSQL. Avoir un bon niveau de trace
 (autrement dit ni trop ni pas assez) permet de réagir rapidement après un
 crash.
+
 </div>
 
 -----
@@ -272,6 +278,7 @@ crash.
     * mise à jour
   * Administrateur système
     * surveillance, qualité de service
+
 </div>
 
 
@@ -294,6 +301,7 @@ Enfin, l'administrateur système doit s'assurer de la présence du service. Il
 doit aussi s'assurer que le service dispose des ressources nécessaires, en
 terme de processeur (donc de puissance de calcul), de mémoire et de disque
 (notamment pour la place disponible).
+
 </div>
 
 -----
@@ -306,6 +314,7 @@ terme de processeur (donc de puissance de calcul), de mémoire et de disque
   * Espace disque
   * Sur-activité et non-activité du serveur
   * Temps de réponse
+
 </div>
 
 
@@ -333,6 +342,7 @@ transactions.
 Il est possible aussi d'utiliser une requête étalon dont la durée
 d'exécution sera testée de temps à autre pour détecter les moments
 problématiques sur le serveur.
+
 </div>
 
 -----
@@ -345,6 +355,7 @@ problématiques sur le serveur.
   * Nombre de transactions par seconde
   * Ratio d'utilisation du cache
   * Retard de réplication
+
 </div>
 
 
@@ -361,6 +372,7 @@ Il existe de nombreux indicateurs intéressant sur les bases :
   * retard de réplication
   * nombre de parcours séquentiels et de parcours d'index
   * etc.
+
 </div>
 
 -----
@@ -372,6 +384,7 @@ Il existe de nombreux indicateurs intéressant sur les bases :
     * les statistiques d'activité
     * les traces
   * Mais rien pour les conserver, les historiser
+
 </div>
 
 
@@ -397,6 +410,7 @@ Pour pouvoir mettre en place un système de supervision automatique, il est
 essentiel de s'assurer que les statistiques d'activité et les traces
 applicatives sont bien configurées et il faut aussi leur associer un outil
 permettant de sauvegarder les données, les alertes et de les historiser.
+
 </div>
 
 -----
@@ -408,6 +422,7 @@ permettant de sauvegarder les données, les alertes et de les historiser.
   * ... et exécuter automatiquement des actions dessus :
     * Génération de graphiques
     * Envoi d'alertes
+
 </div>
 
 
@@ -423,6 +438,7 @@ ces outils comme pg-monz, check_pgactivity ou check_postgres.
 
 Nous nous intéresserons durant ce workshop à des outils graphiques spécifiques
 pour PostgreSQL.
+
 </div>
 
 -----
@@ -434,6 +450,7 @@ pour PostgreSQL.
   * Deux types :
     * en temps réel : PoWA et temboard
     * rétro-analyse : pgBadger
+
 </div>
 
 
@@ -459,371 +476,44 @@ pgBagder.
 </div>
 
 -----
-### PoWA
-
-<div class="slide-content">
-
-  * _PostgreSQL Workload Analyzer_
-  * site officiel : https://github.com/powa-team/powa
-  * Capture régulière de métriques diverses
-  * Stockage efficace des données
-  * Interface graphique permettant d'exploiter ces informations
-
-</div>
-
-<div class="notes">
-
-PoWA (_PostgreSQL Workload Analyzer_) est un outil communautaire, sous
-licence PostgreSQL.
-
-L'outil récupére à intervalle régulier les statistiques collectées par divers
-extensions, les stocke et les historise.
-
-L'outil fournit également une interface graphique permettant d'exploiter ces
-données. On pourra observer en temps réel l'activité de l'instance. Cette
-activité est présentée sous forme de graphiques interactifs et de tableaux
-présentant les requêtes normalisées. Ces tableaux peuvent être trier selon
-divers critères sur un intervalle de temps sélectionné.
-
-</div>
-
------
-### Extensions de collecte
-
-<div class="slide-content">
-
-  * pg_stat_statements : métriques côté PostgreSQL
-  * pg_stat_kcache : métriques côté système
-  * pg_qualstats : informations sur les prédicats
-  * HypoPG : proposition de nouveaux index
-
-</div>
-
-<div class="notes">
-
-La collecte des informations et métriques de PoWA sont fournis par des
-extensions de PostgreSQL. Leur mise en place nécessite le préchargement de
-bibliothèques dans la mémoire partagée grâce au paramètre
-`shared_preload_libraries` dans le fichier _postgresql.conf_. Leur activation
-nécessite le redémarrage de l'instance.
-
-`pg_stat_statements` est une extension officielle de PostgreSQL. Elle est
-disponible dans les modules _contrib_. Elle permet de récupérer de nombreuses
-métriques par requête normalisée, utilisateur et base de données. Ces données
-sont par exemple le nombre de blocs accédés dans ou en dehors du segment de
-mémoire partagée dédié à PostgreSQL, le nombre d'appels, etc.
-
-pg_qualstats :
-extension développée par Dalibo. Elle permet de fournir de nombreuses
-informations très pertinentes concernant les prédicats des requêtes exécutées
-sur une instance, comme la sélectivité d'un prédicat, les valeurs utilisées
-etc.
-
-
-pg_stat_kcache : extension développée par Dalibo. Elle permet de fournir
-des indicateurs complémentaires à ceux de pg_stat_statements, mais côté
-système. On a donc a disposition par requête, utilisateur et base de données
-l'utilisation du processeur, ainsi que les accès physiques aux disques.
-
-
-Plus d'information dans les documentations :
-
-  * [pg_stat_statements](https://www.postgresql.org/docs/current/static/pgstatstatements.html)
-  * [pg_stat_kcache]()
-  * [pg_qualstats]()
-  * [HypoPG](https://github.com/HypoPG/hypopg)
-
-</div>
-
------
-### Fonctionnement de PoWA
-
-<div class="slide-content">
-
-  * Capture régulière des métriques diverses
-    * pg_stat_statements
-    * pg_qualstats
-    * pg_stat_kcache
-  * Stockage efficace des données
-  * Interface permettant d'exploiter ces informations
-</note>
-
-<div class="notes">
-
-Il est composé de plusieurs modules. La plupart sont des extensions PostgreSQL :
-
-  * _PoWA-archivist_ : 
-  * _pg_qualstats_ : an extension to sample predicate statistics
-  * _pg_stat_kcache_ : an extension to sample O/S metrics
-  * _PoWA-web_ : the graphic user interface
-
-
-
-Tout comme pour `pg_stat_statements`, sa mise en place nécessite la modification
-du paramètre `shared_preload_libraries`, et donc le redémarrage de l'instance.
-Il faut également créer une nouvelle base de données dans l'instance.
-Par ailleurs, PoWA repose sur les statistiques collectées par
-`pg_stat_statements`, celui-ci doit donc être également installé.
-
-Une fois installé et configuré, 
-
-
-PostgreSQL Workload Analyzer est un logiciel prévu pour
-échantillonner et visualiser dans le temps les métriques fournies par divers
-modules pour PostgreSQL. L'échantillonnage est géré par un background worker,
-un processus dédié géré directement par PostgreSQL. Celui-ci appelle à
-intervalle régulier les différentes fonctions de gestion de données de
-PoWA. Chaque source de données dispose de ses fonctions d'échantillonnage
-spécifiques.
-
-Les sources de données supportées sont :
-
-  * pg_stat_statements : extension officielle de PostgreSQL permettant de
-    récupérer de nombreuses métriques par requête normalisée, utilisateur et
-    base de données. Ces données sont par exemple le nombre de blocs accédés
-    dans ou en dehors du segment de mémoire partagée dédié à PostgreSQL, le
-    nombre d'appels... Pour plus de détail, voir
-    http://docs.postgresql.fr/9.2/pgstatstatements.html
-  * pg_qualstats : extension développée par Dalibo. Elle permet de fournir de
-    nombreuses informations très pertinentes concernant les prédicats des
-    requêtes exécutées sur une instance, comme la sélectivité d'un prédicat,
-    les valeurs utilisées etc.
-  * pg_stat_kcache : extension développée par Dalibo. Elle permet de fournir
-    des indicateurs complémentaires à ceux de pg_stat_statements, mais côté
-    système. On a donc a disposition par requête, utilisateur et base de
-    données l'utilisation du processeur, ainsi que les accès physiques aux
-    disques.
-
-Le support d'autres sources de données est prévu, notamment :
-
-  * pg_proctab : Extensions développée par Mark Wong. Elle fournit des
-    indicateurs systèmes généralistes, non liés à l'utilisation de requêtes en
-    particulier.
-
-Une interface dédiée est disponible afin d'exploiter au mieux les différentes
-spécificités de ces différentes sources de données.
-</div>
-
------
-### Points forts de PoWA
-
-<div class="slide-content">
-
-  * Granularité des informations jusqu'à la requête
-    * voire jusqu'au prédicat
-  * Hit ratio du cache système
-  * Utilisation CPU
-  * Index manquants
-  * ...
-</div>
-
-<div class="notes">
-
-Les modules pg_stat_statements, pg_qualstats et pg_stat_kcache regroupent leurs
-métriques par requête normalisée, utilisateur et base de données. Toutes les
-informations récoltées par PoWA sont donc disponibles avec cette
-granularité. Les différentes informations que ces modules offrent permettre de
-trouver de nombreuses informations qui manquaient cruellement à l'écosystème
-PostgreSQL jusqu'à présent, par exemple :
-
-  * connaître le taux de lecture dans le cache du système d'exploitation et les
-    accès disques physiques
-  * connaître l'utilisation processeur de chacune des requêtes
-  * suggérer la création d'index pertinents
-</div>
-
------
-
-### Points faibles de PoWA
-
-<div class="slide-content">
-
-  * Nécessite l'installation de plusieurs extensions sur chaque instance
-  * Pas d'informations sur les serveurs secondaires
-</div>
-
-<div class="notes">
-
-PoWA est efficace car il est au plus près de l'instance. Il s'installe comme
-une extension de PostgreSQL et stocke ses informations dans une base de données
-de l'instance. Une défaillance sur un outil externe ne posera pas de problème
-sur l'instance. Un problème sur n'importe quelle extension de PoWA peut
-conduire à un crash de votre instance de production. Il est important de bien
-tester l'outil avant de l'installer en production.
-
-Les informations étant fournies par des extensions requérant un accès direct au
-moteur de chaque instance, l'utilisation de PoWA nécessite le stockage
-d'information sur chacune des instances que l'on souhaite gérer. Un serveur
-secondaire est en lecture seule. On ne peut donc pas y utiliser PoWA.
-
-</div>
-
------
-### extension HypoPG
-
-<div class="slide-content">
-  * proposition de nouveaux index
-</div>
-
-<div class="notes">
-
-La troisième version apporte le support d'un nouvelle extension créée par
-Dalibo, HypoPG, et permet d'aller beaucoup plus loin dans la suggestion
-d'index. En effet, cette nouvelle version a une nouvelle fonctionnalité
-d'optimisation globale d'une production. Cette optimisation se fait en
-récupérant toutes les informations échantillonnées nécessaires d'une base de
-données sur un intervalle de temps, l'analyse et propose des
-optimisations. Pour le moment cela concerne uniquement une suggestion d'index
-optimale, mais d'autres optimisations sont possibles et seront proposées dans
-les futures versions.
-</div>
-
------
 ## pgBadger
 
 <div class="slide-content">
 
   * Script Perl
-  * Traite les journaux applicatifs
-  * Recherche des informations
-    * sur les requêtes et leur durée d'exécution
-    * sur les connexions et sessions
-    * sur les checkpoints
-    * sur l'autovacuum
-    * sur les verrous
-    * etc.
-  * Génération d'un rapport HTML très détaillé
+  * site officiel : <https://pgbadger.darold.net/>
+  * Traite les journaux applicatifs de PostgreSQL
+  * Génére un rapport HTML très détaillé
+
 </div>
 
 <div class="notes">
 
-
 pgBadger est un script Perl écrit par Gilles Darold. Il s'utilise en ligne de
-commande : il suffit de lui fournir le ou les fichiers de trace à analyser et
-il rend un rapport HTML sur les requêtes exécutées, sur les connexions, sur
-les bases, etc. Le rapport est très complet, il peut contenir des graphes
+commande : il suffit de lui fournir le ou les fichiers de traces à analyser et
+il rend un rapport HTML sur les requêtes exécutées, sur les connexions, sur les
+bases, etc. Le rapport est très complet, il peut contenir des graphes
 zoomables.
 
 C'est certainement le meilleur outil actuel de rétro-analyse d'un fichier de
 traces PostgreSQL.
 
 Le site web de pgBadger se trouve sur <https://pgbadger.darold.net/>
+
 </div>
 
-
 -----
-
-
 ### Configurer PostgreSQL pour pgBadger
 
 <div class="slide-content">
 
-  * Configuration minimale
-    * `log_destination`, `log_line_prefix` et `lc_messages`
-  * Configuration de base
-    * `log_connections`, `log_disconnections`
-    * `log_checkpoints`, `log_lock_waits`, `log_temp_files`
-    * `log_autovacuum_min_duration`
-  * Configuration temporaire
-    * `log_min_duration_statement`
-</div>
-
-
-<div class="notes">
-
-
-pgBadger a besoin d'un minimum d'informations dans les traces : timestamp
-(`%t`), pid (`%p`) et numéro de ligne dans la session (`%l`). Il n'y a pas de
-conseil particulier sur la destination des traces (en dehors de `eventlog` que
-pgBadger ne sait pas traiter). De même, le préfixe des traces est laissé au
-choix de l'utilisateur. Par contre, il faudra le préciser à pgBadger si la
-configuration est différente de celle qui suit :
-
-```
-log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d '
-```
-
-La langue des traces doit être
-l'anglais. De toute façon, il s'agit de la meilleure configuration des traces.
-En effet, il est difficile de trouver de l'information sur des traces en
-français, alors que ce n'est pas le cas avec des traces en anglais. Pour cela,
-il suffit de configurer `lc_messages` à la valeur `C`.
-
-Enfin, il faut demander à PostgreSQL de tracer les requêtes. Il est
-préférable de passer par `log_min_duration_statement` plutôt que 
-`log_statement` et `log_duration` pour que pgBadger puisse faire l'association
-entre les requêtes et leur durée :
-
-```
-log_min_duration_statement = 0
-log_statement = none
-log_duration = off
-```
-
-Il est aussi possible de tirer parti 
-d'autres informations dans les traces :
-
-
-  * `log_checkpoints` pour des statistiques sur les checkpoints ;
-  * `log_connections` et `log_disconnections` pour des informations sur les
-connexions et déconnexions ;
-  * `log_lock_waits` pour des statistiques sur les verrous en attente ;
-  * `log_temp_files` pour des statistiques sur les fichiers temporaires ;
-  * `log_autovacuum_min_duration` pour des statistiques sur l'activité de
-    l'autovacuum.
-
-Il est à noter que la version 9.0 essaie de récupérer les informations sur
-les adresses IP, utilisateurs connectés, bases de données à partir des traces
-sur les connexions (voir le paramètre `log_connections`) si jamais ces
-informations ne sont pas indiquées dans le préfixe (paramètre 
-`log_line_prefix`).
-
-La version 9.1 ajoute aussi un tableau sur les erreurs en utilisant le code
-SQLState si ce dernier est tracé (joker ''%e'' avec le paramètre
-`log_line_prefix`).
-</div>
-
-
------
-## Traces
-
-<div class="slide-content">
-
-  * Configuration
-  * Récupération
-    * des problèmes importants
-    * des requêtes lentes / fréquentes
-  * Outils externes de classement
-</div>
-
-
-<div class="notes">
-
-La première information que fournit PostgreSQL quant à l'activité sur le
-serveur est les traces. Chaque requête en erreur génère une trace indiquant
-la requête erronée et l'erreur. Chaque problème de lecture ou d'écriture de
-fichier génère une trace. En fait, tout problème détecté par PostgreSQL
-fait l'objet d'un message dans les traces. PostgreSQL peut aussi envoyer
-d'autres messages suivant certains événements, comme les connexions, l'activité
-de processus système en tâche de fond, etc.
-
-Nous allons donc aborder la configuration des traces (où tracer, quoi tracer,
-quel niveau d'informations). Nous verrons quelques informations intéressantes
-à récupérer. Enfin, nous verrons quelques outils permettant de traiter
-automatiquement les fichiers de trace.
-</div>
-
------
-### Configuration
-
-<div class="slide-content">
-
+  * Utilisation des traces applicatives
   * Où tracer ?
   * Quel niveau de traces ?
   * Tracer les requêtes
   * Tracer certains comportements
-</div>
 
+</div>
 
 <div class="notes">
 
@@ -831,15 +521,19 @@ Il est essentiel de bien configurer PostgreSQL pour que les traces ne soient pas
 en même temps trop nombreuses pour ne pas être submergé par les informations
 et trop peu pour ne pas savoir ce qu'il se passe. Un bon dosage du niveau des
 traces est important. Savoir où envoyer les traces est tout aussi important.
+
 </div>
 
 -----
-### Langue des traces applicatives
+### Configuration minimale
 
 <div class="slide-content">
 
-  * En anglais
-  * paramètre : `lc_messages='C'`
+  * traces en anglais
+    * `lc_messages='C'`
+  * ajouter le plus d'information possible
+    * `log_line_prefix = '%t [%p]: user=%u,db=%d,app=%a,client=%h '`
+
 </div>
 
 
@@ -859,26 +553,12 @@ en anglais. Cela peut se faire ainsi :
 lc_messages = 'C'
 ```
 
-</div>
-
------
-### Préfixe de lignes de trace
-
-<div class="slide-content">
-
-  * ajouter le plus d'information possible
-  * `log_line_prefix = '%t [%p]: user=%u,db=%d,app=%a,client=%h '`
-</div>
-
-
-<div class="notes">
-
 Lorsque la destination des traces est `syslog` ou `eventlog`, elles se voient
-automatiquement ajouter quelques informations dont un horodatage essentiel.
-Lorsque la destination est `stderr`, ce n'est pas le cas. Par défaut, 
+automatiquement ajouter quelques informations dont un horodatage, essentiel.
+Lorsque la destination est `stderr`, ce n'est pas le cas. Par défaut,
 l'utilisateur se retrouve avec des traces sans horodatage, autrement dit des
 traces inutilisables. PostgreSQL propose donc le paramètre `log_line_prefix`
-qui permet d'ajouter un préfixe à une trace. 
+qui permet d'ajouter un préfixe à une trace.
 
 Ce préfixe peut contenir un grand nombre d'informations, comme un horodatage,
 le PID du processus serveur, le nom de l'application cliente, le nom de
@@ -886,47 +566,6 @@ l'utilisateur, le nom de la base. Un paramétrage possible est le suivant :
 
 ```
 log_line_prefix = '%t [%p]: user=%u,db=%d,app=%a,client=%h '
-```
-
-</div>
-
-
------
-### Tracer les requêtes
-
-<div class="slide-content">
-
-  * `log_min_duration_statement`
-  * en production, trace les requêtes longues
-    * 10000 pour les requêtes de plus de 10 secondes
-  * pour un audit, à 0 : trace toutes les requêtes
-</div>
-
-<div class="notes">
-
-Le paramètre `log_min_duration_statement`, trace toute requête dont la durée
-d'exécution dépasse la valeur du paramètre (l'unité est la milliseconde). Il
-trace aussi la durée d'exécution des requêtes tracées. Par exemple, avec une
-valeur de 500, toute requête dont la durée d'exécution dépasse 500 ms sera
-tracée. À 0, toutes les requêtes se voient tracées. Pour désactiver la trace,
-il suffit de mettre la valeur -1 (qui est la valeur par défaut).
-
-Suivant la charge que le système va subir à cause des traces, il est possible
-de configurer finement la durée à partir de laquelle une requête est tracée.
-Cependant, il faut bien comprendre que plus la durée est importante, plus la
-vision des performances est partielle. Il est parfois plus intéressant de
-mettre 0 ou une très petite valeur sur une petite durée, qu'une grosse valeur
-sur une grosse durée. Cela étant dit, laisser 0 en permanence n'est pas
-recommandé. Il est préférable de configurer ce paramètre à une valeur plus
-importante en temps normal pour détecter seulement les requêtes les plus
-longues et, lorsqu'un audit de la plateforme est nécessaire, passer
-temporairement ce paramètre à une valeur très basse (0 étant le mieux).
-
-La trace fournie par `log_min_duration_statement` ressemble à ceci :
-
-```
-2018-09-01 17:34:03 CEST LOG:  duration: 136.811 ms  statement: insert into t1
-                               values (2000000,'test');
 ```
 
 </div>
@@ -941,7 +580,9 @@ La trace fournie par `log_min_duration_statement` ressemble à ceci :
   * `log_checkpoints`
   * `log_lock_waits`
   * `log_temp_files`
+
 </div>
+
 
 <div class="notes">
 
@@ -1008,195 +649,325 @@ Tout fichier temporaire demande des écritures disques.
 Ces écritures peuvent poser problème pour les performances globales du
 système. Il est donc important de savoir si des fichiers temporaires sont créés
 ainsi que leur taille.
+
 </div>
 
 -----
-### Informations intéressantes à récupérer
+### Tracer les requêtes
 
 <div class="slide-content">
 
-  * Messages PANIC
-  * Rechargement de la configuration
+  * `log_min_duration_statement`
+  * en production, trace les requêtes longues
+    * 10000 pour les requêtes de plus de 10 secondes
+  * pour un audit, à 0 : trace toutes les requêtes
+
 </div>
+
 
 <div class="notes">
 
-Suivant la configuration réalisée, les journaux applicatifs peuvent contenir
-quantité d'informations importantes. La plus fréquemment recherchée est la
-durée d'exécution des requêtes. L'intérêt principal est de récupérer les
-requêtes les plus lentes. L'autre information importante concerne les messages
-de niveau PANIC. Ces messages indiquent un état anormal du serveur qui s'est
-soldé par un arrêt brutal. Ce genre de problème doit être surveillé
-fréquemment.
+Le paramètre `log_min_duration_statement`, trace toute requête dont la durée
+d'exécution dépasse la valeur du paramètre (l'unité est la milliseconde). Il
+trace aussi la durée d'exécution des requêtes tracées. Par exemple, avec une
+valeur de 500, toute requête dont la durée d'exécution dépasse 500 ms sera
+tracée. À 0, toutes les requêtes se voient tracées. Pour désactiver la trace,
+il suffit de mettre la valeur -1 (qui est la valeur par défaut).
+
+Suivant la charge que le système va subir à cause des traces, il est possible
+de configurer finement la durée à partir de laquelle une requête est tracée.
+Cependant, il faut bien comprendre que plus la durée est importante, plus la
+vision des performances est partielle. Il est parfois plus intéressant de
+mettre 0 ou une très petite valeur sur une petite durée, qu'une grosse valeur
+sur une grosse durée. Cela étant dit, laisser 0 en permanence n'est pas
+recommandé. Il est préférable de configurer ce paramètre à une valeur plus
+importante en temps normal pour détecter seulement les requêtes les plus
+longues et, lorsqu'un audit de la plateforme est nécessaire, passer
+temporairement ce paramètre à une valeur très basse (0 étant le mieux).
+
+La trace fournie par `log_min_duration_statement` ressemble à ceci :
+
+```
+2018-09-01 17:34:03 CEST LOG:  duration: 136.811 ms  statement: insert into t1
+                               values (2000000,'test');
+```
+
 </div>
 
 -----
-### Messages PANIC
+### Lancement de pgBadger
 
 <div class="slide-content">
 
-  * Exemple:
+`$ pgbadger postgresql-11-main.log`
 
-```
-PANIC:  could not write to file "pg_wal/xlogtemp.9109": 
-        No space left on device
-```
+  * Rapport dans le fichier _out.html_
+  * Très nombreuses options :
+    * fichier de sortie : `--outfile`
+    * filtrage par date : `--begin`, `--end`
+    * autres filtrages : `--dbname`, `--dbuser`, `--appname`, ...
 
-  * Envoi immédiat d'une alerte
-  * Outils : tail_n_mail
 </div>
 
 <div class="notes">
 
-Les messages PANIC sont très importants. Généralement, vous ne les verrez pas
-au moment où ils se produisent. Un crash va survenir et vous allez chercher à
-comprendre ce qui s'est passé. Il est possible à ce moment-là que vous
-trouviez dans les traces des messages PANIC, comme celui indiqué ci-dessous :
+La façon la plus simple pour créer un rapport pgBadger est de simplement
+indiquer au script le fichier de traces de PostgreSQL à analyser.
+
+Il existe énormément d'options. L'aide fournie sur le [site web
+officiel](http://pgbadger.darold.net/documentation.html#SYNOPSIS) les cite
+intégralement. Il serait difficile de les citer ici, des options étant ajoutées
+très fréquemment.
+
+A noter un mode de fonctionnement incrémental. Combiné au format binaire, il
+permet de parser régulièrement les fichiers de traces applicatives de
+PostgreSQL. Puis, de générer des rapports HTML à la demande.
+
+On peut ainsi créer un fichier chaque heure :
 
 ```
-PANIC:  could not write to file "pg_wal/xlogtemp.9109": No space left on device
+pgbadger --last-parsed .pgbadger_last_state -o YY_MM_DD_HH.bin postgresql-11-main.log
 ```
 
-Là, le problème est très simple. PostgreSQL n'arrive pas à créer un journal
-de transactions à cause d'un manque d'espace sur le disque. Du coup, le
-système ne peut plus fonctionner, il panique et s'arrête.
+On pourra créer un rapport en précisant les fichiers binaires voulus :
+    
+```
+pgbadger -o rapport_2018_11_05.html 2018_11_05_**.bin
+```
 
-Un outil comme tail_n_mail peut aider à détecter automatiquement ce genre de
-problème et à envoyer un mail à la personne d'astreinte.
 </div>
 
 -----
-### Rechargement de la configuration
+### PoWA
 
 <div class="slide-content">
 
-  * Exemple :
+  * _PostgreSQL Workload Analyzer_
+  * site officiel : <https://github.com/powa-team/powa>
+  * Capture régulière de métriques diverses
+  * Stockage efficace des données
+  * Interface graphique permettant d'exploiter ces informations
 
-```
-LOG:  received SIGHUP, reloading configuration files
-```
-
-  * Envoi d'une alerte pour s'assurer que cette configuration est voulue
-  * Outils : tail_n_mail
 </div>
 
 <div class="notes">
 
-Il est intéressant de savoir quand la configuration du serveur change, et
-surtout la valeur des paramètres modifiés. PostgreSQL envoie un message niveau
-`LOG` lorsque la configuration est relue. Il indique aussi les nouvelles valeurs
-des paramètres, ainsi que les paramètres modifiés qu'il n'a pas pu prendre en
-compte (cela peut arriver pour tous les paramètres exigeant un redémarrage du
-serveur).
+PoWA (_PostgreSQL Workload Analyzer_) est un outil communautaire, sous
+licence PostgreSQL.
 
-Là-aussi, tail_n_mail est l'outil adapté pour être prévenu dès que la
-configuration du serveur est relue. Une telle alerte vous permet de vérifier de
-la bonne configuration du serveur.
+L'outil récupére à intervalle régulier les statistiques collectées par divers
+extensions, les stocke et les historise.
+
+L'outil fournit également une interface graphique permettant d'exploiter ces
+données. On pourra observer en temps réel l'activité de l'instance. Cette
+activité est présentée sous forme de graphiques interactifs et de tableaux
+présentant les requêtes normalisées. Ces tableaux peuvent être trier selon
+divers critères sur un intervalle de temps sélectionné.
+
+Les différentes informations que PoWA offre permet de trouver de nombreuses
+informations qui manque cruellement à l'écosystème PostgreSQL, par exemple :
+
+  * connaître le taux de lecture dans le cache du système d'exploitation et les
+    accès disques physiques
+  * connaître l'utilisation processeur de chacune des requêtes
+  * suggérer la création d'index pertinents
+
+Et tout cela en temps réel.
+
 </div>
 
 -----
-### Options de pgBadger
+### Extensions de collecte
 
 <div class="slide-content">
 
-  * `--outfile`
-  * `--begin`, `--end`
-  * `--dbname`, `--dbuser`, `--dbclient`, `--appname`
+  * _pg_stat_statements_ : métriques côté PostgreSQL
+  * _pg_stat_kcache_ : métriques côté système
+  * _pg_qualstats_ : informations sur les prédicats
+  * extension en développement (ne pas utiliser en production) :
+    * _pg_sortstats_ : informations sur la mémoire pour les tris
+
 </div>
 
 <div class="notes">
 
-Il existe énormément d'options. L'aide fournie sur le site web officiel les
-cite intégralement. Il serait difficile de les citer ici, des options étant
-ajoutées très fréquemment.
-</div>
+La collecte des informations et métriques de PoWA sont fournis par des
+extensions de PostgreSQL. Leur mise en place nécessite le préchargement de
+bibliothèques dans la mémoire partagée grâce au paramètre
+`shared_preload_libraries` dans le fichier _postgresql.conf_. Leur activation
+nécessite le redémarrage de l'instance.
 
------
-### pgBadger : exemple 1
+`pg_stat_statements` est une extension officielle de PostgreSQL. Elle est
+disponible dans les modules _contrib_. Elle permet de récupérer de nombreuses
+métriques par requête normalisée, utilisateur et base de données. Ces données
+sont par exemple le nombre d'appels, le temps moyen, le nombre de blocs lu dans
+le cache de PostgreSQL pour chaque requête normalisée.
 
-![Exemple pgBadger 1](medias/h1-pgbadger1.png)
-\
+`pg_stat_kcache` est une extension développée pour PoWA. Elle fournit des
+indicateurs complémentaires à ceux de `pg_stat_statements`, mais côté
+système. On a donc a disposition par requête, utilisateur et base de données
+l'utilisation du processeur, ainsi que les accès physiques aux disques.
 
-<div class="notes">
+`pg_qualstats` est une extension développée pour PoWA. Elle fournit de
+nombreuses informations très pertinentes concernant les prédicats des requêtes
+exécutées sur une instance, comme la sélectivité d'un prédicat, les valeurs
+utilisées, etc.
 
-Au tout début du rapport, pgBadger donne des statistiques générales sur les
-fichiers de traces.
+`pg_sortstats` est une extension développée pour PoWA. Elle récupère des
+statistiques sur les tris et permet d'estimer la quantité de mémoire `work_mem`
+nécessaire pour effectuer un tri en mémoire et non sur disque. Voir la [section
+consacré à ce
+paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
+du cours d'optimisation de la formation [DBA4 - PostgreSQL
+Performances](https://www.dalibo.com/formation-postgresql-performance) pour
+plus d'information.  
+Cette extension est en phase de développement et ne doit pas être utilisée en
+production. Vous êtes encouragés à la tester et à faire des retours aux
+développeurs du projet.
 
-Dans les informations importantes se trouve le nombre de requêtes normalisées.
-En fait, les requêtes :
+Plus d'information dans les documentations :
 
-```sql
-SELECT * FROM utilisateurs WHERE id = 1;
-```
+  * [pg_stat_statements](https://www.postgresql.org/docs/current/static/pgstatstatements.html)
+  * [pg_stat_kcache](https://powa.readthedocs.io/en/latest/stats_extensions/pg_stat_kcache.html)
+  * [pg_qualstats](https://powa.readthedocs.io/en/latest/stats_extensions/pg_qualstats.html)
+  * [pg_sortstats](https://github.com/powa-team/pg_sortstats)
 
-et
-
-```sql
-SELECT * FROM utilisateurs WHERE id = 2;
-```
-
-sont différentes car elles ne vont pas récupérer la
-même fiche utilisateur. Cependant, en enlevant la partie constante, les
-requêtes sont identiques. La seule différence est la fiche récupérée mais
-pas la requête. pgBadger est capable de faire cette différence. Toute
-constante, qu'elle soit de type numérique, textuelle, horodatage ou booléenne,
-peut être supprimée de la requête. Dans l'exemple montré ci-dessus, pgBadger
-a comptabilisé environ 5,5 millions de requêtes, mais seulement 3941 requêtes
-différentes après normalisation. Ceci est important dans le fait où nous 
-n'allons pas devoir travailler sur plusieurs millions de requêtes mais
-« seulement » sur 4000.
-
-Autre information intéressante, la durée d'exécution totale des requêtes.
-Ici, nous avons 1 jour et 7 heures d'exécution de requêtes. Cependant, les
-traces vont du 20 au 23 mars, soit plus de trois jours. Cela indique que le
-serveur est assez peu sollicité. Il est plus fréquent que la durée 
-d'exécution sérielle des requêtes soit 3 à 4 fois plus importants que la
-durée des traces.
-</div>
-
------
-### pgBadger : exemple 2
-
-![Exemple pgBadger 2](medias/h1-pgbadger2.png)
-\
-
-<div class="notes">
-
-Ce graphe indique le nombre de requêtes par seconde. Le système ici est assez
-peu utilisé quand on considère le nombre moyen (en orange sur le graphe).
 </div>
 
 -----
-### pgBadger : exemple 3
+### PoWA archivist
 
-![Exemple pgBadger 3](medias/h1-pgbadger3.png)
-\
+<div class="slide-content">
+
+  * Extension de PostgreSQL
+  * Capture régulière des statistiques
+  * Stockage efficace des données
+
+</note>
 
 <div class="notes">
 
-Ce graphe affiche en vert le nombre de fichiers temporaires créés sur la
-durée des traces. La ligne bleue correspond à la taille des fichiers. On
-remarque ainsi la création de fichiers pour un total de plus de 400 Mo par
-moment.
+PoWA archivist est l'extension centrale du logiciel PoWA. Son rôle est de
+capturer, échantillloner et stocker les informations fournies par les
+extensions de collectes.
+
+Les actions de PoWA archivist sont gérés par un background worker, un processus
+dédié géré directement par PostgreSQL. Ce processus va capturer de façon
+régulière, suivant le paramétrage de l'extension, les métriques des collecteurs
+disponibles. Ces métriques sont ensuite échantillonnée grâce à des fonctions
+spécifiques. Les résultats sont stockés dans une base de données dédiée de
+l'instance. Les données stockées sont purgées pour ne garder que l'historique
+configuré.
+
+Plus d'information sur les [clés de
+configuration](https://powa.readthedocs.io/en/latest/powa-archivist/configuration.html)
+dans la documentation.
+
 </div>
 
 -----
-### pgBadger : exemple 4
+### HypoPG
 
-![Exemple pgBadger 4](medias/h1-pgbadger4.jpg)
-\
+<div class="slide-content">
+
+  * Extension de PostgreSQL
+  * Créer des index hypothétiques
+  * Permet la proposition de nouveaux index
+
+</div>
 
 <div class="notes">
 
-Le plus important est certainement ce tableau. Il affiche les requêtes qui ont
-pris le plus de temps, que ce soit parce que les requêtes en question sont
-vraiment très lentes ou parce qu'elles sont exécutées un très grand nombre
-de fois. On remarque d'ailleurs dans cet exemple qu'avec les trois premières
-requêtes, on arrive à un total de 27 heures. Le premier exemple nous indique
-que l'exécution sérielle des requêtes aurait pris 23 heures. En ne
-travaillant que sur ces trois requêtes, nous travaillons en fait sur 87 % du
-temps total d'exécution des requêtes comprises dans les traces. Pas besoin
-donc de travailler sur les 4000 requêtes normalisées.
+`HypoPG` est une extension développée pour PoWA. Elle ne fournit pas de
+statistiques supplémentaires. Elle permet de créer des index hypothétiques qui
+n'exisent pas sur disque. Leur création est donc instantanée et n'a aucun
+impact sur les disques ou la CPU. Couplée aux autres extensions de PoWA, HypoPG
+permet de tester si un nouvel index pourrait améliorer les performances d'une
+requête donnée.
+
+Plus d'information dans la documentation du [projet
+HypoPG](https://powa.readthedocs.io/en/latest/stats_extensions/hypopg.html).
+
+</div>
+
+-----
+### PoWA-web
+
+<div class="slide-content">
+
+  * Interface graphique web
+  * permet d'observer en temps réel l'activité des requêtes
+
+</div>
+
+<div class="notes">
+
+PoWA est fourni une interface web basée sur le framework
+[Tornado](https://www.tornadoweb.org/en/stable/) : PoWA-web. Cette interface
+permet d'exploiter les données stockées par PoWA archivist, et donc d'observer
+en temps réel l'activité de l'instance. Cette activité est présentée sous forme
+de graphiques interactifs et de tableaux permettant de trier selon divers
+critères les différentes requêtes normalisées sur l'intervalle de temps
+sélectionné.
+
+Une démo de cette interface est disponible sur le site :
+<http://demo-powa.dalibo.com/>.
+
+</div>
+
+-----
+### Points faibles de PoWA
+
+<div class="slide-content">
+
+  * Impact sur les performances
+  * Installation de plusieurs extensions
+  * Pas d'informations sur les serveurs secondaires
+
+</div>
+
+<div class="notes">
+
+PoWA est efficace car il est au plus près de l'instance. Son utilisation a
+cependant un impact indéniable sur les performances. Cet impact est surtout dû
+au fonctionnement de l'extension _pg_stat_statements_. Voir .
+
+PoWA s'installe comme une extension de PostgreSQL et stocke ses informations
+dans une base de données de l'instance. Une défaillance sur un outil externe ne
+posera pas de problème sur l'instance. Un problème sur n'importe quelle
+extension de PoWA peut conduire à un crash de votre instance. Il est important
+de bien tester l'outil avant de l'installer et de l'utiliser en production.
+
+Les informations étant fournies par des extensions requérant un accès direct au
+moteur de chaque instance, l'utilisation de PoWA nécessite le stockage
+d'information sur chacune des instances que l'on souhaite gérer. Un serveur
+secondaire est en lecture seule. On ne peut donc pas y utiliser PoWA.
+
+</div>
+
+-----
+### Points forts de PoWA
+
+<div class="slide-content">
+
+  * Information en temps réel
+    * et dans le passé
+  * Granularité des informations jusqu'à la requête
+    * voire jusqu'au prédicat
+
+</div>
+
+<div class="notes">
+
+En cas d'incident sur une production, PoWA permet de détecter immédiatement la
+ou les requêtes posant problème. Il peut proposer des optimisations pour
+améliorer la situation.  
+Si la conservation d'un historique suffisant a été configuré, il permet de
+comparer les performances entre deux périodes données.
+
+Les modules de collectes regroupent leurs métriques par requête normalisée,
+utilisateur et base de données. Toutes les informations récoltées par PoWA sont
+donc disponibles avec cette granularité.
 
 </div>
 
@@ -1209,6 +980,7 @@ donc de travailler sur les 4000 requêtes normalisées.
   * Version: 2.2
   * Licence: PostgreSQL
   * Notes: Serveur sur Linux, client web
+
 </div>
 
 
@@ -1225,6 +997,7 @@ donc de travailler sur les 4000 requêtes normalisées.
   * Surveillance OS / PostgreSQL
   * Suivi de l'activité
   * Configuration de chaque instance
+
 </div>
 
 <div class="notes">
@@ -1234,6 +1007,7 @@ tâches courantes.
 
 Le serveur web est installé de façon centralisée et un agent est déployé pour
 chaque instance.
+
 </div>
 
 -----
@@ -1247,6 +1021,7 @@ chaque instance.
 La section __Monitoring__ permet de visualiser les graphiques historisés au
 niveau du système d'exploitation (CPU, mémoire, ...) ainsi qu'au niveau de
 l'instance PostgreSQL.
+
 </div>
 
 -----
@@ -1260,6 +1035,7 @@ l'instance PostgreSQL.
 La section __Activity__ permet de lister toutes les requêtes courantes
 (__Running__), les requêtes bloquées (__Waiting__) ou bloquantes (__Blocking__).
 Il est possible à partir de cette vue d'annuler une requête.
+
 </div>
 
 -----
@@ -1276,6 +1052,7 @@ La section _Configuration_ permet de lister le paramètres des fichiers
 Elle permet également de modifier ces paramètres. Suivant les cas, il sera
 proposer de recharger la configuration ou de redémarrer l'instance pour
 appliquer ces changements.
+
 </div>
 
 
@@ -1285,10 +1062,12 @@ appliquer ces changements.
 <div class="slide-content">
 
   * Un système est pérenne s'il est bien supervisé
-  * Supervision automatique
-    * configuration des traces
-    * configuration des statistiques
-    * mise en place d'outils d'historisation
+  * Supervision automatique importante
+  * Bonne configuration des traces applicatives
+  * Accès à l'historique des performances
+
+FIXME
+
 </div>
 
 
@@ -1299,6 +1078,9 @@ Pour cela, il faut tout d'abord s'assurer que les traces et les statistiques
 soient bien configurées. Ensuite, l'installation d'un outil d'historisation, de
 création de graphes et de génération d'alertes, est obligatoire pour pouvoir
 tirer profit des informations fournies par PostgreSQL.
+
+FIXME
+
 </div>
 
 -----
@@ -1309,5 +1091,10 @@ tirer profit des informations fournies par PostgreSQL.
 pgBadger
 
 https://hub.docker.com/r/dalibo/pgbadger/
+
+PoWA
+
+temBoard
+
 </div>
 
