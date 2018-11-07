@@ -119,8 +119,8 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
   * Supervision : quoi et pourquoi ?
   * Trois outils de supervision graphique :
     * PoWA
-	* pgbadger
-	* temboard
+	* pgBadger
+	* temBoard
 </div>
 
 <div class="notes">
@@ -128,17 +128,43 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
 </div>
 
 -----
-## Introduction
+## Superviser ?
 
 <div class="slide-content">
 
-  * Deux types de supervision
-    * occasionnelle
-    * automatique
-  * Superviser PostgreSQL et le système
-  * Pour PostgreSQL, statistiques et traces
+| **sy.pɛʁ.vi.ze** |
+
+« _Se placer au dessus pour voir, remarquer, prendre des mesures_ »
+
 </div>
 
+<div class="notes">
+
+La supervision est la _surveillance du bon fonctionnement d’un système ou
+d’une activité_.
+
+Elle permet de surveiller, rapporter et alerter les fonctionnements normaux et
+anormaux des systèmes informatiques.
+
+Elle répond aux préoccupations suivantes :
+
+  * technique : surveillance du réseau, de l’infrastructure et des machines ;
+  * applicative : surveillance des applications et des processus métiers ;
+  * contrat de service : surveillance du respect des indicateurs contractuels ;
+  * métier : surveillance des processus métiers de l’entreprise.
+
+</div>
+
+-----
+## Que superviser ?
+
+<div class="slide-content">
+
+  * Superviser PostgreSQL et le système
+  * Deux types de supervision :
+    * automatique,
+    * occasionnelle.
+</div>
 
 <div class="notes">
 
@@ -150,11 +176,14 @@ PostgreSQL propose lui-aussi des informations qu'il est important de surveiller
 pour détecter des problèmes au niveau de l'utilisation du SGBD ou de sa
 configuration.
 
-Cette partie a pour but de montrer comment effectuer une supervision
-occasionnelle (au cas où un problème survient, savoir comment interpréter les
-informations fournies par le système et par PostgreSQL) et comment mettre en
-place une supervision automatique (permettant l'envoi de messages à une
-personne en astreinte).
+Un système de supervision automatique est primordial. Il permet de toujours
+être notifié en cas de dysfonctionnement. Couplé à un outil de visualisation
+graphique, il fournit un aperçu de l'évolution du système dans le temps.
+
+Il peut également être intéressant, en cas de fonctionnement anormal, ou pour
+un besoin d'audit, de venir ponctuellement superviser un système en utilisation
+un outil précis.
+
 </div>
 
 -----
@@ -172,8 +201,8 @@ personne en astreinte).
 <div class="notes">
 
 Il n'existe pas qu'une seule supervision. Suivant la personne concernée par la
-supervision, son objectif et du coup les critères de la supervision seront
-différents.
+supervision, son objectif et, par conséquence, les critères de la supervision
+seront différents.
 
 Lors de la mise en place de la supervision, il est important de se demander
 l'objectif de cette supervision, à qui elle va servir, les critères qui
@@ -205,9 +234,9 @@ Améliorer les performances du SGBD sans connaître les performances globales du
 système est très difficile. Si un utilisateur se plaint d'une perte de
 performance, pouvoir corroborer ses dires avec des informations provenant du
 système de supervision aide à s'assurer qu'il y a bien un problème de
-performances et peut fréquemment aider à résoudre le problème de
-performances. De plus, il est important de pouvoir mesurer les gains de
-performances.
+performances et peut fréquemment aider à résoudre le problème. De plus, il est
+important de pouvoir mesurer les gains obtenus après une modification
+matérielle ou logicielle.
 
 Une supervision des traces de PostgreSQL permet aussi d'améliorer les
 applications qui utilisent une base de données. Toute requête en erreur est
@@ -282,7 +311,6 @@ terme de processeur (donc de puissance de calcul), de mémoire et de disque
 
 <div class="notes">
 
-
 Voici quelques exemples d'indicateurs intéressants à superviser pour la partie
 du système d'exploitation.
 
@@ -336,30 +364,6 @@ Il existe de nombreux indicateurs intéressant sur les bases :
 </div>
 
 -----
-## La supervision avec PostgreSQL
-
-<div class="slide-content">
-
-  * Supervision occasionnelle : pour les cas où il est possible d'intervenir
-    immédiatement
-  * Supervision automatique
-    * permet de remonter des informations rapidement
-    * permet de conserver les informations
-</div>
-
-
-<div class="notes">
-
-La supervision occasionnelle est intéressante lorsqu'un utilisateur se plaint 
-d'un problème survenant maintenant. Cependant, cela reste assez limité.
-
-Il est important de mettre en place une solution de supervision automatique. Le
-but est de récupérer périodiquement des données statistiques sur les objets
-et sur l'utilisation du serveur pour avoir des graphes de tendance et envoyer
-des alertes quand des seuils sont dépassés.
-</div>
-
------
 ### Informations internes
 
 <div class="slide-content">
@@ -373,17 +377,18 @@ des alertes quand des seuils sont dépassés.
 
 <div class="notes">
 
-PostgreSQL propose deux canaux d'informations : les statistiques d'activité (à
-ne pas confondre avec les statistiques sur les données, à destination de
-l'optimiseur de requêtes) et les traces applicatives (ou « logs »), souvent
-dans un fichier dont le nom varie avec la distribution et l'installation.
+PostgreSQL propose deux canaux d'informations :
 
-PostgreSQL stocke un ensemble d'informations (métadonnées des schémas,
-informations sur les tables et les colonnes, données de suivi interne, etc.)
-dans des tables systèmes qui peuvent être consultées par les administrateurs.
-PostgreSQL fournit également des vues combinant des informations puisées dans
-différentes tables systèmes. Ces vues simplifient le suivi de l'activité de la
-base.
+  * les statistiques d'activité. À ne pas confondre avec les statistiques sur
+les données, à destination de l'optimiseur de requêtes.
+  * les traces applicatives (ou « logs »), souvent dans un fichier dont le nom
+varie avec la distribution et l'installation.
+
+PostgreSQL stocke un ensemble d'informations dans des tables systèmes. Il peut
+s'agir de métadonnées des schémas, d'informations sur les tables et les
+colonnes, de données de suivi interne, etc. PostgreSQL fournit également des
+vues combinant des informations puisées dans différentes tables systèmes. Ces
+vues simplifient le suivi de l'activité de la base.
 
 PostgreSQL est aussi capable de tracer un grand nombre d'informations qui
 peuvent être exploitées pour surveiller l'activité de la base de données.
@@ -410,7 +415,7 @@ permettant de sauvegarder les données, les alertes et de les historiser.
 
 Pour récupérer et enregistrer les informations statistiques, les historiser,
 envoyer des alertes ou dessiner des graphiques, il faut faire appel à un outil
-externe. 
+externe.
 
 Cela peut être des fait grâce à des outils de supervision générique comme
 Icinga, munin ou Zabbix. On utilisera des agents ou plugins spécifiques pour
@@ -440,11 +445,11 @@ deux catégories :
   * ceux qui le font en temps réel ;
   * ceux qui le font après coup (de la rétro-analyse en fait).
 
-L'analyse en temps réel des traces permet de réagir rapidement à certains
-messages. Par exemple, il est important d'avoir une réaction rapide à
-l'archivage échoué d'un journal de transactions, ainsi qu'en cas de manque
-d'espace disque. Dans cette catégorie, nous discuterons de deux outils : PoWA
-et temboard.
+L'analyse en temps réel d'une instance permet de réagir rapidement en cas de
+problème. Par exemple, il est important d'avoir une réaction rapide en cas de
+manque d'espace disque, ou bien de pouvoir comprendre les raisons de requêtes
+trop lentes. Dans cette catégorie, nous discuterons de deux outils : PoWA et
+temboard.
 
 L'analyse après coup permet une analyse plus fine, se terminant généralement
 par un rapport, fréquemment en HTML, parfois avec des graphes. Cette analyse
@@ -459,67 +464,75 @@ pgBagder.
 <div class="slide-content">
 
   * _PostgreSQL Workload Analyzer_
-  * Effectue des captures des statistiques collectées par `pg_stat_statements`
-  * Fournit une interface graphique pour observer en temps réel l'activité des requêtes
-  * Licence PostgreSQL
-  * <https://github.com/powa-team/powa-archivist>
-  * <https://github.com/powa-team/powa-web>
+  * site officiel : https://github.com/powa-team/powa
+  * Capture régulière de métriques diverses
+  * Stockage efficace des données
+  * Interface graphique permettant d'exploiter ces informations
+
 </div>
 
 <div class="notes">
 
 PoWA (_PostgreSQL Workload Analyzer_) est un outil communautaire, sous
 licence PostgreSQL.
-Tout comme pour `pg_stat_statements`, sa mise en place nécessite la modification
-du paramètre `shared_preload_libraries`, et donc le redémarrage de l'instance.
-Il faut également créer une nouvelle base de données dans l'instance.
-Par ailleurs, PoWA repose sur les statistiques collectées par
-`pg_stat_statements`, celui-ci doit donc être également installé.
 
-Une fois installé et configuré, l'outil va récupérer à intervalle régulier
-les statistiques collectées par `pg_stat_statements`, les stocker et les
-historiser.
+L'outil récupére à intervalle régulier les statistiques collectées par divers
+extensions, les stocke et les historise.
+
 L'outil fournit également une interface graphique permettant d'exploiter ces
-données, et donc d'observer en temps réel l'activité de l'instance.
-Cette activité est présentée sous forme de graphiques interactifs et de
-tableaux permettant de trier selon divers critères (nombre d'exécution, blocs
-lus hors cache, ...) les différentes requêtes normalisées sur l'intervalle de
-temps sélectionné.
+données. On pourra observer en temps réel l'activité de l'instance. Cette
+activité est présentée sous forme de graphiques interactifs et de tableaux
+présentant les requêtes normalisées. Ces tableaux peuvent être trier selon
+divers critères sur un intervalle de temps sélectionné.
 
-PoWA 1 et 2 sont compatibles avec les versions 9.3 et supérieures de PostgreSQL.
-
-PoWA 3 est compatible avec les versions 9.4 et supérieures de PostgreSQL.
 </div>
 
 -----
-### pg_stat_statements
+### Extensions de collecte
 
 <div class="slide-content">
 
-  * Module contrib de PostgreSQL
-  * Récupère et stocke des statistiques d'exécution des requêtes
-  * Les requêtes sont normalisées
-  * Pas d'historisation
+  * pg_stat_statements : métriques côté PostgreSQL
+  * pg_stat_kcache : métriques côté système
+  * pg_qualstats : informations sur les prédicats
+  * HypoPG : proposition de nouveaux index
+
 </div>
 
 <div class="notes">
 
-`pg_stat_statements` est un module contrib de PostgreSQL, il s'agit donc d'une
-fonctionnalité qui n'est pas installée par défaut.
-Sa mise en place nécessite le préchargement de bibliothèques dans la mémoire
-partagée (paramètre `shared_preload_libraries`), et donc le redémarrage de
-l'instance.
+La collecte des informations et métriques de PoWA sont fournis par des
+extensions de PostgreSQL. Leur mise en place nécessite le préchargement de
+bibliothèques dans la mémoire partagée grâce au paramètre
+`shared_preload_libraries` dans le fichier _postgresql.conf_. Leur activation
+nécessite le redémarrage de l'instance.
 
-Une fois installé et configuré, des mesures (nombre de blocs lus dans le
-cache, hors cache, …) sont collectées sur toutes les requêtes exécutées,
-et elles sont stockées avec les requêtes normalisées. Ces données sont
-ensuite exploitables en interrogeant la vue `pg_stat_statements`.
-À noter que ces statistiques sont cumulées sans être historisées, il est
-donc souvent difficile d'identifier quelle requête est la plus consommatrice à
-un instant donné, à moins de réinitialiser les statistiques.
+`pg_stat_statements` est une extension officielle de PostgreSQL. Elle est
+disponible dans les modules _contrib_. Elle permet de récupérer de nombreuses
+métriques par requête normalisée, utilisateur et base de données. Ces données
+sont par exemple le nombre de blocs accédés dans ou en dehors du segment de
+mémoire partagée dédié à PostgreSQL, le nombre d'appels, etc.
 
-Voir aussi la documentation officielle :
-<https://www.postgresql.org/docs/current/static/pgstatstatements.html>
+pg_qualstats :
+extension développée par Dalibo. Elle permet de fournir de nombreuses
+informations très pertinentes concernant les prédicats des requêtes exécutées
+sur une instance, comme la sélectivité d'un prédicat, les valeurs utilisées
+etc.
+
+
+pg_stat_kcache : extension développée par Dalibo. Elle permet de fournir
+des indicateurs complémentaires à ceux de pg_stat_statements, mais côté
+système. On a donc a disposition par requête, utilisateur et base de données
+l'utilisation du processeur, ainsi que les accès physiques aux disques.
+
+
+Plus d'information dans les documentations :
+
+  * [pg_stat_statements](https://www.postgresql.org/docs/current/static/pgstatstatements.html)
+  * [pg_stat_kcache]()
+  * [pg_qualstats]()
+  * [HypoPG](https://github.com/HypoPG/hypopg)
+
 </div>
 
 -----
@@ -531,12 +544,29 @@ Voir aussi la documentation officielle :
     * pg_stat_statements
     * pg_qualstats
     * pg_stat_kcache
-    * pg_proctab
   * Stockage efficace des données
   * Interface permettant d'exploiter ces informations
 </note>
 
 <div class="notes">
+
+Il est composé de plusieurs modules. La plupart sont des extensions PostgreSQL :
+
+  * _PoWA-archivist_ : 
+  * _pg_qualstats_ : an extension to sample predicate statistics
+  * _pg_stat_kcache_ : an extension to sample O/S metrics
+  * _PoWA-web_ : the graphic user interface
+
+
+
+Tout comme pour `pg_stat_statements`, sa mise en place nécessite la modification
+du paramètre `shared_preload_libraries`, et donc le redémarrage de l'instance.
+Il faut également créer une nouvelle base de données dans l'instance.
+Par ailleurs, PoWA repose sur les statistiques collectées par
+`pg_stat_statements`, celui-ci doit donc être également installé.
+
+Une fois installé et configuré, 
+
 
 PostgreSQL Workload Analyzer est un logiciel prévu pour
 échantillonner et visualiser dans le temps les métriques fournies par divers
@@ -546,27 +576,27 @@ intervalle régulier les différentes fonctions de gestion de données de
 PoWA. Chaque source de données dispose de ses fonctions d'échantillonnage
 spécifiques.
 
-Les sources de données supportées sont :
+Les sources de données supportées sont :
 
-  * pg_stat_statements : extension officielle de PostgreSQL permettant de
+  * pg_stat_statements : extension officielle de PostgreSQL permettant de
     récupérer de nombreuses métriques par requête normalisée, utilisateur et
     base de données. Ces données sont par exemple le nombre de blocs accédés
     dans ou en dehors du segment de mémoire partagée dédié à PostgreSQL, le
     nombre d'appels... Pour plus de détail, voir
     http://docs.postgresql.fr/9.2/pgstatstatements.html
-  * pg_qualstats : extension développée par Dalibo. Elle permet de fournir de
+  * pg_qualstats : extension développée par Dalibo. Elle permet de fournir de
     nombreuses informations très pertinentes concernant les prédicats des
     requêtes exécutées sur une instance, comme la sélectivité d'un prédicat,
     les valeurs utilisées etc.
-  * pg_stat_kcache : extension développée par Dalibo. Elle permet de fournir
+  * pg_stat_kcache : extension développée par Dalibo. Elle permet de fournir
     des indicateurs complémentaires à ceux de pg_stat_statements, mais côté
     système. On a donc a disposition par requête, utilisateur et base de
     données l'utilisation du processeur, ainsi que les accès physiques aux
     disques.
 
-Le support d'autres sources de données est prévu, notamment :
+Le support d'autres sources de données est prévu, notamment :
 
-  * pg_proctab : Extensions développée par Mark Wong. Elle fournit des
+  * pg_proctab : Extensions développée par Mark Wong. Elle fournit des
     indicateurs systèmes généralistes, non liés à l'utilisation de requêtes en
     particulier.
 
@@ -594,7 +624,7 @@ métriques par requête normalisée, utilisateur et base de données. Toutes les
 informations récoltées par PoWA sont donc disponibles avec cette
 granularité. Les différentes informations que ces modules offrent permettre de
 trouver de nombreuses informations qui manquaient cruellement à l'écosystème
-PostgreSQL jusqu'à présent, par exemple :
+PostgreSQL jusqu'à présent, par exemple :
 
   * connaître le taux de lecture dans le cache du système d'exploitation et les
     accès disques physiques
@@ -1272,3 +1302,12 @@ tirer profit des informations fournies par PostgreSQL.
 </div>
 
 -----
+## Travaux Pratiques
+
+<div class="notes">
+
+pgBadger
+
+https://hub.docker.com/r/dalibo/pgbadger/
+</div>
+
