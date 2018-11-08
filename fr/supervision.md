@@ -476,6 +476,11 @@ pgBagder.
 </div>
 
 -----
+
+![pgBadger](medias/pgbadger.png)
+\
+
+-----
 ## pgBadger
 
 <div class="slide-content">
@@ -695,7 +700,7 @@ La trace fournie par `log_min_duration_statement` ressemble à ceci :
 </div>
 
 -----
-### Lancement de pgBadger
+### Création d'un rapport pgBadger
 
 <div class="slide-content">
 
