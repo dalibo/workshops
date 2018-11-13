@@ -731,7 +731,7 @@ PostgreSQL. Puis, de générer des rapports HTML à la demande.
 On peut ainsi créer un fichier chaque heure :
 
 ```
-pgbadger --last-parsed .pgbadger_last_state -o YY_MM_DD_HH.bin postgresql-11-main.log
+pgbadger --last-parsed .pgbadger_last_state -o YY_MM_DD_HH.bin postgresql.log
 ```
 
 On pourra créer un rapport en précisant les fichiers binaires voulus :
@@ -1041,7 +1041,8 @@ L'interface utilisateur de temboard est développée en python 2.7 et repose sur
 le framework web Tornado. Coté rendu, il s'appuie sur le framework bootstrap.
 
 Une base de données, appelée _repository_ est nécessaire à son fonctionnement,
-en effet, celle-ci va permettre de stocker :
+en effet, celle-ci va permettre de stocker :
+
   * la liste des comptes utilisateurs habilités à se connecter à l'interface;
   * la liste des instances Postgres à manager;
   * l'historique des données collectées.
@@ -1070,14 +1071,14 @@ instance Postgres. Celui-ci ne peut gérer qu'une seule instance Postgres.
 
 Il est développé en python et supporte de la version 2.6 à la version 3.6.
 
-Il est interrogeable et contrôlable au travers d'une API REST (HTTPS) et peut
-facilement entrer en interaction avec des outils tiers.
+Il est interrogeable et contrôlable au travers d'une _API REST_ (_HTTPS_) et
+peut facilement entrer en interaction avec des outils tiers.
 
 Documentation de l'API :
-https://temboard-agent.readthedocs.io/en/latest/api.html
+<https://temboard-agent.readthedocs.io/en/latest/api.html>
 
 L'agent embarque son propre système d'authentification, qui est indépendant
-de celui de l'interface utilisateur.
+de celui de l'interface utilisateur. La sécurité des échange est garantie par le protocole sécurisé _HTTPS_.
 
 </div>
 
@@ -1101,7 +1102,8 @@ de celui de l'interface utilisateur.
 
 Donne une vision en temps réel (rafraichissement toutes les 2 secondes) de
 l'état du système et de l'instance Postgres en mettant en évidence certaines
-données  :
+données :
+
   * Métriques système : usage CPU, mémoire, _loadaverage_.
   * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
   * Status de chaque métrique calculé selon des seuils (*alerting*).
@@ -1110,7 +1112,7 @@ données  :
 
 Permet un accès simplifié en lecture et écriture aux paramètres de
 configuration de l'instance Postgres. La modification des paramètres s'effectue
-avec l'ordre SQL _ALTER SYSTEM_.
+avec l'ordre SQL `ALTER SYSTEM`.
 
 3. Plugin _Monitoring_ (Supervision)
 
@@ -1118,20 +1120,30 @@ L'agent collecte périodiquement des données de métrologie que ce soit au nive
 du système (CPU, mémoire, occupation disque, charge) ou au niveau de l'instance
 Postgres (TPS, tailles, cache hit ratio, verrous, taux d'écriture des WAL, etc).
 Ces données sont ensuite envoyées à l'interface puis historisées dans le
-_repository_. L'interface offre au DBA une consultation de ces données sous
-forme de graphiques, navigables dans le temps. Ces données sont également
-comparées lors de la réception à des seuils (configurables) afin de déclencher
-une alerte si la valeur excède le seuil défini. Ces alertes sont visibles soit
-sur le _dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
+_repository_.
+
+L'interface offre au DBA une consultation de ces données sous forme de
+graphiques, navigables dans le temps. Ces données sont également comparées lors
+de la réception à des seuils (configurables) afin de déclencher une alerte si
+la valeur excède le seuil défini. Ces alertes sont visibles soit sur le
+_dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
 alertes est également navigable dans le temps.
 
 4. Plugin _Activity_ (Activité)
 
 Ce plugin permet de consulter en temps réel la liste des requêtes SQL en court
 d'execution, les requêtes bloquées ou les requêtes bloquantes. La liste
-affichées des _backends_ contient les informations suivantes : PID du processus,
-nom de la base, utilisateur, usage CPU, usage mémoire, I/O, si le _backend_ est
-en attente de verrou, la durée d'execution et la requête SQL.
+affichées des _backends_ contient les informations suivantes :
+
+  * PID du processus,
+  * nom de la base,
+  * utilisateur,
+  * usage CPU,
+  * usage mémoire,
+  * I/O,
+  * si le _backend_ est en attente de verrou,
+  * durée d'execution,
+  * requête SQL.
 
 Il permet également de mettre en pause le rafraichissement automatique et de
 terminer un backend.
