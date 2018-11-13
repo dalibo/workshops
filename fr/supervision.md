@@ -26,7 +26,7 @@ url : https://dalibo.com/formations
 ## Limiter la profondeur de la table des matières
 toc-depth: 2
 
-## Mettre les lien http en pieds de page
+## Mettre les liens http en pieds de page
 links-as-notes: true
 
 ## Police plus petite dans un bloc de code
@@ -135,7 +135,7 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
 
 **| sy.pɛʁ.vi.ze |**
 
-« _Se placer au dessus pour voir, remarquer, prendre des mesures_ »
+« _Se placer au-dessus pour voir, remarquer, prendre des mesures_ »
 
 </div>
 
@@ -174,7 +174,7 @@ Superviser un serveur de bases de données consiste à superviser le SGBD
 lui-même mais aussi le système d'exploitation et le matériel. Ces deux
 derniers sont importants pour connaître la charge système, l'utilisation des
 disques ou du réseau, qui pourraient expliquer des lenteurs au niveau du SGBD.
-PostgreSQL propose lui-aussi des informations qu'il est important de surveiller
+PostgreSQL propose lui aussi des informations qu'il est important de surveiller
 pour détecter des problèmes au niveau de l'utilisation du SGBD ou de sa
 configuration.
 
@@ -328,7 +328,7 @@ requêtes, auparavant rapides, deviennent lentes. Cependant, la suractivité
 comme la non-activité sont un problème. En fait, si le service est tombé, le
 serveur sera en sous-activité, ce qui est un excellent indice.
 
-Les entrées/sorties disque permettent de montrer un soucis au niveau du
+Les entrées/sorties disque permettent de montrer un souci au niveau du
 système disque : soit PostgreSQL écrit trop à cause d'une mauvaise
 configuration des journaux de transactions, soit les requêtes exécutées
 utilisent des fichiers temporaires pour trier les données, ou pour une toute
@@ -432,9 +432,9 @@ Pour récupérer et enregistrer les informations statistiques, les historiser,
 envoyer des alertes ou dessiner des graphiques, il faut faire appel à un outil
 externe.
 
-Cela peut être des fait grâce à des outils de supervision générique comme
-Icinga, munin ou Zabbix. On utilisera des agents ou plugins spécifiques pour
-ces outils comme pg-monz, check_pgactivity ou check_postgres.
+Cela peut être fait grâce à des outils de supervision générique comme Icinga,
+munin ou Zabbix. On utilisera des agents ou plugins spécifiques pour ces outils
+comme pg-monz, check_pgactivity ou check_postgres.
 
 Nous nous intéresserons durant ce workshop à des outils graphiques spécifiques
 pour PostgreSQL.
@@ -771,7 +771,7 @@ extensions, les stocke et les historise.
 L'outil fournit également une interface graphique permettant d'exploiter ces
 données. On pourra observer en temps réel l'activité de l'instance. Cette
 activité est présentée sous forme de graphiques interactifs et de tableaux
-présentant les requêtes normalisées. Ces tableaux peuvent être trier selon
+présentant les requêtes normalisées. Ces tableaux peuvent être triés selon
 divers critères sur un intervalle de temps sélectionné.
 
 Les différentes informations que PoWA offre permet de trouver de nombreuses
@@ -858,7 +858,7 @@ Plus d'information dans les documentations :
 <div class="notes">
 
 PoWA archivist est l'extension centrale du logiciel PoWA. Son rôle est de
-capturer, échantillloner et stocker les informations fournies par les
+capturer, échantilloner et stocker les informations fournies par les
 extensions de collectes.
 
 Les actions de PoWA archivist sont gérés par un background worker, un processus
@@ -1001,20 +1001,22 @@ donc disponibles avec cette granularité.
 
 
 <div class="notes">
+
 temboard est une console d'administration et de supervision d'instances
 PostgreSQL. Il offre une centralisation des interactions et accès aux
 données collectées, s'inscrivant ainsi dans une politique de gestion de parc.
 
-L'outil est constitué de deux composants :
+L'outil est constitué de deux composants :
+
   * un serveur, proposant une interface web au travers de laquelle les DBAs
-    vont pouvoir intéragir avec les instances Postgres;
+    vont pouvoir interagir avec les instances Postgres;
   * un agent, devant être déployé sur chaque hote hébergeant une instance
     Postgres à surveiller.
 
 Le serveur nécessite l'usage de sa propre base de données dans le but
 d'historiser les différentes données remontées par les agents.
 
-Chaque fonctionnalité est implémentée sous forme de "plugin-in", et peut-être
+Chaque fonctionnalité est implémentée sous forme de _plugin_, et peut-être
 activer ou désactivée par instance.
 
 </div>
@@ -1068,7 +1070,7 @@ instance Postgres. Celui-ci ne peut gérer qu'une seule instance Postgres.
 
 Il est développé en python et supporte de la version 2.6 à la version 3.6.
 
-Il est interrogeable et controlable au travers d'une API REST (HTTPS) et peut
+Il est interrogeable et contrôlable au travers d'une API REST (HTTPS) et peut
 facilement entrer en interaction avec des outils tiers.
 
 Documentation de l'API :
@@ -1107,17 +1109,17 @@ données  :
 2. Plugin _Configuration_
 
 Permet un accès simplifié en lecture et écriture aux paramètres de
-configuration de l'instance Postgres. La modification des paramètre
-s'effectue avec l'ordre SQL _ALTER SYSTEM_.
+configuration de l'instance Postgres. La modification des paramètres s'effectue
+avec l'ordre SQL _ALTER SYSTEM_.
 
-3. Plugin _Monitoring_ (Supersion)
+3. Plugin _Monitoring_ (Supervision)
 
 L'agent collecte périodiquement des données de métrologie que ce soit au niveau
 du système (CPU, mémoire, occupation disque, charge) ou au niveau de l'instance
 Postgres (TPS, tailles, cache hit ratio, verrous, taux d'écriture des WAL, etc).
 Ces données sont ensuite envoyées à l'interface puis historisées dans le
 _repository_. L'interface offre au DBA une consultation de ces données sous
-forme de graphiques, naviguables dans le temps. Ces données sont également
+forme de graphiques, navigables dans le temps. Ces données sont également
 comparées lors de la réception à des seuils (configurables) afin de déclencher
 une alerte si la valeur excède le seuil défini. Ces alertes sont visibles soit
 sur le _dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
@@ -1142,7 +1144,7 @@ terminer un backend.
 <div class="slide-content">
 
   * Liste des sondes de supervision pas complète
-  * Pas de notifications par email pour les alertes
+  * Pas de notifications par e-mail pour les alertes
   * Pas cloud-ready
   * Pas d'accès en lecture seule au niveau de l'agent
 
@@ -1151,7 +1153,7 @@ terminer un backend.
 <div class="notes">
 
 temBoard est encore en phase de développement, certaines fonctionnalités
-interessantes ne sont pas encore implémentées mais devraient l'être dans
+intéressantes ne sont pas encore implémentées mais devraient l'être dans
 un avenir proche.
 
 </div>
@@ -1218,13 +1220,89 @@ corriger :
 
 <div class="notes">
 
-pgBadger
+### pgBadger
 
-https://hub.docker.com/r/dalibo/pgbadger/
+#### Installation
 
-PoWA
+Suivant les outils à disposition sur votre ordinateur, vous avez 2 moyens à
+disposition pour installer le blaireau : récupérer le projet ou utiliser une
+image docker.
 
-temBoard
+Si Perl est disponible sur votre ordinateur, vous pouvez opter pour la
+récupération du projet sur github et le lancement du script en direct :
+
+```bash
+$ git clone https://github.com/darold/pgbadger.git
+$ cd pgbadger
+$ export run_pgbadger="<chemin_projet>/pgbadger/pgbadger"
+$ $run_pgbadger --version
+pgBadger version 10.1
+```
+
+Si Perl n'est pas disponible, vous pouvez utiliser l'image docker :
+
+```bash
+$ docker pull dalibo/pgbadger
+$ export run_pgbadger="docker run --rm -v $(pwd):/data dalibo/pgbadger --outdir=/data "
+$ $run_pgbadger --version
+pgBadger version 10.1
+```
+
+Vous pouvez récupérer les logs PostgreSQL utilisés dans le TP en suivant le
+lien suivant :
+<https://cloud.dalibo.com/p/workshop/workshop_supervision/logs_postgresql.tgz>.
+
+L'archive contient 9 fichiers de traces de 135 Mo chacun :
+
+```bash
+$ tar xzf logs_postgresql.tgz
+$ cd logs_postgresql
+$ du -sh *
+135M	postgresql-11-main.1.log
+135M	postgresql-11-main.2.log
+135M	postgresql-11-main.3.log
+135M	postgresql-11-main.4.log
+135M	postgresql-11-main.5.log
+135M	postgresql-11-main.6.log
+135M	postgresql-11-main.7.log
+135M	postgresql-11-main.8.log
+135M	postgresql-11-main.9.log
+```
+
+#### Premier rapport
+
+Nous allons commencer par créer un premier rapport à partir du premier fichier
+de logs. L'option `-j` est à fixer à votre nombre de processeur :
+
+Si vous utiliser le script Perl :
+
+```bash
+$ $run_pgbadger -j 4 postgresql-11-main.1.log
+```
+
+Le fichier de rapport _out.html_ est créé dans le répertoire courant. Avant de
+l'ouvrir dans le navigateur, lançons la création du rapport complet :
+
+```bash
+$ $run_pgbadger -j 4 --outfile rapport_complet.html postgresql-11-main.*.log
+```
+
+Pendant la création du rapport complet, ouvrez-le fichier _out.html_ dans votre
+navigateur. Parcourir les différents onglets et graphiques.
+
+Une fois le rapport complet créé, ouvrez le dans votre navigateur.
+
+On peut observer un nombre de sessions et de connexions proches. Chaque session
+doit ouvrir une nouvelle connexion. Ceci est assez coûteux, un processus et de
+la mémoire devant être alloués.
+
+
+
+
+
+### PoWA
+
+### temBoard
 
 </div>
 
