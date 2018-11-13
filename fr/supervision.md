@@ -133,7 +133,7 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
 
 <div class="slide-content">
 
-| **sy.pɛʁ.vi.ze** |
+**| sy.pɛʁ.vi.ze |**
 
 « _Se placer au dessus pour voir, remarquer, prendre des mesures_ »
 
@@ -825,7 +825,7 @@ consacré à ce
 paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
 du cours d'optimisation de la formation [DBA4 - PostgreSQL
 Performances](https://www.dalibo.com/formation-postgresql-performance) pour
-plus d'information.
+plus d'information.  
 Cette extension est en phase de développement et ne doit pas être utilisée en
 production. Vous êtes encouragés à la tester et à faire des retours aux
 développeurs du projet.
@@ -966,7 +966,7 @@ secondaire est en lecture seule. On ne peut donc pas y utiliser PoWA.
 
 En cas d'incident sur une production, PoWA permet de détecter immédiatement la
 ou les requêtes posant problème. Il peut proposer des optimisations pour
-améliorer la situation.
+améliorer la situation.  
 Si la conservation d'un historique suffisant a été configuré, il permet de
 comparer les performances entre deux périodes données.
 
@@ -1153,7 +1153,7 @@ un avenir proche.
 
   * Outil multi-fonctionnalités
   * Accès centralisés
-  * Orienté Postgres *uniquement*
+  * Orienté PostgreSQL *uniquement*
 
 </div>
 
@@ -1174,10 +1174,7 @@ actif.
 
   * Un système est pérenne s'il est bien supervisé
   * Supervision automatique importante
-  * Bonne configuration des traces applicatives
-  * Accès à l'historique des performances
-
-FIXME
+  * Utiliser le bon outil suivant la problématique
 
 </div>
 
@@ -1190,7 +1187,19 @@ soient bien configurées. Ensuite, l'installation d'un outil d'historisation, de
 création de graphes et de génération d'alertes, est obligatoire pour pouvoir
 tirer profit des informations fournies par PostgreSQL.
 
-FIXME
+Les trois outils graphiques présentés demande une configuration
+préalable. S'ils ne sont pas utiles pour alerter en cas de problèmes, leur
+utilisation permet de découvrir rapidement les origines du problème et de le
+corriger :
+
+  * pgBadger analyse les logs de l'instance et permet de pointer les erreurs et
+    axes d'améliorations des applications.
+  * PoWA analyse en temps réel de l'intérieur de l'instance, les requêtes s'y
+    exécutant. Il permet de pointer les requêtes lentes et peut même proposer
+    la création d'index.
+  * temBoard analyse lui aussi en temps réel l'activité de l'instance, mais
+    aussi du système l'hébergeant. Il permet également d'agir sur l'instance en
+    modifiant ses paramètres ou en stoppant des requêtes.
 
 </div>
 
