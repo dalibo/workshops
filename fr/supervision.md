@@ -119,8 +119,8 @@ obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss
   * Supervision : quoi et pourquoi ?
   * Trois outils de supervision graphique :
     * PoWA
-	* pgBadger
-	* temBoard
+    * pgBadger
+    * temBoard
 
 </div>
 
@@ -196,7 +196,7 @@ un outil précis.
   * Pour quoi ?
   * Pour qui ?
   * Quels critères ?
-  * Quels outils
+  * Quels outils ?
 
 </div>
 
@@ -361,7 +361,7 @@ problématiques sur le serveur.
 
 <div class="notes">
 
-Il existe de nombreux indicateurs intéressant sur les bases :
+Il existe de nombreux indicateurs intéressants sur les bases :
 
   * nombre de connexions : en faisant par exemple la différence entre
     connexions inactives, actives, en attente de verrous,
@@ -523,7 +523,7 @@ Le site web de pgBadger se trouve sur <https://pgbadger.darold.net/>
 <div class="notes">
 
 Il est essentiel de bien configurer PostgreSQL pour que les traces ne soient pas
-en même temps trop nombreuses pour ne pas être submergé par les informations
+en même temps trop nombreuses pour ne pas être submergées par les informations
 et trop peu pour ne pas savoir ce qu'il se passe. Un bon dosage du niveau des
 traces est important. Savoir où envoyer les traces est tout aussi important.
 
@@ -735,7 +735,7 @@ pgbadger --last-parsed .pgbadger_last_state -o YY_MM_DD_HH.bin postgresql-11-mai
 ```
 
 On pourra créer un rapport en précisant les fichiers binaires voulus :
-    
+
 ```
 pgbadger -o rapport_2018_11_05.html 2018_11_05_**.bin
 ```
@@ -825,7 +825,7 @@ consacré à ce
 paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
 du cours d'optimisation de la formation [DBA4 - PostgreSQL
 Performances](https://www.dalibo.com/formation-postgresql-performance) pour
-plus d'information.  
+plus d'information.
 Cette extension est en phase de développement et ne doit pas être utilisée en
 production. Vous êtes encouragés à la tester et à faire des retours aux
 développeurs du projet.
@@ -859,7 +859,7 @@ extensions de collectes.
 Les actions de PoWA archivist sont gérés par un background worker, un processus
 dédié géré directement par PostgreSQL. Ce processus va capturer de façon
 régulière, suivant le paramétrage de l'extension, les métriques des collecteurs
-disponibles. Ces métriques sont ensuite échantillonnée grâce à des fonctions
+disponibles. Ces métriques sont ensuite échantillonnées grâce à des fonctions
 spécifiques. Les résultats sont stockés dans une base de données dédiée de
 l'instance. Les données stockées sont purgées pour ne garder que l'historique
 configuré.
@@ -901,13 +901,13 @@ HypoPG](https://powa.readthedocs.io/en/latest/stats_extensions/hypopg.html).
 <div class="slide-content">
 
   * Interface graphique web
-  * permet d'observer en temps réel l'activité des requêtes
+  * Permet d'observer en temps réel l'activité des requêtes
 
 </div>
 
 <div class="notes">
 
-PoWA est fourni une interface web basée sur le framework
+PoWA fournit une interface web basée sur le framework
 [Tornado](https://www.tornadoweb.org/en/stable/) : PoWA-web. Cette interface
 permet d'exploiter les données stockées par PoWA archivist, et donc d'observer
 en temps réel l'activité de l'instance. Cette activité est présentée sous forme
@@ -966,7 +966,7 @@ secondaire est en lecture seule. On ne peut donc pas y utiliser PoWA.
 
 En cas d'incident sur une production, PoWA permet de détecter immédiatement la
 ou les requêtes posant problème. Il peut proposer des optimisations pour
-améliorer la situation.  
+améliorer la situation.
 Si la conservation d'un historique suffisant a été configuré, il permet de
 comparer les performances entre deux périodes données.
 
@@ -982,81 +982,187 @@ donc disponibles avec cette granularité.
 <div class="slide-content">
 
   * Adresse: <https://github.com/dalibo/temboard>
-  * Version: 2.2
-  * Licence: PostgreSQL
-  * Notes: Serveur sur Linux, client web
+  * Console centrale d'administration et de supervision
+  * Architecture serveur (interface) / agent
+  * Historisation des données et temps réel
+  * Extensible
 
 </div>
 
 
 <div class="notes">
+temboard est une console d'administration et de supervision d'instances
+PostgreSQL. Il offre une centralisation des interactions et accès aux
+données collectées, s'inscrivant ainsi dans une politique de gestion de parc.
+
+L'outil est constitué de deux composants :
+  * un serveur, proposant une interface web au travers de laquelle les DBAs
+    vont pouvoir intéragir avec les instances Postgres;
+  * un agent, devant être déployé sur chaque hote hébergeant une instance
+    Postgres à surveiller.
+
+Le serveur nécessite l'usage de sa propre base de données dans le but
+d'historiser les différentes données remontées par les agents.
+
+Chaque fonctionnalité est implémentée sous forme de "plugin-in", et peut-être
+activer ou désactivée par instance.
 
 </div>
 
 -----
-### temBoard - PostgreSQL Remote Control
+### temBoard - Serveur
 
 <div class="slide-content">
 
-  * Multi-instances
-  * Surveillance OS / PostgreSQL
-  * Suivi de l'activité
-  * Configuration de chaque instance
+  * Interface Web
+    * Python 2.7 / Tornado / SQLALchemy
+  * Base de données historique et metadonnées
+    * PostgreSQL 9.4+
+  * Authentification
+  * Packagé pour centos/RHEL 7
 
 </div>
 
 <div class="notes">
 
-temBoard est un outil permettant à un DBA de mener à bien la plupart de ses
-tâches courantes.
+L'interface utilisateur de temboard est développée en python 2.7 et repose sur
+le framework web Tornado. Coté rendu, il s'appuie sur le framework bootstrap.
 
-Le serveur web est installé de façon centralisée et un agent est déployé pour
-chaque instance.
+Une base de données, appelée _repository_ est nécessaire à son fonctionnement,
+en effet, celle-ci va permettre de stocker :
+  * la liste des comptes utilisateurs habilités à se connecter à l'interface;
+  * la liste des instances Postgres à manager;
+  * l'historique des données collectées.
 
-</div>
-
------
-### temBoard - Monitoring
-
-![temBoard](medias/de-temBoard-monitoring.png)
-\
-
-<div class="notes">
-
-La section __Monitoring__ permet de visualiser les graphiques historisés au
-niveau du système d'exploitation (CPU, mémoire, ...) ainsi qu'au niveau de
-l'instance PostgreSQL.
+L'accès a cette interface est protégée par une authentification utilisateur.
 
 </div>
 
 -----
-### temBoard - Activity
+### temBoard - Agent
 
-![temBoard](medias/de-temBoard-activity.png)
-\
+<div class="slide-content">
+
+  * Mono-instance
+  * Pas de dépendances
+  * API REST
+  * Authentification
+  * Packagé pour centos/RHEL 6 et 7
+
+</div>
 
 <div class="notes">
 
-La section __Activity__ permet de lister toutes les requêtes courantes
-(__Running__), les requêtes bloquées (__Waiting__) ou bloquantes (__Blocking__).
-Il est possible à partir de cette vue d'annuler une requête.
+L'agent temboard doit quant à lui être déployée sur chaque hôte qui héberge une
+instance Postgres. Celui-ci ne peut gérer qu'une seule instance Postgres.
+
+Il est développé en python et supporte de la version 2.6 à la version 3.6.
+
+Il est interrogeable et controlable au travers d'une API REST (HTTPS) et peut
+facilement entrer en interaction avec des outils tiers.
+
+Documentation de l'API :
+https://temboard-agent.readthedocs.io/en/latest/api.html
+
+L'agent embarque son propre système d'authentification, qui est indépendant
+de celui de l'interface utilisateur.
 
 </div>
 
 -----
-### temBoard - Configuration
+### temBoard - Fonctionnalités
 
-![temBoard](medias/de-temBoard-configuration.png)
-\
+<div class="slide-content">
+
+  * Tableau de bord
+  * Configuration Postgres
+  * Supervision
+  * Activité
+
+</div>
 
 <div class="notes">
 
-La section _Configuration_ permet de lister le paramètres des fichiers
-`postgresql.conf`, `pg_hba.conf` et `pg_ident.conf`.
+4 fonctionnalités sont pour le moment disponibles :
 
-Elle permet également de modifier ces paramètres. Suivant les cas, il sera
-proposer de recharger la configuration ou de redémarrer l'instance pour
-appliquer ces changements.
+1. Plugin _Dashboard_ (Tableau de bord)
+
+Donne une vision en temps réel (rafraichissement toutes les 2 secondes) de
+l'état du système et de l'instance Postgres en mettant en évidence certaines
+données  :
+  * Métriques système : usage CPU, mémoire, _loadaverage_.
+  * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
+  * Status de chaque métrique calculé selon des seuils (*alerting*).
+
+2. Plugin _Configuration_
+
+Permet un accès simplifié en lecture et écriture aux paramètres de
+configuration de l'instance Postgres. La modification des paramètre
+s'effectue avec l'ordre SQL _ALTER SYSTEM_.
+
+3. Plugin _Monitoring_ (Supersion)
+
+L'agent collecte périodiquement des données de métrologie que ce soit au niveau
+du système (CPU, mémoire, occupation disque, charge) ou au niveau de l'instance
+Postgres (TPS, tailles, cache hit ratio, verrous, taux d'écriture des WAL, etc).
+Ces données sont ensuite envoyées à l'interface puis historisées dans le
+_repository_. L'interface offre au DBA une consultation de ces données sous
+forme de graphiques, naviguables dans le temps. Ces données sont également
+comparées lors de la réception à des seuils (configurables) afin de déclencher
+une alerte si la valeur excède le seuil défini. Ces alertes sont visibles soit
+sur le _dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
+alertes est également navigable dans le temps.
+
+4. Plugin _Activity_ (Activité)
+
+Ce plugin permet de consulter en temps réel la liste des requêtes SQL en court
+d'execution, les requêtes bloquées ou les requêtes bloquantes. La liste
+affichées des _backends_ contient les informations suivantes : PID du processus,
+nom de la base, utilisateur, usage CPU, usage mémoire, I/O, si le _backend_ est
+en attente de verrou, la durée d'execution et la requête SQL.
+
+Il permet également de mettre en pause le rafraichissement automatique et de
+terminer un backend.
+
+</div>
+
+-----
+### Points faibles de temBoard
+
+<div class="slide-content">
+
+  * Liste des sondes de supervision pas complète
+  * Pas de notifications par email pour les alertes
+  * Pas cloud-ready
+  * Pas d'accès en lecture seule au niveau de l'agent
+
+</div>
+
+<div class="notes">
+
+temBoard est encore en phase de développement, certaines fonctionnalités
+interessantes ne sont pas encore implémentées mais devraient l'être dans
+un avenir proche.
+
+</div>
+
+-----
+### Points forts de temBoard
+
+<div class="slide-content">
+
+  * Outil multi-fonctionnalités
+  * Accès centralisés
+  * Orienté Postgres *uniquement*
+
+</div>
+
+<div class="notes">
+
+L'objectif de temBoard est de proposer un seul et unique outil permettant
+l'administration courante et la supervision d'un parc d'instance Postgres.
+Le chemin pour atteindre ce but est encore long mais le développement est
+actif.
 
 </div>
 
