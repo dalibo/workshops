@@ -765,7 +765,7 @@ pgbadger -o rapport_2018_11_05.html 2018_11_05_**.bin
 PoWA (_PostgreSQL Workload Analyzer_) est un outil communautaire, sous
 licence PostgreSQL.
 
-L'outil récupére à intervalle régulier les statistiques collectées par divers
+L'outil récupére à intervalle régulier les statistiques collectées par diverses
 extensions, les stocke et les historise.
 
 L'outil fournit également une interface graphique permettant d'exploiter ces
@@ -774,8 +774,8 @@ activité est présentée sous forme de graphiques interactifs et de tableaux
 présentant les requêtes normalisées. Ces tableaux peuvent être triés selon
 divers critères sur un intervalle de temps sélectionné.
 
-Les différentes informations que PoWA offre permet de trouver de nombreuses
-informations qui manque cruellement à l'écosystème PostgreSQL, par exemple :
+Les différentes informations que PoWA offre permettent de trouver de nombreuses
+informations qui manquent cruellement à l'écosystème PostgreSQL, par exemple :
 
   * connaître le taux de lecture dans le cache du système d'exploitation et les
     accès disques physiques
@@ -861,7 +861,7 @@ PoWA archivist est l'extension centrale du logiciel PoWA. Son rôle est de
 capturer, échantilloner et stocker les informations fournies par les
 extensions de collectes.
 
-Les actions de PoWA archivist sont gérés par un background worker, un processus
+Les actions de PoWA archivist sont gérées par un background worker, un processus
 dédié géré directement par PostgreSQL. Ce processus va capturer de façon
 régulière, suivant le paramétrage de l'extension, les métriques des collecteurs
 disponibles. Ces métriques sont ensuite échantillonnées grâce à des fonctions
@@ -1002,7 +1002,7 @@ donc disponibles avec cette granularité.
 
 <div class="notes">
 
-temboard est une console d'administration et de supervision d'instances
+temBoard est une console d'administration et de supervision d'instances
 PostgreSQL. Il offre une centralisation des interactions et accès aux
 données collectées, s'inscrivant ainsi dans une politique de gestion de parc.
 
@@ -1010,14 +1010,14 @@ L'outil est constitué de deux composants :
 
   * un serveur, proposant une interface web au travers de laquelle les DBAs
     vont pouvoir interagir avec les instances Postgres;
-  * un agent, devant être déployé sur chaque hote hébergeant une instance
+  * un agent, devant être déployé sur chaque hôte hébergeant une instance
     Postgres à surveiller.
 
 Le serveur nécessite l'usage de sa propre base de données dans le but
 d'historiser les différentes données remontées par les agents.
 
-Chaque fonctionnalité est implémentée sous forme de _plugin_, et peut-être
-activer ou désactivée par instance.
+Chaque fonctionnalité est implémentée sous forme de _plugin_, et peut être
+activée ou désactivée par instance.
 
 </div>
 
@@ -1031,23 +1031,23 @@ activer ou désactivée par instance.
   * Base de données historique et metadonnées
     * PostgreSQL 9.4+
   * Authentification
-  * Packagé pour centos/RHEL 7
+  * Packagé pour CentOS/RHEL 7
 
 </div>
 
 <div class="notes">
 
-L'interface utilisateur de temboard est développée en python 2.7 et repose sur
+L'interface utilisateur de temBoard est développée en python 2.7 et repose sur
 le framework web Tornado. Coté rendu, il s'appuie sur le framework bootstrap.
 
 Une base de données, appelée _repository_ est nécessaire à son fonctionnement,
 en effet, celle-ci va permettre de stocker :
 
   * la liste des comptes utilisateurs habilités à se connecter à l'interface;
-  * la liste des instances Postgres à manager;
+  * la liste des instances Postgres à gérer;
   * l'historique des données collectées.
 
-L'accès a cette interface est protégée par une authentification utilisateur.
+L'accès à cette interface est protégée par une authentification utilisateur.
 
 </div>
 
@@ -1066,8 +1066,8 @@ L'accès a cette interface est protégée par une authentification utilisateur.
 
 <div class="notes">
 
-L'agent temboard doit quant à lui être déployée sur chaque hôte qui héberge une
-instance Postgres. Celui-ci ne peut gérer qu'une seule instance Postgres.
+L'agent temboard doit quant à lui être déployé sur chaque hôte qui héberge une
+instance PostgreSQL. Celui-ci ne peut gérer qu'une seule instance PostgreSQL.
 
 Il est développé en python et supporte de la version 2.6 à la version 3.6.
 
@@ -1078,7 +1078,7 @@ Documentation de l'API :
 <https://temboard-agent.readthedocs.io/en/latest/api.html>
 
 L'agent embarque son propre système d'authentification, qui est indépendant
-de celui de l'interface utilisateur. La sécurité des échange est garantie par le protocole sécurisé _HTTPS_.
+de celui de l'interface utilisateur. La sécurité des échanges est garantie par le protocole sécurisé _HTTPS_.
 
 </div>
 
@@ -1131,9 +1131,9 @@ alertes est également navigable dans le temps.
 
 4. Plugin _Activity_ (Activité)
 
-Ce plugin permet de consulter en temps réel la liste des requêtes SQL en court
-d'execution, les requêtes bloquées ou les requêtes bloquantes. La liste
-affichées des _backends_ contient les informations suivantes :
+Ce plugin permet de consulter en temps réel la liste des requêtes SQL en cours
+d'exécution, les requêtes bloquées ou les requêtes bloquantes. La liste
+affichée des _backends_ contient les informations suivantes :
 
   * PID du processus,
   * nom de la base,
