@@ -743,6 +743,11 @@ pgbadger -o rapport_2018_11_05.html 2018_11_05_**.bin
 </div>
 
 -----
+
+![PoWA](medias/powa1-ws.png)
+\
+
+-----
 ### PoWA
 
 <div class="slide-content">
@@ -975,6 +980,11 @@ utilisateur et base de données. Toutes les informations récoltées par PoWA so
 donc disponibles avec cette granularité.
 
 </div>
+
+-----
+
+![temBoard](medias/temboard1-ws.png)
+\
 
 -----
 ## temBoard
