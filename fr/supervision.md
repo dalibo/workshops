@@ -1352,6 +1352,49 @@ Etude plus précise de la db bank autour de 16:50.
 
 ### PoWA
 
+#### Installation
+
+L'installation d'un environnement fonctionnel PoWA se fera au travers des images docker mises à disposition par Dalibo.
+
+Télécharger le fichier `docker-compose.yml` de la version 11 de PostgreSQL :
+
+```bash
+$ wget https://raw.githubusercontent.com/dalibo/docker/master/powa/compose/docker-compose-11.yml
+```
+
+Téléchargement des images et démarrage des conteneurs docker :
+
+```bash
+$ docker-compose -f docker-compose-11.yml up
+```
+
+Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de l'image `powa-archivist` :
+
+```bash
+# Lister les conteneurs pour trouver celui de powa-archivist
+$ docker ps
+# Executer un shell bash
+$ docker exec -i -t f8427da010e3 /bin/bash
+```
+
+Initialisation de la base `bench` :
+
+```bash
+# su postgres
+$ psql -c "CREATE DATABASE bench;"
+$ pgbench -i bench
+```
+
+Générer du traffic SQL :
+
+```bash
+$ pgbench -c 4 -T 1000 bench
+```
+
+Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
+
+
+
 ### temBoard
 
 </div>
