@@ -1393,7 +1393,7 @@ $ pgbench -c 4 -T 1000 bench
 
 Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
-
+Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
 ### temBoard
 
