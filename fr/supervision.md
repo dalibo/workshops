@@ -1397,6 +1397,72 @@ Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
 ### temBoard
 
+L'installation d'un environnement fonctionnel temboard se fera au travers des images docker mises à disposition par Dalibo.
+
+Télécharger le fichier `docker-compose.yml` :
+
+```bash
+$ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-compose.yml
+```
+
+Téléchargement des images et démarrage des conteneurs docker :
+
+```bash
+$ docker-compose up
+```
+
+Afin de créer de l'activité SQL sur notre environnement temboard, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur `tmp_instance10_1` :
+
+```bash
+# Lister les conteneurs pour trouver celui de powa-archivist
+$ docker ps | grep tmp_instance10_1
+# Executer un shell bash
+$ docker exec -i -t f8427da010e3 /bin/bash
+```
+
+Initialisation de la base `bench` :
+
+```bash
+# su postgres
+$ psql -c "CREATE DATABASE bench;"
+$ pgbench -i bench
+```
+
+Générer du traffic SQL :
+
+```bash
+$ pgbench -c 4 -T 1000 bench
+```
+
+Ouvrir votre navigateur à l'adresse https://0.0.0.0:8888
+
+Pour l'authentification, le nom d'utilisateur est `admin`, mot de passe `admin`.
+
+Cliquer sur `instance10.fqdn`
+
+Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
+
+Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
+
+Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, ouvrir un nouveau shell bash sur le conteneur `tmp_instance10_1`, puis :
+
+```bash
+# su postgres
+$ psql bench
+
+bench=# BEGIN;
+
+bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
+
+```
+
+Revenir sur le `Dashboard` temboard, que constate-t-on ?
+
+Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`, `Blocking`.
+
+Depuis l'onglet `Waiting`, mettre en pause le rafraissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
+
+Revenir sur le `Dashboard`. Que constate-t-on ?
 </div>
 
 
