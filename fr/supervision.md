@@ -939,8 +939,11 @@ Une démo de cette interface est disponible sur le site :
 <div class="notes">
 
 PoWA est efficace car il est au plus près de l'instance. Son utilisation a
-cependant un impact indéniable sur les performances. Cet impact est surtout dû
-au fonctionnement de l'extension _pg_stat_statements_. Voir .
+cependant un impact indéniable sur les performances. Cet impact est dû à
+l'activation de l'extension _pg_stat_statements_ et à la collecte des données
+par PoWA. Pour plus d'information, voir [le
+comparatif](https://github.com/powa-team/powa/wiki/POWA-vs-pgBadger) fait par
+notre équipe.
 
 PoWA s'installe comme une extension de PostgreSQL et stocke ses informations
 dans une base de données de l'instance. Une défaillance sur un outil externe ne
@@ -1077,8 +1080,9 @@ peut facilement entrer en interaction avec des outils tiers.
 Documentation de l'API :
 <https://temboard-agent.readthedocs.io/en/latest/api.html>
 
-L'agent embarque son propre système d'authentification, qui est indépendant
-de celui de l'interface utilisateur. La sécurité des échanges est garantie par le protocole sécurisé _HTTPS_.
+L'agent embarque son propre système d'authentification, qui est indépendant de
+celui de l'interface utilisateur. La sécurité des échanges est garantie par le
+protocole sécurisé _HTTPS_.
 
 </div>
 
@@ -1304,11 +1308,44 @@ navigateur. Parcourir les différents onglets et graphiques.
 
 Une fois le rapport complet créé, ouvrez le dans votre navigateur.
 
-On peut observer un nombre de sessions et de connexions proches. Chaque session
-doit ouvrir une nouvelle connexion. Ceci est assez coûteux, un processus et de
-la mémoire devant être alloués.
+On peut observer dans les sections _Connections_ et _Sessions_ un nombre de
+sessions et de connexions proches. Chaque session doit ouvrir une nouvelle
+connexion. Ceci est assez coûteux, un processus et de la mémoire devant être
+alloués.
 
+La section _Checkpoints_ montre une activité d'écriture normale.
 
+La section _Temp Files_ permet, grâce au graphique temporel de vérifier si un
+ralentissement de l'instance est corrélé à un volume important d'écriture de
+fichiers temporaires. Le rapport permet également de lister les requêtes ayant
+générées des fichiers temporaires.  
+Suivant les cas, on pourra tenter une optimisation de la requête ou bien un
+ajustement de la mémoire de travail, `work_mem`.
+
+La section _Vacuums_ liste les différentes tables ayant fait l'objet d'un
+`VACUUM`.
+
+Le section _Locks_ permet d'obtenir les requêtes normalisées ayant le plus fait
+l'objet d'attente sur verrou. Le rapport pgBadger ne permet pas toujours de
+connaître la raison de ces attentes.
+
+La section _Queries_ fournit une connaissance du type d'activité sur chaque
+base de données : _application web_, OLTP, _data warehouse_. Elle permet
+également, si le paramètre `log_line_prefix` le précise bien, la répartition
+des requêtes selon la base de données, l'utilisateur, l'hôte ou l'application.
+
+La section _Top_ est très intéressante. Elle permet de lister les requêtes
+normalisées ayant pris le plus de temps. La fixation du paramètre
+`log_min_duration_statement` à 0 permet de lister toutes les requêtes
+exécutées. Une requête peut ne mettre que quelques dizaines de millisecondes à
+s'exécuter. Mais si elle est lancée des millions de fois par heure, une
+optimisation de quelques pourcent peut avoir un impact non négligeable.
+
+Dans la section _Top_, normalisée les plus lentes et le nombre
+de fois où elles ont été exécutées.
+
+FIXME
+Etude plus précise de la db bank autour de 16:50.
 
 
 
