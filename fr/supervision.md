@@ -183,7 +183,7 @@ Un système de supervision automatique est primordial. Il permet de toujours
 graphique, il fournit un aperçu de l'évolution du système dans le temps.
 
 Il peut également être intéressant, en cas de fonctionnement anormal, ou pour
-un besoin d'audit, de venir ponctuellement superviser un système en utilisation
+un besoin d'audit, de venir ponctuellement superviser un système en utilisant
 un outil précis.
 
 </div>
@@ -204,7 +204,7 @@ un outil précis.
 <div class="notes">
 
 Il n'existe pas qu'une seule supervision. Suivant la personne concernée par la
-supervision, son objectif et, par conséquence, les critères de la supervision
+supervision, son objectif, les critères de la supervision
 seront différents.
 
 Lors de la mise en place de la supervision, il est important de se demander
@@ -312,7 +312,7 @@ terme de processeur (donc de puissance de calcul), de mémoire et de disque
   * Charge CPU
   * Entrées/sorties disque
   * Espace disque
-  * Sur-activité et non-activité du serveur
+  * Sur-activité et inactivité du serveur
   * Temps de réponse
 
 </div>
@@ -432,7 +432,7 @@ Pour récupérer et enregistrer les informations statistiques, les historiser,
 envoyer des alertes ou dessiner des graphiques, il faut faire appel à un outil
 externe.
 
-Cela peut être fait grâce à des outils de supervision générique comme Icinga,
+Cela peut être fait grâce à des outils de supervision génériques comme Icinga,
 munin ou Zabbix. On utilisera des agents ou plugins spécifiques pour ces outils
 comme pg-monz, check_pgactivity ou check_postgres.
 
@@ -774,13 +774,14 @@ activité est présentée sous forme de graphiques interactifs et de tableaux
 présentant les requêtes normalisées. Ces tableaux peuvent être triés selon
 divers critères sur un intervalle de temps sélectionné.
 
-Les différentes informations que PoWA offre permettent de trouver de nombreuses
-informations qui manquent cruellement à l'écosystème PostgreSQL, par exemple :
+PoWA permet d'afficher de nombreuses informations qui manquent cruellement à
+l'écosystème PostgreSQL, par exemple :
 
-  * connaître le taux de lecture dans le cache du système d'exploitation et les
+  * le taux de lecture dans le cache du système d'exploitation et les
     accès disques physiques
-  * connaître l'utilisation processeur de chacune des requêtes
-  * suggérer la création d'index pertinents
+  * l'utilisation processeur de chacune des requêtes
+
+Il est aussi capable de suggérer la création d'index pertinents.
 
 Et tout cela en temps réel.
 
@@ -810,7 +811,7 @@ nécessite le redémarrage de l'instance.
 `pg_stat_statements` est une extension officielle de PostgreSQL. Elle est
 disponible dans les modules _contrib_. Elle permet de récupérer de nombreuses
 métriques par requête normalisée, utilisateur et base de données. Ces données
-sont par exemple le nombre d'appels, le temps moyen, le nombre de blocs lu dans
+sont par exemple le nombre d'appels, le temps moyen, le nombre de blocs lus dans
 le cache de PostgreSQL pour chaque requête normalisée.
 
 `pg_stat_kcache` est une extension développée pour PoWA. Elle fournit des
@@ -826,9 +827,9 @@ utilisées, etc.
 `pg_sortstats` est une extension développée pour PoWA. Elle récupère des
 statistiques sur les tris et permet d'estimer la quantité de mémoire `work_mem`
 nécessaire pour effectuer un tri en mémoire et non sur disque. Voir la [section
-consacré à ce
+consacrée à ce
 paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
-du cours d'optimisation de la formation [DBA4 - PostgreSQL
+dans le chapitre sur l'optimisation de la formation [DBA4 - PostgreSQL
 Performances](https://www.dalibo.com/formation-postgresql-performance) pour
 plus d'information.  
 Cette extension est en phase de développement et ne doit pas être utilisée en
@@ -891,7 +892,7 @@ dans la documentation.
 `HypoPG` est une extension développée pour PoWA. Elle ne fournit pas de
 statistiques supplémentaires. Elle permet de créer des index hypothétiques qui
 n'exisent pas sur disque. Leur création est donc instantanée et n'a aucun
-impact sur les disques ou la CPU. Couplée aux autres extensions de PoWA, HypoPG
+impact sur les disques ou la charge CPU. Couplée aux autres extensions de PoWA, HypoPG
 permet de tester si un nouvel index pourrait améliorer les performances d'une
 requête donnée.
 
@@ -1040,8 +1041,8 @@ activée ou désactivée par instance.
 
 <div class="notes">
 
-L'interface utilisateur de temBoard est développée en python 2.7 et repose sur
-le framework web Tornado. Coté rendu, il s'appuie sur le framework bootstrap.
+L'interface utilisateur de temboard est développée en python 2.7 et repose sur
+le framework web Tornado.
 
 Une base de données, appelée _repository_ est nécessaire à son fonctionnement,
 en effet, celle-ci va permettre de stocker :
@@ -1072,7 +1073,7 @@ L'accès à cette interface est protégée par une authentification utilisateur.
 L'agent temboard doit quant à lui être déployé sur chaque hôte qui héberge une
 instance PostgreSQL. Celui-ci ne peut gérer qu'une seule instance PostgreSQL.
 
-Il est développé en python et supporte de la version 2.6 à la version 3.6.
+Il est développé en python et est compatible avec des versions de la 2.6 à la 3.6.
 
 Il est interrogeable et contrôlable au travers d'une _API REST_ (_HTTPS_) et
 peut facilement entrer en interaction avec des outils tiers.
@@ -1104,13 +1105,13 @@ protocole sécurisé _HTTPS_.
 
 1. Plugin _Dashboard_ (Tableau de bord)
 
-Donne une vision en temps réel (rafraichissement toutes les 2 secondes) de
+Donne une vision en temps réel (rafraîchissement toutes les 2 secondes) de
 l'état du système et de l'instance Postgres en mettant en évidence certaines
 données :
 
   * Métriques système : usage CPU, mémoire, _loadaverage_.
   * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
-  * Status de chaque métrique calculé selon des seuils (*alerting*).
+  * Statut de chaque métrique calculé selon des seuils (*alerting*).
 
 2. Plugin _Configuration_
 
@@ -1211,11 +1212,11 @@ actif.
 
 Une bonne politique de supervision est la clef de voûte d'un système pérenne.
 Pour cela, il faut tout d'abord s'assurer que les traces et les statistiques
-soient bien configurées. Ensuite, l'installation d'un outil d'historisation, de
+sont bien configurées. Ensuite, l'installation d'un outil d'historisation, de
 création de graphes et de génération d'alertes, est obligatoire pour pouvoir
 tirer profit des informations fournies par PostgreSQL.
 
-Les trois outils graphiques présentés demande une configuration
+Les trois outils graphiques présentés demandent une configuration
 préalable. S'ils ne sont pas utiles pour alerter en cas de problèmes, leur
 utilisation permet de découvrir rapidement les origines du problème et de le
 corriger :
@@ -1354,4 +1355,5 @@ Etude plus précise de la db bank autour de 16:50.
 ### temBoard
 
 </div>
+
 
