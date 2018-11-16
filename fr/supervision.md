@@ -1408,16 +1408,13 @@ $ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-co
 Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
-$ docker-compose up
+$ docker-compose up -d
 ```
 
-Afin de créer de l'activité SQL sur notre environnement temboard, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur `tmp_instance10_1` :
+Afin de créer de l'activité SQL sur notre environnement temboard, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le service `instance10` :
 
 ```bash
-# Lister les conteneurs pour trouver celui de powa-archivist
-$ docker ps | grep tmp_instance10_1
-# Executer un shell bash
-$ docker exec -i -t f8427da010e3 /bin/bash
+$ docker-compose exec instance10 bash
 ```
 
 Initialisation de la base `bench` :
@@ -1444,9 +1441,10 @@ Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
 
 Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
 
-Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, ouvrir un nouveau shell bash sur le conteneur `tmp_instance10_1`, puis :
+Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du terminal:
 
 ```bash
+$ docker-compose exec instance10 bash
 # su postgres
 $ psql bench
 
