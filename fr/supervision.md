@@ -1250,8 +1250,7 @@ récupération du projet sur github et le lancement du script en direct :
 
 ```bash
 $ git clone https://github.com/darold/pgbadger.git
-$ cd pgbadger
-$ export run_pgbadger="<chemin_projet>/pgbadger/pgbadger"
+$ export run_pgbadger="$(pwd)/pgbadger/pgbadger"
 $ $run_pgbadger --version
 pgBadger version 10.1
 ```
