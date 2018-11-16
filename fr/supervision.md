@@ -1362,16 +1362,13 @@ $ wget https://raw.githubusercontent.com/dalibo/docker/master/powa/compose/docke
 Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
-$ docker-compose -f docker-compose-11.yml up
+$ docker-compose -f docker-compose-11.yml up -d
 ```
 
 Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de l'image `powa-archivist` :
 
 ```bash
-# Lister les conteneurs pour trouver celui de powa-archivist
-$ docker ps
-# Executer un shell bash
-$ docker exec -i -t f8427da010e3 /bin/bash
+$ docker-compose -f docker-compose-11.yml exec powa-archivist bash
 ```
 
 Initialisation de la base `bench` :
