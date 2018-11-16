@@ -1491,6 +1491,11 @@ cette revérification peut être très coûteuse pour certains index, et la vale
 index fonctionnel est concerné par la mise à jour). Le défaut est `on` si le
 coût de la fonction est inférieur à 1000.
 
+Adrien Nayrat a publié un
+[article sur le sujet](https://blog.anayrat.info/en/2018/11/12/postgresql-and-heap-only-tuples-updates-part-1/)
+
+Noter que cette fonctionnalité a été désactivée en version 11.1 suite à des bugs sérieux.
+
 </div>
 
 -----
