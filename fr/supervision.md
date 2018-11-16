@@ -1288,7 +1288,7 @@ $ du -sh *
 #### Premier rapport
 
 Nous allons commencer par créer un premier rapport à partir du premier fichier
-de logs. L'option `-j` est à fixer à votre nombre de processeur :
+de logs. L'option `-j` est à fixer à votre nombre de processeurs :
 
 Si vous utiliser le script Perl :
 
@@ -1315,10 +1315,10 @@ alloués.
 
 La section _Checkpoints_ montre une activité d'écriture normale.
 
-La section _Temp Files_ permet, grâce au graphique temporel de vérifier si un
+La section _Temp Files_ permet, grâce au graphique temporel, de vérifier si un
 ralentissement de l'instance est corrélé à un volume important d'écriture de
 fichiers temporaires. Le rapport permet également de lister les requêtes ayant
-générées des fichiers temporaires.  
+généré des fichiers temporaires.
 Suivant les cas, on pourra tenter une optimisation de la requête ou bien un
 ajustement de la mémoire de travail, `work_mem`.
 
@@ -1331,18 +1331,16 @@ connaître la raison de ces attentes.
 
 La section _Queries_ fournit une connaissance du type d'activité sur chaque
 base de données : _application web_, OLTP, _data warehouse_. Elle permet
-également, si le paramètre `log_line_prefix` le précise bien, la répartition
-des requêtes selon la base de données, l'utilisateur, l'hôte ou l'application.
+également, si le paramètre `log_line_prefix` le précise bien, de connaître la
+répartition des requêtes selon la base de données, l'utilisateur, l'hôte ou
+l'application.
 
 La section _Top_ est très intéressante. Elle permet de lister les requêtes
-normalisées ayant pris le plus de temps. La fixation du paramètre
+normalisées ayant pris le plus de temps. Fixer le paramètre
 `log_min_duration_statement` à 0 permet de lister toutes les requêtes
 exécutées. Une requête peut ne mettre que quelques dizaines de millisecondes à
 s'exécuter. Mais si elle est lancée des millions de fois par heure, une
 optimisation de quelques pourcent peut avoir un impact non négligeable.
-
-Dans la section _Top_, normalisée les plus lentes et le nombre
-de fois où elles ont été exécutées.
 
 FIXME
 Etude plus précise de la db bank autour de 16:50.
