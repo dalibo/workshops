@@ -1441,7 +1441,7 @@ Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
 
 Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
 
-Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du terminal:
+Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du terminal :
 
 ```bash
 $ docker-compose exec instance10 bash
@@ -1458,7 +1458,7 @@ Revenir sur le `Dashboard` temboard, que constate-t-on ?
 
 Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`, `Blocking`.
 
-Depuis l'onglet `Waiting`, mettre en pause le rafraissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
+Depuis l'onglet `Blocking`, mettre en pause le rafraissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
 
 Revenir sur le `Dashboard`. Que constate-t-on ?
 </div>
