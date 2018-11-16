@@ -1391,6 +1391,12 @@ Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
 ### temBoard
 
+Stopper les services docker de PoWA
+
+```bash
+$ docker-compose -f docker-compose-11.yml stop
+```
+
 L'installation d'un environnement fonctionnel temboard se fera au travers des images docker mises à disposition par Dalibo.
 
 Télécharger le fichier `docker-compose.yml` :
