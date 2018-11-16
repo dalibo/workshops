@@ -1029,7 +1029,6 @@ manuelle.
   * Compilation _Just In Time_ (JIT)
   * Parallélisme étendu à plusieurs commandes
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
-  * `recheck_on_update`
 
 </div>
 
@@ -1459,42 +1458,6 @@ attmissingval | {16:55:40.017082+02}
 
 
 Pour les détails, voir <https://brandur.org/postgres-default>.
-
-</div>
-
------
-### Performances : divers
-
-<div class="slide-content">
-
-  * Clause `recheck_on_update` \
- `CREATE INDEX nomindex ON nomtable (fonction(colonne))` \
- `WITH (recheck_on_update = on) ;`
-  * Facilite les mises à jour HOT
-
-</div>
-
-<div class="notes">
-
-Une nouvelle option apparaît pour les créations d'index :
-```sql
-CREATE INDEX nomindex ON nomtable (fonction(colonne)) WITH (recheck_on_update = on) ;
-```
-
-Ce paramètre vise à faciliter les mises à jour HOT (_Heat Only Tuple_),
-c'est-à-dire au sein d'un même bloc (pour peu qu'il y ait de la place), et ainsi
-économiser des écritures et de la fragmentation.
-Ces mises à jour HOT ne sont possibles que si les champs indexés ne sont pas
-modifiés. PostgreSQL 11 cherche à le vérifier aussi pour les index fonctionnels. Or
-cette revérification peut être très coûteuse pour certains index, et la valeur
-`off` permet de la désactiver (rendant les mises à jour HOT impossibles si cet
-index fonctionnel est concerné par la mise à jour). Le défaut est `on` si le
-coût de la fonction est inférieur à 1000.
-
-Adrien Nayrat a publié un
-[article sur le sujet](https://blog.anayrat.info/en/2018/11/12/postgresql-and-heap-only-tuples-updates-part-1/)
-
-Noter que cette fonctionnalité a été désactivée en version 11.1 suite à des bugs sérieux.
 
 </div>
 
