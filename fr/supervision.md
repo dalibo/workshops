@@ -1472,7 +1472,14 @@ $ psql -c "CREATE DATABASE bench;"
 $ pgbench -i bench
 ```
 
-Générer du traffic SQL :
+Suppression d'une contrainte pour montrer l'intérêt de PoWA pour la suggestion
+d'index :
+
+```bash
+$ psql -d bench -c "ALTER TABLE pgbench_accounts DROP CONSTRAINT pgbench_accounts_pkey"
+```
+
+Générer du traffic SQL :
 
 ```bash
 $ pgbench -c 4 -T 1000 bench
@@ -1482,8 +1489,15 @@ Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
 Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
-Attendre quelques minutes. Nous allons parcourir ensemble les différentes vues
-proposées par PoWA.
+Note : Il peut être nécessaire d'attendre 5 minutes avant que PoWA ne mette à
+jour les statistiques.
+
+Choisir la base de données `bench`. Cliquer sur le bouton `Optimize Database`.
+Que constate-t'on ?
+
+Choisir une requête qui procède à des mises à jour de la table
+`pgbench_accounts`. Naviguer dans l'onglet `Predicates`. Quel serait le gain si
+l'index suggéré était utilisé ?
 
 ### temBoard
 
