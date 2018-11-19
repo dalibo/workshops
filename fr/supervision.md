@@ -1078,7 +1078,7 @@ Il est développé en python et est compatible avec des versions de la 2.6 à la
 Il est interrogeable et contrôlable au travers d'une _API REST_ (_HTTPS_) et
 peut facilement entrer en interaction avec des outils tiers.
 
-Documentation de l'API :
+Documentation de l'API :
 <https://temboard-agent.readthedocs.io/en/latest/api.html>
 
 L'agent embarque son propre système d'authentification, qui est indépendant de
@@ -1101,7 +1101,7 @@ protocole sécurisé _HTTPS_.
 
 <div class="notes">
 
-4 fonctionnalités sont pour le moment disponibles :
+4 fonctionnalités sont pour le moment disponibles :
 
 1. Plugin _Dashboard_ (Tableau de bord)
 
@@ -1109,8 +1109,8 @@ Donne une vision en temps réel (rafraîchissement toutes les 2 secondes) de
 l'état du système et de l'instance Postgres en mettant en évidence certaines
 données :
 
-  * Métriques système : usage CPU, mémoire, _loadaverage_.
-  * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
+  * Métriques système : usage CPU, mémoire, _loadaverage_.
+  * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
   * Statut de chaque métrique calculé selon des seuils (*alerting*).
 
 2. Plugin _Configuration_
@@ -1288,7 +1288,7 @@ $ du -sh *
 #### Premier rapport
 
 Nous allons commencer par créer un premier rapport à partir du premier fichier
-de logs. L'option `-j` est à fixer à votre nombre de processeurs :
+de logs. L'option `-j` est à fixer à votre nombre de processeurs :
 
 Si vous utiliser le script Perl :
 
@@ -1425,33 +1425,46 @@ $ du -sh /tmp/incr_report/
 340K	/tmp/incr_report/
 ```
 
+On pourra reconstruire à tout moment les rapports avec la commande :
 
+```bash
+$ $run_pgbadger -I -O /tmp/incr_report/ --rebuild
+```
+
+Ce mode permet de plus construire des rapports réguliers journalier et
+hebdomadaire. Vous pouvez vous référer à la
+[documentation](http://pgbadger.darold.net/documentation.html#INCREMENTAL-REPORTS)
+pour en savoir plus sur ce mode incrémental.
 
 ### PoWA
 
 #### Installation
 
-L'installation d'un environnement fonctionnel PoWA se fera au travers des images docker mises à disposition par Dalibo.
+L'installation d'un environnement fonctionnel PoWA se fera au travers des
+images docker mises à disposition par Dalibo.
 
-Télécharger le fichier `docker-compose.yml` de la version 11 de PostgreSQL :
+Télécharger le fichier `docker-compose.yml` de la version 11 de PostgreSQL :
 
 ```bash
 $ wget https://raw.githubusercontent.com/dalibo/docker/master/powa/compose/docker-compose-11.yml
 ```
 
-Téléchargement des images et démarrage des conteneurs docker :
+Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
 $ docker-compose -f docker-compose-11.yml up -d
 ```
 
-Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de l'image `powa-archivist` :
+Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons
+initialiser une base de données et générer du trafic SQL via l'outil
+`pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de
+l'image `powa-archivist` :
 
 ```bash
 $ docker-compose -f docker-compose-11.yml exec powa-archivist bash
 ```
 
-Initialisation de la base `bench` :
+Initialisation de la base `bench` :
 
 ```bash
 # su postgres
@@ -1459,7 +1472,7 @@ $ psql -c "CREATE DATABASE bench;"
 $ pgbench -i bench
 ```
 
-Générer du traffic SQL :
+Générer du traffic SQL :
 
 ```bash
 $ pgbench -c 4 -T 1000 bench
@@ -1469,7 +1482,8 @@ Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
 Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
-Attendre quelques minutes. Nous allons parcourir ensemble les différentes vues proposées par PoWA.
+Attendre quelques minutes. Nous allons parcourir ensemble les différentes vues
+proposées par PoWA.
 
 ### temBoard
 
@@ -1481,25 +1495,28 @@ $ docker-compose -f docker-compose-11.yml stop
 
 L'installation d'un environnement fonctionnel temboard se fera au travers des images docker mises à disposition par Dalibo.
 
-Télécharger le fichier `docker-compose.yml` :
+Télécharger le fichier `docker-compose.yml` :
 
 ```bash
 $ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-compose.yml
 ```
 
-Téléchargement des images et démarrage des conteneurs docker :
+Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
 $ docker-compose up -d
 ```
 
-Afin de créer de l'activité SQL sur notre environnement temboard, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le service `instance10` :
+Afin de créer de l'activité SQL sur notre environnement temboard, nous allons
+initialiser une base de données et générer du trafic SQL via l'outil
+`pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le service
+`instance10` :
 
 ```bash
 $ docker-compose exec instance10 bash
 ```
 
-Initialisation de la base `bench` :
+Initialisation de la base `bench` :
 
 ```bash
 # su postgres
@@ -1507,7 +1524,7 @@ $ psql -c "CREATE DATABASE bench;"
 $ pgbench -i bench
 ```
 
-Générer du traffic SQL :
+Générer du traffic SQL :
 
 ```bash
 $ pgbench -c 12 -T 1000 bench
@@ -1523,7 +1540,9 @@ Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
 
 Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
 
-Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du terminal :
+Nous allons à présent vérrouiller de manière exclusive un table de la base
+`bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du
+terminal :
 
 ```bash
 $ docker-compose exec instance10 bash
@@ -1536,13 +1555,17 @@ bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
 
 ```
 
-Revenir sur le `Dashboard` temboard et attendre quelques instants, que constate-t-on ?
+Revenir sur le `Dashboard` temboard et attendre quelques instants, que
+constate-t-on ?
 
 Cliquer sur `Status`, puis sur `Waiting sessions`.
 
-Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`, `Blocking`.
+Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`,
+`Blocking`.
 
-Depuis l'onglet `Blocking`, mettre en pause le rafraichissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
+Depuis l'onglet `Blocking`, mettre en pause le rafraichissement automatique,
+cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin
+confirmer.
 
 Revenir sur le `Dashboard`, attendre quelques instants. Que constate-t-on ?
 </div>
