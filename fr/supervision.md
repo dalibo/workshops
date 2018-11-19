@@ -892,9 +892,9 @@ dans la documentation.
 `HypoPG` est une extension développée pour PoWA. Elle ne fournit pas de
 statistiques supplémentaires. Elle permet de créer des index hypothétiques qui
 n'exisent pas sur disque. Leur création est donc instantanée et n'a aucun
-impact sur les disques ou la charge CPU. Couplée aux autres extensions de PoWA, HypoPG
-permet de tester si un nouvel index pourrait améliorer les performances d'une
-requête donnée.
+impact sur les disques ou la charge CPU. Couplée aux autres extensions de PoWA,
+HypoPG permet de tester si un nouvel index pourrait améliorer les performances
+d'une requête donnée.
 
 Plus d'information dans la documentation du [projet
 HypoPG](https://powa.readthedocs.io/en/latest/stats_extensions/hypopg.html).
@@ -1342,8 +1342,88 @@ exécutées. Une requête peut ne mettre que quelques dizaines de millisecondes 
 s'exécuter. Mais si elle est lancée des millions de fois par heure, une
 optimisation de quelques pourcent peut avoir un impact non négligeable.
 
-FIXME
-Etude plus précise de la db bank autour de 16:50.
+Dans la section _Top_, normalisée les plus lentes et le nombre
+de fois où elles ont été exécutées.
+
+#### Format des logs
+
+Dans certains cas, pgBadger peut ne pas réussir à détecter automatiquement le
+format du fichier ou le préfixe des lignes. Pour le format du fichier, on
+pourra utiliser l'option `--format`. On pourra par exemple préciser que le
+fichier est au format _csv_ ou bien qu'il s'agit d'un log de pgbouncer.  
+Pour le préfixe des lignes, on pourra utiliser l'option `--prefix`. En cas de
+doute sur la configuration et si l'accès à l'instance est possible, on pourra
+récupérer l'information via la requête :
+
+```bash
+$ psql -At -c 'show log_line_prefix'
+%t [%p]: user=%u,db=%d,app=%a,client=%h 
+```
+
+#### Rapport précis
+
+La vue des verrous nous informe d'un problème sur la base de données _bank_
+vers 16h50. Nous allons réaliser un rapport spécifique sur cette base de
+données et cette période :
+
+```bash
+$ $run_pgbadger -j 4 --outfile rapport_bank.html --dbname bank        \
+   --begin "2018-11-12 16:45:00 CET" --end "2018-11-12 16:55:00 CET"  \
+   postgresql-11-main.*.log
+```
+
+Nous voulons connaître plus précisément quelles requêtes venant de l'IP
+192.168.0.84 et avoir une vue plus fine des graphiques. Nous allons créer un
+rapport en filtrant par client et en calculant les moyennes par minute :
+
+```bash
+$ $run_pgbadger -j 4 --outfile rapport_host_89.html --dbclient 192.168.0.89 \
+   --average 1 postgresql-11-main.*.log
+```
+
+Il est également possible de filtrer par application avec l'option `--appname`.
+
+#### Mode incrémental
+
+Les fichiers de logs sont volumineux. On ne peut pas toujours conserver un
+historique assez important. pgBadger peut parser les fichiers de log et stocker
+les informations dans des fichiers binaires. Un rapport peut-être construit à
+tout moment en précisant les fichiers binaires à utiliser.
+
+```bash
+$ mkdir /tmp/incr_report
+$ $run_pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
+$ tree /tmp/incr_report
+/tmp/incr_report
+├── 2018
+│   └── 11
+│       └── 12
+│           ├── 2018-11-12-25869.bin
+│           ├── 2018-11-12-25871.bin
+│           ├── 2018-11-12-25872.bin
+│           └── 2018-11-12-25873.bin
+└── LAST_PARSED
+
+3 directories, 5 files
+$ cat /tmp/incr_report/LAST_PARSED 
+2018-11-12 16:36:39	141351476	2018-11-12 16:36:39 CET [17303]: user=banquier,
+  db=bank,app=gestion,client=192.168.0.84 LOG:  duration: 0.2
+```
+
+Le fichier _LAST_PARSE_ stocke la dernière ligne analysée. Dans le cas d'un
+fichier de log en cours d'écriture, pgBadger commencera son analyse au prochain
+lancement de ,
+
+Le fichier _postgresql-11-main.1.log_ occupe 135 Mo. On peut le compresser pour
+le réduire à 7 Mo. Voyons l'espace occupé par les fichiers incrémentaux de
+pgBadger :
+
+```bash
+$ mkdir /tmp/incr_report
+$ $run_pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
+$ du -sh /tmp/incr_report/
+340K	/tmp/incr_report/
+```
 
 
 
