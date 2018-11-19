@@ -1389,6 +1389,8 @@ Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
 Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
+Attendre quelques minutes. Nous allons parcourir ensemble les différentes vues proposées par PoWA.
+
 ### temBoard
 
 Stopper les services docker de PoWA
@@ -1428,7 +1430,7 @@ $ pgbench -i bench
 Générer du traffic SQL :
 
 ```bash
-$ pgbench -c 4 -T 1000 bench
+$ pgbench -c 12 -T 1000 bench
 ```
 
 Ouvrir votre navigateur à l'adresse https://0.0.0.0:8888
@@ -1454,13 +1456,15 @@ bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
 
 ```
 
-Revenir sur le `Dashboard` temboard, que constate-t-on ?
+Revenir sur le `Dashboard` temboard et attendre quelques instants, que constate-t-on ?
+
+Cliquer sur `Status`, puis sur `Waiting sessions`.
 
 Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`, `Blocking`.
 
-Depuis l'onglet `Blocking`, mettre en pause le rafraissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
+Depuis l'onglet `Blocking`, mettre en pause le rafraichissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
 
-Revenir sur le `Dashboard`. Que constate-t-on ?
+Revenir sur le `Dashboard`, attendre quelques instants. Que constate-t-on ?
 </div>
 
 
