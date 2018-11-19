@@ -1250,8 +1250,7 @@ récupération du projet sur github et le lancement du script en direct :
 
 ```bash
 $ git clone https://github.com/darold/pgbadger.git
-$ cd pgbadger
-$ export run_pgbadger="<chemin_projet>/pgbadger/pgbadger"
+$ export run_pgbadger="$(pwd)/pgbadger/pgbadger"
 $ $run_pgbadger --version
 pgBadger version 10.1
 ```
@@ -1289,7 +1288,7 @@ $ du -sh *
 #### Premier rapport
 
 Nous allons commencer par créer un premier rapport à partir du premier fichier
-de logs. L'option `-j` est à fixer à votre nombre de processeur :
+de logs. L'option `-j` est à fixer à votre nombre de processeurs :
 
 Si vous utiliser le script Perl :
 
@@ -1316,10 +1315,10 @@ alloués.
 
 La section _Checkpoints_ montre une activité d'écriture normale.
 
-La section _Temp Files_ permet, grâce au graphique temporel de vérifier si un
+La section _Temp Files_ permet, grâce au graphique temporel, de vérifier si un
 ralentissement de l'instance est corrélé à un volume important d'écriture de
 fichiers temporaires. Le rapport permet également de lister les requêtes ayant
-générées des fichiers temporaires.  
+généré des fichiers temporaires.
 Suivant les cas, on pourra tenter une optimisation de la requête ou bien un
 ajustement de la mémoire de travail, `work_mem`.
 
@@ -1332,18 +1331,16 @@ connaître la raison de ces attentes.
 
 La section _Queries_ fournit une connaissance du type d'activité sur chaque
 base de données : _application web_, OLTP, _data warehouse_. Elle permet
-également, si le paramètre `log_line_prefix` le précise bien, la répartition
-des requêtes selon la base de données, l'utilisateur, l'hôte ou l'application.
+également, si le paramètre `log_line_prefix` le précise bien, de connaître la
+répartition des requêtes selon la base de données, l'utilisateur, l'hôte ou
+l'application.
 
 La section _Top_ est très intéressante. Elle permet de lister les requêtes
-normalisées ayant pris le plus de temps. La fixation du paramètre
+normalisées ayant pris le plus de temps. Fixer le paramètre
 `log_min_duration_statement` à 0 permet de lister toutes les requêtes
 exécutées. Une requête peut ne mettre que quelques dizaines de millisecondes à
 s'exécuter. Mais si elle est lancée des millions de fois par heure, une
 optimisation de quelques pourcent peut avoir un impact non négligeable.
-
-Dans la section _Top_, normalisée les plus lentes et le nombre
-de fois où elles ont été exécutées.
 
 FIXME
 Etude plus précise de la db bank autour de 16:50.
@@ -1365,16 +1362,13 @@ $ wget https://raw.githubusercontent.com/dalibo/docker/master/powa/compose/docke
 Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
-$ docker-compose -f docker-compose-11.yml up
+$ docker-compose -f docker-compose-11.yml up -d
 ```
 
 Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de l'image `powa-archivist` :
 
 ```bash
-# Lister les conteneurs pour trouver celui de powa-archivist
-$ docker ps
-# Executer un shell bash
-$ docker exec -i -t f8427da010e3 /bin/bash
+$ docker-compose -f docker-compose-11.yml exec powa-archivist bash
 ```
 
 Initialisation de la base `bench` :
@@ -1393,10 +1387,80 @@ $ pgbench -c 4 -T 1000 bench
 
 Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
-
+Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
 ### temBoard
 
+Stopper les services docker de PoWA
+
+```bash
+$ docker-compose -f docker-compose-11.yml stop
+```
+
+L'installation d'un environnement fonctionnel temboard se fera au travers des images docker mises à disposition par Dalibo.
+
+Télécharger le fichier `docker-compose.yml` :
+
+```bash
+$ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-compose.yml
+```
+
+Téléchargement des images et démarrage des conteneurs docker :
+
+```bash
+$ docker-compose up -d
+```
+
+Afin de créer de l'activité SQL sur notre environnement temboard, nous allons initialiser une base de données et générer du trafic SQL via l'outil `pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le service `instance10` :
+
+```bash
+$ docker-compose exec instance10 bash
+```
+
+Initialisation de la base `bench` :
+
+```bash
+# su postgres
+$ psql -c "CREATE DATABASE bench;"
+$ pgbench -i bench
+```
+
+Générer du traffic SQL :
+
+```bash
+$ pgbench -c 4 -T 1000 bench
+```
+
+Ouvrir votre navigateur à l'adresse https://0.0.0.0:8888
+
+Pour l'authentification, le nom d'utilisateur est `admin`, mot de passe `admin`.
+
+Cliquer sur `instance10.fqdn`
+
+Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
+
+Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
+
+Nous allons à présent vérrouiller de manière exclusive un table de la base `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du terminal :
+
+```bash
+$ docker-compose exec instance10 bash
+# su postgres
+$ psql bench
+
+bench=# BEGIN;
+
+bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
+
+```
+
+Revenir sur le `Dashboard` temboard, que constate-t-on ?
+
+Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`, `Blocking`.
+
+Depuis l'onglet `Blocking`, mettre en pause le rafraissement automatique, cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin confirmer.
+
+Revenir sur le `Dashboard`. Que constate-t-on ?
 </div>
 
 
