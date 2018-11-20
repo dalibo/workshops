@@ -1519,7 +1519,7 @@ $ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-co
 Téléchargement des images et démarrage des conteneurs docker :
 
 ```bash
-$ docker-compose up -d
+$ docker-compose -f docker-compose.yml up -d
 ```
 
 Afin de créer de l'activité SQL sur notre environnement temboard, nous allons
@@ -1546,6 +1546,9 @@ $ pgbench -c 12 -T 1000 bench
 ```
 
 Ouvrir votre navigateur à l'adresse https://0.0.0.0:8888
+
+Votre navigateur devrait vous indiquer que la connexion n’est pas sécurisée.
+Ajoutez une exception de sécurité pour le certificat de temBoard.
 
 Pour l'authentification, le nom d'utilisateur est `admin`, mot de passe `admin`.
 
