@@ -824,6 +824,10 @@ nombreuses informations très pertinentes concernant les prédicats des requête
 exécutées sur une instance, comme la sélectivité d'un prédicat, les valeurs
 utilisées, etc.
 
+`pg_wait_sampling` est une extension qui échantillonne à une fréquence elevée
+les `wait_event`. PoWA repose sur cette extension pour collecter les données et
+les historiser.
+
 `pg_sortstats` est une extension développée pour PoWA. Elle récupère des
 statistiques sur les tris et permet d'estimer la quantité de mémoire `work_mem`
 nécessaire pour effectuer un tri en mémoire et non sur disque. Voir la [section
@@ -831,7 +835,7 @@ consacrée à ce
 paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
 dans le chapitre sur l'optimisation de la formation [DBA4 - PostgreSQL
 Performances](https://www.dalibo.com/formation-postgresql-performance) pour
-plus d'information.  
+plus d'information.
 Cette extension est en phase de développement et ne doit pas être utilisée en
 production. Vous êtes encouragés à la tester et à faire des retours aux
 développeurs du projet.
@@ -841,6 +845,7 @@ Plus d'information dans les documentations :
   * [pg_stat_statements](https://www.postgresql.org/docs/current/static/pgstatstatements.html)
   * [pg_stat_kcache](https://powa.readthedocs.io/en/latest/stats_extensions/pg_stat_kcache.html)
   * [pg_qualstats](https://powa.readthedocs.io/en/latest/stats_extensions/pg_qualstats.html)
+  * [pg_wait_sampling](https://github.com/postgrespro/pg_wait_sampling)
   * [pg_sortstats](https://github.com/powa-team/pg_sortstats)
 
 </div>
