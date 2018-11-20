@@ -797,6 +797,7 @@ Et tout cela en temps réel.
   * _pg_qualstats_ : informations sur les prédicats
   * extension en développement (ne pas utiliser en production) :
     * _pg_sortstats_ : informations sur la mémoire pour les tris
+    * _pg_wait_sampling_ : statistiques sur les évènements en attente
 
 </div>
 
@@ -835,7 +836,7 @@ consacrée à ce
 paramètre](https://cloud.dalibo.com/p/exports/formation/manuels/formations/dba4/dba4.handout.html#configuration---m%C3%A9moire)
 dans le chapitre sur l'optimisation de la formation [DBA4 - PostgreSQL
 Performances](https://www.dalibo.com/formation-postgresql-performance) pour
-plus d'information.
+plus d'information.  
 Cette extension est en phase de développement et ne doit pas être utilisée en
 production. Vous êtes encouragés à la tester et à faire des retours aux
 développeurs du projet.
