@@ -1,6 +1,6 @@
 ---
 title : 'Supervision graphique en PostgreSQL'
-subtitle : 'Quels outils pour quels problèmes ?'
+subtitle : 'Quels outils pour quels problèmes ?'
 keywords:
 - postgres
 - postgresql
@@ -196,7 +196,7 @@ un outil précis.
   * Pour quoi ?
   * Pour qui ?
   * Quels critères ?
-  * Quels outils ?
+  * Quels outils ?
 
 </div>
 
@@ -1473,13 +1473,13 @@ $ pgbench -i bench
 ```
 
 Suppression d'une contrainte pour montrer l'intérêt de PoWA pour la suggestion
-d'index :
+d'index :
 
 ```bash
 $ psql -d bench -c "ALTER TABLE pgbench_accounts DROP CONSTRAINT pgbench_accounts_pkey"
 ```
 
-Générer du traffic SQL :
+Générer du traffic SQL :
 
 ```bash
 $ pgbench -c 4 -T 1000 bench
@@ -1489,15 +1489,15 @@ Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
 
 Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
 
-Note : Il peut être nécessaire d'attendre 5 minutes avant que PoWA ne mette à
+Note : il peut être nécessaire d'attendre 5 minutes avant que PoWA ne mette à
 jour les statistiques.
 
 Choisir la base de données `bench`. Cliquer sur le bouton `Optimize Database`.
-Que constate-t'on ?
+Que constate-t'on ?
 
 Choisir une requête qui procède à des mises à jour de la table
 `pgbench_accounts`. Naviguer dans l'onglet `Predicates`. Quel serait le gain si
-l'index suggéré était utilisé ?
+l'index suggéré était utilisé ?
 
 ### temBoard
 
@@ -1507,7 +1507,8 @@ Stopper les services docker de PoWA
 $ docker-compose -f docker-compose-11.yml stop
 ```
 
-L'installation d'un environnement fonctionnel temboard se fera au travers des images docker mises à disposition par Dalibo.
+L'installation d'un environnement fonctionnel temboard se fera au travers des
+images docker mises à disposition par Dalibo.
 
 Télécharger le fichier `docker-compose.yml` :
 
@@ -1570,7 +1571,7 @@ bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
 ```
 
 Revenir sur le `Dashboard` temboard et attendre quelques instants, que
-constate-t-on ?
+constate-t-on ?
 
 Cliquer sur `Status`, puis sur `Waiting sessions`.
 
@@ -1581,7 +1582,7 @@ Depuis l'onglet `Blocking`, mettre en pause le rafraichissement automatique,
 cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin
 confirmer.
 
-Revenir sur le `Dashboard`, attendre quelques instants. Que constate-t-on ?
+Revenir sur le `Dashboard`, attendre quelques instants. Que constate-t-on ?
 </div>
 
 
