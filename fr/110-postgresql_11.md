@@ -3293,8 +3293,8 @@ for i in $( seq 0 4 ) ;do vacuumdb -v -t commandes_${i}_5 v11 & done; wait
 <div class="notes">
 
 Le test se déroulera à partir de deux instances :
-L'instance `data` est en écoute sur le port 5435.
-L'instance `data2` est en écoute sur le port 5436.
+L'instance `data` est en écoute sur le port 5432.
+L'instance `data2` est en écoute sur le port 5433.
 
 
 Sur la première instance `data` dans la base `workshop11`,
@@ -3338,7 +3338,7 @@ CREATE TABLE
 Création de la souscription `s1` :
 ```sql
 workshop11_2=# CREATE SUBSCRIPTION s1
-               CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
+               CONNECTION  'host=/tmp/ port=5432 dbname=workshop11' PUBLICATION p1;
 NOTICE:  created replication slot "s1" on publisher
 CREATE SUBSCRIPTION
 
