@@ -414,7 +414,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
   * Index sur une table partitionnée
   * Index créé sur chaque partition
-    - Hors partitions étrangères
+    - Hors partitions distantes
   * Création automatique sur toute nouvelle partition
 
 </div>
@@ -485,9 +485,9 @@ L'exemple ci-dessus concerne une colonne de la clé de partitionnement, mais
 cela fonctionne avec toute colonne.
 
 La propagation ne fonctionne pas sur les partitions qui sont des tables
-étrangères : la création d'index y est impossible, il faut le faire sur la
+distantes : la création d'index y est impossible, il faut le faire sur la
 table source. Pire : des index à propager existants interdisent d'attacher
-une partition étrangère, et la présence d'une partition étrangère interdit de
+une partition distante, et la présence d'une partition distante interdit de
 créer tout index sur la table partitionnée. Il faut créer les index
 manuellement sur chaque partition.
 
@@ -840,7 +840,7 @@ Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
     - sauf mise à jour de clé
   * _Partition-Wise Aggregate_ (par défaut : `off`)
   * Triggers `AFTER ... FOR EACH ROW`
-  * Partitions étrangères : routage pour les insertions
+  * Partitions distantes : routage pour les insertions
     * uniquement postgres_fdw
     * pas de propagation des index
     * sharding !
@@ -985,7 +985,7 @@ La propagation du trigger, comme les index, est automatique sur chaque partition
 Les triggers `BEFORE UPDATE` ne sont pas supportés mais il reste possible de les
 créer sur chaque partition.
 
-**Partitions étrangères**
+**Partitions distantes**
 
 En v10, les tables partitionnées pouvaient déjà être utilisées comme partition,
 et dès la déclaration :
@@ -1012,7 +1012,7 @@ Cela ouvre d'intéressantes perspectives en terme de _sharding_ (répartition
 d'une table sur plusieurs instances).
 
 Cependant, la création d'un index sur une
-table étrangère n'étant pas possible, la propagation des index reste donc
+table distante n'étant pas possible, la propagation des index reste donc
 manuelle.
 
 
