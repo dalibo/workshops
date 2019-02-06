@@ -133,6 +133,8 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
   * Bêta 4 le 17 septembre
   * Release Candidate 1 le 11 octobre
   * Version finale : 18 octobre 2018
+  * 11.1 : le 8 novembre 2018
+  * 11.2 : attendue pour le 14 février 2019
   * Plus de 1,5 millions de lignes de code C
   * Des centaines de contributeurs
 </div>
