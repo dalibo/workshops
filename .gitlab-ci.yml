@@ -1,17 +1,23 @@
-##
-## "Secret" variables
-## defined in the project config at : Settings > CI/CD > Secret variables
-##
-
-# GITLAB_DEPLOY_PRIVATE_KEY is used to clone the themes project
-# CLOUD_DEPLOY_PRIVATE_KEY is the key to publish artefacts on the HTTP server
-# CLOUD_DEPLOY_DEST is the public destination of the HTTP server
-# CLOUD_DEPLOY_PRIVATE_DEST is the private destination on the HTTP server
+## PRO TIP : Test your changes locally with :
+## gitlab-ci-multi-runner exec docker {name_of_the_job}
 
 ##
-## Custom variables
+## I N C L U D E S
 ##
+
+# How To Export artefacts to the private environment
+include:
+  - project: 'dalibo/gitlab-templates'
+    file: 'artifacts_private_env.yml'
+
+##
+## V A R I A B L E S
+##
+
 variables:
+  # $ARTIFACTS is required by artefacts_private_env.yml
+  ARTIFACTS: '_site/*'  
+  # 
   THEMES_BRANCH: stable # usually 'stable' or 'master'
 
 
@@ -72,34 +78,3 @@ public:
     - rsync -avp en $CLOUD_DEPLOY_DEST
   only:
     - master@formation/workshops
-
-## Export artefacts from each branch in a private environments
-## see https://gitlab.dalibo.info/formation/workshops/environments
-private:
-  stage: deploy
-  environment:
-    name: $CI_COMMIT_REF_SLUG # one environment for each branch
-    url: https://cloud.dalibo.com/private/exports/formation/workshops/$CI_COMMIT_REF_SLUG/
-    on_stop: clean_up_private_storage
-  script:
-    ## Install Deploy Key
-    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
-    ## Push
-    - rsync -avp $CI_PROJECT_DIR/* $CLOUD_DEPLOY_PRIVATE_DEST/$CI_COMMIT_REF_SLUG
-  only:
-    - branches@formation/workshops
-
-## Delete environments
-clean_up_private_storage:
-  stage: deploy
-  script:
-    ## Install Deploy Key
-    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
-    - host=$(echo $CLOUD_DEPLOY_PRIVATE_DEST | sed 's/:.*//')
-    - path=$(echo $CLOUD_DEPLOY_PRIVATE_DEST | sed 's/.*://')
-    - ssh $host rm -fr $path/$CI_COMMIT_REF_SLUG
-  when: manual
-  environment:
-    name: $CI_COMMIT_REF_SLUG
-    action: stop
-
