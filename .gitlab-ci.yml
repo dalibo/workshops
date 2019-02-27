@@ -16,7 +16,7 @@ include:
 
 variables:
   # $ARTIFACTS is required by artefacts_private_env.yml
-  ARTIFACTS: '_site/*'  
+  ARTIFACTS: '*'  
   # 
   THEMES_BRANCH: stable # usually 'stable' or 'master'
 
