@@ -14,7 +14,7 @@ linkcolor:
 
 licence : PostgreSQL
 author: Dalibo & Contributors
-revision: 18.09
+revision: 19.11
 url : https://dalibo.com/formations
 
 #
@@ -938,8 +938,9 @@ Une démo de cette interface est disponible sur le site :
 <div class="slide-content">
 
   * Impact sur les performances
-  * Installation de plusieurs extensions
+  * Installation de plusieurs extensions sur les instances de production
   * Pas d'informations sur les serveurs secondaires
+    * développement en cours pour déporter PoWA sur sa propre instance
 
 </div>
 
@@ -993,7 +994,7 @@ donc disponibles avec cette granularité.
 
 -----
 
-![temBoard](medias/temboard1-ws.png)
+![temBoard](medias/temboard_4.1-ws.png)
 \
 
 -----
@@ -1041,7 +1042,9 @@ activée ou désactivée par instance.
   * Base de données historique et metadonnées
     * PostgreSQL 9.4+
   * Authentification
-  * Packagé pour CentOS/RHEL 7
+  * Disponible sur PyPI et packagé pour :
+    * CentOS / RHEL 7
+	* debian _jessie_ et _stretch_
 
 </div>
 
@@ -1059,6 +1062,14 @@ en effet, celle-ci va permettre de stocker :
 
 L'accès à cette interface est protégée par une authentification utilisateur.
 
+Il est possible d'installer temBoard en utilisant PyPI, ou bien 
+
+L'installation de temBoard est possible soit le gestionnaire de paquets _pip_
+via [PyPI](https://pypi.org/search/?q=temboard). Des paquets sont également
+disponible sur les dépôt [yum](https://yum.dalibo.org/labs/) et
+[apt](https://apt.dalibo.org/labs/) de dalibo pour les systèmes d'exploitation
+CentOS/RHEL en version 7 et debian en version _jessie_ et _stretch_.
+
 </div>
 
 -----
@@ -1070,7 +1081,9 @@ L'accès à cette interface est protégée par une authentification utilisateur.
   * Pas de dépendances
   * API REST
   * Authentification
-  * Packagé pour centos/RHEL 6 et 7
+  * Disponible sur PyPI et packagé pour :
+    * centos / RHEL (6 et 7)
+	* debian (7 à 10)
 
 </div>
 
@@ -1079,7 +1092,7 @@ L'accès à cette interface est protégée par une authentification utilisateur.
 L'agent temboard doit quant à lui être déployé sur chaque hôte qui héberge une
 instance PostgreSQL. Celui-ci ne peut gérer qu'une seule instance PostgreSQL.
 
-Il est développé en python et est compatible avec des versions de la 2.6 à la 3.6.
+Il est développé en python et est compatible avec des versions 2.6+ et 3.5+.
 
 Il est interrogeable et contrôlable au travers d'une _API REST_ (_HTTPS_) et
 peut facilement entrer en interaction avec des outils tiers.
@@ -1099,17 +1112,32 @@ protocole sécurisé _HTTPS_.
 <div class="slide-content">
 
   * Tableau de bord
-  * Configuration Postgres
-  * Supervision
   * Activité
+  * Supervision / Alerting
+  * Statut
+  * Configuration
+  * Maintenance
+  * Notifications
 
 </div>
 
 <div class="notes">
 
-4 fonctionnalités sont pour le moment disponibles :
+De nombreuses fonctionnalités sont disponibles.
 
-1. Plugin _Dashboard_ (Tableau de bord)
+</div>
+
+-----
+### Plugin _Dashboard_ : tableau de bord
+
+<div class="slide-content">
+
+  * Vision en temps réel de l'état du système
+  * Présentation de quelques métriques de l'instance
+
+</div>
+
+<div class="notes">
 
 Donne une vision en temps réel (rafraîchissement toutes les 2 secondes) de
 l'état du système et de l'instance Postgres en mettant en évidence certaines
@@ -1119,28 +1147,19 @@ données :
   * Métriques Postgres : Cache Hit Ratio, Sessions, TPS.
   * Statut de chaque métrique calculé selon des seuils (*alerting*).
 
-2. Plugin _Configuration_
+</div>
 
-Permet un accès simplifié en lecture et écriture aux paramètres de
-configuration de l'instance Postgres. La modification des paramètres s'effectue
-avec l'ordre SQL `ALTER SYSTEM`.
+-----
+### Plugin _Activity_ : activité
 
-3. Plugin _Monitoring_ (Supervision)
+<div class="slide-content">
 
-L'agent collecte périodiquement des données de métrologie que ce soit au niveau
-du système (CPU, mémoire, occupation disque, charge) ou au niveau de l'instance
-Postgres (TPS, tailles, cache hit ratio, verrous, taux d'écriture des WAL, etc).
-Ces données sont ensuite envoyées à l'interface puis historisées dans le
-_repository_.
+  * liste des requêtes SQL en cours d'exécution
+  * permet de terminer un processus serveur
 
-L'interface offre au DBA une consultation de ces données sous forme de
-graphiques, navigables dans le temps. Ces données sont également comparées lors
-de la réception à des seuils (configurables) afin de déclencher une alerte si
-la valeur excède le seuil défini. Ces alertes sont visibles soit sur le
-_dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
-alertes est également navigable dans le temps.
+</div>
 
-4. Plugin _Activity_ (Activité)
+<div class="notes">
 
 Ce plugin permet de consulter en temps réel la liste des requêtes SQL en cours
 d'exécution, les requêtes bloquées ou les requêtes bloquantes. La liste
@@ -1162,14 +1181,168 @@ terminer un backend.
 </div>
 
 -----
+### Plugin _Monitoring_ : supervision
+
+<div class="slide-content">
+
+  * Affichage des données de supervision
+  * au niveau du système :
+    * CPU, mémoire, occupation disque...
+  * au niveau PostgreSQL :
+    * TPS, tailles, cache hit ratio, verrous...
+
+</div>
+
+<div class="notes">
+
+L'agent collecte périodiquement des données de métrologie que ce soit au niveau
+du système (CPU, mémoire, occupation disque, charge) ou au niveau de l'instance
+Postgres (TPS, tailles, cache hit ratio, verrous, taux d'écriture des WAL, etc).
+Ces données sont ensuite envoyées à l'interface puis historisées dans le
+_repository_.
+
+L'interface offre au DBA une consultation de ces données sous forme de
+graphiques, navigables dans le temps. Ces données sont également comparées lors
+de la réception à des seuils (configurables) afin de déclencher une alerte si
+la valeur excède le seuil défini. Ces alertes sont visibles soit sur le
+_dashboard_, soit sur une page dédiée appelée _Status_. L'historique des
+alertes est également navigable dans le temps.
+
+</div>
+
+-----
+### Plugin _Monitoring_ : alerting
+
+<div class="slide-content">
+
+  * Envoi d'alerte en cas de dépassement de seuils
+  * Par mail ou par SMS
+  * Configuration possible par utilisateur
+
+</div>
+
+<div class="notes">
+
+Le plugin _Monitoring_ permet également d'envoyer des alertes en cas de
+dépassement de seuils des sondes. Ces alertes peuvent être faites par mail ou
+par SMS. Les notification par SMS sont effectuées grâce au service
+[Twilio](https://www.twilio.com/).
+
+On peut activer / désactiver les alertes pour chaque utilisateur.
+
+</div>
+
+-----
+### Plugin _Status_
+
+<div class="slide-content">
+
+  * Vision synthétique de l'état des sondes
+  * Accès au graphique détaillé
+
+</div>
+
+<div class="notes">
+
+La vue _Status_ permet d'afficher l'état des différentes sondes de l'instance
+sur une seule page. Pour chaque sonde, les niveaux d'alertes _Warning_ et
+_Critical_ sont précisés.
+
+On cliquant sur la sonde, on accède au graphique historique. On peut à partir
+de cette vue :
+
+  * changer son nom,
+  * activer / désactiver la sonde,
+  * modifier les niveau d'alertes _Warning_ et _Critical_.
+
+</div>
+
+-----
+### Plugin _Configuration_ 
+
+<div class="slide-content">
+
+  * Visualisation des paramètres de l'instance
+  * Modification par l'ordre SQL `ALTER SYSTEM`
+  * Recharge de la configuration possible
+
+</div>
+
+<div class="notes">
+
+Permet un accès simplifié en lecture et écriture aux paramètres de
+configuration de l'instance Postgres. La modification des paramètres s'effectue
+avec l'ordre SQL `ALTER SYSTEM`.
+
+Dans le cas où une modification de paramètre nécessite le redémarrage de
+l'instance, une alerte s'affiche en haut de cette page.
+
+</div>
+
+-----
+### Plugin _Maintenance_
+
+<div class="slide-content">
+
+  * Volume disque par :
+    * base de données / schéma / table
+  * des tables, index, toast et fragmentation
+  * Lancement d'opérations de`ANALYSE`, `VACUUM` ou `REINDEX`
+
+</div>
+
+<div class="notes">
+
+Ce module permet de visualiser pour chaque objet de l'instance le volume des
+tables et des index. Pour chacun de ces types d'objets, il permet de voir le
+volume de fragmentation présent.
+
+On peut naviguer dans les histogrammes des volumes de plus en plus finement :
+
+  * par base de données,
+  * par schéma d'une base de données,
+  * par table et index d'un schéma.
+
+On peut choisir de trier les objets selon différents critères : nom, taille
+totale, taille des tables, taille des index, volume de fragmentation...
+
+En sélectionnant une table, on peut y lancer des opérations de maintenance :
+
+  * `ANALYSE`
+  * `VACUUM`
+  * `REINDEX` de la table ou d'un index
+
+Des messages d'information alertent le DBA du besoin d'exécution de certaines
+opérations.
+
+
+</div>
+
+-----
+### Plugin _Notifications_  
+
+<div class="slide-content">
+
+  * Visualisation des opérations effectuées depuis temBoard
+
+</div>
+
+<div class="notes">
+
+La page `Notifications` permette de réaliser un audit des connections et
+actions effectuées depuis l'interface de temBoard.
+
+</div>
+
+-----
 ### Points faibles de temBoard
 
 <div class="slide-content">
 
-  * Liste des sondes de supervision pas complète
-  * Pas de notifications par e-mail pour les alertes
-  * Pas cloud-ready
-  * Pas d'accès en lecture seule au niveau de l'agent
+  * Pas de gestion des sauvegardes
+  * Pas cloud public ready
+  * Pas d'accès en observateur au niveau de l'agent
+    * accès administrateur uniquement
 
 </div>
 
@@ -1178,6 +1351,16 @@ terminer un backend.
 temBoard est encore en phase de développement, certaines fonctionnalités
 intéressantes ne sont pas encore implémentées mais devraient l'être dans
 un avenir proche.
+
+Par exemple, temBoard ne gère pas les sauvegardes physiques ou logiques. Il ne
+sait pas non plus alerter en cas d'erreur sur des sauvegardes.
+
+L'agent doit être colocalisé avec l'instance. Ce n'est pas possible dans le
+cloud public.
+
+Une autre problématique est que tout accès à l'agent se fait avec des droits
+d'administration. Il n'est pas possible de donner uniquement des droits
+d'observation à un utilisateur authentifié auprès d'un agent.
 
 </div>
 
@@ -1195,9 +1378,8 @@ un avenir proche.
 <div class="notes">
 
 L'objectif de temBoard est de proposer un seul et unique outil permettant
-l'administration courante et la supervision d'un parc d'instance Postgres.
-Le chemin pour atteindre ce but est encore long mais le développement est
-actif.
+l'administration courante et la supervision d'un parc d'instance Postgres. Il
+reste encore du chemin pour atteindre ce but, mais le développement est actif.
 
 </div>
 
@@ -1248,31 +1430,33 @@ corriger :
 #### Installation
 
 Suivant les outils à disposition sur votre ordinateur, vous avez 2 moyens à
-disposition pour installer le blaireau : récupérer le projet ou utiliser une
-image docker.
+disposition pour installer le blaireau : utiliser le paquet sur le dépôt
+communautaire ou récupérer le projet github.
+
+Installer le paquet sur debian sera aussi simple qu'un :
+
+```bash
+$ apt install --yes pgbadger
+$ pgbadger --version
+pgBadger version 11.1
+```
 
 Si Perl est disponible sur votre ordinateur, vous pouvez opter pour la
 récupération du projet sur github et le lancement du script en direct :
 
 ```bash
 $ git clone https://github.com/darold/pgbadger.git
-$ export run_pgbadger="$(pwd)/pgbadger/pgbadger"
-$ $run_pgbadger --version
-pgBadger version 10.1
+$ export PATH="$PATH:$(pwd)/pgbadger/pgbadger"
+$ pgbadger --version
+pgBadger version 11.1
 ```
 
-Si Perl n'est pas disponible, vous pouvez utiliser l'image docker :
+Les logs PostgreSQL utilisés pour le TP sont stockés dans le répertoire
+`~dalibo/Documents`.
 
-```bash
-$ docker pull dalibo/pgbadger
-$ export run_pgbadger="docker run --rm -v $(pwd):/data dalibo/pgbadger --outdir=/data "
-$ $run_pgbadger --version
-pgBadger version 10.1
-```
-
-Vous pouvez récupérer les logs PostgreSQL utilisés dans le TP en suivant le
-lien suivant :
-<https://cloud.dalibo.com/p/workshop/workshop_supervision/logs_postgresql.tgz>.
+Dans tous les cas, vous pouvez également récupérer ces logs en suivant le lien
+suivant :
+<https://public.dalibo.com/workshop/workshop_supervision/logs_postgresql.tgz>.
 
 L'archive contient 9 fichiers de traces de 135 Mo chacun :
 
@@ -1299,14 +1483,14 @@ de logs. L'option `-j` est à fixer à votre nombre de processeurs :
 Si vous utiliser le script Perl :
 
 ```bash
-$ $run_pgbadger -j 4 postgresql-11-main.1.log
+$ pgbadger -j 4 postgresql-11-main.1.log
 ```
 
 Le fichier de rapport _out.html_ est créé dans le répertoire courant. Avant de
 l'ouvrir dans le navigateur, lançons la création du rapport complet :
 
 ```bash
-$ $run_pgbadger -j 4 --outfile rapport_complet.html postgresql-11-main.*.log
+$ pgbadger -j 4 --outfile rapport_complet.html postgresql-11-main.*.log
 ```
 
 Pendant la création du rapport complet, ouvrez-le fichier _out.html_ dans votre
@@ -1373,7 +1557,7 @@ vers 16h50. Nous allons réaliser un rapport spécifique sur cette base de
 données et cette période :
 
 ```bash
-$ $run_pgbadger -j 4 --outfile rapport_bank.html --dbname bank        \
+$ pgbadger -j 4 --outfile rapport_bank.html --dbname bank        \
    --begin "2018-11-12 16:45:00 CET" --end "2018-11-12 16:55:00 CET"  \
    postgresql-11-main.*.log
 ```
@@ -1383,7 +1567,7 @@ Nous voulons connaître plus précisément quelles requêtes venant de l'IP
 rapport en filtrant par client et en calculant les moyennes par minute :
 
 ```bash
-$ $run_pgbadger -j 4 --outfile rapport_host_89.html --dbclient 192.168.0.89 \
+$ pgbadger -j 4 --outfile rapport_host_89.html --dbclient 192.168.0.89 \
    --average 1 postgresql-11-main.*.log
 ```
 
@@ -1398,7 +1582,7 @@ tout moment en précisant les fichiers binaires à utiliser.
 
 ```bash
 $ mkdir /tmp/incr_report
-$ $run_pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
+$ pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
 $ tree /tmp/incr_report
 /tmp/incr_report
 ├── 2018
@@ -1426,7 +1610,7 @@ pgBadger :
 
 ```bash
 $ mkdir /tmp/incr_report
-$ $run_pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
+$ pgbadger -j 4 -I --noreport -O /tmp/incr_report/ postgresql-11-main.1.log
 $ du -sh /tmp/incr_report/
 340K	/tmp/incr_report/
 ```
@@ -1434,7 +1618,7 @@ $ du -sh /tmp/incr_report/
 On pourra reconstruire à tout moment les rapports avec la commande :
 
 ```bash
-$ $run_pgbadger -I -O /tmp/incr_report/ --rebuild
+$ pgbadger -I -O /tmp/incr_report/ --rebuild
 ```
 
 Ce mode permet de plus construire des rapports réguliers journalier et
@@ -1444,59 +1628,120 @@ pour en savoir plus sur ce mode incrémental.
 
 ### PoWA
 
+Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons
+générer du trafic SQL via l'outil `pgbench`. Pour cela, nous allons lancer les
+commandes suivantes dans un terminal :
+
+```bash
+$ sudo -iu postgres
+postgres$ pgbench -c 4 -T 1000 bench
+```
+
 #### Installation
 
-L'installation d'un environnement fonctionnel PoWA se fera au travers des
-images docker mises à disposition par Dalibo.
+L'installation d'un environnement fonctionnel PoWA en version 3.2 a été
+effectué sur la machine virtuelle.
 
-Télécharger le fichier `docker-compose.yml` de la version 11 de PostgreSQL :
-
-```bash
-$ wget https://raw.githubusercontent.com/dalibo/docker/master/powa/compose/docker-compose-11.yml
-```
-
-Téléchargement des images et démarrage des conteneurs docker :
+En attendant que l'activité soit visible, étudions comment nous avons mis en
+place PoWA sur la machine virtuelle. Nous avons tout d'abord installé
+_powa-archivist_ sur le serveur hébergeant l'instance :
 
 ```bash
-$ docker-compose -f docker-compose-11.yml up -d
+# installation de powa et des différents modules disponible
+apt install postgresql-12-powa postgresql-12-pg-qualstats \
+            postgresql-12-pg-stat-kcache postgresql-12-hypopg
 ```
 
-Afin de créer de l'activité SQL sur notre environnement PoWA, nous allons
-initialiser une base de données et générer du trafic SQL via l'outil
-`pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le conteneur de
-l'image `powa-archivist` :
+La configuration de l'instance a été mise à jour pour charger les modules au
+démarrage, récupérer les temps d'accès des entrées / sorties et récupérer des
+métriques dans PoWA toutes les 15 secondes :
+
+```ini
+shared_preload_libraries = 'pg_stat_statements,pg_stat_kcache,pg_qualstats,powa'
+track_io_timing = on
+powa.frequency = '15s'
+```
+
+L'instance a ensuite été redémarrée :
 
 ```bash
-$ docker-compose -f docker-compose-11.yml exec powa-archivist bash
+# systemctl restart postgresql@12-main.service
 ```
 
-Initialisation de la base `bench` :
+Nous avons ensuite procédé, via l'utilisateur _postgres_ à l'installation de la
+base de données PoWA :
 
 ```bash
-# su postgres
-$ psql -c "CREATE DATABASE bench;"
-$ pgbench -i bench
+postgres$ psql -c 'CREATE DATABASE powa'
+postgres$ psql -d powa -c 'CREATE EXTENSION btree_gist'
+postgres$ psql -d powa -c 'CREATE EXTENSION pg_stat_statements'
+postgres$ psql -d powa -c 'CREATE EXTENSION pg_qualstats'
+postgres$ psql -d powa -c 'CREATE EXTENSION pg_stat_kcache'
+postgres$ psql -d powa -c 'CREATE EXTENSION powa'
+postgres$ psql -d powa -c 'CREATE EXTENSION hypopg'
 ```
 
-Suppression d'une contrainte pour montrer l'intérêt de PoWA pour la suggestion
-d'index :
+Puis créé l'utilisateur powa_user :
 
 ```bash
-$ psql -d bench -c "ALTER TABLE pgbench_accounts DROP CONSTRAINT pgbench_accounts_pkey"
+postgres$ psql -c "CREATE ROLE powa_user LOGIN SUPERUSER PASSWORD 'powa'"
 ```
 
-Générer du traffic SQL :
+Nous avons ensuite mis en place la base de données _bench_ sur laquelle nous
+sommes en train de générer de l'activité :
 
 ```bash
-$ pgbench -c 4 -T 1000 bench
+postgres$ psql -c "CREATE DATABASE bench;"
+postgres$ pgbench -i bench
 ```
 
-Ouvrir votre navigateur à l'adresse http://0.0.0.0:8888
+Pour montrer l'intérêt de PoWA pour la suggestion d'index, nous avons supprimé
+une contrainte :
 
-Pour l'authentification, le nom d'utilisateur est `postgres`, mot de passe vide.
+```bash
+postgres$ psql -d bench \
+    -c "ALTER TABLE pgbench_accounts DROP CONSTRAINT pgbench_accounts_pkey"
+```
 
-Note : il peut être nécessaire d'attendre 5 minutes avant que PoWA ne mette à
-jour les statistiques.
+Nous avons ensuite procédé à l'installation de _powa-web_ à partir du dépôt
+git :
+
+```bash
+dalibo:~/git$ git clone https://github.com/powa-team/powa-web.git
+dalibo:~/git$ cd powa-web
+dalibo:~/git/powa-web$ git checkout 682d0a78311e9ef44f8f355d0903657b189cac4a
+dalibo:~/git/powa-web$ cp powa-web.conf-dist powa-web.conf
+```
+
+Nous avons installé les paquets python nécessaire à son fonctionnement :
+
+```bash
+# apt install python-tornado python-sqlalchemy python-psycopg2
+```
+
+#### Visualisation
+
+Nous devons lancer le logiciel powa-web :
+
+```bash
+dalibo:~/$ cd /git/powa-web
+dalibo:~/git/powa-web$ ./powa-web
+[I 191107 15:45:46 powa-web:12] Starting powa-web on http://0.0.0.0:8888
+```
+
+Ouvrir votre navigateur à l'adresse <http://127.0.0.1:8888>
+
+Pour l'authentification, le nom d'utilisateur est « `powa_user` », le mot de passe
+« `powa` ».
+
+La page principale vous pouvez maintenant permet de visualiser les différentes
+métriques par base de données.
+
+En sélectionnant une base de données, on accède aux métriques par requêtes.
+
+La sélection d'une requête permet d'accéder à des informations spécifique pour
+cette requête. Cette vue permet de voir si une requête change de comportement
+au cours du temps.
 
 Choisir la base de données `bench`. Cliquer sur le bouton `Optimize Database`.
 Que constate-t'on ?
@@ -1507,76 +1752,137 @@ l'index suggéré était utilisé ?
 
 ### temBoard
 
-Stopper les services docker de PoWA
+L'installation d'un environnement fonctionnel temBoard en version 4.1 a été
+effectué sur la machine virtuelle.
+
+Pour créer de l'activité SQL pour notre environnement temBoard, nous allons de
+nouveau générer du trafic SQL via l'outil `pgbench`. Pour cela, lancer les
+commandes suivantes dans un nouveau terminal :
 
 ```bash
-$ docker-compose -f docker-compose-11.yml stop
+$ sudo -iu postgres
+postgres$ psql -p 5433 -c "CREATE DATABASE bench;"
+postgres$ pgbench -p 5433 -i bench
+postgres$ pgbench -p 5433 -c 2 -T 500 bench
 ```
 
-L'installation d'un environnement fonctionnel temboard se fera au travers des
-images docker mises à disposition par Dalibo.
-
-Télécharger le fichier `docker-compose.yml` :
+Stopper le trafic lancée lors du TP PoWA sur l'instance en version 12 et le
+relancer avec plus de sessions :
 
 ```bash
-$ wget https://raw.githubusercontent.com/dalibo/temboard/master/docker/docker-compose.yml
+postgres$ pgbench -c 8 -T 200 bench
 ```
 
-Téléchargement des images et démarrage des conteneurs docker :
+#### Installation
+
+En attendant que l'activité soit visible, étudions comment nous avons mis en
+place temBoard sur la machine virtuelle. L'installation d'un environnement
+fonctionnel temBoard a été effectuée grâce à _pip_ :
 
 ```bash
-$ docker-compose -f docker-compose.yml up -d
+apt install python-pip
+pip install psycopg2-binary temboard temboard-agent
 ```
 
-Afin de créer de l'activité SQL sur notre environnement temboard, nous allons
-initialiser une base de données et générer du trafic SQL via l'outil
-`pgbench`. Pour cela, il faut ouvrir un shell `bash` sur le service
-`instance10` :
+Pour bien fonctionner, temBoard a besoin d'un FQDN bien fonctionnel. On l'a
+défini dans le fichier `/etc/hosts` :
 
 ```bash
-$ docker-compose exec instance10 bash
+# hostname --fqdn
+supervision
+# sed -i 's/127.0.1.1\tsupervision/127.0.1.1\tsupervision.ws\tsupervision/' /etc/hosts
+# hostname --fqdn
+supervision.ws
 ```
 
-Initialisation de la base `bench` :
+Nous avons ensuite initié temBoard. Le script temBoard `auto_configure.sh` a
+créé la base de données et la configuration du logiciel :
 
 ```bash
-# su postgres
-$ psql -c "CREATE DATABASE bench;"
-$ pgbench -i bench
+# /usr/local/share/temboard/auto_configure.sh 
+Creating Postgres user, database and schema.
+Creating system user temBoard.
+Configuring temboard in /etc/temboard.
+Using snake-oil SSL certificate.
+
+Success. You can now start temboard using:
+
+    systemctl start temboard
+
+Remember to replace default admin user!!!
 ```
 
-Générer du traffic SQL :
+PoWA utilise le port 8888. Nous allons faire tourner temBoard sur le
+port 9999. Nous ajoutons la clé de configuration du port dans la section
+`[temboard]` du fichier `/etc/temboard/temboard.conf` :
+
+```ini
+port = 9999
+```
+
+Nous avons ensuite configuré le service pour qu'il démarre de façon
+automatique :
 
 ```bash
-$ pgbench -c 12 -T 1000 bench
+# systemctl enable temboard
+# systemctl start temboard
 ```
 
-Ouvrir votre navigateur à l'adresse https://0.0.0.0:8888
+Dans l'interface de temBoard, nous avons déclaré un nouvel utilisateur
+administrateur pour l'accès aux agents, login : _tmbagent_, mot de passe :
+_temboard_.
 
-Votre navigateur devrait vous indiquer que la connexion n’est pas sécurisée.
-Ajoutez une exception de sécurité pour le certificat de temBoard.
+Une fois l'interface utilisateur installée, il faut installer un agent par
+instance PostgreSQL à superviser. Nous avons installé un agent pour l'instance
+PostgreSQL 12-main en utilisant l'utilisateur _tmbagent_ créé ci-dessus :
+
+```bash
+# export PGPORT=5432
+# /usr/local/share/temboard-agent/auto_configure.sh https://supervision.ws:9999
+# sudo -u postgres temboard-agent-adduser -c /etc/temboard-agent/12/main/temboard-agent.conf
+# systemctl enable temboard-agent@12-main.service
+# systemctl start temboard-agent@12-main.service
+# sudo -u postgres temboard-agent-register \ 
+    -c /etc/temboard-agent/12/main/temboard-agent.conf --host $(hostname --fqdn) \
+	--port 3345 --groups default https://supervision.ws:9999
+```
+
+Nous avons procédéde même pour l'agent pour de l'instance PostgreSQL 11-main :
+
+```bash
+# export PGPORT=5433
+# /usr/local/share/temboard-agent/auto_configure.sh https://supervision.ws:9999
+# sudo -u postgres temboard-agent-adduser -c /etc/temboard-agent/11/main/temboard-agent.conf
+# systemctl enable temboard-agent@11-main.service
+# systemctl start temboard-agent@11-main.service
+# sudo -u postgres temboard-agent-register \ 
+    -c /etc/temboard-agent/11/main/temboard-agent.conf --host $(hostname --fqdn) \ 
+    --port 3345 --groups default https://supervision.ws:9999
+```
+
+#### Visualisation
+
+Ouvrir votre navigateur à l'adresse <https://127.0.0.1:9999>
 
 Pour l'authentification, le nom d'utilisateur est `admin`, mot de passe `admin`.
 
-Cliquer sur `instance10.fqdn`
+Les instances sont nommées par leurs noms d'hôte. Les 2 instances sont donc
+nommées _supervision.ws_. Ici, le numéro de port et la version de PostgreSQL
+permettent de différencier entre les instances supervisées.
 
-Pour l'authentification, le nom d'utilisateur est `alice`, mot de passe `alice`.
+Cliquez sur `supervision.ws` de la version 12, et étudiez les différents
+modules.
 
-Vous êtes à présent sur le `Dashboard` de l'instance `instance10`.
-
-Nous allons à présent vérrouiller de manière exclusive un table de la base
+Nous allons à présent verrouiller de manière exclusive un table de la base
 `bench` dans le but de bloquer l'activité. Pour cela, dans un autre onglet du
 terminal :
 
 ```bash
-$ docker-compose exec instance10 bash
-# su postgres
-$ psql bench
+$ sudo -iu postgres psql bench
 
 bench=# BEGIN;
 
 bench=# LOCK TABLE pgbench_tellers IN EXCLUSIVE MODE;
-
 ```
 
 Revenir sur le `Dashboard` temboard et attendre quelques instants, que
@@ -1587,11 +1893,47 @@ Cliquer sur `Status`, puis sur `Waiting sessions`.
 Aller sur la vue `Activity` et naviguer entre les onglets `Running`, `Waiting`,
 `Blocking`.
 
-Depuis l'onglet `Blocking`, mettre en pause le rafraichissement automatique,
-cocher la ligne de la requête bloquante, puis cliquer sur `Terminate`, enfin
-confirmer.
+Depuis l'onglet `Blocking`, cocher la ligne de la requête bloquante, puis
+cliquer sur `Terminate`, enfin confirmer.
 
 Revenir sur le `Dashboard`, attendre quelques instants. Que constate-t-on ?
+
+Nous allons maintenant ajouter un nouvel utilisateur, `alice`, qui aura accès
+uniquement à l'instance PostgreSQL en version 10 sur le port 5434.
+
+Commençons par installer l'agent pour l'instance en version 10 en suivant la
+procédure utilisée pour les 2 autres agents. Utilisez l'utilisateur _tmbagent_
+pour connecter l'agent à l'UI.
+
+Une fois l'agent installé et l'instance visible dans l'UI temBoard, nous allons
+ajouter une nouvelle utilisatrice et un nouveau groupe. Pour se faire, cliquer
+sur le bouton « Settings » en haut à droite de l'interface.
+
+Nous allons créer :
+
+  * un nouveau groupe d'utilisatrices « user_pg10 »,
+  * une nouvelle utilisatrice « alice » dans le groupe « user_pg10 »,
+  * un nouveau groupe d'instances « instance_pg10 » accessibles par le groupe
+    « user_pg10 »,
+  * enfin, ajouter l'instance en version 10 dans le groups d'instances
+    « instance_pg10 ».
+
+Déconnectons nous et vérifions ce que l'utilisatrice alice peut visualiser.
+
+Nous constatons que l'utilisatrice ne peut pas modifier le paramétrage de
+l'instance avec ses identifiants de connexion.
+
+Si nous voulons que alice puisse agir sur l'instance, nous devons la déclarer
+au niveau de l'agent. Nous pouvons le faire via le script
+`temboard-agent-adduser` :
+
+```bash
+# export PGPORT=5434
+# sudo -u postgres temboard-agent-adduser -c /etc/temboard-agent/10/main/temboard-agent.conf
+```
+
+Vérifions ensuite que alice peut agir sur les paramètres de l'instance.
+
 </div>
 
 
