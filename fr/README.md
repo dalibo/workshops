@@ -1,6 +1,14 @@
 Workshops en Français
 ===============================================================================
 
+Nouveautés de PostgreSQL 12
+--------------------------------------------------------------------------------
+
+* Source : [PostgreSQL 12](120-postgresql_12.md)
+* Slides : [HTML](https://cloud.dalibo.com/p/exports/formation/workshops/fr/120-postgresql_12.slides.html)
+* Handout : [PDF](https://cloud.dalibo.com/p/exports/formation/workshops/fr/120-postgresql_12.pdf)
+* Mobile : [EPUB](https://cloud.dalibo.com/p/exports/formation/workshops/fr/120-postgresql_12.epub)
+
 Nouveautés de PostgreSQL 11
 --------------------------------------------------------------------------------
 
@@ -32,3 +40,5 @@ Workshop supervision : outils graphiques
 * Slides : [HTML](https://cloud.dalibo.com/p/exports/formation/workshops/fr/supervision.slides.html)
 * Handout : [PDF](https://cloud.dalibo.com/p/exports/formation/workshops/fr/supervision.pdf)
 * Mobile : [EPUB](https://cloud.dalibo.com/p/exports/formation/workshops/fr/supervision.epub)
+
+
