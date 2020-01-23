@@ -64,7 +64,7 @@ P=pandoc $(PANDOC_PARAMS) --metadata=dlb:$(LOCAL_DLB)
 # Then let's use the docker image by setting DOCKER_TAG
 #
 ifeq (, $(shell which pandoc))
-    DOCKER?=19.08
+    DOCKER?=latest
 endif
 
 # If make was launched with DOCKER=... or pandoc was not there,

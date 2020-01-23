@@ -222,16 +222,16 @@ PostgreSQL 12 offre 4 nouveaux arguments pour la commande `vacuumdb`:
 
 - `--skip-locked`
 
-  Ignore les tables verrouillées (version PostgreSQL 12 et supérieur).
+  Ignore les tables verrouillées (versions PostgreSQL 12 et supérieures).
 </div>
 
 ----
 
-### Journaux de transaction
+### Journaux de transactions
 
 <div class="slide-content">
 
-Nouvelles options pour les journaux de transactions:
+Nouvelles options pour les journaux de transactions :
 
   * `wal_recycle`
   * `wal_init_zero`
@@ -396,7 +396,7 @@ Deux nouvelles options ont été ajoutées à la commande `pg_upgrade`.
 ### Rotation des traces avec pg_ctl
 
 Jusqu'en version 11, la rotation des traces se faisait en envoyant un signal
-`SIGUP` au processus `logger` ou grâce à la fonction SQL `pg_rotate_logfile()`.
+`SIGUSR1` au processus `logger` ou grâce à la fonction SQL `pg_rotate_logfile()`.
 
 Depuis PostgreSQL 12, le mode `logrotate` a été ajouté à la commande `pg_ctl`.
 
@@ -415,7 +415,7 @@ server signaled to rotate log file
 
 <div class="slide-content">
 
-  * `pg_verify_checksum` renommée en `pg_checksums`
+  * `pg_verify_checksums` renommée en `pg_checksums`
   * Activation, désactivation des _checksums_
 
 </div>
@@ -495,7 +495,7 @@ Checksums enabled in cluster
 |                                    | défaut à utiliser lors de la création de tables.      |            |
 | log_transaction_sample_rate (0)    |                                                       | superuser  |
 | plan_cache_mode (auto)             | Change le comportement du cache des plans d'exécution | user       |
-|                                    | (auto`, `force_custom_plan, force_generic_plan)       |            |
+|                                    | (`auto`, `force_custom_plan`, `force_generic_plan`)   |            |
 | primary_conninfo                   | Anciennement dans le fichier recovery.conf            | postmaster |
 | primary_slot_name                  | Anciennement dans le fichier recovery.conf            | postmaster |
 | promote_trigger_file               | Anciennement dans le fichier recovery.conf            | sighup     |
@@ -507,7 +507,7 @@ Checksums enabled in cluster
 | recovery_target_lsn                | Anciennement dans le fichier recovery.conf            | postmaster |
 | recovery_target_name               | Anciennement dans le fichier recovery.conf            | postmaster |
 | recovery_target_time               | Anciennement dans le fichier recovery.conf            | postmaster |
-| recovery_target_timeline (lastest) | Anciennement dans le fichier recovery.conf            | postmaster |
+| recovery_target_timeline (latest)  | Anciennement dans le fichier recovery.conf            | postmaster |
 | recovery_target_xid                | Anciennement dans le fichier recovery.conf            | postmaster |
 | restore_comand                     | Anciennement dans le fichier recovery.conf            | postmaster |
 | shared_memory_type                 | Type de mémoire partagée, les valeurs possibles       | postmaster |
@@ -516,7 +516,7 @@ Checksums enabled in cluster
 | ssl_max_protocol_version           | Version max du protocole SSL supporté                 | sighup     |
 | ssl_min_protocol_version (TLSv1)   | Version min du protocole SSL supporté                 | sighup     |
 | tcp_user_timeout (0)               |                                                       | user       |
-| wal_init_zero (on)                 | Remplit les nouveaux fichiers WAL de zéros             | superuser  |
+| wal_init_zero (on)                 | Remplit les nouveaux fichiers WAL de zéros            | superuser  |
 | wal_recycle (on)                   | Recycle les WAL                                       | superuser  |
 
 

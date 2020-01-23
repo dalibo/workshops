@@ -3,32 +3,33 @@
 <div class="slide-content">
 
   * _Pluggable storage_
-    * _HEAP storage_
-    * _column storage_
+    * _HEAP storage_, historique et par défaut
+    * _columnar storage_
     * _Zed Heap_
     * _blackhole_
 </div>
 
 <div class="notes">
 
-Les _pluggable storage_ déterminent comment les données sont stockées
-dans les tables et les vues. Les bases de cette API ont été publiées dans
-cette version 12.
+Jusqu'à lors, le stockage des données s'effectuait dans les tables à l'aide
+d'un mécanisme appellé _Heap Storage_. Cette méthode était l'unique
+implémentation du stockage dans PostgreSQL pour le contenu des tables ou des
+vues matérialisées.
 
-D'autres méthodes de stockages sont en cours de développement et permettront
-de choisir un format en fonction de l'utilisation et/ou des données stockées,
-table par table.
+Avec la version 12, l'ajout des _pluggable storages_ apporte une nouvelle couche
+d'abstraction dans la gestion des accès aux données des tables et des vues.
 
+D'autres méthodes de stockage sont en cours de développement et permettront
+de choisir un format en fonction de l'utilisation des données stockées, table
+par table. Cette amélioration permettra de répondre à des attentes utilisateurs
+déjà présentes dans les autres moteurs SGBD du marché.
+
+<!--
 ![*Heap storage* actuel](medias/schema_pluggable_storage_heap.png)
-
-
 ![*Pluggable Storage*](medias/schema_pluggable_storage.png)
+-->
 
-FIXME c'est bien joli mais ils servent à quoi, ces deux graphiques ? il
-faudrait un texte les expliquant s'ils ont un intérêt. Pour moi, ils n'en ont
-pas et devraient donc être supprimés.
-
-(source : [présentation d'Andres Freund PGConf-EU 2018 ](https://anarazel.de/talks/2018-10-25-pgconfeu-pluggable-storage/pluggable.pdf) )
+Pour aller plus loin : [Présentation d'Andres Freund PGConf-EU 2018 ](https://anarazel.de/talks/2018-10-25-pgconfeu-pluggable-storage/pluggable.pdf)
 </div>
 
 ---
@@ -39,8 +40,8 @@ pas et devraient donc être supprimés.
 
 <div class="slide-content">
   * `HEAP storage`
-  * méthode de stockage par défaut
-  * seule méthode supportée pour le moment
+  * Méthode de stockage par défaut
+  * Seule méthode supportée pour le moment
 </div>
 
 <div class="notes">
@@ -50,36 +51,42 @@ adaptée en tant qu'_Access Method_ utilisant la nouvelle architecture. Cette
 méthode a été simplement appelée `HEAP` et est pour le moment la seule
 supportée.
 
+<!--
 FIXME je ne comprends pas, cette méthode ne fait pas partie du futur ? cette
 slide devrait être supprimée à mon sens
+
+(florent) Selon moi ce slide est nécessaire pour comprendre que la nouvelle 
+architecture s'appuie sur une implémentation déjà existante et reste transparente
+pour la version en cours, et permet de faire le lien avec les méthodes à venir.
+-->
 
 </div>
 
 ---
 
-#### Zedstore: Column storage
+#### Méthode d'accès ZedStore (Columnar storage)
 
 
 <div class="slide-content">
-  * méthode orientée colonne
-  * données compressées
-  * nom temporaire !
+  * Méthode orientée colonne
+  * Données compressées
+  * Nom temporaire !
 </div>
 
 
 <div class="notes">
 
-**Heikki Linnakangas de Pivotal** travaille sur le **_column storage_**, une
-méthode de stockage orientée "colonne" et permettant entre autres la
+**Heikki Linnakangas de Pivotal** travaille sur le **_columnar storage_**, une
+méthode de stockage orientée « colonne » et permettant entre autres, la
 compression des données des colonnes.
 
 Bénéfices :
 
-  * optimisation en cas de nombreuses mises à jour sur une même colonne
-  * suppression de colonne instantanée
-  * possibilité de réécrire une colonne plutôt que toute la table
+  * Optimisation en cas de nombreuses mises à jour sur une même colonne ;
+  * Suppression de colonne instantanée ;
+  * Possibilité de réécrire une colonne plutôt que toute la table.
 
-Pour plus d'information sur cette méthode de stockage et ses développements,
+Pour plus d'informations sur cette méthode de stockage et ses développements,
 voir [les slides de conférence](https://www.postgresql.eu/events/pgconfeu2019/schedule/session/2738-zedstore-column-store-for-postgresql/)
 de Heikki Linnakangas à ce sujet.
 
@@ -87,20 +94,20 @@ de Heikki Linnakangas à ce sujet.
 
 ---
 
-#### zHeap
+#### Méthode d'accès zHeap
 
 <div class="slide-content">
 
-  * meilleur contrôle du _bloat_
-  * réduction de l'amplification des écritures
-  * réduction de la taille des entêtes
-  * méthode basée sur les différences 
+  * Meilleur contrôle du _bloat_
+  * Réduction de l'amplification des écritures
+  * Réduction de la taille des entêtes
+  * Méthode basée sur les différences 
   
 </div>
 
 <div class="notes">
 
-**Enterprise DB** travaille actuellement sur une méthode de stockage nommée
+**EnterpriseDB** travaille actuellement sur une méthode de stockage nommée
 _zHeap_ dont le fonctionnement repose sur un système UNDO en lieu et place du
 REDO actuel. Le principe est de modifier les enregistrements "sur place"
 lorsque c'est possible et de conserver dans les journaux de transaction
@@ -113,6 +120,8 @@ Les bénéfices observés seraient :
     méthode `HEAP`
   * stockage plus performant en réduisant la taille des entêtes
 
+Pour aller plus loin : [Article du contributeur Amit Kapila d'EntrepriseDB](https://www.enterprisedb.com/blog/zheap-storage-engine-provide-better-control-over-bloat)
+
 </div>
 
 ---
@@ -121,8 +130,8 @@ Les bénéfices observés seraient :
 
 <div class="slide-content">
 
-  * sert de base pour créer une extension _Access Method_
-  * toute donnée ajoutée est envoyée dans le néant
+  * Sert de base pour créer une extension _Access Method_
+  * Toute donnée ajoutée est envoyée dans le néant
   
 </div>
 

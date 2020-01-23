@@ -133,10 +133,12 @@ pg12=$ select * from pg_statistic_ext;
 (1 row)
 ```
 
-</div>
-
 Pour plus d'information et d'exemple, voir le chapitre
 [Extended Statistics](https://www.postgresql.org/docs/12/planner-stats.html#PLANNER-STATS-EXTENDED)
+
+</div>
+
+----
 
 ### Mise en cache des plans d'exécution 
 
@@ -342,7 +344,7 @@ d'une partition. En revanche, l'option `DETACH PARTITION`, pose toujours un
 verrou exclusif.
 
 L'utilisation de clés étrangères pour les partitions filles est désormais
-supporté. Voir à ce propos le chapitre sur le partitionnement.
+supportée. Voir à ce propos le chapitre sur le partitionnement.
 
 Une amélioration de la fonction `COPY` dans les partitions permet un chargement plus
 rapide.
