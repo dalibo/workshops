@@ -3,34 +3,20 @@
 <div class="slide-content">
 
   * Les fonctions d'appui
-  * reindex concurrently
+  * `REINDEX CONCURRENTLY`
+
 </div>
 
 <div class="notes">
-
-</div>
-
-----
 
 ### TP sur les fonctions d'appui
-
-<div class="slide-content">
-
-
-</div>
-
-<div class="notes">
-
-
-#### Modification des fonctions classiques
 
 En regardant la définition de la fonction `unnest(anyarray)`, on remarque que la v12 fait apparaître une fonction d'appui (_support function_ en anglais) :
 
 
 **En v11**
 
-```SQL
-
+```sql
 v11 $ \ef unnest(anyarray)
 
 CREATE OR REPLACE FUNCTION pg_catalog.unnest(anyarray)
@@ -43,8 +29,7 @@ AS $function$array_unnest$function$
 
 **En v12 :** 
 
-```SQL
-
+```sql
 v12 $ \ef unnest(anyarray)
 
 CREATE OR REPLACE FUNCTION pg_catalog.unnest(anyarray)
@@ -56,7 +41,7 @@ AS $function$array_unnest$function$
 
 Le rôle de la fonction d'appui peut être vérifié rapidement en comparant  l'`explain` sous une version 11 et sous une version 12 :
 
-```SQL
+```sql
 v11 $ explain select * from unnest(array[0,1,2,3]);
                          QUERY PLAN                          
 -------------------------------------------------------------
@@ -66,8 +51,8 @@ v11 $ explain select * from unnest(array[0,1,2,3]);
 
 On remarque que l'optimiseur fait une erreur en estimant le nombre de lignes retournées (100 plutôt que 4).
 
-```SQL
-explain select * from unnest(array[0,1,2,3]);
+```sql
+v12 $ explain select * from unnest(array[0,1,2,3]);
                         QUERY PLAN                         
 -----------------------------------------------------------
  Function Scan on unnest  (cost=0.00..0.04 rows=4 width=4)
@@ -79,7 +64,7 @@ La v12 estime bien le nombre de ligne car elle consulte la fonction d'appui.
 
 Autre exemple avec la fonction `generate_series(bigint,bigint)`
 
-```SQL
+```sql
 v11 $ explain select generate_series(1,100000000);
                    QUERY PLAN
 -------------------------------------------------
@@ -88,7 +73,7 @@ v11 $ explain select generate_series(1,100000000);
 (2 rows)
 ```
 
-```SQL
+```sql
 v12 $ explain select generate_series(1,100000000);
                         QUERY PLAN
 -----------------------------------------------------------
@@ -97,9 +82,9 @@ v12 $ explain select generate_series(1,100000000);
 (2 rows)
 ```
 
-La fonction generate_series a été modifiée : 
+La fonction `generate_series` a été modifiée : 
 
-```SQL
+```sql
 v12 $ \ef generate_series(bigint,bigint)
 
 CREATE OR REPLACE FUNCTION pg_catalog.generate_series(bigint, bigint)
@@ -109,21 +94,9 @@ CREATE OR REPLACE FUNCTION pg_catalog.generate_series(bigint, bigint)
 AS $function$generate_series_int8$function$
 ```
 
-La fonction d'appui est appelée par l'optimiseur, pour retourner une estimation du nombre de lignes qui est calculée en  rapport avec les  2 entiers donnés en paramètres.
-
-</div>
-----
-
+La fonction d'appui est appelée par l'optimiseur, pour retourner une estimation du nombre de lignes qui est calculée en rapport avec les 2 entiers donnés en paramètres.
 
 ### TP Reindex concurrently
-
-<div class="slide-content">
-
-</div>
-
-
-<div class="notes">
-
 
 Les tests sont à effectuer sur une instance de PostgreSQL 12 avec le paramétrage par défaut.
 

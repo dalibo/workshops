@@ -2,35 +2,20 @@
 
 <div class="slide-content">
 
-  * échantillon des requêtes dans les logs
-  * Vues de progression pour `CREATE INDEX`, `CLUSTER`, `VACUUM`
-  * pg_ls_archive_statusdir() et pg_ls_tmpdir()
-  * pg_stat_replication : timestamp du dernier message reçu du standby
+  * Échantillon des requêtes dans les logs
+  * Vues de progression des opérations de maintenance
+  * `pg_ls_archive_statusdir()` et `pg_ls_tmpdir()`
+  * `pg_stat_replication` : timestamp du dernier message reçu du standby
 
 </div>
 
 <div class="notes">
 
-</div>
-
----
-
-###  Échantillon des requêtes dans les logs
- 
-<div class="slide-content">
-
-  * log_transaction_sample_rate
-
-</div>
-
-<div class="notes">
-
-#### Activation des paramètres
+### Échantillon des requêtes dans les logs
 
 Les deux paramètres sont à modifier dans le fichier `postgresql.conf` de l'instance :
 
 ```ini
-
 # on récupère toute l'activité
 log_min_duration_statement = 0
 
@@ -38,102 +23,67 @@ log_min_duration_statement = 0
 log_transaction_sample_rate = 0.80
 ```
 
-</div>
+<!-- 
+TODO: proposer l'analyse des logs avec une activité pgbench pour mettre en
+lumière l'échantillonnage avec log_transaction_sample_rate
+-->
 
----
+### Vues de progression des opérations de maintenance
 
-### Vues de progression pour `CREATE INDEX`, `CLUSTER`, `VACUUM`
+#### Surveiller la progression d'une création d'index
 
-<div class="slide-content">
+Dans une première session `psql`, lancer les commandes suivante pour observer
+les opérations de maintenance sur index avec la vue `pg_stat_progress_create_index` :
 
-  * pg_stat_progress_create_index
-  * pg_stat_progress_vacuum
-
-</div>
-
-<div class="notes">
-
-#### pg_stat_progress_create_index
-
-Lancer dans une sessions `psql` les commandes :  
-
-```SQL
-$ SELECT
-  datname,
-  relid::regclass,
-  command,
-  phase,
-  tuples_done
-FROM
-  pg_stat_progress_create_index;
+```sql
+$ SELECT datname, relid::regclass, command, phase, tuples_done
+    FROM pg_stat_progress_create_index;
 
 $ \watch 1
-  
-``` 
+```
 
+Dans une autre session, alimenter une table puis créer un index :
 
-Lancer une réindexation dans une autre session : 
-
-```SQL
-$ CREATE TABLE a_table (
-  i int,
-  a text,
-  b text
-);
-
-$ INSERT INTO a_table
-SELECT
-  i,
-  md5(i::text),
-  md5(i::text)
-FROM
-  generate_series(1, 100000) i;
-
+```sql
+$ CREATE TABLE a_table (i int, a text, b text);
+$ INSERT INTO a_table SELECT i, md5(i::text), md5(i::text)
+    FROM generate_series(1, 100000) i;
 
 $ CREATE INDEX ON a_table (i, a, b);
-
 ```
 
 Observer les phases de la création de l'index dans la première session.
 
-#### pg_stat_progress_vacuum
+#### Surveiller la progression d'un vacuum
 
-On se propose de suivre la progression des vacuum d'une base.
+On se propose de suivre la progression des vacuum d'une base. Ces derniers se
+déclenchent lorsqu'un certain seuil de modifications est atteint sur un ou
+plusieurs tables.
 
-```SQL
-$ CREATE TABLE tab (i int , j text);
+```sql
+$ CREATE TABLE tab (i int, j text);
 $ INSERT INTO tab SELECT i, md5(i::text)
-  FROM generate_series(1,1000000) s(i);
+    FROM generate_series(1,1000000) s(i);
+
 $ DELETE FROM tab;
 $ INSERT INTO tab SELECT i, md5(i::text)
-  FROM generate_series(1,1000000) s(i);
+    FROM generate_series(1,1000000) s(i);
+
 -- L'autovacuum devrait se déclencher
-$ SELECT * FROM pg_stat_progress_vacuum;
+$ SELECT datname, relid::regclass, phase, heap_blks_total, num_dead_tuples
+    FROM pg_stat_progress_vacuum;
 $ \watch 1
 ```
 
-</div>
-----
+### pg_ls_archive_statusdir() et pg_ls_tmpdir()
 
-### Archive status et fichiers temporaires
-
-<div class="slide-content">
-
-  * `pg_ls_archive_statusdir()`
-  * `pg_ls_tmpdir()`
-
-</div>
-
-
-<div class="notes">
-
-Déclenchez la rotation des journaux de transaction et donc l'archivage :
+Déclencher la rotation des journaux de transactions et donc l'archivage :
 
 ```sql
-$ select pg_switch_wal();
-$ select pg_switch_wal();
-$ select pg_switch_wal();
-$ select pg_ls_archive_statusdir();
+$ SELECT pg_switch_wal();
+$ SELECT pg_switch_wal();
+$ SELECT pg_switch_wal();
+$ SELECT pg_ls_archive_statusdir();
 
                   pg_ls_archive_statusdir                   
 ------------------------------------------------------------
@@ -141,32 +91,24 @@ $ select pg_ls_archive_statusdir();
  (0000000100000001000000BB.done,0,"2019-07-29 14:11:36+02")
  (0000000100000001000000BD.done,0,"2019-07-29 14:12:15+02")
 (3 rows)
-
 ```
 
-Lancer une requête effectuant un tri assez conséquent pour dépasser la `work_mem` et créer des fichiers temporaires :
+Lancer une requête effectuant un tri assez conséquent pour dépasser la `work_mem`
+et créer des fichiers temporaires :
+
+<!--
+TODO: ajouter une requête consommatrice qui crée des fichiers temporaires
+-->
 
 ```sql
-$ select pg_ls_tmpdir();
+$ SELECT pg_ls_tmpdir();
                      pg_ls_tmpdir                     
 ------------------------------------------------------
  (pgsql_tmp16064.9,24395776,"2019-07-29 14:05:49+02")
 (1 row)
-
 ```
-</div>
 
----
-
-### timestamp du dernier message reçu du standby
-
-<div class="slide-content">
-
-  * pg_stat_replication
-
-</div>
-
-<div class="notes">
+### pg_stat_replication : _timestamp_ du dernier message reçu du standby
 
 #### Réplication sur le serveur primaire
 
@@ -202,7 +144,7 @@ Activation de la réplication logique sur le primaire :
 ```ini
 wal_level = logical
 ```
-création de l'utilisateur de réplication :
+Création de l'utilisateur de réplication :
 
 ```sql
 $ create user repli with password 'repli';
@@ -252,8 +194,6 @@ $ select usename,application_name,reply_time from pg_stat_replication ;
 ```
 
 Nous avons l'heure exacte du dernier contact avec la souscription _a_table_subscription_.
-
-
 </div>
 
 ----

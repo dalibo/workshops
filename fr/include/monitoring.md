@@ -35,14 +35,16 @@ Adrien Nayrat a soumis un correctif proposant l'échantillonnage des transaction
 
 ----
 
-###  Information de progression
+###  Informations de progression
 
 <div class="slide-content">
 
-  * `pg_stat_progress_cluster`
-  * `pg_stat_progress_create_index`
-  * `pg_stat_progress_vacuum`
-FIXME pg_stat_progress_vacuum existe depuis la 11, aucun intérêt ici
+  * Nouvelles vues pour l'avancement des tâches de maintenance
+    * `pg_stat_progress_cluster`
+    * `pg_stat_progress_create_index`
+  * En complément d'une déjà existante depuis la version 11
+    * `pg_stat_progress_vacuum`
+
 </div>
 
 <div class="notes">
@@ -51,11 +53,13 @@ FIXME pg_stat_progress_vacuum existe depuis la 11, aucun intérêt ici
 
 ----
 
-###  Progression de l'opération CLUSTER
+###  Progression des réécritures de table
 
 <div class="slide-content">
 
-  * `pg_stat_progress_cluster`
+  * Vue `pg_stat_progress_cluster`
+    * Pour les opérations `CLUSTER` et `VACCUM FULL`
+
 </div>
 
 
@@ -64,14 +68,14 @@ FIXME pg_stat_progress_vacuum existe depuis la 11, aucun intérêt ici
 Lors de l'opération [`CLUSTER`](https://docs.postgresql.fr/12/sql-cluster.html) et `VACUUM FULL`, la vue `pg_stat_progress_cluster` indique la progression de l'opération qui dans certains cas, peut être très 
 longue.
 
-On lance le traitement dans une session 
+On lance le traitement dans une session :
 
 ```SQL
 $ CLUSTER tab USING tab_i_j_idx;
 CLUSTER
 ```
 
-On observe la progression dans une autre 
+On observe la progression dans une autre session :
 
 ```sql
 $ SELECT
@@ -119,18 +123,19 @@ $ \watch 1
 
 ----
 
-### Progression de la création d'index
+### Progression des maintenances d'index
 
 <div class="slide-content">
 
-  * `pg_stat_progress_create_index`
+  * Vue `pg_stat_progress_create_index`
+    * Pour les opérations `CREATE INDEX` et `REINDEX`
+
 </div>
 
 
 <div class="notes">
 
-Lors de la création d' index, la progression est consultable dans la vue 
-
+Lors de la création d' index, la progression est consultable dans la vue
 `pg_stat_progress_create_index` :
 
 ```sql
@@ -178,84 +183,6 @@ $ \watch 1
 
 -----
 
-### Progression de l'opération VACUUM
-
-<div class="slide-content">
-
-  * `pg_stat_progress_vacuum`
-</div>
-
-<div class="notes">
-
-Depuis la version 11, dès qu'un `VACUUM` est en action, la vue `pg_stat_progress_vacuum` est renseignée pour informer de la progression de l'opération.
-
-```sql
-$ SELECT
-   phase,
-   heap_blks_vacuumed,
-   index_vacuum_count,
-   num_dead_tuples
- FROM
-   pg_stat_progress_vacuum;
-
-
-phase         | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
---------------+--------------------+--------------------+-----------------
-scanning heap |                  0 |                  0 |          997918
-(1 row)
-```
-
-```sql
-$ \watch 1
-ven. 26 juil. 2019 18:21:03 CEST (every 1s)
-
-phase          | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
----------------+--------------------+--------------------+-----------------
-scanning heap  |                  0 |                  0 |          997918
-(1 row)
-
-  ven. 26 juil. 2019 18:21:04 CEST (every 1s)
-
-  phase           | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
-  ----------------+--------------------+--------------------+-----------------
-vacuuming indexes |                  0 |                  0 |          997918
-(1 row)
-
-...
-
-ven. 26 juil. 2019 18:21:21 CEST (every 1s)
-
-phase          | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
----------------+--------------------+--------------------+-----------------
-vacuuming heap |               6577 |                  1 |          997918
-(1 row)
-
-ven. 26 juil. 2019 18:21:22 CEST (every 1s)
-
-phase          | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
----------------+--------------------+--------------------+-----------------
-vacuuming heap |               9097 |                  1 |          997918
-(1 row)
-
-ven. 26 juil. 2019 18:21:23 CEST (every 1s)
-
-phase          | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
----------------+--------------------+--------------------+-----------------
-vacuuming heap |              11620 |                  1 |          997918
-(1 row)
-
-ven. 26 juil. 2019 18:21:24 CEST (every 1s)
-
-phase  | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples 
--------+--------------------+--------------------+-----------------
-(0 rows)
-
-```
-</div>
-
------
-
-
 ### Archive status 
 
 <div class="slide-content">
@@ -265,9 +192,9 @@ phase  | heap_blks_vacuumed | index_vacuum_count | num_dead_tuples
 
 <div class="notes">
 
-Liste le nom, taille et l'heure de la dernière modification des fichiers dans  le dossier `status` de l'archive des _WAL_. Il faut être membre du group pg_monitor ou avoir explicitement le droit (`pg_read_server_files`).
+Liste le nom, taille et l'heure de la dernière modification des fichiers dans  le dossier `status` de l'archive des _WAL_. Il faut être membre du group `pg_monitor` ou avoir explicitement le droit (`pg_read_server_files`).
 
-À savoir que ce répertoire est peuplé lorsqu'un journal de transaction (wal)
+À savoir que ce répertoire est peuplé lorsqu'un journal de transactions (wal)
 est archivé par l'`archive_command`.
 
 
@@ -320,7 +247,7 @@ $ select * from pg_ls_tmpdir();
 
 -----
 
-###  Ajout dans la vue pg_stat_replication 
+###  Ajout dans la vue `pg_stat_replication` 
 
 <div class="slide-content">
 

@@ -38,7 +38,7 @@ Attention, les scripts et outils de gestion des PITR (eg. générant
 automatiquement le fichier `recovery.conf`) doivent donc être mis à mettre à
 jour en même temps que l'instance PostgreSQL 12.
 
-De même, la gestion d'instance secondaire en réplication est aussi impacté.
+De même, la gestion d'instance secondaire en réplication est aussi impactée.
 Tout l'outillage mis en œuvre doit être mis à jour.
 
 </div>
@@ -77,8 +77,8 @@ légèrement faussées.
 <div class="slide-content">
 
 * Changement de norme de nommage des FK
-* inclut désormais toutes les colonnes concernées
-* impact potentiel sur les outils
+* Inclut désormais toutes les colonnes concernées
+* Impact potentiel sur les outils
 </div>
 
 
@@ -122,9 +122,9 @@ Foreign-key constraints:
 <div class="notes">
 
 L'option `WITH OIDS` (instruction `CREATE TABLE`) est supprimée. Il n'est plus
-possible de créer des tables avec une colonne "oid" « cachée ».
+possible de créer des tables avec une colonne `oid` « cachée ».
 
-L'option `WITHOUT OIDS` est toujours supportées, et le paramètre
+L'option `WITHOUT OIDS` est toujours supportée, et le paramètre
 `default_with_oids` n'existe qu'en lecture seule avec comme valeur `off`.
 
 **Exemple :** impossible de créer une table avec WITH OIDS
@@ -243,11 +243,11 @@ sur la couche applicative.
 
 ----
 
-### `pg_verify_checksums` renomée en `pg_checkums`
+### `pg_verify_checksums` renommée en `pg_checksums`
 
 <div class="slide-content">
 
-L'outil `pg_verify_checksums` devient `pg_checkums`
+L'outil `pg_verify_checksums` devient `pg_checksums`
 
 </div>
 

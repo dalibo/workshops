@@ -146,8 +146,8 @@ Paramètres renommés ou supprimés :
 
 <div class="slide-content">
 
-  * standby.signal
-  * recovery.signal
+  * `standby.signal`
+  * `recovery.signal`
 
 </div>
 
@@ -157,8 +157,7 @@ Paramètres renommés ou supprimés :
 Pour que PostgreSQL démarre en mode **standby** ou **recovery**, 2 fichiers trigger sont utilisés, ils sont à positionner à la racine de l'instance PostgreSQL. 
 
 - `standby.signal` : (remplace le paramètre `standby_mode=on`) permet de configurer l'instance en instance de secours. 
-
-- `recovery.signal` : permet de configurer l'instance en mode récupération (exemple : restauration PITR)
+- `recovery.signal` : permet de configurer l'instance en mode récupération (exemple : restauration PITR).
 
 </div>
 
@@ -180,9 +179,7 @@ Pour que PostgreSQL démarre en mode **standby** ou **recovery**, 2 fichiers tri
 Les paramètres suivants, sont modifiables à chaud : 
 
 - `archive_cleanup_command` : permet de nettoyer les WAL qui ont été rejoués sur l'instance secondaire.
-
 - `recovery_end_command` : permet de spécifier une commande (shell) à exécuter une fois l'instance restaurée.
-
 - `recovery_min_apply_delay` : permet de différer l'application des WAL sur l'instance secondaire
 - `promote_trigger_file` : permet de spécifier le chemin du fichier dont la présence déclenche la promotion de l'instance en standby.
 
@@ -207,7 +204,7 @@ Rappel des 2 possibilités de promotion en version 11 : 
 - commande système : `pg_ctl promote`
 - création du fichier "trigger" en commande shell, en ayant préalablement configuré le paramètre `trigger_file` dans le fichier `recovery.conf`.
 
-Dans les 2 cas, il faut avoir accès au système de fichier avec les droits `postgres`.
+Dans les 2 cas, il faut avoir accès au système de fichiers avec les droits `postgres`.
 
 PostgreSQL 12 offre un troisième moyen de déclencher une promotion avec une fonction système SQL. 
 
@@ -238,7 +235,7 @@ postgres=# SELECT pg_promote(false);
 
 
 
-L'accès à la fonction `pg_promote()` est limité aux super-utilisateurs. A noter qu'il est  possible de déléguer les droits à un autre utilisateur ou un autre rôle : 
+L'accès à la fonction `pg_promote()` est limité aux super-utilisateurs. À noter qu'il est  possible de déléguer les droits à un autre utilisateur ou un autre rôle : 
 
 ```sql
 postgres=# GRANT EXECUTE ON FUNCTION pg_promote TO mon_role;
@@ -271,9 +268,7 @@ HINT:  Recovery control functions can only be executed during recovery.
 Rappel historique des slots de réplication : 
 
 - Introduction du slot de réplication physique en version 9.4 pour éviter la suppression des WAL sur l'instance primaire alors qu'un réplicat est arrêté ou trop en retard sur sa réplication.
-
 - Le slot de réplication logique a été introduit en version PostgreSQL 10.
-
 - PostgreSQL 12 permet grâce à 2 fonctions de copier les slots de réplications. 
 
 **<u>Cas d'usage de ces fonctions :</u>** 

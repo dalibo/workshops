@@ -95,19 +95,10 @@ title-transform : none
 # Mettre en commentaire pour désactiver
 hide_author_in_slide: true
 
-
----
-
-\newpage
-
 ---
 # Nouveautés de PostgreSQL 12
 
 ![](medias/Etosha_elefant_12.png)
-
-<div class="slide-content">
-
-</div>
 
 <div class="notes">
 
@@ -117,7 +108,7 @@ obtenue sur [wikimedia.org](https://fr.wikipedia.org/wiki/Fichier:Etosha_elefant
 
 **Participez à ce workshop !**
 
- Pour des précisions, compléments, liens, exemples, 
+Pour des précisions, compléments, liens, exemples, 
 et autres corrections et suggestions, soumettez vos _Pull Requests_ dans notre dépôt :
 
 <https://github.com/dalibo/workshops/tree/master/fr>
@@ -129,8 +120,6 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 </div>
 
 ----
-
-\newpage
 
 !include include/intro.md
 
@@ -168,7 +157,7 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 
 # Ateliers
 
-
+----
 
 !include include/tp-dev-sql-generated-column.md
 
