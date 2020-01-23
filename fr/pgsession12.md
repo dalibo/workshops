@@ -103,7 +103,7 @@ hide_author_in_slide: true
 ---
 # Nouveautés de PostgreSQL 12
 
-![](medias/Etosha_elefant_12.png)
+![](medias/ws12/Etosha_elefant_12.png)
 
 <div class="slide-content">
 
@@ -614,4 +614,3 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 </div>
 
 ----
-
