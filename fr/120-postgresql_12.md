@@ -98,7 +98,7 @@ hide_author_in_slide: true
 ---
 # Nouveautés de PostgreSQL 12
 
-![](medias/Etosha_elefant_12.png)
+![](medias/ws12/Etosha_elefant_12.png)
 
 <div class="notes">
 
@@ -121,57 +121,57 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 
 ----
 
-!include include/intro.md
+!include include/ws12/intro.md
 
 \newpage
 
-!include include/dev-sql.md
+!include include/ws12/dev-sql.md
 
 \newpage
 
-!include include/partitionnement.md
+!include include/ws12/partitionnement.md
 
 \newpage
 
-!include include/replication.md
+!include include/ws12/replication.md
 
 \newpage
 
-!include include/monitoring.md
+!include include/ws12/monitoring.md
 
 \newpage
 
-!include include/administration.md
+!include include/ws12/administration.md
 
 \newpage
 
-!include include/index-perf.md
+!include include/ws12/index-perf.md
 
 \newpage
 
-!include include/incompatibilites.md
+!include include/ws12/incompatibilites.md
 
 \newpage
 
-!include include/futur.md
+!include include/ws12/futur.md
 
 # Ateliers
 
 ----
 
-!include include/tp-dev-sql-generated-column.md
+!include include/ws12/tp-dev-sql-generated-column.md
 
 \newpage
 
-!include include/tp-partitionnement.md
+!include include/ws12/tp-partitionnement.md
 
 \newpage
 
-!include include/tp-monitoring.md
+!include include/ws12/tp-monitoring.md
 
 \newpage
 
-!include include/tp-index-perf-fonctions-support.md
+!include include/ws12/tp-index-perf-fonctions-support.md
 
-!include include/gfdl.md
+!include include/ws12/gfdl.md
 
