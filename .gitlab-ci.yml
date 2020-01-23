@@ -33,7 +33,7 @@ before_script:
 # We use the same image for all jobs
 #
 image:
-  name: dalibo/pandocker:18.06 # usually 'stable' or 'latest' (=master)
+  name: dalibo/pandocker:19.11 # usually 'stable' or 'latest' (=master)
   entrypoint: [""]  # we need to override the image entrypoint
 
 
