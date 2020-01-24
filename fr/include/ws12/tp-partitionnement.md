@@ -4,7 +4,6 @@
 
   * Support des clés étrangères
   * Fonctions d'information sur le partitionnement
-  * _Tablespace_ des tables filles dans l'ordre `CREATE TABLE`
   * Nouvelle commande `\dP` pour les partitions
 
 </div>
@@ -137,18 +136,6 @@ $ SELECT * from pg_partition_tree('meteo');
  meteo_paris_201909  | meteo       | t      |     1
  meteo_paris_201910  | meteo       | t      |     1
 (7 rows)
-```
-
-### Tablespace des partitions dans l'ordre CREATE TABLE
-
-Il est maintenant possible de choisir le tablespace d'une partition lors de sa création :
-
-```sql
-$ CREATE TABLESPACE tb1 LOCATION '/var/lib/pgsql/tb1/';
-$ CREATE TABLESPACE tb2 LOCATION '/var/lib/pgsql/tb2/';
-$ CREATE TABLE mere (i INT) PARTITION BY RANGE (i);
-$ CREATE TABLE fille_1_10 PARTITION OF mere FOR VALUES FROM  (1) TO (5) TABLESPACE tb1;
-$ CREATE TABLE fille_6_10 PARTITION OF mere FOR VALUES FROM  (6) TO (10) TABLESPACE tb2;
 ```
 
 ###  Affichage des tables partitionnées seules

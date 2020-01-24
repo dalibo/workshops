@@ -2,12 +2,13 @@
 
 <div class="slide-content">
 
-  * Clés étrangères
-  * Fonctions d'information : 
+  * Support des clés étrangères
+  * Définition du tablespace pour les partitions
+  * Fonctions d'information :
     * `pg_partition_root()`
     * `pg_partition_ancestors()`
     * `pg_partition_tree()`
-  * Commande `\dP`
+  * Nouvelle commande `\dP` pour les partitions
 
 </div>  
 
@@ -90,6 +91,62 @@ Referenced by:
   TABLE "pere" CONSTRAINT "pere_idmere_fkey" FOREIGN KEY (idmere) REFERENCES mere(i)
 ```
 
+</div>
+
+----
+
+### Définition du tablespace pour les partitions
+
+
+<div class="slide-content">
+
+  * Gestion des tablespaces pour les tables partitionnées
+    * Propagation du tablespace aux partitions filles
+    * Surcharge du tablespace par partitions filles
+
+</div>
+
+<div class="notes">
+
+Dans les versions précédentes, le choix des tablespace pour une table partitionnée
+n'était pas supporté bien que la commande `CREATE TABLE ... TABLESPACE ...` puisse
+être utilisée sans erreur.
+
+À partir de la version 12, la gestion fine des tablespace est possible à n'importe
+quelle moment de la vie d'une table partitionnée et de ses partitions filles. Tout
+changement de tablespace au niveau de la table mère se propage pour les futures 
+partitions filles ; toutes les partitions existantes doivent être déplacées une à
+une avec la commande `ALTER TABLE ... SET TABLESPACE`.
+
+```sql
+$ \! mkdir /var/lib/pgsql/tb1
+$ \! mkdir /var/lib/pgsql/tb2
+$ CREATE TABLESPACE tb1 LOCATION '/var/lib/pgsql/tb1/';
+$ CREATE TABLESPACE tb2 LOCATION '/var/lib/pgsql/tb2/';
+
+$ CREATE TABLE mere (i INT) PARTITION BY RANGE (i) TABLESPACE tb1;
+$ CREATE TABLE fille_1_5 PARTITION OF mere FOR VALUES FROM  (1) TO (5);
+
+$ \d fille_1_5 
+             Table "public.fille_1_5"
+ Column |  Type   | Collation | Nullable | Default 
+--------+---------+-----------+----------+---------
+ i      | integer |           |          | 
+Partition of: mere FOR VALUES FROM (1) TO (5)
+Tablespace: "tb1"
+
+$ ALTER TABLE mere SET TABLESPACE tb2;
+$ CREATE TABLE fille_6_10 PARTITION OF mere FOR VALUES FROM  (6) TO (10) TABLESPACE tb2;
+
+$ SELECT tablename, tablespace FROM pg_tables 
+   WHERE tablename = 'mere' OR tablename LIKE 'fille%';
+
+ tablename  | tablespace 
+------------+------------
+ mere       | tb2
+ fille_1_5  | tb1
+ fille_6_10 | tb2
+```
 </div>
 
 ----
