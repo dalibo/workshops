@@ -279,7 +279,7 @@ $ SHOW TRANSACTION_ISOLATION;
 
   * Filtrer l'import massif de données
     
-    ```COPY FROM... WHERE...```
+    `COPY FROM... WHERE...`
 
 </div>
 
