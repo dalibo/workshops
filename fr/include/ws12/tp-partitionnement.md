@@ -10,7 +10,7 @@
 
 <div class="notes">
 
-### Clés étrangères dans les tables partitionnées 
+### Clés étrangères vers une tables partitionnée
 
 Créer les deux tables `job` et `job_detail` avec une contrainte de clé étrangère.
 
@@ -69,11 +69,18 @@ START TRANSACTION;
 ALTER TABLE job_detail DROP CONSTRAINT IF EXISTS job_detail_jobid_fkey;
 ALTER TABLE job DROP CONSTRAINT IF EXISTS job_pkey;
 
-ALTER TABLE job_part ATTACH PARTITION job DEFAULT;
+-- Suppression des index au niveau de l'ancienne table pour les redéfinir sur
+-- la table partitionnée de façon globale
+DROP INDEX job_job_start_idx;
 
 -- Renommage des relations pour maintenir la logique métier
 ALTER TABLE job RENAME TO job_default;
 ALTER TABLE job_part RENAME TO job;
+ALTER INDEX job_part_pkey RENAME TO job_pkey;
+
+-- Ajout de la table job en tant que partition
+ALTER TABLE job ATTACH PARTITION job_default DEFAULT;
+CREATE INDEX ON job(job_start);
 
 -- Récupération de la dernière valeur de la séquence de la précédente table
 SELECT setval(pg_get_serial_sequence('job', 'id'),
@@ -96,10 +103,6 @@ ALTER TABLE job_detail ADD FOREIGN KEY (jobid, job_start)
 COMMIT;
 ```
 
-<!--
-TODO: déplacer l'index job_start_idx de job_detail à la table mère job
--->
-
 À partir de cette étape, la table `job` est partitionnée mais toutes les lignes
 passées et à venir sont stockées dans la partition `job_default`. Il est possible
 de déplacer les lignes d'une partition vers une nouvelle, bien qu'il soit recommandé
@@ -107,25 +110,44 @@ de maîtriser les requêtes en provenance des utilisateurs car une série de ver
 seront posés entre les tables.
 
 ```sql
+CREATE OR REPLACE PROCEDURE add_daily_partition(timestamp with time zone)
+   LANGUAGE plpgsql AS $$
+   DECLARE
+      daily_interval INTERVAL := INTERVAL '1 day';
+   BEGIN
+      EXECUTE format(
+         'CREATE TABLE IF NOT EXISTS job_%s (LIKE job_default INCLUDING CONSTRAINTS);',
+         TO_CHAR($1, 'YYYYMMDD')
+      );
+      
+      EXECUTE format(
+         'INSERT INTO job_%s
+            SELECT * FROM job_default WHERE job_start
+            BETWEEN ''%s'' AND ''%s'';',
+         TO_CHAR($1, 'YYYYMMDD'), date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
+      );
+      
+      EXECUTE format(
+         'DELETE FROM job_default WHERE job_start BETWEEN ''%s'' AND ''%s'';',
+         date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
+      );
+
+      EXECUTE format(
+         'ALTER TABLE job ATTACH PARTITION job_%s
+            FOR VALUES FROM (''%s'') TO (''%s'');',
+         TO_CHAR($1, 'YYYYMMDD'), date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
+      );
+   END;
+$$; 
+
 START TRANSACTION;
 LOCK TABLE job;
 LOCK TABLE job_detail;
 
--- Retrait temporaire de la clé étrangère pour réduire les risques de suppression
--- en cascade
+-- Retrait temporaire de la clé étrangère pour réduire les risques 
+-- de suppression en cascade
 ALTER TABLE job_detail DROP CONSTRAINT IF EXISTS job_detail_jobid_job_start_fkey;
-
-CREATE TABLE job_20200124 (LIKE job_default INCLUDING CONSTRAINTS);
-INSERT INTO job_20200124
-   SELECT * FROM job_default WHERE job_start 
-   BETWEEN date_trunc('day', now()) AND date_trunc('day', now() + interval '1d');
-
-DELETE FROM job_default WHERE job_start 
-   BETWEEN date_trunc('day', now()) AND date_trunc('day', now() + interval '1d');
-
-ALTER TABLE job ATTACH PARTITION job_20200124 FOR VALUES
-   FROM (date_trunc('day', now())) TO (date_trunc('day', now() + interval '1d'));
-
+CALL add_daily_partition (now());
 ALTER TABLE job_detail ADD FOREIGN KEY (jobid, job_start) 
    REFERENCES job(id, job_start) ON DELETE CASCADE;
 
