@@ -39,6 +39,7 @@ Pour aller plus loin : [Présentation d'Andres Freund PGConf-EU 2018 ](https://
 #### HEAP storage
 
 <div class="slide-content">
+
   * `HEAP storage`
   * Méthode de stockage par défaut
   * Seule méthode supportée pour le moment
@@ -68,6 +69,7 @@ pour la version en cours, et permet de faire le lien avec les méthodes à venir
 
 
 <div class="slide-content">
+
   * Méthode orientée colonne
   * Données compressées
   * Nom temporaire !
@@ -165,4 +167,3 @@ $ SELECT * FROM blackhole_tab;
 </div>
 
 ---
-
