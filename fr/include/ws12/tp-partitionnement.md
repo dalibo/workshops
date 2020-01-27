@@ -114,28 +114,26 @@ CREATE OR REPLACE PROCEDURE add_daily_partition(timestamp with time zone)
    LANGUAGE plpgsql AS $$
    DECLARE
       daily_interval INTERVAL := INTERVAL '1 day';
+      tablename   VARCHAR(50) := format('job_%s', TO_CHAR($1, 'YYYYMMDD'));
+      from_expr   VARCHAR(50) := date_trunc('day', $1);
+      to_expr     VARCHAR(50) := date_trunc('day', $1 + daily_interval);
+
    BEGIN
       EXECUTE format(
-         'CREATE TABLE IF NOT EXISTS job_%s (LIKE job_default INCLUDING CONSTRAINTS);',
-         TO_CHAR($1, 'YYYYMMDD')
-      );
-      
+         'CREATE TABLE IF NOT EXISTS %s (LIKE job_default INCLUDING CONSTRAINTS);', 
+         tablename
+      );      
       EXECUTE format(
-         'INSERT INTO job_%s
-            SELECT * FROM job_default WHERE job_start
-            BETWEEN ''%s'' AND ''%s'';',
-         TO_CHAR($1, 'YYYYMMDD'), date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
-      );
-      
+         'INSERT INTO %s SELECT * FROM job_default WHERE job_start BETWEEN ''%s'' AND ''%s'';',
+         tablename, from_expr, to_expr
+      );      
       EXECUTE format(
          'DELETE FROM job_default WHERE job_start BETWEEN ''%s'' AND ''%s'';',
-         date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
+         from_expr, to_expr
       );
-
       EXECUTE format(
-         'ALTER TABLE job ATTACH PARTITION job_%s
-            FOR VALUES FROM (''%s'') TO (''%s'');',
-         TO_CHAR($1, 'YYYYMMDD'), date_trunc('day', $1), date_trunc('day', $1 + daily_interval)
+         'ALTER TABLE job ATTACH PARTITION %s FOR VALUES FROM (''%s'') TO (''%s'');',
+         tablename, from_expr, to_expr
       );
    END;
 $$; 
@@ -159,7 +157,7 @@ COMMIT;
 `pg_partition_root` renvoie la partition mère d’une partition.
 
 ```sql
-$ SELECT pg_partition_root('job_20200124');
+$ SELECT pg_partition_root('job_default');
 
  pg_partition_root 
 -------------------
@@ -170,7 +168,7 @@ $ SELECT pg_partition_root('job_20200124');
 `pg_partition_ancestors` renvoie la partition mère ainsi que la partition concernée.
 
 ```sql
-$ SELECT pg_partition_ancestors('job_20200124');
+$ SELECT pg_partition_ancestors('job_default');
 
  pg_partition_ancestors 
 ------------------------
