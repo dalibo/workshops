@@ -39,7 +39,7 @@ INSERT INTO job_detail VALUES
 ```
 
 Dans un contexte de croissance, le nombre de travaux (_jobs_) augmente considérablement
-et la purge de la table devient périllieuse au long terme. La transformation de 
+et la purge de la table devient périlleuse au long terme. La transformation de 
 cette table en table partionnée se revèle nécessaire.
 
 Créer une table `job_part` ayant la même structure que la table `job` en ajoutant
