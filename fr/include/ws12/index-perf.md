@@ -174,6 +174,7 @@ exécuté, pas lorsqu'il est préparé.
 ### Fonctions d'appui (_support functions_)
 
 <div class="slide-content"> 
+
 * Améliore la visibilité du planificateur sur les fonctions
 * Possibilité d'associer à une fonction une fonction « de support »
 * Produit dynamiquement des informations sur:
@@ -184,6 +185,7 @@ exécuté, pas lorsqu'il est préparé.
 </div>
 
 <div class="notes">
+
 Jusqu'en version 11, le planificateur considérait des fonctions comme des boîtes
 noires, avec éventuellement quelques informations très partielles et surtout
 statiques à propos de leur coût et du nombre de lignes retourné.
