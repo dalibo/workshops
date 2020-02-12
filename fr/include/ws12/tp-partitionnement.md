@@ -69,26 +69,16 @@ START TRANSACTION;
 ALTER TABLE job_detail DROP CONSTRAINT IF EXISTS job_detail_jobid_fkey;
 ALTER TABLE job DROP CONSTRAINT IF EXISTS job_pkey;
 
--- Suppression des index au niveau de l'ancienne table pour les redéfinir sur
--- la table partitionnée de façon globale
-DROP INDEX job_job_start_idx;
-
--- Renommage des relations pour maintenir la logique métier
-ALTER TABLE job RENAME TO job_default;
-ALTER TABLE job_part RENAME TO job;
-ALTER INDEX job_part_pkey RENAME TO job_pkey;
-
 -- Ajout de la table job en tant que partition
-ALTER TABLE job ATTACH PARTITION job_default DEFAULT;
-CREATE INDEX ON job(job_start);
+ALTER TABLE job_part ATTACH PARTITION job DEFAULT;
+CREATE INDEX ON job_part(job_start);
 
 -- Récupération de la dernière valeur de la séquence de la précédente table
-SELECT setval(pg_get_serial_sequence('job', 'id'),
-      currval(pg_get_serial_sequence('job_default', 'id')), true);
+SELECT setval(pg_get_serial_sequence('job_part', 'id'),
+      currval(pg_get_serial_sequence('job', 'id')), true);
 
--- Suppression de l'ancienne séquence et de sa relation avec la table job_default
-ALTER TABLE job_default ALTER id DROP IDENTITY, ALTER job_start DROP DEFAULT;
-ALTER SEQUENCE job_part_id_seq RENAME TO job_id_seq;
+-- Suppression de l'ancienne séquence et de sa relation avec la partition job
+ALTER TABLE job ALTER id DROP IDENTITY, ALTER job_start DROP DEFAULT;
 
 -- Réactivation des contraintes de clés étrangères
 -- Puisque la colonne job_start fait à présent partie de la PRIMARY KEY, il est
@@ -99,6 +89,20 @@ UPDATE job_detail SET job_start = j.job_start
 
 ALTER TABLE job_detail ADD FOREIGN KEY (jobid, job_start) 
    REFERENCES job(id, job_start) ON DELETE CASCADE;
+
+COMMIT;
+```
+
+Une étape optionnelle serait de renommer les relations pour être totalement
+transparent avec le fonctionnement applicatif.
+
+```sql
+START TRANSACTION;
+
+-- Renommage des relations pour maintenir la logique métier
+ALTER TABLE job RENAME TO job_default;
+ALTER TABLE job_part RENAME TO job;
+ALTER SEQUENCE job_part_id_seq RENAME TO job_id_seq;
 
 COMMIT;
 ```
