@@ -176,7 +176,7 @@ $ SELECT pg_partition_ancestors('job_default');
 
  pg_partition_ancestors 
 ------------------------
- job_20200124
+ job_default
  job
 (2 rows)
 ```
