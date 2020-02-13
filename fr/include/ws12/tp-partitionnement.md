@@ -10,7 +10,7 @@
 
 <div class="notes">
 
-### Clés étrangères vers une tables partitionnée
+### Clés étrangères vers une table partitionnée
 
 Créer les deux tables `job` et `job_detail` avec une contrainte de clé étrangère.
 
@@ -56,8 +56,8 @@ CREATE TABLE job_part (
 ) PARTITION BY RANGE (job_start);
 ```
 
-La prochaine étape consiste à rattacher la table `job` en partition fille par
-défaut de la future table partitionnée. Pour cela, il peut être judicieux de 
+La prochaine étape consiste à rattacher la table `job` en tant que partition
+par défaut de la future table partitionnée. Pour cela, il peut être judicieux de 
 jouer les instructions dans une seule transaction et de prêter garde au respect
 de la contrainte étrangère sur la table `job_detail`.
 
