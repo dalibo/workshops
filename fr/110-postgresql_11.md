@@ -13,7 +13,7 @@ linkcolor:
 
 licence : PostgreSQL
 author: Dalibo & Contributors
-revision: 18.09
+revision: 18.12
 url : https://dalibo.com/formations
 
 #
@@ -133,6 +133,8 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
   * Bêta 4 le 17 septembre
   * Release Candidate 1 le 11 octobre
   * Version finale : 18 octobre 2018
+  * 11.1 : le 8 novembre 2018
+  * 11.2 : attendue pour le 14 février 2019
   * Plus de 1,5 millions de lignes de code C
   * Des centaines de contributeurs
 </div>
@@ -414,7 +416,7 @@ nouvelles partitions `t1_aa` et `t1_ab`.
 
   * Index sur une table partitionnée
   * Index créé sur chaque partition
-    - Hors partitions étrangères
+    - Hors partitions distantes
   * Création automatique sur toute nouvelle partition
 
 </div>
@@ -485,9 +487,9 @@ L'exemple ci-dessus concerne une colonne de la clé de partitionnement, mais
 cela fonctionne avec toute colonne.
 
 La propagation ne fonctionne pas sur les partitions qui sont des tables
-étrangères : la création d'index y est impossible, il faut le faire sur la
+distantes : la création d'index y est impossible, il faut le faire sur la
 table source. Pire : des index à propager existants interdisent d'attacher
-une partition étrangère, et la présence d'une partition étrangère interdit de
+une partition distante, et la présence d'une partition distante interdit de
 créer tout index sur la table partitionnée. Il faut créer les index
 manuellement sur chaque partition.
 
@@ -840,7 +842,7 @@ Reiss](http://blog.frosties.org/post/2018/05/23/PostgreSQL-11-dynamic_pruning).
     - sauf mise à jour de clé
   * _Partition-Wise Aggregate_ (par défaut : `off`)
   * Triggers `AFTER ... FOR EACH ROW`
-  * Partitions étrangères : routage pour les insertions
+  * Partitions distantes : routage pour les insertions
     * uniquement postgres_fdw
     * pas de propagation des index
     * sharding !
@@ -985,7 +987,7 @@ La propagation du trigger, comme les index, est automatique sur chaque partition
 Les triggers `BEFORE UPDATE` ne sont pas supportés mais il reste possible de les
 créer sur chaque partition.
 
-**Partitions étrangères**
+**Partitions distantes**
 
 En v10, les tables partitionnées pouvaient déjà être utilisées comme partition,
 et dès la déclaration :
@@ -1012,7 +1014,7 @@ Cela ouvre d'intéressantes perspectives en terme de _sharding_ (répartition
 d'une table sur plusieurs instances).
 
 Cependant, la création d'un index sur une
-table étrangère n'étant pas possible, la propagation des index reste donc
+table distante n'étant pas possible, la propagation des index reste donc
 manuelle.
 
 
@@ -1029,7 +1031,6 @@ manuelle.
   * Compilation _Just In Time_ (JIT)
   * Parallélisme étendu à plusieurs commandes
   * `ALTER TABLE ADD COLUMN ... DEFAULT ...` sans réécriture
-  * `recheck_on_update`
 
 </div>
 
@@ -1459,37 +1460,6 @@ attmissingval | {16:55:40.017082+02}
 
 
 Pour les détails, voir <https://brandur.org/postgres-default>.
-
-</div>
-
------
-### Performances : divers
-
-<div class="slide-content">
-
-  * Clause `recheck_on_update` \
- `CREATE INDEX nomindex ON nomtable (fonction(colonne))` \
- `WITH (recheck_on_update = on) ;`
-  * Facilite les mises à jour HOT
-
-</div>
-
-<div class="notes">
-
-Une nouvelle option apparaît pour les créations d'index :
-```sql
-CREATE INDEX nomindex ON nomtable (fonction(colonne)) WITH (recheck_on_update = on) ;
-```
-
-Ce paramètre vise à faciliter les mises à jour HOT (_Heat Only Tuple_),
-c'est-à-dire au sein d'un même bloc (pour peu qu'il y ait de la place), et ainsi
-économiser des écritures et de la fragmentation.
-Ces mises à jour HOT ne sont possibles que si les champs indexés ne sont pas
-modifiés. PostgreSQL 11 cherche à le vérifier aussi pour les index fonctionnels. Or
-cette revérification peut être très coûteuse pour certains index, et la valeur
-`off` permet de la désactiver (rendant les mises à jour HOT impossibles si cet
-index fonctionnel est concerné par la mise à jour). Le défaut est `on` si le
-coût de la fonction est inférieur à 1000.
 
 </div>
 
@@ -3325,8 +3295,8 @@ for i in $( seq 0 4 ) ;do vacuumdb -v -t commandes_${i}_5 v11 & done; wait
 <div class="notes">
 
 Le test se déroulera à partir de deux instances :
-L'instance `data` est en écoute sur le port 5435.
-L'instance `data2` est en écoute sur le port 5436.
+L'instance `data` est en écoute sur le port 5432.
+L'instance `data2` est en écoute sur le port 5433.
 
 
 Sur la première instance `data` dans la base `workshop11`,
@@ -3370,7 +3340,7 @@ CREATE TABLE
 Création de la souscription `s1` :
 ```sql
 workshop11_2=# CREATE SUBSCRIPTION s1
-               CONNECTION  'host=/tmp/ port=5435 dbname=workshop11' PUBLICATION p1;
+               CONNECTION  'host=/tmp/ port=5432 dbname=workshop11' PUBLICATION p1;
 NOTICE:  created replication slot "s1" on publisher
 CREATE SUBSCRIPTION
 

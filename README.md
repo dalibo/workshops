@@ -33,14 +33,14 @@ Compile
 -------------------------------------------------------------------------------
 
 Each workshop is contained in a single markdown file (for instance
-[fr/100-postgresql_10.md](fr/100-postgresql_10.md) )
+[fr/110-postgresql_11.md](fr/110-postgresql_11.md) )
 
 You can export the content using `make` by specifying the file extension you want
 
 ```
-make fr/100-postgresql_10.html
-make fr/100-postgresql_10.epub
-make fr/100-postgresql_10.pdf
+make fr/110-postgresql_11.html
+make fr/110-postgresql_11.epub
+make fr/110-postgresql_11.pdf
 etc.
 ```
 

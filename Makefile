@@ -46,7 +46,7 @@ DIR=`dirname $^`
 # you can compile the docs without them
 #
 ifeq ($(LOCAL_DLB),)
-LOCAL_DLB=$(HOME)/.dalibo/themes/
+    LOCAL_DLB=$(HOME)/.dalibo/themes/
 endif
 
 # Normally DLB == LOCAL_DLB, but this will change when we'll use docker
@@ -55,18 +55,19 @@ DLB=$(LOCAL_DLB)
 #
 # Pandoc binary
 #
-
-P=pandoc --metadata=dlb:$(DLB)
+# TODO: factorize with docker call below
+PANDOC_PARAMS=--filter pandoc-include
+P=pandoc $(PANDOC_PARAMS) --metadata=dlb:$(LOCAL_DLB)
 
 #
 # If pandoc is not installed, 
 # Then let's use the docker image by setting DOCKER_TAG
 #
-ifeq (, $(shell which $P))
-	DOCKER_TAG=latest
+ifeq (, $(shell which pandoc))
+    DOCKER?=latest
 endif
 
-# If make was launched with DOCKER=latest 
+# If make was launched with DOCKER=... or pandoc was not there,
 # Then we force usage of docker by setting DOCKER_TAG
 ifneq ($(DOCKER),)
 	DOCKER_TAG=$(DOCKER)
@@ -75,8 +76,8 @@ endif
 # If DOCKER_TAG is defined
 # Then we replace $P with a docker call
 ifneq ($(DOCKER_TAG),)
-	DOCKER_DLB=/root/dalibo/themes
-	P=docker run --rm -it --privileged -u `id -u`:`id -g` --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB)
+	DOCKER_DLB=/root/.dalibo/themes
+	P=docker run --rm -it --privileged --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB) $(PANDOC_PARAMS)
 	DLB=$(DOCKER_DLB)
 endif
 
@@ -106,7 +107,7 @@ else
  REVEAL_FLAGS=-t revealjs --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs" --self-contained --standalone -V revealjs-url="$(DLB)/reveal.js/"
  TEX_FLAGS= -st beamer -V theme=Dalibo
  BEAMER_FLAGS= -st beamer -V theme=Dalibo
- PDF_FLAGS=--pdf-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition
+ PDF_FLAGS=--pdf-engine=xelatex --toc --template=$(DLB)/tex/book1/template.tex --filter pandoc-latex-admonition 
  ODT_FLAGS=-t odt --toc --reference-odt=$(DLB)/odt/template_conference.dokuwiki.odt
  DOC_FLAGS=-t doc --toc --reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
  EPUB_FLAGS=
@@ -118,7 +119,7 @@ endif
 # README files and other documentation markdown files are not compiled
 #
 EXCLUDE_FILES=\./\(LICENSE\|QUICKSTART\|CONTRIBUTING\|SYNTAX\|INSTALL\|AUTHORS\)\.md
-SRCS=$(shell find . -name '*.md' -and -not -name README.md -and -not -regex '$(EXCLUDE_FILES)' -and -not -path './themes/*')
+SRCS=$(shell find . -name '*.md' -and -not -name README.md -and -not -regex '$(EXCLUDE_FILES)' -and -not -path './themes/*' -and -not -path './include/*' -and -not -path './fr/include/*' )
 
 JSON_OBJS=$(SRCS:.md=.json)
 REVEAL_OBJS=$(SRCS:.md=.slides.html)
@@ -208,7 +209,7 @@ epub: $(EPUB_OBJS)
 
 clean:
 	rm -fr $(REVEAL_OBJS)
-	rm -fr $(REVEAL_OBJS)
+	rm -fr $(HANDOUT_HTML_OBJS)
 	rm -fr $(TEX_OBJS)
 	rm -fr $(BEAMER_OBJS)
 	rm -fr $(PDF_OBJS)
