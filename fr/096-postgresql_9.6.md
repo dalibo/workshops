@@ -3266,7 +3266,7 @@ NOTICE:  pg_stop_backup terminé, tous les journaux de transactions requis ont �
             |                                                                |
 ```
 
-Le fichier indiquant la fin du backup apparaît parmi les fichiers de transaction dans `pg_xlog` :
+Le fichier indiquant la fin du backup apparaît parmi les fichiers de transactions dans `pg_xlog` :
 
 ```
 -bash-4.2$ cat 00000001000000010000001C.00000060.backup
