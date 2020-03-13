@@ -100,7 +100,7 @@ La fonction d'appui est appelée par l'optimiseur, pour retourner une estimation
 
 Les tests sont à effectuer sur une instance de PostgreSQL 12 avec le paramétrage par défaut.
 
-- Créer 10 000 000 de lignes. La commande ci-dessous ajoute 10 milions d'enregistrements dans la table pgbench_accounts.
+- Créer 10 000 000 de lignes. La commande ci-dessous ajoute 10 millions d'enregistrements dans la table pgbench_accounts.
 
 ```bash
 $ pgbench -i -s 100
@@ -149,10 +149,10 @@ progress: 2.0 s, 6549.7 tps, lat 0.152 ms stddev 0.016
 progress: 3.0 s, 6586.0 tps, lat 0.151 ms stddev 0.019
 progress: 4.0 s, 6902.0 tps, lat 0.145 ms stddev 0.020
 progress: 5.0 s, 6603.9 tps, lat 0.148 ms stddev 0.017
-progress: 6.0 s, 0.0 tps, lat 0.000 ms stddev 0.000    <- reindex en cours
-progress: 7.0 s, 0.0 tps, lat 0.000 ms stddev 0.000    <- reindex en cours
+progress: 6.0 s, 0.0 tps, lat 0.000 ms stddev 0.000    <- REINDEX en cours
+progress: 7.0 s, 0.0 tps, lat 0.000 ms stddev 0.000    <- REINDEX en cours
 ....
-0:06.70                                                <- temps de reindex
+0:06.70                                                <- temps de REINDEX
 progress: 12.0 s, 2324.2 tps, lat 3.022 ms stddev 138.282
 progress: 13.0 s, 6684.0 tps, lat 0.149 ms stddev 0.028
 ... 
@@ -170,7 +170,7 @@ tps = 4455.974731 (excluding connections establishing)
 [1]+  Done      ( sleep 5; time -f%E reindexdb -i pgbench_accounts_pkey )
 ```
 
-- Lancer un test avec `pgbench` de 20 secondes en lecture et déclencher une reindexation avec `concurrently` 5 secondes après le début du bench.
+- Lancer un test avec `pgbench` de 20 secondes en lecture et déclencher une réindexation avec `concurrently` 5 secondes après le début du bench.
 
 ```bash
 $ (sleep 5; time -f%E reindexdb --concurrently -i pgbench_accounts_pkey ) \
@@ -186,11 +186,11 @@ progress: 2.0 s, 6688.0 tps, lat 0.149 ms stddev 0.016
 progress: 3.0 s, 6471.9 tps, lat 0.154 ms stddev 0.053
 progress: 4.0 s, 6730.9 tps, lat 0.148 ms stddev 0.025
 progress: 5.0 s, 6723.0 tps, lat 0.148 ms stddev 0.021
-progress: 6.0 s, 4546.0 tps, lat 0.219 ms stddev 0.047  <- reindex concurrently 
-progress: 7.0 s, 4472.2 tps, lat 0.223 ms stddev 0.090  <- reindex concurrently 
-progress: 8.0 s, 4557.0 tps, lat 0.219 ms stddev 0.067  <- reindex concurrently 
+progress: 6.0 s, 4546.0 tps, lat 0.219 ms stddev 0.047  <- REINDEX concurrently 
+progress: 7.0 s, 4472.2 tps, lat 0.223 ms stddev 0.090  <- REINDEX concurrently 
+progress: 8.0 s, 4557.0 tps, lat 0.219 ms stddev 0.067  <- REINDEX concurrently 
 ...
-0:10.62                                                 <- temps de reindex
+0:10.62                                                 <- temps de REINDEX
 progress: 16.0 s, 6221.7 tps, lat 0.160 ms stddev 0.039
 progress: 17.0 s, 6655.3 tps, lat 0.150 ms stddev 0.017
 ...
@@ -208,7 +208,7 @@ tps = 6027.885412 (excluding connections establishing)
 [1]+  Done  ( sleep 5; time -f%E reindexdb --concurrently -i pgbench_accounts_pkey )
 ```
 
-- Lancer un test avec `pgbench` de 20 secondes en écriture et déclencher une reindexation 5 secondes après le début du bench.
+- Lancer un test avec `pgbench` de 20 secondes en écriture et déclencher une réindexation 5 secondes après le début du bench.
 
 ```bash
 $ (sleep 5; time -f%E reindexdb -i pgbench_accounts_pkey ) & pgbench -c1 -T20 -P1 -r
@@ -223,7 +223,7 @@ progress: 2.0 s, 155.0 tps, lat 6.468 ms stddev 1.254
 progress: 3.0 s, 129.0 tps, lat 7.773 ms stddev 1.439
 progress: 4.0 s, 129.0 tps, lat 7.704 ms stddev 1.415
 progress: 5.0 s, 156.0 tps, lat 6.310 ms stddev 1.235
-progress: 6.0 s, 0.0 tps, lat 0.000 ms stddev 0.000 <- reindex en cours
+progress: 6.0 s, 0.0 tps, lat 0.000 ms stddev 0.000 <- REINDEX en cours
 progress: 7.0 s, 0.0 tps, lat 0.000 ms stddev 0.000
 ....
 0:07.70
@@ -261,7 +261,7 @@ statement latencies in milliseconds:
   [1]+  Done      () sleep 5; time -f%E reindexdb -i pgbench_accounts_pkey )
 ```
 
-- Lancer un test avec `pgbench` de 20 secondes en écriture et déclencher une reindexation avec `concurrently` 5 secondes après le début du bench.
+- Lancer un test avec `pgbench` de 20 secondes en écriture et déclencher une réindexation avec `concurrently` 5 secondes après le début du bench.
 
 ```bash
 $ (sleep 5; time -f%E reindexdb --concurrently -i pgbench_accounts_pkey ) \
@@ -302,22 +302,3 @@ tps = 137.018048 (excluding connections establishing)
 </div>
 
 ----
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
