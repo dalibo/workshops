@@ -148,7 +148,7 @@ uninstall:
 # Supported formats
 #
 #all: reveal tex beamer pdf odt doc epub
-all: reveal handout_html pdf epub
+all: reveal handout_html pdf epub peecho
 
 json: $(JSON_OBJS)
 handout_html: $(HANDOUT_HTML_OBJS)
@@ -191,7 +191,7 @@ epub: $(EPUB_OBJS)
 
 %.peecho.pdf: %.pdf
 	$(ECHO)
-	cd $(DIR) && $(LOCAL_DLB)/tex/book1/postprod.peecho.py -b $(LOCAL_DLB)/_build/tex/book1/backcover.pdf -n $(LOCAL_DLB)/_build/tex/book1/note.pdf -p $(LOCAL_DLB)/_build/tex/book1/publications.pdf $(IN) -o $(OUT) 
+	cd $(DIR) && $(LOCAL_DLB)/tex/book1/postprod.peecho.py -b $(LOCAL_DLB)/tex/book1/backcover.pdf -n $(LOCAL_DLB)/tex/book1/note.pdf -p $(LOCAL_DLB)/tex/book1/publications.pdf $(IN) -o $(OUT) 
 
 %.odt: %.md
 	$(ECHO)
