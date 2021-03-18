@@ -1,6 +1,14 @@
 Workshops en Français
 ===============================================================================
 
+Nouveautés de PostgreSQL 13
+--------------------------------------------------------------------------------
+
+* Source : [PostgreSQL 13](130-postgresql_13.md)
+* Slides : [HTML](https://cloud.dalibo.com/p/exports/formation/workshops/fr/130-postgresql_13.slides.html)
+* Handout : [PDF](https://cloud.dalibo.com/p/exports/formation/workshops/fr/130-postgresql_13.pdf)
+* Mobile : [EPUB](https://cloud.dalibo.com/p/exports/formation/workshops/fr/130-postgresql_13.epub)
+
 Nouveautés de PostgreSQL 12
 --------------------------------------------------------------------------------
 
