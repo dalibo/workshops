@@ -19,6 +19,10 @@ variables:
   ARTIFACTS: '*'  
   # 
   THEMES_BRANCH: stable # usually 'stable' or 'master'
+  ## Limitation des pull docker
+  ## https://gitlab.dalibo.info/formation/manuels/-/issues/482
+  ## Pointer temporairement vers un registre cache externe chez Gitlab (https://gitlab.com/dalibo/pandocker/container_registry/1505688)
+  CI_REGISTRY: registry.gitlab.com
 
 
 before_script:
@@ -33,7 +37,7 @@ before_script:
 # We use the same image for all jobs
 #
 image:
-  name: dalibo/pandocker:19.11 # usually 'stable' or 'latest' (=master)
+  name: dalibo/pandocker:20.02 # usually 'stable' or 'latest' (=master)
   entrypoint: [""]  # we need to override the image entrypoint
 
 

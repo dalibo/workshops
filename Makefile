@@ -77,7 +77,7 @@ endif
 # Then we replace $P with a docker call
 ifneq ($(DOCKER_TAG),)
 	DOCKER_DLB=/root/.dalibo/themes
-	P=docker run --rm -it --privileged --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB) $(PANDOC_PARAMS)
+	P=docker run --rm --privileged --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) dalibo/pandocker:$(DOCKER_TAG) --metadata=dlb:$(DOCKER_DLB) $(PANDOC_PARAMS)
 	DLB=$(DOCKER_DLB)
 endif
 
@@ -125,8 +125,8 @@ JSON_OBJS=$(SRCS:.md=.json)
 REVEAL_OBJS=$(SRCS:.md=.slides.html)
 TEX_OBJS=$(SRCS:.md=.tex)
 BEAMER_OBJS=$(SRCS:.md=.beamer.pdf)
-PDF_OBJS=$(SRCS:.md=.pdf)
-PEECHO_OBJS=$(SRCS:.md=.peecho.pdf)
+PDF_OBJS=$(SRCS:.md=.nocover.pdf)
+PEECHO_OBJS=$(SRCS:.md=.pdf)
 ODT_OBJS=$(SRCS:.md=.odt)
 DOC_OBJS=$(SRCS:.md=.doc)
 EPUB_OBJS=$(SRCS:.md=.epub)
@@ -147,16 +147,17 @@ uninstall:
 #
 # Supported formats
 #
-#all: reveal tex beamer pdf odt doc epub
-all: reveal handout_html pdf epub peecho
+# NB : 'pdf' est en fait le peecho, et le pdf_nocover est le PDF sans couverture
+all: reveal handout_html pdf epub
 
 json: $(JSON_OBJS)
 handout_html: $(HANDOUT_HTML_OBJS)
 reveal: $(REVEAL_OBJS)
 tex: $(TEX_OBJS)
 beamer: $(BEAMER_OBJS)
-pdf: $(PDF_OBJS)
-peecho: $(PEECHO_OBJS)
+nocover_pdf: $(PDF_OBJS)
+#peecho: $(PEECHO_OBJS)
+pdf: $(PEECHO_OBJS)
 odt: $(ODT_OBJS)
 doc: $(DOC_OBJS)
 epub: $(EPUB_OBJS)
@@ -184,14 +185,18 @@ epub: $(EPUB_OBJS)
 	$(ECHO)
 	TEXMFHOME=$(DLB)/beamer	cd $(DIR) && $P $(BEAMER_FLAGS) $(IN) -o $(OUT)
 
-%.pdf: %.md
+%.nocover.pdf: %.md
 	$(ECHO)	
 	cd $(DIR) && $P $(PDF_FLAGS) $(IN) -o $(OUT)
 
-
-%.peecho.pdf: %.pdf
+%.peecho.pdf: %.nocover.pdf
 	$(ECHO)
-	cd $(DIR) && $(LOCAL_DLB)/tex/book1/postprod.peecho.py -b $(LOCAL_DLB)/tex/book1/backcover.pdf -n $(LOCAL_DLB)/tex/book1/note.pdf -p $(LOCAL_DLB)/tex/book1/publications.pdf $(IN) -o $(OUT) 
+	cd $(DIR) && $(LOCAL_DLB)/tex/book1/postprod.peecho.py -b $(LOCAL_DLB)/tex/book1/backcover.pdf -n $(LOCAL_DLB)/tex/book1/note.pdf -p $(LOCAL_DLB)/tex/book1/publications.pdf $(IN) -o $(OUT)  # pas de rm -f $(IN)  , ça ne coûte rien de laisser
+	
+
+%.pdf: %.peecho.pdf
+	$(ECHO)
+	cd $(DIR) && mv $(IN) $(OUT)
 
 %.odt: %.md
 	$(ECHO)
