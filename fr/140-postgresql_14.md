@@ -1,0 +1,537 @@
+---
+subtitle : 'Workshop 14'
+title : 'Nouveautés de PostgreSQL 14'
+keywords:
+- postgres
+- postgresql
+- features
+- news
+- 14
+- workshop
+linkcolor:
+
+licence : PostgreSQL
+author: Dalibo & Contributors
+revision: 14
+url : https://dalibo.com/formations
+
+#
+# PDF Options
+#
+
+#toc: true
+
+## Limiter la profondeur de la table des matières
+toc-depth: 3
+
+## Mettre les lien http en pieds de page
+links-as-notes: true
+
+## Police plus petite dans un bloc de code
+
+code-blocks-fontsize: small
+
+## Filtre : pandoc-latex-env = cadres de couleurs
+## OBSOLETE voir pandoc-latex-admonition
+latex-environment:
+  importantframe: [important]
+  warningframe: [warning]
+  tipframe: [tip]
+  noteframe: [note]
+  frshaded: [slide-content]
+
+## Filtre : pandoc-latex-admonition
+## order of definition is important
+pandoc-latex-admonition:
+  - color: LightPink
+    classes: [important]
+    linewidth: 4
+  - color: Khaki
+    classes: [warning]
+    linewidth: 4
+  - color: DarkSeaGreen
+    classes: [tip]
+    linewidth: 4
+  - color: Ivory
+    classes: [note]
+    linewidth: 4
+  - color: DodgerBlue
+    classes: [slide-content]
+    linewidth: 4
+
+#
+# Reveal Options
+#
+
+# Taille affichage
+width: 1200
+height: 768
+
+## beige/blood/moon/simple/solarized/black/league/night/serif/sky/white
+theme: white
+
+## None - Fade - Slide - Convex - Concave - Zoom
+transition: Convex
+
+transition-speed: fast
+
+# Barre de progression
+progress: true
+
+# Affiche N° de slide
+slideNumber: true
+
+# Le numero de slide apparait dans la barre d'adresse
+history: true
+
+# Defilement des slides avec la roulette
+mouseWheel: true
+
+# Annule la transformation uppercase de certains thèmes
+title-transform : none
+
+# Cache l'auteur sur la première slide
+# Mettre en commentaire pour désactiver
+hide_author_in_slide: true
+
+---
+
+# Nouveautés de PostgreSQL 14
+
+![](medias/The_Big_Boss_Elephant.jpeg)
+
+<div class="notes">
+
+Photographie de Rad Dougall, licence [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en),
+obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
+
+
+**Participez à ce workshop !**
+
+Pour des précisions, compléments, liens, exemples,
+et autres corrections et suggestions, soumettez vos _Pull Requests_ dans notre dépôt :
+
+<https://github.com/dalibo/workshops/tree/master/fr>
+
+Licence : [PostgreSQL](https://github.com/dalibo/workshops/blob/master/LICENSE.md)
+
+Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 14.
+
+</div>
+
+----
+
+\newpage
+
+## Les nouveautés
+
+<div class="slide-content">
+  * Administration
+    * Sécurité
+    * Outils clients
+    * Partitionnement
+    * Divers
+    * Contributions
+  * Réplication (logique ou physique) & sharding/FDW
+    * Réplication physique
+    * Réplication logique
+    * Foreing Data Wrapper et sharding
+  * Développement + Changement syntaxe SQL
+  * Supervision
+  * Performances
+    * Index
+    * Recovery
+    * Divers
+  * Régressions
+</div>
+
+<div class="notes">
+
+PostgreSQL 14 est sorti le FIXME
+
+Les points principaux sont décrits dans le « [press kit](FIXME) ».
+
+Nous allons décrire ces nouveautés plus en détail.
+
+</div>
+
+----
+
+\newpage
+
+## Administration et maintenance
+
+<div class="slide-content">
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+\newpage
+
+### Sécurité
+
+<div class="slide-content">
+  * password_encryption passe à scram-sha-256 par défaut
+  * nouveaux rôles pg_readl_all_data et  pg_write_all_data
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### password_encryption passe à scram-sha-256 par défaut
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### nouveaux rôles pg_read_all_data et pg_write_all_data
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/99 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+### Nouveautés de configuration (GUC)
+
+<div class="slide-content">
+  * Ajout %P au log_line_prefix pour leader de groupe parallélisé
+  * Ajout de idle_session_timeout
+  * Rechargement au démarrage de restre_command
+  * Détection des déconnexions pendant l'exécution d'une requête
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+\newpage
+
+#### Ajout %P au log_line_prefix pour leader de groupe parallélisé
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Ajout de idle_session_timeout
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/101 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Allow restore_command parameter to be changed with reload.
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/102 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Détection des déconnexions pendant l'exécution d'une requête
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/103 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+### Outils clients
+
+<div class="slide-content">
+  * pg_dump : Possibilité d'exporter des partitions individuellement
+  * pg_dump : Nouvelle option pour exporter les extensions  
+  * reindex_db : Nouvelle option --tablespace
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### pg_dump : Possibilité d'exporter des partitions individuellement
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/105 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### pg_dump : Nouvelle option pour exporter les extensions  
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/106 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### reindex_db : Nouvelle option --tablespace
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+### Partionnement
+
+<div class="slide-content">
+  * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
+  * REINDEX supporte désormais les tables paritionnées
+  * autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/108 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### REINDEX supporte désormais les tables paritionnées
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+### Divers
+
+<div class="slide-content">
+  * Compression des toast configuratble en : LZ4 et pglz
+  * Nouvelle option pour VACUUM : PROCESS_TOAST
+  * Nouvelle fonction pour attendre lorsque l'on arrête un backend
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### Compression des toast configuratble en : LZ4 et pglz
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Nouvelle option pour VACUUM : PROCESS_TOAST
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Nouvelle fonction pour attendre lorsque l'on arrête un backend
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/113 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+## Réplication et sharding
+
+<div class="slide-content">
+  * Réplication physique
+  * Réplication logique
+  * Foreign Datawrapper / Sharding
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+\newpage
+
+### Réplication Physique
+
+<div class="slide-content">
+  * Autorise pg_rewind a utiliser une standby comme source 
+  * Nouveaux paramètre de connexion dans libpq
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### Autorise pg_rewind a utiliser une standby comme source 
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+#### Nouveaux paramètre de connexion dans libpq
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Réplication Logique - slide commun (#115)
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 
+     * logical streaming of large in-progress transactions
+     * Logical Replication - detail message with names of missing columns
+     * Support ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ... syntax
+-->
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+### Foreign Data Wrapper / Sharding
+
+<div class="slide-content">
+  * Autorise la commande TRUNCATE sur les tables étrangères
+  * Nouveau noeud Asynchronous Append sur les tables étrangères
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+#### Autorise la commande TRUNCATE sur les tables étrangères
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/116 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+
+#### Nouveau noeud Asynchronous Append sur les tables étrangères
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/117 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+## Développement + Changement syntaxe SQL
+
+<div class="slide-content">
+  * Fonction string_to_table
+  * CREATE OR REPLACE TRIGGER
+  * Nouveau type multiranges et nouvelle fonction range_agg
+  * GROUP BY DISTINCT
+  * Corps de Fonction respectant le standard SQL
+  * Nouvelles clauses SEARCH et CYCLE
+  * Nouvelle fonction date_bin
+  * Possiblité d'attacher un alias a un JOIN .. USING
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+### Fonction string_to_table
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### CREATE OR REPLACE TRIGGER
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/119 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Support des paramètres OUT dans les procédures
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/120 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle implémentaiton des assignements dans pg/pgsql
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouveau type multiranges et nouvelle fonction range_agg
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### GROUP BY DISTINCT
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/123 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Corps de Fonction respectant le standard SQL
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/124 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelles clauses SEARCH et CYCLE
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/125 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle fonction date_bin
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Possiblité d'attacher un alias a un JOIN .. USING
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+# Ateliers
+
+<!-- lister les tp ici, un include par tp --> 
+
+
+!include include/ws14/tp-EXEMPLE.md
+
+----
+

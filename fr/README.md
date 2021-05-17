@@ -1,6 +1,14 @@
 Workshops en Français
 ===============================================================================
 
+Nouveautés de PostgreSQL 14
+--------------------------------------------------------------------------------
+
+* Source : [PostgreSQL 14](140-postgresql_14.md)
+* Slides : [HTML](https://cloud.dalibo.com/p/exports/formation/workshops/fr/140-postgresql_14.slides.html)
+* Handout : [PDF](https://cloud.dalibo.com/p/exports/formation/workshops/fr/140-postgresql_14.pdf)
+* Mobile : [EPUB](https://cloud.dalibo.com/p/exports/formation/workshops/fr/140-postgresql_14.epub)
+
 Nouveautés de PostgreSQL 13
 --------------------------------------------------------------------------------
 
