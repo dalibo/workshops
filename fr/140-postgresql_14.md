@@ -371,12 +371,20 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Réplication Physique
 
 <div class="slide-content">
+  * Améliore la gestion des différences de paramétrage en primaire et seconaires
   * Autorise pg_rewind a utiliser une standby comme source 
   * Nouveaux paramètre de connexion dans libpq
 </div>
 
 <div class="notes">
 </div>
+
+----
+
+#### Améliore la gestion des différences de paramétrage en primaire et seconaires
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/128 --> 
+!include include/ws14/EXEMPLE.md
 
 ----
 
