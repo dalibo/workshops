@@ -26,7 +26,7 @@ Ce paramètre a pour conséquence de terminer toute session ne faisant rien depu
 plus longtemps que la durée indiquée par ce paramètre. Cela permet de relâcher
 les ressources prises par ces sessions.
 
-Si cette valeur est indiquée sans unité, elle est compris comme un nombre en
+Si cette valeur est indiquée sans unité, elle est comprise comme un nombre en
 millisecondes.
 La valeur par défaut de `0` désactive cette fonctionnalité.
 
