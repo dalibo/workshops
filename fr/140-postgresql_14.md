@@ -185,14 +185,14 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### password_encryption passe à scram-sha-256 par défaut
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### nouveaux rôles pg_read_all_data et pg_write_all_data
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/99 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/99 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -217,28 +217,28 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Ajout %P au log_line_prefix pour leader de groupe parallélisé
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### Ajout de idle_session_timeout
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/101 -->
-!include include/ws14/101_idle_session_ timeout.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/101 --> 
+!include include/ws14/EXEMPLE.md
 
 ----
 
 #### Allow restore_command parameter to be changed with reload.
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/102 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/102 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### Détection des déconnexions pendant l'exécution d'une requête
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/103 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/103 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -260,21 +260,21 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### pg_dump : Possibilité d'exporter des partitions individuellement
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/105 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/105 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### pg_dump : Nouvelle option pour exporter les extensions  
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/106 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/106 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### reindex_db : Nouvelle option --tablespace
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -296,21 +296,21 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/108 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/108 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### REINDEX supporte désormais les tables paritionnées
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### autovacuum gère désormais correctement les statistiques sur les tables paritionnées
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -332,21 +332,21 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Compression des toast configuratble en : LZ4 et pglz
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### Nouvelle option pour VACUUM : PROCESS_TOAST
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### Nouvelle fonction pour attendre lorsque l'on arrête un backend
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/113 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/113 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -372,7 +372,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * Améliore la gestion des différences de paramétrage en primaire et seconaires
-  * Autorise pg_rewind a utiliser une standby comme source
+  * Autorise pg_rewind a utiliser une standby comme source 
   * Nouveaux paramètre de connexion dans libpq
 </div>
 
@@ -383,28 +383,28 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Améliore la gestion des différences de paramétrage en primaire et seconaires
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/128 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/128 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
-#### Autorise pg_rewind a utiliser une standby comme source
+#### Autorise pg_rewind a utiliser une standby comme source 
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 #### Nouveaux paramètre de connexion dans libpq
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Réplication Logique - slide commun (#115)
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 
      * logical streaming of large in-progress transactions
      * Logical Replication - detail message with names of missing columns
      * Support ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ... syntax
@@ -429,7 +429,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Autorise la commande TRUNCATE sur les tables étrangères
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/116 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/116 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -437,7 +437,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Nouveau noeud Asynchronous Append sur les tables étrangères
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/117 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/117 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -464,7 +464,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Fonction string_to_table
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -478,56 +478,56 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Support des paramètres OUT dans les procédures
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/120 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/120 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Nouvelle implémentaiton des assignements dans pg/pgsql
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Nouveau type multiranges et nouvelle fonction range_agg
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### GROUP BY DISTINCT
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/123 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/123 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Corps de Fonction respectant le standard SQL
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/124 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/124 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Nouvelles clauses SEARCH et CYCLE
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/125 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/125 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Nouvelle fonction date_bin
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
 
 ### Possiblité d'attacher un alias a un JOIN .. USING
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 --> 
 !include include/ws14/EXEMPLE.md
 
 ----
@@ -536,10 +536,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 # Ateliers
 
-<!-- lister les tp ici, un include par tp -->
+<!-- lister les tp ici, un include par tp --> 
 
 
 !include include/ws14/tp-EXEMPLE.md
-!include include/ws14/tp-101_idle_session_ timeout.md
 
 ----
+
