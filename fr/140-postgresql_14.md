@@ -174,7 +174,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Sécurité
 
 <div class="slide-content">
-  * password_encryption passe à scram-sha-256 par défaut
+  * L'authentication repose par défaut sur SCRAM-SHA-256
   * nouveaux rôles pg_readl_all_data et  pg_write_all_data
 </div>
 
@@ -183,10 +183,8 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### password_encryption passe à scram-sha-256 par défaut
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 -->
-!include include/ws14/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
+!include include/ws14/scram-par-defaut.md
 
 ----
 
