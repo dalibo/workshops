@@ -103,7 +103,7 @@ hide_author_in_slide: true
 <div class="notes">
 
 Photographie d'Antoine Taveneaux, licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en),
-obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Lakshmana_Temple_10_1024px.jpg).
+obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Lakshmana_Temple_10.jpg).
 
 
 **Participez à ce workshop !**
