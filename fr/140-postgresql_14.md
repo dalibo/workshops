@@ -285,7 +285,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
-  * REINDEX supporte désormais les tables paritionnées
+  * Nouveautées sur REINDEX et reindexdb
   * autovacuum gère désormais correctement les statistiques sur les tables paritionnées
 </div>
 
@@ -301,7 +301,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### REINDEX supporte désormais les tables paritionnées
+#### Nouveautées sur REINDEX et reindexdb
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 --> 
 !include include/ws14/EXEMPLE.md
@@ -533,6 +533,116 @@ Nous allons décrire ces nouveautés plus en détail.
 ----
 
 \newpage
+
+## Supevision
+
+<div class="slide-content">
+  * Nouvelle vue pg_stat_wal
+  * Nouvelle vue pg_stat_progress_copy
+  * Nouvelle vue pg_stat_replication_slots
+  * Nouveautées dans pg_stat_statements
+  * Ajout de statistiques sur les sessions dans pg_stat_database
+  * Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+  * Ajout de la colonne wait_start dans pg_locks
+
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+### Nouvelle vue pg_stat_wal
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/129 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle vue pg_stat_progress_copy
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle vue pg_stat_replication_slots
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouveautées dans pg_stat_statements
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout de statistiques sur les sessions dans pg_stat_database
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/132 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout de la colonne wait_start dans pg_locks
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+## Supevision
+
+<div class="slide-content">
+  * Amélioration de l'indexation
+  * Amélioration des performances avec un grand nombre de connexions read-only
+  * Amélioration des performances de la recovery
+  * Autres améliorations
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+### Améliorations de l'indexation
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Amélioration des performances avec un grand nombre de connexions read-only
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Amélioration des performances de la recovery
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/138 --> 
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Autres améliorations
+
+!include include/ws14/EXEMPLE.md
+
+----
 
 # Ateliers
 
