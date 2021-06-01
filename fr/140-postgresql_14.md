@@ -98,12 +98,12 @@ hide_author_in_slide: true
 
 # Nouveautés de PostgreSQL 14
 
-![](medias/The_Big_Boss_Elephant.jpeg)
+![](medias/ws14/ws14_Lakshmana_Temple_10.jpg)
 
 <div class="notes">
 
-Photographie de Rad Dougall, licence [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en),
-obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
+Photographie d'Antoine Taveneaux, licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en),
+obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Lakshmana_Temple_10_1024px.jpg).
 
 
 **Participez à ce workshop !**
