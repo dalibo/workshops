@@ -1,4 +1,3 @@
-#### Authentification SCRAM-SHA-256 par défaut
 
 <div class="slide-content">
 

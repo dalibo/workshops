@@ -183,6 +183,8 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
+#### Authentification SCRAM-SHA-256 par défaut
+
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
 !include include/ws14/scram-par-defaut.md
 
@@ -532,7 +534,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-## Supevision
+## Supervision
 
 <div class="slide-content">
   * Nouvelle vue pg_stat_wal
@@ -601,7 +603,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-## Supevision
+## Performances
 
 <div class="slide-content">
   * Amélioration de l'indexation
