@@ -203,7 +203,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * Ajout %P au log_line_prefix pour leader de groupe parallélisé
-  * Ajout de idle_session_timeout
+  * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
   * Rechargement au démarrage de restre_command
   * Détection des déconnexions pendant l'exécution d'une requête
 </div>
@@ -222,10 +222,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Ajout de idle_session_timeout
+#### Temps d'attente maximal pour une session inactive
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/101 -->
-!include include/ws14/101_idle_session_ timeout.md
+!include include/ws14/101_idle_session_timeout.md
 
 ----
 
@@ -650,6 +650,5 @@ Nous allons décrire ces nouveautés plus en détail.
 
 
 !include include/ws14/tp-EXEMPLE.md
-!include include/ws14/tp-101_idle_session_ timeout.md
 
 ----
