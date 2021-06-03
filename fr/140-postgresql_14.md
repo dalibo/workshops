@@ -98,12 +98,12 @@ hide_author_in_slide: true
 
 # Nouveautés de PostgreSQL 14
 
-![](medias/The_Big_Boss_Elephant.jpeg)
+![](medias/ws14/ws14_Lakshmana_Temple_10.jpg)
 
 <div class="notes">
 
-Photographie de Rad Dougall, licence [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/deed.en),
-obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:The_Big_Boss_Elephant_(190898861).jpeg).
+Photographie d'Antoine Taveneaux, licence [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/deed.en),
+obtenue sur [wikimedia.org](https://commons.wikimedia.org/wiki/File:Lakshmana_Temple_10.jpg).
 
 
 **Participez à ce workshop !**
@@ -174,7 +174,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Sécurité
 
 <div class="slide-content">
-  * password_encryption passe à scram-sha-256 par défaut
+  * L'authentication repose par défaut sur SCRAM-SHA-256
   * nouveaux rôles pg_readl_all_data et  pg_write_all_data
 </div>
 
@@ -183,10 +183,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### password_encryption passe à scram-sha-256 par défaut
+#### Authentification SCRAM-SHA-256 par défaut
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 -->
-!include include/ws14/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
+!include include/ws14/scram-par-defaut.md
 
 ----
 
@@ -285,7 +285,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
-  * REINDEX supporte désormais les tables paritionnées
+  * Nouveautées sur REINDEX et reindexdb
   * autovacuum gère désormais correctement les statistiques sur les tables paritionnées
 </div>
 
@@ -301,7 +301,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### REINDEX supporte désormais les tables paritionnées
+#### Nouveautées sur REINDEX et reindexdb
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
 !include include/ws14/EXEMPLE.md
@@ -533,6 +533,116 @@ Nous allons décrire ces nouveautés plus en détail.
 ----
 
 \newpage
+
+## Supervision
+
+<div class="slide-content">
+  * Nouvelle vue pg_stat_wal
+  * Nouvelle vue pg_stat_progress_copy
+  * Nouvelle vue pg_stat_replication_slots
+  * Nouveautées dans pg_stat_statements
+  * Ajout de statistiques sur les sessions dans pg_stat_database
+  * Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+  * Ajout de la colonne wait_start dans pg_locks
+
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+### Nouvelle vue pg_stat_wal
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/129 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle vue pg_stat_progress_copy
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouvelle vue pg_stat_replication_slots
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Nouveautées dans pg_stat_statements
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout de statistiques sur les sessions dans pg_stat_database
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/132 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Ajout de la colonne wait_start dans pg_locks
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+\newpage
+
+## Performances
+
+<div class="slide-content">
+  * Amélioration de l'indexation
+  * Amélioration des performances avec un grand nombre de connexions read-only
+  * Amélioration des performances de la recovery
+  * Autres améliorations
+</div>
+
+<div class="notes">
+</div>
+
+----
+
+### Améliorations de l'indexation
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Amélioration des performances avec un grand nombre de connexions read-only
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Amélioration des performances de la recovery
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/138 -->
+!include include/ws14/EXEMPLE.md
+
+----
+
+### Autres améliorations
+
+!include include/ws14/EXEMPLE.md
+
+----
 
 # Ateliers
 
