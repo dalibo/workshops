@@ -19,18 +19,20 @@ Discussion
 
 <div class="notes">
 
-Le paramètre `idle_session_timeout` définit la durée maximale autorisée d'une
-session.
+Le paramètre `idle_session_timeout` définit la durée maximale sans activié entre 
+deux requêtes lorsque l'utilisateur n'est pas dans une transaction.
 
 Ce paramètre a pour conséquence de terminer toute session ne faisant rien depuis
-plus longtemps que la durée indiquée par ce paramètre. Cela permet de relâcher
-les ressources prises par ces sessions.
+plus longtemps que la durée indiquée par ce paramètre. Cela permet de limiter
+la consommation de ressources effectuée par des sessions inactives (mémoire par
+exemple) et de diminuer le coût de maintenance des sessions connectées à l'instance
+en limitant leur nombre.
 
 Si cette valeur est indiquée sans unité, elle est comprise comme un nombre en
 millisecondes.
 La valeur par défaut de `0` désactive cette fonctionnalité.
 
 Le changement de la valeur du paramètre `idle_session_timeout` ne requiert pas
-de démarrage.
+de démarrage ou de droit particulier.
 
 </div>
