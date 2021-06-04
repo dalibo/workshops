@@ -204,7 +204,7 @@ Nous allons décrire ces nouveautés plus en détail.
 <div class="slide-content">
   * Ajout %P au log_line_prefix pour leader de groupe parallélisé
   * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
-  * Rechargement au démarrage de restre_command
+  * Modification à chaud du paramètre `restore_command`
   * Détection des déconnexions pendant l'exécution d'une requête
 </div>
 
@@ -229,10 +229,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Allow restore_command parameter to be changed with reload.
+#### Modification à chaud de la restore_command
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/102 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/102_restore_command_on_reload.md
 
 ----
 
