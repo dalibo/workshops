@@ -239,7 +239,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Détection des déconnexions pendant l'exécution d'une requête
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/103 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/103_client_connection_check_interval.md
 
 ----
 
