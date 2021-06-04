@@ -10,7 +10,7 @@ Discussion
 -->
 
 <div class="slide-content">
-* Nouvelle fonction pour répartir des timestamps dans des inervalles
+* Nouvelle fonction pour répartir des timestamps dans des intervalles
   (_buckets_)
 * `date_bin(`
   * `TAILLE DES BUCKETS,` : INTEVAL (unités `month` et `year` interdites)
@@ -23,7 +23,7 @@ Discussion
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
 
-La nouvelle fonction `date_bin` permet placer un timestamp fournit en entrée
+La nouvelle fonction [`date_bin`](https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN) permet placer un timestamp fournit en entrée
 (second paramètre) dans un interval aussi appellée _bucket_.
 
 Les valeurs produites correspondent au timestamp de début de l'intervalle
@@ -32,7 +32,7 @@ regroupant les données par plages de 15 minutes.
 
 Les _buckets_ sont créés en se basant sur :
 
-* un timestamp de début (troisième paramètre)
+* un timestamp de début (troisième paramètre) ;
 * une taille définie sous forme d'intervalle (premier paramètre). L'unité
   utilisée pour définir la taille du _bucket_ peut être définie en secondes,
   minutes, heures, jours ou semaines.
@@ -129,15 +129,17 @@ nécessairement coïncider avec le timestamp le plus ancien présent dans la tab
 (17 rows)
 ```
 
-Comme dit précédemment, il n'est pas possible d'utiliser une taille de bucket
-définie en mois ou année. Il est cependant possible de spécifier des tailles de
+Comme dit précédemment, il n'est pas possible d'utiliser une taille de _bucket_
+définie en mois ou années. Il est cependant possible de spécifier des tailles de
 _bucket_ supérieures ou égales à un mois avec les autres unités :
 
 ```
 =# SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');
 ERROR:  timestamps cannot be binned into intervals containing months or years
+
 =# SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
 ERROR:  timestamps cannot be binned into intervals containing months or years
+
 =# SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
         date_bin
 ------------------------
@@ -153,7 +155,7 @@ ERROR:  timestamps cannot be binned into intervals containing months or years
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC -->
 
-La fonction `date_bin` a un effet similaire a `date_trunc` lorsqu'elle est
+La fonction `date_bin` a un effet similaire à [`date_trunc`](https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) lorsqu'elle est
 utilisée avec les intervalles `1 hour` et `1 minute`.
 
 ```
