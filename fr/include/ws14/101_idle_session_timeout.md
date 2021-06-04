@@ -23,8 +23,8 @@ Discussion
 <div class="notes">
 
 Le paramètre `idle_session_timeout` définit la durée maximale sans activité entre 
-deux requêtes lorsque l'utilisateur n'est pas dans une transaction. Il s'agit
-d'un comportement similaire au paramètre `idle_in_transaction_session_timeout`
+deux requêtes lorsque l'utilisateur n'est pas dans une transaction. Son
+comportement est similaire à celui du paramètre `idle_in_transaction_session_timeout`
 introduit dans PostgreSQL 9.6.
 
 Ce paramètre a pour conséquence d'interrompre toute session inactive depuis plus 
