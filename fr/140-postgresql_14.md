@@ -175,7 +175,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * L'authentication repose par défaut sur SCRAM-SHA-256
-  * nouveaux rôles pg_readl_all_data et  pg_write_all_data
+  * Nouveaux rôles prédéfinis
 </div>
 
 <div class="notes">
@@ -190,10 +190,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### nouveaux rôles pg_read_all_data et pg_write_all_data
+#### Nouveaux rôles prédéfinis
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/99 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/99_new_roles.md
 
 ----
 
@@ -648,6 +648,15 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <!-- lister les tp ici, un include par tp -->
 
+<div class="slide-content">
+  * Nouveaux rôles prédéfinis
+</div>
+
+----
+
+!include include/ws14/tp-99_new_roles.md
+
+----
 
 !include include/ws14/tp-EXEMPLE.md
 
