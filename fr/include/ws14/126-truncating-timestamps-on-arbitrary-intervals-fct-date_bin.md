@@ -12,10 +12,10 @@ Discussion
 <div class="slide-content">
 * Nouvelle fonction pour répartir des timestamps dans des intervalles
   (_buckets_)
-* `date_bin(`
-  * `TAILLE DES BUCKETS,` : INTEVAL (unités `month` et `year` interdites)
-  * `VALEUR EN ENTREE,` : TIMESTAMP à traiter
-  * `TIMESTAMP DE DEBUT)` : TIMESTAMP correspond au début du premier _bucket_
+* `date_bin`
+  * `interval` : taille des _buckets_ (unités `month` et `year` interdites)
+  * `timestamptz` : valeur en entrée à traiter
+  * `timestamptz` : timestamp correspondant au début du premier _bucket_
 
 </div>
 
@@ -23,8 +23,10 @@ Discussion
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
 
-La nouvelle fonction [`date_bin`](https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN) permet placer un timestamp fournit en entrée
-(second paramètre) dans un interval aussi appellée _bucket_.
+La nouvelle fonction `date_bin` permet placer un timestamp fournit en entrée 
+(second paramètre) dans un intervalle aussi appellée _bucket_.
+
+Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
 
 Les valeurs produites correspondent au timestamp de début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
@@ -41,6 +43,8 @@ La fonction existe pour des timestamp avec et sans timezone :
 
 ```sql
 =# \df date_bin
+```
+```text
 List of functions
 -[ RECORD 1 ]-------+-------------------------------------------------------------------
 Schema              | pg_catalog
@@ -61,20 +65,18 @@ Voici un exemple de cette fonction en action :
 ```sql
 =# -- Génération des données
 =# CREATE TABLE sonde(t timestamp with time zone, id_sonde int, mesure int);
-CREATE TABLE
 =# INSERT INTO sonde(t, id_sonde, mesure)
     SELECT  '2021-06-01 00:00:00'::timestamp with time zone + INTERVAL '1s' * x,
             1,
             sin(x*3.14/86401)*30
       FROM generate_series(0, 60*60*24) AS F(x);
-INSERT 0 86401
-
 
 =# -- création de buckets de 1h30 commençant à minuit le premier juin
 =# SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with time zone),
          id_sonde, avg(mesure)
     FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
-
+```
+```text
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-06-01 00:00:00+02 |        1 |     2.9318518518518519
@@ -101,12 +103,13 @@ La data de début utilisée pour la création des buckets ne doit pas
 nécessairement coïncider avec le timestamp le plus ancien présent dans la table
 :
 
-```
+```sql
 =# SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:11:00'::timestamp with time zone),
          id_sonde,
 	 avg(mesure)
    FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
-
+```
+```text
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-05-31 22:41:00+02 |        1 | 0.30454545454545454545
@@ -133,20 +136,25 @@ Comme dit précédemment, il n'est pas possible d'utiliser une taille de _bucket
 définie en mois ou années. Il est cependant possible de spécifier des tailles de
 _bucket_ supérieures ou égales à un mois avec les autres unités :
 
-```
+```sql
 =# SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');
-ERROR:  timestamps cannot be binned into intervals containing months or years
+-- ERROR:  timestamps cannot be binned into intervals containing months or years
 
 =# SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
-ERROR:  timestamps cannot be binned into intervals containing months or years
+-- ERROR:  timestamps cannot be binned into intervals containing months or years
 
 =# SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
+```
+```text
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
 (1 row)
-
+```
+```sql
 =# SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
+```
+```text
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
@@ -155,20 +163,26 @@ ERROR:  timestamps cannot be binned into intervals containing months or years
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC -->
 
-La fonction `date_bin` a un effet similaire à [`date_trunc`](https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC) lorsqu'elle est
+La fonction `date_bin` a un effet similaire à `date_trunc` lorsqu'elle est 
 utilisée avec les intervalles `1 hour` et `1 minute`.
 
-```
+Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC>
+
+```sql
 =# SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
           date_trunc('hour', '2021-06-01 10:05:10'::timestamp);
-
+```
+```text
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:00:00 | 2021-06-01 10:00:00
 (1 row)
-
+```
+```sql
 =# SELECT date_bin('1 minute', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
           date_trunc('minute', '2021-06-01 10:05:10'::timestamp);
+```
+```text
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:05:00 | 2021-06-01 10:05:00
