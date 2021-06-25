@@ -33,7 +33,10 @@ _EOF_
 ```
 
 ```sql
-=# CREATE TABLE entreprise(nom text, departement int, ville text, creation date, montant int); 
+CREATE TABLE entreprise (
+  nom TEXT, departement INT, ville TEXT,
+  creation DATE, montant INT
+); 
 CREATE TABLE
 
 =# \copy entreprise FROM 'entreprise.csv' WITH DELIMITER ',' CSV
