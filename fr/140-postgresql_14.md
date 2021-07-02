@@ -500,7 +500,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### GROUP BY DISTINCT
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/123 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/123_group_by_distinct.md
 
 ----
 
