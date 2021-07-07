@@ -419,7 +419,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * Autorise la commande TRUNCATE sur les tables étrangères
-  * Nouveau noeud Asynchronous Append sur les tables étrangères
+  * Lecture asynchrone des tables distantes
 </div>
 
 <div class="notes">
@@ -435,10 +435,10 @@ Nous allons décrire ces nouveautés plus en détail.
 ----
 
 
-#### Nouveau noeud Asynchronous Append sur les tables étrangères
+#### Lecture asynchrone des tables distantes
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/117 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/117_async_append.md
 
 ----
 
@@ -650,11 +650,16 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <div class="slide-content">
   * Nouveaux rôles prédéfinis
+  * Mise en place d'un sharding minimal
 </div>
 
 ----
 
 !include include/ws14/tp-99_new_roles.md
+
+----
+
+!include include/ws14/tp-117_async_append.md
 
 ----
 
