@@ -465,7 +465,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Fonction string_to_table
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/118_function_string_to_table.md
 
 ----
 
