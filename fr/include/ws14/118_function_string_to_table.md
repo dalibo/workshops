@@ -52,7 +52,7 @@ Exemple d'utilisation :
 
 Dans les versions précédentes, ce genre d'opération était déjà possible avec
 les fonctions `unnest(string_to_array())` et `regexp_split_to_table()`.
-L'avantage de cette nouvelle fonction est qu'elle est beaucoup plus performante
+Cette nouvelle fonction a l'avantage d'être plus performante car plus spécialisée.
 car plus spécialisée.
 
 </div>
