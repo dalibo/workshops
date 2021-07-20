@@ -53,6 +53,5 @@ Exemple d'utilisation :
 Dans les versions précédentes, ce genre d'opération était déjà possible avec
 les fonctions `unnest(string_to_array())` et `regexp_split_to_table()`.
 Cette nouvelle fonction a l'avantage d'être plus performante car plus spécialisée.
-car plus spécialisée.
 
 </div>
