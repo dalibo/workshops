@@ -13,7 +13,7 @@ Discussion
 
 * Nouvelle fonction pour subdiviser une chaîne de caractère et renvoyer le
   résultat dans une table :
-  * `text` : chaîne de caractères à taiter
+  * `text` : chaîne de caractères à traiter
   * `text` : séparateur
   * `text` : chaîne de caractères à remplacer par `NULL` si rencontrée 
 * Alternative plus performante à `regexp_split_to_table()` et
@@ -23,7 +23,7 @@ Discussion
 
 <div class="notes">
 
-Une nouvelle fonction a été créé pour subdiviser une chaine de caractères et
+Une nouvelle fonction a été créée pour subdiviser une chaîne de caractères et
 renvoyer le résultat dans une table :
 
 ```sql
