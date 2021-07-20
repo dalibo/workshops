@@ -353,12 +353,13 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-## Réplication et sharding
+## Réplication et Sharding
 
 <div class="slide-content">
   * Réplication physique
   * Réplication logique
-  * Foreign Datawrapper / Sharding
+  * Évolutions pour les _Foreign Data Wrapper_
+    * Vers une architecture distribuée (_sharding_)
 </div>
 
 <div class="notes">
@@ -415,22 +416,26 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-### Foreign Data Wrapper / Sharding
+### Foreign Data Wrapper et Sharding
 
 <div class="slide-content">
-  * Autorise la commande TRUNCATE sur les tables étrangères
+  * Support du `TRUNCATE` sur les tables distantes
   * Lecture asynchrone des tables distantes
 </div>
 
 <div class="notes">
+Deux évolutions majeures sont apparues dans la gestion des tables distantes à
+travers l'API _Foreign Data Wrapper_, portées dans l'extension `postgres_fdw`.
+Nous verrons que l'architecture distribuée, dites _sharding_, devient alors
+possible.
 </div>
 
 ----
 
-#### Autorise la commande TRUNCATE sur les tables étrangères
+#### Support du TRUNCATE sur les tables distantes
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/116 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/116_truncate_on_foreign_table.md
 
 ----
 
