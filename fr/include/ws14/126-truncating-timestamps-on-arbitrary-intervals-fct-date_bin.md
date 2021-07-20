@@ -99,7 +99,7 @@ Voici un exemple de cette fonction en action :
 (17 rows)
 ```
 
-La data de début utilisée pour la création des buckets ne doit pas
+La date de début utilisée pour la création des _buckets_ ne doit pas
 nécessairement coïncider avec le timestamp le plus ancien présent dans la table
 :
 
