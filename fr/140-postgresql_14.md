@@ -526,7 +526,7 @@ possible.
 ### Nouvelle fonction date_bin
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/126-truncating-timestamps-on-arbitrary-intervals-fct-date_bin.md
 
 ----
 
