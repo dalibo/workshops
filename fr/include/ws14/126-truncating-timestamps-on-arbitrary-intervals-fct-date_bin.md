@@ -32,7 +32,7 @@ Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
-Les _buckets_ sont créés en se basant sur :
+La valeur mise en second paramètre de la fonction est placée dans un _buckets_ en se basant sur :
 
 * Un timestamp de début (troisième paramètre).
 * Une taille définie sous forme d'intervalle (premier paramètre). \
