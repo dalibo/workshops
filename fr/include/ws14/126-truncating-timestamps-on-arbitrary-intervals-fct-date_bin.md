@@ -28,16 +28,16 @@ La nouvelle fonction `date_bin` permet placer un timestamp fournit en entrée
 
 Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
 
-Les valeurs produites correspondent au timestamp de début de l'intervalle
+Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
 Les _buckets_ sont créés en se basant sur :
 
-* un timestamp de début (troisième paramètre) ;
-* une taille définie sous forme d'intervalle (premier paramètre). L'unité
-  utilisée pour définir la taille du _bucket_ peut être définie en secondes,
-  minutes, heures, jours ou semaines.
+* Un timestamp de début (troisième paramètre).
+* Une taille définie sous forme d'intervalle (premier paramètre). \
+  L'unité utilisée pour définir la taille du _bucket_ peut être définie \
+  en secondes, minutes, heures, jours ou semaines.
 
 La fonction existe pour des timestamp avec et sans timezone :
 
