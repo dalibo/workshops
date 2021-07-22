@@ -459,7 +459,7 @@ possible.
   * Corps de Fonction respectant le standard SQL
   * Nouvelles clauses SEARCH et CYCLE
   * Nouvelle fonction date_bin
-  * Possiblité d'attacher un alias a un JOIN .. USING
+  * Possiblité d'attacher un alias à un JOIN .. USING
 </div>
 
 <div class="notes">
@@ -530,10 +530,10 @@ possible.
 
 ----
 
-### Possiblité d'attacher un alias a un JOIN .. USING
+### Possiblité d'attacher un alias à un JOIN .. USING
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/127_allow_an_alias_to_be_attached_directly_to_a_join_using.md
 
 ----
 
