@@ -248,8 +248,8 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Outils clients
 
 <div class="slide-content">
-  * pg_dump : Possibilité d'exporter des partitions individuellement
-  * pg_dump : Nouvelle option pour exporter les extensions  
+  * pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
+  * pg_dump : Nouvelle option pour exporter les extensions
   * reindex_db : Nouvelle option --tablespace
 </div>
 
@@ -258,10 +258,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### pg_dump : Possibilité d'exporter des partitions individuellement
+#### pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/105 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/105_dump_attach_partition.md
 
 ----
 
