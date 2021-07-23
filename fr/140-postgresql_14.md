@@ -456,7 +456,7 @@ possible.
   * CREATE OR REPLACE TRIGGER
   * Nouveau type multiranges et nouvelle fonction range_agg
   * GROUP BY DISTINCT
-  * Corps de Fonction respectant le standard SQL
+  * Corps de routines respectant le standard SQL
   * Nouvelles clauses SEARCH et CYCLE
   * Nouvelle fonction date_bin
   * Possiblité d'attacher un alias à un JOIN .. USING
@@ -509,10 +509,10 @@ possible.
 
 ----
 
-### Corps de Fonction respectant le standard SQL
+### Corps de routines respectant le standard SQL
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/124 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/124-sql-standard-function-body.md
 
 ----
 
