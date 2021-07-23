@@ -347,7 +347,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Nouvelle fonction pour attendre lorsque l'on arrête un backend
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/113 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/113_add_functions_to_wait_for_backend_termination.md
 
 ----
 
