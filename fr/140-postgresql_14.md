@@ -454,7 +454,7 @@ possible.
 <div class="slide-content">
   * Fonction string_to_table
   * CREATE OR REPLACE TRIGGER
-  * Nouveau type multiranges et nouvelle fonction range_agg
+  * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
   * GROUP BY DISTINCT
   * Corps de Fonction respectant le standard SQL
   * Nouvelles clauses SEARCH et CYCLE
@@ -495,10 +495,10 @@ possible.
 
 ----
 
-### Nouveau type multiranges et nouvelle fonction range_agg
+### Nouveaux types `multirange` et nouvelles fonctions d'agrégats
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/122_range_agg_multiranges.md
 
 ----
 
