@@ -202,7 +202,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Nouveautés de configuration (GUC)
 
 <div class="slide-content">
-  * Ajout %P au log_line_prefix pour leader de groupe parallélisé
+  * Nouveaux caractères d'échappement pour `log_line_prefix`
   * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
   * Modification à chaud du paramètre `restore_command`
   * Détection des déconnexions pendant l'exécution d'une requête
@@ -215,10 +215,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-#### Ajout %P au log_line_prefix pour leader de groupe parallélisé
+#### Nouveaux caractères d'échappement pour log_line_prefix
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/100_parallel_leader_wildcard_to_log_line_prefix.md
 
 ----
 
