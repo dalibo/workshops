@@ -446,7 +446,6 @@ possible.
 <div class="slide-content">
   * Fonction string_to_table
   * OR REPLACE lors de la création d'un trigger
-  * PL/pgSQL : assignation pour les types complexes
   * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
   * GROUP BY DISTINCT
   * Corps de routines respectant le standard SQL
@@ -481,10 +480,10 @@ possible.
 
 ----
 
-### PL/pgSQL : assignation pour les types complexes
+### Nouvelle implémentaiton des assignements dans pg/pgsql
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121 -->
-!include include/ws14/121-plpgsql-assignment-parsing.md
+!include include/ws14/EXEMPLE.md
 
 ----
 
