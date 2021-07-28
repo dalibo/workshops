@@ -476,7 +476,7 @@ possible.
 ### Support des paramètres OUT dans les procédures
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/120 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/120_support_for_out_parameters_in_procedures.md
 
 ----
 
