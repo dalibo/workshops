@@ -1,0 +1,245 @@
+## TP - Outil pg_rewind
+
+<div class="slide-content">
+
+  * Création d'une instance primaire ;
+  * Mise en place la réplication sur deux secondaires ;
+  * Promotion d'une secondaire pour réaliser des tests ;
+  * Utilisation de pg_rewind raccrocher l'instance secondaire a la réplication.
+
+</div>
+
+<div class="notes">
+
+### Création d'une instance primaire
+
+Nous créons pour cette démonstration des instances temporaires dans le
+répertoire `~/tmp/rewind` :
+
+```bash
+export DATADIRS=~/tmp/rewind
+mkdir -p $DATADIRS/archives
+export PGNAME=srv1
+```
+
+Créer une instance primaire en activant les checkpoints :
+
+```bash
+initdb --data-checksums --data-checksums $DATADIRS/$PGNAME -U postgres
+```
+
+Note: Pour utiliser pg_rewind, il est nécessaire d'activer le paramètre
+`wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
+de l'instance.
+
+Configurer PostgreSQL :
+
+```bash
+cat <<_EOF_ >> $DATADIRS/${PGNAME}/postgresql.conf
+port = 5636
+listen_addresses = '*'
+logging_collector = on
+archive_mode = on
+archive_command = '/usr/bin/rsync -a %p $DATADIRS/archives/%f'
+restore_command = '/usr/bin/rsync -a $DATADIRS/archives/%f %p'
+cluster_name = '${PGNAME}'
+_EOF_
+```
+
+Démarrer l'instance et y créer une base de données :
+
+```bash
+pg_ctl start -D $DATADIRS/$PGNAME -w
+psql -p 5636 -c "CREATE DATABASE bench;"
+pgbench -p 5636 -i -s 10 bench
+```
+
+Créer un utilisateur pour la réplication et ajouter le mot de passe au
+fichier `.pgpass` :
+
+```bash
+psql -p 5636 << _EOF_
+CREATE ROLE replication
+  WITH LOGIN REPLICATION PASSWORD 'replication';
+_EOF_
+
+cat << _EOF_ >> ~/.pgpass
+*:5636:replication:replication:replication # srv1
+*:5637:replication:replication:replication # srv2
+*:5638:replication:replication:replication # srv3
+_EOF_
+chmod 600 ~/.pgpass
+```
+
+### Mettre en place la réplication sur deux secondaires
+
+Configurer les variables d'environnements pour l'instance à déployer :
+
+```bash
+export PGNAME=srv2
+export PGDATA=$DATADIRS/$PGNAME
+export PGPORT=5637
+```
+
+Créer une instance secondaire :
+
+```bash
+pg_basebackup -D $PGDATA -p 5636 --progress --username=replication --checkpoint=fast
+```
+
+Modifier la configuration :
+
+```bash
+touch $PGDATA/standby.signal
+
+cat << _EOF_ >> $PGDATA/postgresql.conf
+port = $PGPORT
+primary_conninfo = 'port=5636 user=replication application_name=replication_${PGNAME}'
+cluster_name = '${PGNAME}'
+_EOF_
+```
+
+Démarrer l'instance secondaire :
+
+```bash
+pg_ctl start -D $PGDATA -w
+```
+
+La requête suivante doit renvoyer un nombre de lignes égal au nombre de standby
+depuis l'instance primaire **srv1** :
+
+```bash
+psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
+```
+
+Faire la même opération à nouveau avec :
+
+```bash
+export PGNAME=srv3
+export PGDATA=$DATADIRS/$PGNAME
+export PGPORT=5638
+```
+
+### Décrochage de l'instance secondaire **srv3** pour des besoins applicatifs
+
+Promouvoir l'instance secondaire **srv3** :
+
+```bash
+pg_ctl promote -D $DATADIRS/srv3 -w
+psql -p 5638 -c CHECKPOINT
+```
+
+Ajouter des données aux instances **srv1** et **srv3** afin de les faire
+diverger (une minute d'attente par instance):
+
+```bash
+pgbench -p 5636 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv1
+pgbench -p 5638 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv3
+```
+
+Les deux instances ont maintenant divergé. Sans action supplémentaire, il n'est
+donc pas possible de raccrocher l'ancienne primaire à la nouvelle.
+
+Stopper l'instance **srv3** proprement :
+
+```bash
+pg_ctl stop -D $DATADIRS/srv3 -m fast -w
+```
+
+### Utilisation de pg_rewind
+
+Donner les autorisations à l'utilisateur de réplication, afin qu'il puisse
+utiliser `pg_rewind` :
+
+```sql
+psql -p 5636 <<_EOF_
+GRANT EXECUTE
+  ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
+  TO replication;
+GRANT EXECUTE
+  ON function pg_catalog.pg_stat_file(text, boolean)
+  TO replication;
+GRANT EXECUTE
+  ON function pg_catalog.pg_read_binary_file(text)
+  TO replication;
+GRANT EXECUTE
+  ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean)
+  TO replication;
+_EOF_
+```
+
+Sauvegarder le `postgresql.conf` car il sera écraser par celui de **srv1**
+pendant le _rewind_ :
+
+```
+cp $DATADIRS/srv3/postgresql.conf $DATADIRS
+```
+
+Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
+**srv2** (commencer par un passage à blanc `--dry-run`) :
+
+```bash
+pg_rewind --target-pgdata $DATADIRS/srv3                          \
+          --source-server "port=5637 user=replication dbname=postgres" \
+          --restore-target-wal                                         \
+          --progress                                                   \
+          --dry-run
+```
+
+Une fois le résultat validé relancer `pg_rewind` sans `--dry-run`.
+
+Restaurer le postgresql.conf de **srv3** :
+
+```bash
+cp $DATADIRS/postgresql.conf $DATADIRS/srv3
+```
+
+À l'issue de l'opération, les droits donnés à l'utilisateur de réplication
+peuvent être révoqués :
+
+```
+psql -p 5636 <<_EOF_
+REVOKE EXECUTE
+  ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
+  FROM  replication;
+REVOKE EXECUTE
+  ON function pg_catalog.pg_stat_file(text, boolean)
+  FROM replication;
+REVOKE EXECUTE
+  ON function pg_catalog.pg_read_binary_file(text)
+  FROM replication;
+REVOKE EXECUTE
+  ON function pg_catalog.pg_read_binary_file(text, bigint, bigint, boolean)
+  FROM replication;
+_EOF_
+```
+
+### Redémarrer srv1
+
+Mise à jour de la configuration de **srv3** en standby :
+
+```bash
+touch $DATADIRS/srv3/standby.signal
+
+cat <<_EOF_ >> $DATADIRS/srv3/postgresql.conf
+recovery_target_timeline = 1 # Forcer la même timeline que le maître pour la recovery
+_EOF_
+```
+
+Redémarrer l'instance **srv3** en standby :
+
+```bash
+pg_ctl start -D $DATADIRS/srv3 -w
+```
+
+La requête suivante doit renvoyer un nombre de lignes égal au nombre de
+standby. Elle doit être exécutée depuis l'instance primaire **srv1** :
+
+```bash
+psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
+```
+
+Commenter le paramètre `recovery_target_timeline` de la configuration de
+l'instance **srv3**, car elle pourrait poser des problèmes par la suite.
+
+</div>

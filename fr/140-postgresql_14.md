@@ -384,7 +384,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Autorise pg_rewind a utiliser une standby comme source
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/104-allow-pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
 
