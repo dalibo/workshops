@@ -25,12 +25,12 @@ nouvelle instance primaire suite à une bascule ayant provoqué une divergence.
 
 Lorsque l'on dispose de plus de deux serveurs dans une architecture répliquée,
 il est désormais possible d'utiliser une instance secondaire comme source du
-`rewind`. Cela permet de limiter l'impact des lectures sur la nouvelle instance
+_rewind_. Cela permet de limiter l'impact des lectures sur la nouvelle instance
 primaire.
 
 Précédemment, PostgreSQL utilisait une table temporaire pour stocker certaines
-information le temps du `rewind`. Une réécriture du code à rendu cette étape
+information le temps du _rewind_. Une réécriture du code à rendu cette étape
 inutile. C'est cette modification qui permet l'utilisation les instances
-secondaires comme source d'un `rewind`.
+secondaires comme source d'un _rewind_.
 
 </div>

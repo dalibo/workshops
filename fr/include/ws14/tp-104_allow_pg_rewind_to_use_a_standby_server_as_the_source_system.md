@@ -5,7 +5,7 @@
   * Création d'une instance primaire ;
   * Mise en place la réplication sur deux secondaires ;
   * Promotion d'une secondaire pour réaliser des tests ;
-  * Utilisation de pg_rewind raccrocher l'instance secondaire a la réplication.
+  * Utilisation de `pg_rewind` pour raccrocher l'instance secondaire à la réplication.
 
 </div>
 
@@ -22,7 +22,7 @@ mkdir -p $DATADIRS/archives
 export PGNAME=srv1
 ```
 
-Créer une instance primaire en activant les checkpoints :
+Créer une instance primaire en activant les sommes de contrôle :
 
 ```bash
 initdb --data-checksums --data-checksums $DATADIRS/$PGNAME -U postgres
@@ -46,7 +46,8 @@ cluster_name = '${PGNAME}'
 _EOF_
 ```
 
-Démarrer l'instance et y créer une base de données :
+Démarrer l'instance, y créer une base de données et initialiser une base
+pgbench :
 
 ```bash
 pg_ctl start -D $DATADIRS/$PGNAME -w
@@ -105,8 +106,9 @@ Démarrer l'instance secondaire :
 pg_ctl start -D $PGDATA -w
 ```
 
-La requête suivante doit renvoyer un nombre de lignes égal au nombre de standby
-depuis l'instance primaire **srv1** :
+La requête suivante doit renvoyer un nombre de lignes égal au nombre
+d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
+**srv1** :
 
 ```bash
 psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
@@ -134,7 +136,7 @@ diverger (une minute d'attente par instance):
 
 ```bash
 pgbench -p 5636 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv1
-pgbench -p 5638 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv3
+pgbench -p 5638 -c 10 -T 60 -n bench # Simulation d'un traitement spécifique sur l'instance srv3
 ```
 
 Les deux instances ont maintenant divergé. Sans action supplémentaire, il n'est
@@ -168,7 +170,8 @@ GRANT EXECUTE
 _EOF_
 ```
 
-Sauvegarder le `postgresql.conf` car il sera écraser par celui de **srv1**
+Sauvegarder la configuration qui diffère entre **srv1** et **srv3** (ici
+`postgresql.conf`) car les fichiers de **srv1** vont écraser ceux de **srv3**
 pendant le _rewind_ :
 
 ```
@@ -216,7 +219,8 @@ _EOF_
 
 ### Redémarrer srv1
 
-Mise à jour de la configuration de **srv3** en standby :
+Mise à jour de la configuration de **srv3** pour en faire une instance
+secondaire :
 
 ```bash
 touch $DATADIRS/srv3/standby.signal
@@ -226,14 +230,15 @@ recovery_target_timeline = 1 # Forcer la même timeline que le maître pour la r
 _EOF_
 ```
 
-Redémarrer l'instance **srv3** en standby :
+Redémarrer l'instance **srv3** :
 
 ```bash
 pg_ctl start -D $DATADIRS/srv3 -w
 ```
 
-La requête suivante doit renvoyer un nombre de lignes égal au nombre de
-standby. Elle doit être exécutée depuis l'instance primaire **srv1** :
+La requête suivante doit renvoyer un nombre de lignes égal au nombre
+d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
+**srv1** :
 
 ```bash
 psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
