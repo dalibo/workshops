@@ -445,7 +445,7 @@ possible.
 
 <div class="slide-content">
   * Fonction string_to_table
-  * OR REPLACE lors de la création d'un trigger
+  * Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
   * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
   * GROUP BY DISTINCT
   * Corps de routines respectant le standard SQL
@@ -466,7 +466,7 @@ possible.
 
 ----
 
-### OR REPLACE lors de la création d'un trigger
+### Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/119 -->
 !include include/ws14/119_create_or_replace_trigger.md
