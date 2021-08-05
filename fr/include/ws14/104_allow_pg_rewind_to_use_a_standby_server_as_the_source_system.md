@@ -29,8 +29,8 @@ _rewind_. Cela permet de limiter l'impact des lectures sur la nouvelle instance
 primaire.
 
 Précédemment, PostgreSQL utilisait une table temporaire pour stocker certaines
-information le temps du _rewind_. Une réécriture du code à rendu cette étape
-inutile. C'est cette modification qui permet l'utilisation les instances
+information le temps du _rewind_. Une réécriture du code a rendu cette étape
+inutile. C'est cette modification qui permet l'utilisation des instances
 secondaires comme source d'un _rewind_.
 
 </div>

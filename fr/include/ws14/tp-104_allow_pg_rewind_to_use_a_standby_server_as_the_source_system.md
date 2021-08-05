@@ -3,8 +3,8 @@
 <div class="slide-content">
 
   * Création d'une instance primaire ;
-  * Mise en place la réplication sur deux secondaires ;
-  * Promotion d'une secondaire pour réaliser des tests ;
+  * Mise en place de la réplication sur deux secondaires ;
+  * Promotion d'un secondaire pour réaliser des tests ;
   * Utilisation de `pg_rewind` pour raccrocher l'instance secondaire à la réplication.
 
 </div>
@@ -74,7 +74,7 @@ chmod 600 ~/.pgpass
 
 ### Mettre en place la réplication sur deux secondaires
 
-Configurer les variables d'environnements pour l'instance à déployer :
+Configurer les variables d'environnement pour l'instance à déployer :
 
 ```bash
 export PGNAME=srv2
@@ -189,7 +189,7 @@ pg_rewind --target-pgdata $DATADIRS/srv3                          \
           --dry-run
 ```
 
-Une fois le résultat validé relancer `pg_rewind` sans `--dry-run`.
+Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 
 Restaurer le postgresql.conf de **srv3** :
 
