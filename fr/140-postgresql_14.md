@@ -540,7 +540,7 @@ possible.
   * Nouvelle vue pg_stat_replication_slots
   * Nouveautées dans pg_stat_statements
   * Ajout de statistiques sur les sessions dans pg_stat_database
-  * Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+  * Identifiant pour les requêtes normalisées
   * Ajout de la colonne wait_start dans pg_locks
 
 </div>
@@ -585,10 +585,10 @@ possible.
 
 ----
 
-### Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+### Identifiant pour les requêtes normalisées
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/132 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/132_compute_query_id.md
 
 ----
 
