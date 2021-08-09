@@ -1,4 +1,4 @@
-## TP - Outil pg_rewind
+## Outil pg_rewind
 
 <div class="slide-content">
 
@@ -25,7 +25,7 @@ export PGNAME=srv1
 Créer une instance primaire en activant les sommes de contrôle :
 
 ```bash
-initdb --data-checksums --data-checksums $DATADIRS/$PGNAME -U postgres
+initdb --data-checksums $DATADIRS/$PGNAME -U postgres
 ```
 
 Note: Pour utiliser pg_rewind, il est nécessaire d'activer le paramètre
@@ -95,7 +95,7 @@ touch $PGDATA/standby.signal
 
 cat << _EOF_ >> $PGDATA/postgresql.conf
 port = $PGPORT
-primary_conninfo = 'port=5636 user=replication application_name=replication_${PGNAME}'
+primary_conninfo = 'port=5636 user=replication application_name=${PGNAME}'
 cluster_name = '${PGNAME}'
 _EOF_
 ```
@@ -140,7 +140,8 @@ pgbench -p 5638 -c 10 -T 60 -n bench # Simulation d'un traitement spécifique su
 ```
 
 Les deux instances ont maintenant divergé. Sans action supplémentaire, il n'est
-donc pas possible de raccrocher l'ancienne primaire à la nouvelle.
+donc pas possible de raccrocher l'ancienne instance secondaire **srv3** à l'instance
+primaire **srv1**.
 
 Stopper l'instance **srv3** proprement :
 
@@ -174,7 +175,7 @@ Sauvegarder la configuration qui diffère entre **srv1** et **srv3** (ici
 `postgresql.conf`) car les fichiers de **srv1** vont écraser ceux de **srv3**
 pendant le _rewind_ :
 
-```
+```bash
 cp $DATADIRS/srv3/postgresql.conf $DATADIRS
 ```
 
@@ -217,7 +218,7 @@ REVOKE EXECUTE
 _EOF_
 ```
 
-### Redémarrer srv1
+### Redémarrer srv3
 
 Mise à jour de la configuration de **srv3** pour en faire une instance
 secondaire :
