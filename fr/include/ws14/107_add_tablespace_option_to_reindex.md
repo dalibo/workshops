@@ -33,19 +33,21 @@ dans un autre tablespace durant leur reconstruction. Son utilisation avec la cla
 
 ```sql
 -- On dispose d'une table t1 avec un index idx_col1 qui se trouvent dans le tablespace pg_default.
-test=# \d+ t1
-                                                     Table « public.t1 »
- Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage | Compression | Cible de statistiques | Description 
----------+---------+-----------------+-----------+------------+----------+-------------+-----------------------+-------------
- col1    | integer |                 |           |            | plain    |             |                       | 
+test=# \d t1
+                     Table « public.t1 »
+ Colonne |  Type   | Collationnement | NULL-able | Par défaut  
+---------+---------+-----------------+-----------+------------
+ col1    | integer |                 |           |            
 Index :
     "idx_col1" btree (col1)
 
 -- Réindexation de la table t1 et déplacement de l'index idx_col1 dans le tablespace tbs.
 test=# reindex (tablespace tbs) table t1 ;
-
+\newpage
 -- L'index a bien été déplacé
-test=# SELECT c.relname, t.spcname FROM pg_class c JOIN pg_tablespace t ON (c.reltablespace = t.oid) where c.relname = 'index_col1';
+test=# SELECT c.relname, t.spcname FROM pg_class c 
+      JOIN pg_tablespace t ON (c.reltablespace = t.oid) where c.relname = 'index_col1';
+
   relname   | spcname 
 ------------+---------
  index_col1 | tbs
@@ -75,38 +77,40 @@ test=# SELECT * FROM pg_partition_tree('parent_index');
  enfant_2_id_idx | parent_index | t      |     1
 
 -- Tous les index sont dans le tablespace pg_default
-test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p JOIN pg_class c ON (c.oid = p.relid);
+test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p 
+      JOIN pg_class c ON (c.oid = p.relid);
+
      relname     | reltablespace 
 -----------------+---------------
  parent_index    |             0
  enfant_1_id_idx |             0
  enfant_2_id_idx |             0
- enfant_3_id_idx |             0
 
 -- Reindexation de la table parent avec l'option TABLESPACE
 test=# reindex (tablespace tbs) table parent;
 
 -- Seuls les index des partitions ont été déplacés
-test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p JOIN pg_class c ON (c.oid = p.relid);
+test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p 
+      JOIN pg_class c ON (c.oid = p.relid);
+
      relname     | reltablespace 
 -----------------+---------------
  parent_index    |             0
  enfant_1_id_idx |         16395
  enfant_2_id_idx |         16395
- enfant_3_id_idx |         16395
 ```
 
 * Les index des tables `TOAST` sont concervés dans leur tablespace d'origine.
 
 ```sql
 -- On dispose d'une table blog avec une table TOAST
-test=# \d+ blog
-                                                    Table « public.blog »
- Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage | Compression | Cible de statistiques | Description 
----------+---------+-----------------+-----------+------------+----------+-------------+-----------------------+-------------
- id      | integer |                 |           |            | plain    |             |                       | 
- title   | text    |                 |           |            | extended |             |                       | 
- content | text    |                 |           |            | extended |             |                       | 
+test=# \d blog
+                     Table « public.blog »
+ Colonne |  Type   | Collationnement | NULL-able | Par défaut 
+---------+---------+-----------------+-----------+------------
+ id      | integer |                 |           |            
+ title   | text    |                 |           |            
+ content | text    |                 |           |            
 Index :
     "idx_blog" btree (title)
 
@@ -125,7 +129,9 @@ Index :
 test=# reindex (tablespace tbs) table blog;
 
 -- Seul l'index de la table blog à été déplacé. Celui de la table TOAST a uniquement été reconstruit
-test=# SELECT c.relname, t.spcname FROM pg_class c JOIN pg_tablespace t ON (c.reltablespace = t.oid) where t.spcname = 'tbs';
+test=# SELECT c.relname, t.spcname FROM pg_class c 
+      JOIN pg_tablespace t ON (c.reltablespace = t.oid) where t.spcname = 'tbs';
+
      relname     | spcname 
 -----------------+---------
 idx_blog         | tbs
