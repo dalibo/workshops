@@ -268,7 +268,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### pg_dump : Nouvelle option pour exporter les extensions  
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/106 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/106-add-support-for-extension-in-pg_dump.md
 
 ----
 
