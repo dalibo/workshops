@@ -250,7 +250,7 @@ Nous allons décrire ces nouveautés plus en détail.
 <div class="slide-content">
   * pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
   * pg_dump : Nouvelle option pour exporter les extensions
-  * reindex_db : Nouvelle option --tablespace
+  * reindexdb : Nouvelle option --tablespace
 </div>
 
 <div class="notes">
@@ -269,13 +269,6 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/106 -->
 !include include/ws14/EXEMPLE.md
-
-----
-
-#### reindex_db : Nouvelle option --tablespace
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
-!include include/ws14/107_add_tablespace_option_to_reindex.md
 
 ----
 
@@ -322,6 +315,7 @@ Nous allons décrire ces nouveautés plus en détail.
 <div class="slide-content">
   * Compression des toast configuratble en : LZ4 et pglz
   * Nouvelle option pour VACUUM : PROCESS_TOAST
+  * Nouvelle option pour REINDEX : TABLESPACE
   * Nouvelle fonction pour attendre lorsque l'on arrête un backend
 </div>
 
@@ -341,6 +335,13 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 -->
 !include include/ws14/EXEMPLE.md
+
+----
+
+#### Nouvelle option pour REINDEX : TABLESPACE
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
+!include include/ws14/107_add_tablespace_option_to_reindex.md
 
 ----
 
