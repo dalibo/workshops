@@ -275,7 +275,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### reindex_db : Nouvelle option --tablespace
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/107_add_tablespace_option_to_reindex.md
 
 ----
 
