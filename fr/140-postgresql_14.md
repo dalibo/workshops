@@ -446,6 +446,7 @@ possible.
 <div class="slide-content">
   * Fonction string_to_table
   * Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
+  * PL/pgSQL : assignation pour les types complexes
   * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
   * GROUP BY DISTINCT
   * Corps de routines respectant le standard SQL
@@ -480,10 +481,10 @@ possible.
 
 ----
 
-### Nouvelle implémentaiton des assignements dans pg/pgsql
+### PL/pgSQL : assignation pour les types complexes
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/121-plpgsql-assignment-parsing.md
 
 ----
 
@@ -539,7 +540,7 @@ possible.
   * Nouvelle vue pg_stat_replication_slots
   * Nouveautées dans pg_stat_statements
   * Ajout de statistiques sur les sessions dans pg_stat_database
-  * Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+  * Identifiant pour les requêtes normalisées
   * Ajout de la colonne wait_start dans pg_locks
 
 </div>
@@ -584,10 +585,10 @@ possible.
 
 ----
 
-### Ajout du queryid dans pg_stat_activity et dans log_line_prefix
+### Identifiant pour les requêtes normalisées
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/132 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/132_compute_query_id.md
 
 ----
 
