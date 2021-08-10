@@ -31,7 +31,7 @@ Discussion
 La commande `REINDEX` dispose avec cette nouvelle version de l'option `TABLESPACE` qui donne la possibilité de déplacer des index 
 dans un autre tablespace durant leur reconstruction. Son utilisation avec la clause `CONCURRENTLY` est supportée.
 
-```
+```sql
 -- On dispose d'une table t1 avec un index idx_col1 qui se trouvent dans le tablespace pg_default.
 test=# \d+ t1
                                                      Table « public.t1 »
@@ -40,7 +40,6 @@ test=# \d+ t1
  col1    | integer |                 |           |            | plain    |             |                       | 
 Index :
     "idx_col1" btree (col1)
-Méthode d'accès : heap
 
 -- Réindexation de la table t1 et déplacement de l'index idx_col1 dans le tablespace tbs.
 test=# reindex (tablespace tbs) table t1 ;
@@ -58,7 +57,7 @@ Quelques restrictions s'appliquent :
 tablespace. Aucune modification du tablespace ne sera effectuée dans `pg_class.reltablespace`, il faudra pour cela utiliser la commande `ALTER TABLE SET TABLESPACE`.
 Afin de déplacer l'index parent, il faudra passer par la commande `ALTER INDEX SET TABLESPACE`.
 
-```
+```sql
 -- On dispose de la table partionnée suivante
 test=# SELECT * FROM pg_partition_tree('parent');
   relid   | parentrelid | isleaf | level 
@@ -75,33 +74,31 @@ test=# SELECT * FROM pg_partition_tree('parent_index');
  enfant_1_id_idx | parent_index | t      |     1
  enfant_2_id_idx | parent_index | t      |     1
 
--- Tous ces objets sont dans le tablespace pg_default
-test=# \d+ parent
-                                            Table partitionnée « public.parent »
- Colonne |  Type   | Collationnement | NULL-able | Par défaut | Stockage | Compression | Cible de statistiques | Description 
----------+---------+-----------------+-----------+------------+----------+-------------+-----------------------+-------------
- id      | integer |                 |           |            | plain    |             |                       | 
-Clé de partition : RANGE (id)
-Index :
-    "parent_index" btree (id)
-Partitions: enfant_1 FOR VALUES FROM (0) TO (100),
-            enfant_2 FOR VALUES FROM (100) TO (200)
+-- Tous les index sont dans le tablespace pg_default
+test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p JOIN pg_class c ON (c.oid = p.relid);
+     relname     | reltablespace 
+-----------------+---------------
+ parent_index    |             0
+ enfant_1_id_idx |             0
+ enfant_2_id_idx |             0
+ enfant_3_id_idx |             0
 
 -- Reindexation de la table parent avec l'option TABLESPACE
 test=# reindex (tablespace tbs) table parent;
 
 -- Seuls les index des partitions ont été déplacés
-test=# SELECT c.relname, t.spcname FROM pg_partition_tree('parent_index') p 
-JOIN pg_class c ON (c.oid = p.relid) JOIN pg_tablespace t ON (c.reltablespace = t.oid);
-     relname     | spcname 
------------------+---------
- enfant_1_id_idx | tbs
- enfant_2_id_idx | tbs
+test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p JOIN pg_class c ON (c.oid = p.relid);
+     relname     | reltablespace 
+-----------------+---------------
+ parent_index    |             0
+ enfant_1_id_idx |         16395
+ enfant_2_id_idx |         16395
+ enfant_3_id_idx |         16395
 ```
 
 * Les index des tables `TOAST` sont concervés dans leur tablespace d'origine.
 
-```
+```sql
 -- On dispose d'une table blog avec une table TOAST
 test=# \d+ blog
                                                     Table « public.blog »
@@ -112,7 +109,6 @@ test=# \d+ blog
  content | text    |                 |           |            | extended |             |                       | 
 Index :
     "idx_blog" btree (title)
-Méthode d'accès : heap
 
 test=# \d+ pg_toast.pg_toast_16417
 Table TOAST « pg_toast.pg_toast_16417 »
@@ -124,7 +120,6 @@ Table TOAST « pg_toast.pg_toast_16417 »
 Table propriétaire : « public.blog »
 Index :
     "pg_toast_16417_index" PRIMARY KEY, btree (chunk_id, chunk_seq)
-Méthode d'accès : heap
 
 -- réindexation de la table blog
 test=# reindex (tablespace tbs) table blog;
@@ -142,7 +137,7 @@ ERROR:  cannot move system relation "pg_toast_16417_index"
 
 * L'option est interdite sur le catalogue système. Lors de l'utilisation des commandes `REINDEX SCHEMA`, `DATABASE` ou `SYSTEM` les objets systèmes ne seront pas concernés par le déplacement si l'option `TABLESPACE` est utilisée.
 
-```
+```sql
 -- Test d'un déplacement d'index sur une table système
 test=# reindex (tablespace tbs) table pg_aggregate;
 ERROR:  cannot move system relation "pg_aggregate_fnoid_index"
