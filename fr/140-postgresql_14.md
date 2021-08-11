@@ -304,7 +304,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Nouveautées sur REINDEX et reindexdb
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/109_add_support_for_partitioned_tables_and_indexes_in_reindex.md
 
 ----
 
