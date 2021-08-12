@@ -308,10 +308,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+#### autovacuum gère désormais correctement les statistiques sur les tables partitionnées
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/110_autovacuum_handle_analyze_for_partitioned_tables.md
 
 ----
 
