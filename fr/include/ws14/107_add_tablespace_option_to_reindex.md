@@ -104,7 +104,7 @@ test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') 
  enfant_2_id_idx |         16395
 ```
 
-* Les index des tables `TOAST` sont concervés dans leur tablespace d'origine.
+* Les index des tables `TOAST` sont conservés dans leur tablespace d'origine.
 
 ```sql
 -- On dispose d'une table blog avec une table TOAST.
