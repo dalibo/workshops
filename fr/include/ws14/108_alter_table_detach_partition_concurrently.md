@@ -27,7 +27,7 @@ Son fonctionnement repose sur le mode _multi-transactions_ (2 au total) et ne re
 
 Dans le cas d'une annulation ou d'un crash lors de la deuxième transaction, la commande `ALTER TABLE...DETACH PARTITION...FINALIZE` sera exécutée pour terminer l'opération.
 
-Lors de la séparation d'une partition, une contrainte `CHECK` est créée à l'identique de la contrainte de partionnement. Celle-ci peut être supprimée par la suite.
+Lors de la séparation d'une partition, une contrainte `CHECK` est créée à l'identique de la contrainte de partitionnement. Celle-ci peut être supprimée par la suite.
 
 Cependant, en cas de rattachement de la partition, le système n'aura pas besoin d'effectuer un parcours de la table pour valider la contrainte de partition si cette contrainte existe.
 Sans elle, la table sera parcourue entièrement pour valider la contrainte de partition tout en ayant un verrou de niveau `ACCESS EXCLUSIVE` sur la table parente.
