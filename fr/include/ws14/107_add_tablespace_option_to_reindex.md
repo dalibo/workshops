@@ -101,14 +101,21 @@ test=# reindex (tablespace tbs) table parent;
 \newpage
 ```sql
 -- Seuls les index des partitions ont été déplacés.
-test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p 
-      JOIN pg_class c ON (c.oid = p.relid);
+test=# SELECT c.relname, CASE 
+                WHEN c.reltablespace = 0 THEN td.spcname 
+                ELSE tr.spcname
+              END spcname
+         FROM pg_partition_tree('parent_index') p
+         JOIN pg_class c ON (c.oid = p.relid)
+         JOIN pg_database d ON (d.datname = current_database())
+         JOIN pg_tablespace td ON (d.dattablespace = td.oid)
+    LEFT JOIN pg_tablespace tr ON (c.reltablespace = tr.oid);
 
-     relname     | reltablespace 
------------------+---------------
- parent_index    |             0
- enfant_1_id_idx |         16395
- enfant_2_id_idx |         16395
+     relname     |  spcname   
+-----------------+------------
+ parent_index    | pg_default
+ enfant_1_id_idx | tbs
+ enfant_2_id_idx | tbs
 ```
 
 * Les index des tables `TOAST` sont conservés dans leur tablespace d'origine.
