@@ -174,7 +174,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Sécurité
 
 <div class="slide-content">
-  * L'authentication repose par défaut sur SCRAM-SHA-256
+  * L'authentification repose par défaut sur SCRAM-SHA-256
   * Nouveaux rôles prédéfinis
 </div>
 
@@ -286,7 +286,7 @@ Nous allons décrire ces nouveautés plus en détail.
 <div class="slide-content">
   * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
   * Nouveautées sur REINDEX et reindexdb
-  * autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+  * autovacuum gère désormais correctement les statistiques sur les tables partitionnées
 </div>
 
 <div class="notes">
@@ -301,14 +301,14 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Nouveautées sur REINDEX et reindexdb
+#### Nouveautés sur REINDEX et reindexdb
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-#### autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+#### autovacuum gère désormais correctement les statistiques sur les tables partitionnées
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 -->
 !include include/ws14/EXEMPLE.md
@@ -320,7 +320,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Divers
 
 <div class="slide-content">
-  * Compression des toast configuratble en : LZ4 et pglz
+  * Compression des toast configurable en LZ4 et pglz
   * Nouvelle option pour VACUUM : PROCESS_TOAST
   * Nouvelle fonction pour attendre lorsque l'on arrête un backend
 </div>
@@ -330,7 +330,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Compression des toast configuratble en : LZ4 et pglz
+#### Compression des toast configurable en : LZ4 et pglz
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 -->
 !include include/ws14/EXEMPLE.md
@@ -372,8 +372,8 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Réplication Physique
 
 <div class="slide-content">
-  * Autorise pg_rewind a utiliser une standby comme source
-  * Nouveaux paramètre de connexion dans libpq
+  * Autorise pg_rewind à utiliser un secondaire comme source
+  * Nouveau paramètre de connexion dans libpq
 </div>
 
 <div class="notes">
@@ -381,21 +381,21 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Autorise pg_rewind a utiliser une standby comme source
+#### Autorise pg_rewind a utiliser un secondaire comme source
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-#### Nouveaux paramètre de connexion dans libpq
+#### Nouveau paramètre de connexion dans libpq
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-### Réplication Logique - slide commun (#115)
+### Réplication logique - slide commun (#115)
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114
      * logical streaming of large in-progress transactions
@@ -445,14 +445,14 @@ possible.
 
 <div class="slide-content">
   * Fonction string_to_table
-  * Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
+  * Nouvelle syntaxe OR REPLACE pour la modification d'un trigger
   * PL/pgSQL : assignation pour les types complexes
   * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
   * GROUP BY DISTINCT
   * Corps de routines respectant le standard SQL
   * Nouvelles clauses SEARCH et CYCLE
   * Nouvelle fonction date_bin
-  * Possiblité d'attacher un alias à un JOIN .. USING
+  * Possibilité d'attacher un alias à un JOIN .. USING
 </div>
 
 <div class="notes">
@@ -467,7 +467,7 @@ possible.
 
 ----
 
-### Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
+### Nouvelle syntaxe OR REPLACE pour la modification d'un trigger
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/119 -->
 !include include/ws14/119_create_or_replace_trigger.md
@@ -523,7 +523,7 @@ possible.
 
 ----
 
-### Possiblité d'attacher un alias à un JOIN .. USING
+### Possibilité d'attacher un alias à un JOIN .. USING
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 -->
 !include include/ws14/127_allow_an_alias_to_be_attached_directly_to_a_join_using.md
@@ -538,10 +538,10 @@ possible.
   * Nouvelle vue pg_stat_wal
   * Nouvelle vue pg_stat_progress_copy
   * Nouvelle vue pg_stat_replication_slots
-  * Nouveautées dans pg_stat_statements
+  * Nouveautés dans pg_stat_statements
   * Ajout de statistiques sur les sessions dans pg_stat_database
   * Identifiant pour les requêtes normalisées
-  * Ajout de la colonne wait_start dans pg_locks
+  * Ajout de la colonne waitstart dans pg_locks
 
 </div>
 
@@ -592,7 +592,7 @@ possible.
 
 ----
 
-### Ajout de la colonne wait_start dans pg_locks
+### Ajout de la colonne waitstart dans pg_locks
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
 !include include/ws14/EXEMPLE.md
@@ -605,8 +605,8 @@ possible.
 
 <div class="slide-content">
   * Amélioration de l'indexation
-  * Amélioration des performances avec un grand nombre de connexions read-only
-  * Amélioration des performances de la recovery
+  * Amélioration des performances avec un grand nombre de connexions en lecture seule
+  * Amélioration des performances de la restauration
   * Autres améliorations
 </div>
 
@@ -622,14 +622,14 @@ possible.
 
 ----
 
-### Amélioration des performances avec un grand nombre de connexions read-only
+### Amélioration des performances avec un grand nombre de connexions en lecture seule
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-### Amélioration des performances de la recovery
+### Amélioration des performances de la restauration
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/138 -->
 !include include/ws14/EXEMPLE.md

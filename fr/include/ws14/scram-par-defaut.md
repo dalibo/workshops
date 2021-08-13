@@ -15,7 +15,7 @@ Défaut à présent : `password_encryption` = `scram-sha-256`
 <div class="notes">
 
 L'ancienne méthode de chiffrement MD5 utilisée jusque là par défaut est
-obsolète.  Depuis PostgreSQL 10, on pouvait la remplacer par un nouvel
+obsolète. Depuis PostgreSQL 10, on pouvait la remplacer par un nouvel
 algorithme bien plus sûr : SCRAM-SHA-256.
 
 Il s'agit de l'implémentation du _Salted Challenge Response Authentication

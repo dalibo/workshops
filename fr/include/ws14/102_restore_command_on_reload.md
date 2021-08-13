@@ -19,11 +19,12 @@ Discussion
 
 <div class="notes">
 
-La modification du paramètres `restore_command` ne nécessite plus de redémarrage
-pour que l'instance secondaire prenne en compte sa nouvelle valeur.
+La modification du paramètres `restore_command` ne nécessite plus de
+redémarrage pour que l'instance secondaire prenne en compte sa nouvelle
+valeur. Un simple rechargement suffit.
 
 Cette amélioration permet de ne plus redémarrer un réplica lorsque la provenance
-des archives de journaux de transaction est modifiée. Les session en cours sont
+des archives de journaux de transaction est modifiée. Les sessions en cours sont
 donc maintenues sans risque lors de la manipulation.
 
 </div>

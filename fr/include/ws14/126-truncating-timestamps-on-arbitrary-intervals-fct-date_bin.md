@@ -23,7 +23,7 @@ Discussion
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
 
-La nouvelle fonction `date_bin` permet placer un timestamp fournit en entrée 
+La nouvelle fonction `date_bin` permet de placer un timestamp fourni en entrée 
 (second paramètre) dans un intervalle aussi appellée _bucket_.
 
 Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
@@ -32,7 +32,7 @@ Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
-La valeur mise en second paramètre de la fonction est placée dans un _buckets_
+La valeur mise en second paramètre de la fonction est placée dans un _bucket_
 en se basant sur :
 
 * Un timestamp de début (troisième paramètre).
@@ -40,7 +40,7 @@ en se basant sur :
   L'unité utilisée pour définir la taille du _bucket_ peut être définie \
   en secondes, minutes, heures, jours ou semaines.
 
-La fonction existe pour des timestamp avec et sans timezone :
+La fonction existe pour des timestamp avec et sans fuseau horaire :
 
 ```sql
 =# \df date_bin
