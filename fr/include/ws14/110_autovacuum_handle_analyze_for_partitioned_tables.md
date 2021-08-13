@@ -12,7 +12,7 @@ Discussion
 
 <div class="slide-content">
 
-* `ANALYZE` sur les tables partitionnées grâce à l'autovacuum
+* Les tables partitionnées ne sont plus exclues lors de la phase `ANALYZE` de l'autovacuum
 * Permet d'améliorer les choix de l'optimiseur
 
 </div>
@@ -20,7 +20,7 @@ Discussion
 <div class="notes">
 
 Avant la version 14, l'autovacuum ignorait les tables partitionnées. Ce comportement avait pour conséquence de ne générer aucune statistique pour ces objets et pouvait provoquer des mauvais choix de plan d'exécution.
-Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel. Avec cette nouvelle version, ce n'est plus le cas et les statistiques des tables partitionnées sont analysées comme pour une table classique en 
+Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel. Avec cette nouvelle version, ce n'est plus le cas et les statistiques des tables partitionnées sont collectées comme pour une table classique en 
 fonction des paramètres `autovacuum_analyze_scale_factor` et `autovacuum_analyze_threshold`.
 
 ```sql
