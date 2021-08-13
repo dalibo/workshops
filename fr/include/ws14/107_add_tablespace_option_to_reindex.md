@@ -130,7 +130,7 @@ test=# \d blog
  title   | text    |                 |           |            
  content | text    |                 |           |            
 Index :
-    "idx_blog" btree (title)
+    "blog_title_idx" btree (title)
 
 test=# \d+ pg_toast.pg_toast_16417
 Table TOAST « pg_toast.pg_toast_16417 »
@@ -153,7 +153,7 @@ test=# SELECT c.relname, t.spcname FROM pg_class c
 
      relname     | spcname 
 -----------------+---------
-idx_blog         | tbs
+blog_title_idx   | tbs
 ```
 \newpage
 ```sql
