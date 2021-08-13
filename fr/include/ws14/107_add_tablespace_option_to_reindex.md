@@ -79,14 +79,21 @@ test=# SELECT * FROM pg_partition_tree('parent_index');
  enfant_2_id_idx | parent_index | t      |     1
 
 -- Tous les index sont dans le tablespace pg_default.
-test=# select c.relname, c.reltablespace from pg_partition_tree('parent_index') p 
-      JOIN pg_class c ON (c.oid = p.relid);
+test=# SELECT c.relname, CASE 
+                WHEN c.reltablespace = 0 THEN td.spcname 
+                ELSE tr.spcname
+              END spcname
+         FROM pg_partition_tree('parent_index') p
+         JOIN pg_class c ON (c.oid = p.relid)
+         JOIN pg_database d ON (d.datname = current_database())
+         JOIN pg_tablespace td ON (d.dattablespace = td.oid)
+    LEFT JOIN pg_tablespace tr ON (c.reltablespace = tr.oid);
 
-     relname     | reltablespace 
------------------+---------------
- parent_index    |             0
- enfant_1_id_idx |             0
- enfant_2_id_idx |             0
+     relname     |  spcname   
+-----------------+------------
+ parent_index    | pg_default
+ enfant_1_id_idx | pg_default
+ enfant_2_id_idx | pg_default
 
 -- Reindexation de la table parent avec l'option TABLESPACE.
 test=# reindex (tablespace tbs) table parent;
