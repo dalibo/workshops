@@ -35,7 +35,7 @@ Elle pourra bien entendu être supprimée après le rattachement de la partition
 
 ```sql
 -- On dispose d'une table partitionnée avec deux partitions
-test=# \d parent
+test=# \d+ parent
                      Table partitionnée « public.parent »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
@@ -44,17 +44,16 @@ Clé de partition : RANGE (id)
 Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_2 FOR VALUES FROM (5000000) TO (11000000)
 
--- Nous allons procéder au détachement de la partition enfant_2
 test=# \d enfant_2
                      Table « public.enfant_2 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
  id      | integer |                 |           |            
 Partition de : parent FOR VALUES FROM (5000000) TO (11000000)
-Contrainte de partition : ((id IS NOT NULL) AND (id >= 5000000) AND (id < 11000000))
 Index :
     "enfant_2_id_idx" btree (id)
 
+-- Nous allons procéder au détachement de la partition enfant_2
 test=# alter table parent detach partition enfant_2 concurrently ;
 
 -- Une contrainte CHECK a été créée
