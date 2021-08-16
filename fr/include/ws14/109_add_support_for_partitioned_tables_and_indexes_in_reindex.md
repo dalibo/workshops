@@ -95,8 +95,6 @@ ERROR:  REINDEX INDEX cannot run inside a transaction block
 CONTEXTE : while reindexing partitioned index "public.parent_index"
 ```
 
-\newpage
-
-Concernant la vue `pg_stat_progress_create_index`, qui donne des informations sur l'état de progression des commandes `CREATE INDEX` et `REINDEX`. Celle-ci ne sera malheureusement pas utlisable car les deux colonnes qui nous intéressent `partitions_total` (nombre total de partitions sur lesquelles l'index est à créer) et `partitions_done` (nombre total de partitions sur lesquelles l'index a déjà été créé) sont positionnées à 0 durant la durée de l'opération. La progression d'un `REINDEX` sur des tables ou index partionnés est donc pour le moment difficilement contrôlable.
+La vue `pg_stat_progress_create_index` ne sera malheureusement pas utlisable car les deux colonnes qui nous intéressent `partitions_total` et `partitions_done` sont positionnées à 0 durant la durée de l'opération.
 
 </div>
