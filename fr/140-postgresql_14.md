@@ -206,6 +206,7 @@ Nous allons décrire ces nouveautés plus en détail.
   * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
   * Modification à chaud du paramètre `restore_command`
   * Détection des déconnexions pendant l'exécution d'une requête
+  * Changements mineurs de configuration
 </div>
 
 <div class="notes">
@@ -240,6 +241,13 @@ Nous allons décrire ces nouveautés plus en détail.
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/103 -->
 !include include/ws14/103_client_connection_check_interval.md
+
+----
+
+#### Changements mineurs de configuration
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/141 -->
+!include include/ws14/141_changements_mineurs_de_la_configuration.md
 
 ----
 
