@@ -560,7 +560,7 @@ possible.
 ### Nouvelle vue pg_stat_progress_copy
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/133_simple_progress_reporting_for_copy_command.md
 
 ----
 
