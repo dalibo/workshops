@@ -391,7 +391,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Nouveau paramètre de connexion dans libpq
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/114_new_libpq_option_to_prefer_standby_for_connection.md
 
 ----
 
