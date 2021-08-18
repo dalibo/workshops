@@ -12,7 +12,7 @@ Discussion
 
 <div class="slide-content">
 
-* Nouvelles options disponibles pour le paramètre `target_session_attrs` de `libpq` (`read-only`, `primary`, `standby`, et `prefer-standby`)
+* Nouvelles options disponibles pour le paramètre `target_session_attrs` (`read-only`, `primary`, `standby`, et `prefer-standby`)
 
 </div>
 
