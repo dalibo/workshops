@@ -42,9 +42,9 @@ tuples_processed | 5570696
 tuples_excluded  | 0
 ```
 
-Parmis ces infomrations, on retrouve le type de `COPY` exécuté (champ `command`), le type d'entrée/sortie utilisé (champ `type`), ainsi que le nombre d'octets déjà traités (champ `bytes_processed`) et le nombre de lignes déjà insérées (champ `tuples_processed`).
+Parmis ces informations, on retrouve le type de `COPY` exécuté (`command`), le type d'entrée/sortie utilisé (`type`), ainsi que le nombre d'octets déjà traités (`bytes_processed`) et le nombre de lignes déjà insérées (`tuples_processed`).
 
-Pour le champ `tuples_excluded`, celui-ci n'est renseigné qu'en cas d'utilisation d'une clause `WHERE` et remonte le nombre de lignes exclues par cette même clause.
+Pour le champ `tuples_excluded`, il n'est renseigné qu'en cas d'utilisation d'une clause `WHERE` et remonte le nombre de lignes exclues par cette même clause.
 
 ```sql
 test=# copy test_copy from '/tmp/test_copy' where i > 1000;
