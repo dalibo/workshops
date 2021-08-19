@@ -581,7 +581,7 @@ possible.
 ### Ajout de statistiques sur les sessions dans pg_stat_database
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/131_add_session_statistics_to_pg_stat_database.md
 
 ----
 
