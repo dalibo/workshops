@@ -15,14 +15,14 @@ Discussion
 * Il est maintenant possible de compresser les données `TOAST` au format `lz4`
 * Nécessite l'option `--with-lz4` à la compilation
 * Plusieurs niveaux de définition (globale ou par colonne)
-* Nouvel option `--no-toast-compression` pour `pg_dump`
+* Nouvelle option `--no-toast-compression` pour `pg_dump`
 * N'affecte pas le fonctionnement de la réplication
 
 </div>
 
 <div class="notes">
 
-Historiquement, le seul algorithme de compression disponible dans PostgreSQL était `pglz`. Avec l'arrivée de la version 14, il est maintenant possible d'utiliser `lz4` et de définir un type de compression jusqu'au niveau d'une colonne.
+Historiquement, le seul algorithme de compression disponible dans PostgreSQL était `pglz`. À présent, il est possible d'utiliser `lz4` et de définir un type de compression jusqu'au niveau d'une colonne.
 
 Afin de pouvoir utiliser `lz4`, il faudra veiller à ce que PostgreSQL ait bien été compilé avec l'option `--with-lz4` et que le paquet `liblz4-dev` pour Debian ou `lz4-devel` pour RedHat soit installé.
 
@@ -45,7 +45,7 @@ test=# \d+ t1
 ---------+------+-----------------+-----------+------------+----------+-------------
  champ1  | text |                 |           |            | extended | lz4         
 
-test=# alter table t1 alter COLUMN champ1 set compression pglz;
+test=# alter table t1 alter column champ1 set compression pglz;
 
 test=# \d+ t1
                                                    Table « public.t1 »
@@ -55,7 +55,7 @@ test=# \d+ t1
 
 ```
 
-* Via le paramètre `default_toast_compression` dans le fichier `postgresql.conf`, la valeur par defaut étant `pglz`. Sa modification ne nécessite qu'un simple `RELOAD` de l'instance. Ce paramètre étant global à l'instance, il n'est pas prioritaire sur la clause `COMPRESSION` des commandes `CREATE TABLE` et `ALTER TABLE`.
+* Via le paramètre `default_toast_compression` dans le fichier `postgresql.conf`, la valeur par defaut étant `pglz`. Sa modification ne nécessite qu'un simple rechargement de l'instance. Ce paramètre étant global à l'instance, il n'est pas prioritaire sur la clause `COMPRESSION` des commandes `CREATE TABLE` et `ALTER TABLE`.
 
 ```sql
 test=# show default_toast_compression;
@@ -71,7 +71,7 @@ test=# show default_toast_compression;
  lz4
 ```
 
-La modification du type de compression qu'elle soit globale ou spécifique à un objet n'entraînera aucune réécriture, seules les futures données insérées seront concernées. Il est donc tout à fait possible d'avoir des lignes compressées différemment dans une même table.
+La modification du type de compression, qu'elle soit globale ou spécifique à un objet, n'entraînera aucune réécriture, seules les futures données insérées seront concernées. Il est donc tout à fait possible d'avoir des lignes compressées différemment dans une même table.
 
 Une nouvelle fonction est également disponible : `pg_column_compression()` retourne l'algorithme de compression qui a été utilisé lors de l'insertion d'une ligne.
 
@@ -95,7 +95,7 @@ test=# select pg_column_compression(champ2) from t2;
  lz4
 ```
 
-Point particulier concernant les commandes de type `CREATE TABLE AS`, `SELECT INTO` ou encore `INSERT ... SELECT`, les valeurs déjà compressées dans la table source ne seront pas recompresser lors de l'insertion pour des raisons de performance.
+Point particulier concernant les commandes de type `CREATE TABLE AS`, `SELECT INTO` ou encore `INSERT ... SELECT`, les valeurs déjà compressées dans la table source ne seront pas recompressées lors de l'insertion pour des raisons de performance.
 
 ```sql
 test=# select pg_column_compression(champ2) from t2;
