@@ -12,7 +12,8 @@ Discussion
 
 <div class="slide-content">
 
-* Nouvelles options disponibles pour le paramètre `target_session_attrs` (`read-only`, `primary`, `standby`, et `prefer-standby`)
+* Nouvelles options pour le paramètre `target_session_attrs`
+  * `read-only`, `primary`, `standby`, et `prefer-standby`
 
 </div>
 
@@ -23,8 +24,11 @@ En plus des options `any` (qui reste celle par défaut) et `read-write`, le para
 * `read-only`, le serveur ne doit accepter que les sessions en lecture seule (mode _hot standby_ ou `default_transaction_read_only` à `on`).
 * `primary`, le serveur ne doit pas être en mode _hot standby_.
 * `standby`, le serveur doit être en mode _hot standby_.
-* `prefer-standby`, dans un premier temps, essaie de trouver un serveur _standby_ sinon utilise le mode `any`.
+* `read-only`, l'instance ne doit accepter que les sessions en lecture seule (mode _hot standby_ ou `default_transaction_read_only` à `on`).
+* `primary`, l'instance ne doit pas être en mode _hot standby_.
+* `standby`, l'instance doit être en mode _hot standby_.
+* `prefer-standby`, dans un premier temps, essaie de trouver une instance secondaire, sinon utilise le mode `any`.
 
-A partir de la version 14, aucune communication réseau supplémentaire ne sera nécessaire pour obtenir l'état de la session ou du serveur. Les variables GUC fournies sont suffisantes. Pour les versions plus anciennes, une requête `SHOW` ou `SELECT` peut être émise pour afin de détecter si la session est en lecture seule ou si le serveur est en mode _hot standby_.
+Avec ces nouvelles options, aucune communication réseau supplémentaire ne sera nécessaire pour obtenir l'état de la session ou du serveur. Les variables GUC fournies sont suffisantes. Pour les versions plus anciennes, une requête `SHOW` ou `SELECT` devait être émise afin de détecter si la session était en lecture seule ou si l'instance était en mode _hot standby_.
 
 </div>
