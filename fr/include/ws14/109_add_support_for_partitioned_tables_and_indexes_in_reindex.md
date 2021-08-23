@@ -28,10 +28,10 @@ Jusqu'à la version 13, la commande `REINDEX` ne pouvait pas être utilisée sur
 ```sql
 -- Avec la version 13 de PostgreSQL, on obtient ce type d'erreur
 -- lorsque l'on tente de réindexer une table ou un index partitionné
-test=# reindex index parent_index;
+test=# REINDEX TABLE parent_index;
 ERREUR:  REINDEX n'est pas implémenté pour des index partitionnés
 
-test=# reindex table parent;
+test=# REINDEX TABLE parent;
 ATTENTION:  REINDEX n'est pas encore implémenté pour les tables partitionnées, « parent » ignoré
 NOTICE:  la table « parent » n'a pas d'index à réindexer
 REINDEX
@@ -58,43 +58,45 @@ test=# SELECT * FROM pg_partition_tree('parent_index');
  enfant_2_id_idx | parent_index | t      |     1
 
 -- Visualisation de la fragmentation des index des partitions
-test=# select avg_leaf_density, leaf_fragmentation from pgstatindex('enfant_1_id_idx');
+test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.18 |                 50
 
-test=# select avg_leaf_density, leaf_fragmentation from pgstatindex('enfant_2_id_idx');
+test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.17 |                 50
 
 -- Réindexation
-test=# reindex index parent_index;
+test=# REINDEX INDEX parent_index;
 
 -- Vérification de la fragmentation des index des partitions
-test=# select avg_leaf_density, leaf_fragmentation from pgstatindex('enfant_1_id_idx');
+test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0
 
-test=# select avg_leaf_density, leaf_fragmentation from pgstatindex('enfant_2_id_idx');
+test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0
 ```
 
-Côté fonctionnement, celui-ci est _multi transactions_. C'est-à-dire que chaque partition est traitée dans une transaction spécifique.
+Côté fonctionnement, celui-ci est _multi transactions_. C'est-à-dire que chaque partition est traitée séquentiellement dans une transaction spécifique.
 Cela à pour avantage de minimiser le nombre d'index invalides en cas d'annulation ou d'échec avec la commande `REINDEX CONCURRENTLY`.
 Cependant, cela empêche son fonctionnement dans un bloc de transaction.
 
 ```sql
-test=# begin;
+test=# BEGIN;
 BEGIN
-test=*# reindex index parent_index;
+test=*# REINDEX INDEX parent_index;
 ERROR:  REINDEX INDEX cannot run inside a transaction block
 CONTEXTE : while reindexing partitioned index "public.parent_index"
 ```
 
-La vue `pg_stat_progress_create_index` ne sera malheureusement pas utlisable car les deux colonnes qui nous intéressent `partitions_total` et `partitions_done` sont positionnées à 0 durant la durée de l'opération.
+Les colonnes `partitions_total` et `partitions_done` de la vue `pg_stat_progress_create_index`
+sont positionnées à 0 durant la durée de l'opération. Il est néanmoins possible de voir les
+`REINDEX` passer les un après les autres dans cette vue.
 
 </div>
