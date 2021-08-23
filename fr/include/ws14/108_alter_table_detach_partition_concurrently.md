@@ -23,9 +23,20 @@ Discussion
 <div class="notes">
 
 Détacher une partition peut maintenant se faire de façon non bloquante grâce à la commande `ALTER TABLE...DETACH PARTITION...CONCURRENTLY`.
-Son fonctionnement repose sur le mode _multi-transactions_ (2 au total) et ne requiert qu'un verrou `SHARE UPDATE EXCLUSIVE` sur la table partitionnée.
+Son fonctionnement repose sur l'utilisation de deux transactions :
+* La première ne requiert qu'un verrou `SHARE UPDATE EXCLUSIVE` sur la table
+  partitionnée et la partition. Pendant cette phase, la partition est marquée
+  comme en cours de détachement, la transaction est validée et on attend
+  que toutes les transactions qui utilisent la partition se terminent. Cette
+  phase est nécessaire pour s'assurer que tout le monde voie le changement de
+  statut de la partition.
+* Pendant la seconde, un verrou `SHARE UPDATE EXCLUSIVE` est placé surla table
+  partitionnée et un verrou `ACCESS EXCLUSIVE` sur la partition pour terminer
+  le processus de détachement.
 
-Dans le cas d'une annulation ou d'un crash lors de la deuxième transaction, la commande `ALTER TABLE...DETACH PARTITION...FINALIZE` sera exécutée pour terminer l'opération.
+Dans le cas d'une annulation ou d'un crash lors de la deuxième transaction,
+la commande `ALTER TABLE...DETACH PARTITION...FINALIZE` devra être exécutée
+pour terminer l'opération.
 
 Lors de la séparation d'une partition, une contrainte `CHECK` est créée à l'identique de la contrainte de partitionnement. Celle-ci peut être supprimée par la suite.
 
@@ -54,7 +65,7 @@ Index :
     "enfant_2_id_idx" btree (id)
 
 -- Nous allons procéder au détachement de la partition enfant_2
-test=# alter table parent detach partition enfant_2 concurrently ;
+test=# ALTER TABLE parent DETACH PARTITION enfant_2 CONCURRENTLY ;
 
 -- Une contrainte CHECK a été créée
 -- Celle-ci correspond à la contrainte de partition
@@ -74,13 +85,16 @@ Concernant les restrictions :
 * Il n'est pas possible d'utiliser `ALTER TABLE...DETACH PARTITION...CONCURRENTLY` dans un bloc de transactions à cause de son mode _multi-transactions_.
 
 ```sql
-test=# begin;
+test=# BEGIN;
 BEGIN
-test=*# alter table parent detach partition enfant_2 concurrently ;
+test=*# ALTER TABLE parent DETACH PARTITION enfant_2 CONCURRENTLY;
 ERROR:  ALTER TABLE ... DETACH CONCURRENTLY cannot run inside a transaction block
 ```
 
-* Il est impossible d'utiliser cette commande si une partition par défaut existe car il faut obtenir un verrou de type `exclusive lock` dessus.
+* Il est impossible d'utiliser cette commande si une partition par défaut existe
+  car les contrainte associées sont trop importante pour le mode concurrent. En
+  effet, il faut obtenir un verrou de type `EXCLUSIVE LOCK` sur la partition par
+  defaut.
 \newpage
 ```sql
 -- On dispose d'une table partitionnée et de trois partitions
@@ -96,7 +110,7 @@ Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_3 DEFAULT
 
 -- On tente de détacher la partition enfant_1
-test=# alter table parent detach partition enfant_1 concurrently ;
+test=# ALTER TABLE parent DETACH PARTITION enfant_1 CONCURRENTLY;
 ERROR:  cannot detach partitions concurrently when a default partition exists
 ```
 
