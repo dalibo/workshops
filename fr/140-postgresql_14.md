@@ -340,7 +340,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Nouvelle option pour VACUUM : PROCESS_TOAST
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/112_add_option_process_toast_to_vacuum.md
 
 ----
 
