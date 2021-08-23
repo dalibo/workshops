@@ -114,7 +114,10 @@ test=# select pg_column_compression(champ2) from t3;
 ```
 
 Concernant la réplication, il est possible de rejouer les WAL qui contiennent des données compressées avec `lz4` sur une instance secondaire via les réplications physique ou logique même si celle-ci ne dispose pas de `lz4`.
-Il faudra cependant faire attention en cas d'utilisation d'algorithmes différents entre primaire et secondaire notamment au niveau de la volumétrie et du temps nécessaire à la compression.
+
+Principal inconvénient de la réplication physique, toute tentative de lecture de ces données entraînera une erreur.
+
+La réplication logique n'est pas impactée par ce problème, les données seront compressées en utilisant l'algorithme configuré sur le secondaire. Il faudra cependant faire attention en cas d'utilisation d'algorithmes différents entre primaire et secondaire notamment au niveau de la volumétrie et du temps nécessaire à la compression.
 
 ```sql
 -- Un exemple simple afin de mettre en évidence la différence
