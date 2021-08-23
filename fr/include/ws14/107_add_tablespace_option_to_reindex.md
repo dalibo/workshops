@@ -42,7 +42,7 @@ Index :
     "idx_col1" btree (col1)
 
 -- Réindexation de la table t1 et déplacement de l'index idx_col1 dans le tablespace tbs.
-test=# reindex (tablespace tbs) table t1 ;
+test=# REINDEX (TABLESPACE tbs) TABLE t1 ;
 
 -- L'index a bien été déplacé.
 test=# SELECT c.relname, t.spcname FROM pg_class c 
@@ -95,7 +95,7 @@ test=# SELECT c.relname, CASE
  enfant_2_id_idx | pg_default
 
 -- Reindexation de la table parent avec l'option TABLESPACE.
-test=# reindex (tablespace tbs) table parent;
+test=# REINDEX (TABLESPACE tbs) TABLE parent;
 
 -- Seuls les index des partitions ont été déplacés.
 test=# SELECT c.relname, CASE 
@@ -115,7 +115,8 @@ test=# SELECT c.relname, CASE
  enfant_2_id_idx | tbs
 ```
 
-* Les index des tables `TOAST` sont conservés dans leur tablespace d'origine.
+* Les index des tables `TOAST` sont conservés dans leur tablespace d'origine. Ils seront
+  déplacés avec la table `TOAST` si la table utilisateur rattachée est déplacée.
 
 ```sql
 -- On dispose d'une table blog avec une table TOAST.
@@ -141,7 +142,7 @@ Index :
     "pg_toast_16417_index" PRIMARY KEY, btree (chunk_id, chunk_seq)
 
 -- réindexation de la table blog
-test=# reindex (tablespace tbs) table blog;
+test=# REINDEX (TABLESPACE tbs) TABLE blog;
 
 -- Seul l'index de la table blog à été déplacé.
 -- Celui de la table TOAST a uniquement été reconstruit.
@@ -162,11 +163,11 @@ ERROR:  cannot move system relation "pg_toast_16417_index"
 
 ```sql
 -- Test d'un déplacement d'index sur une table système.
-test=# reindex (tablespace tbs) table pg_aggregate;
+test=# REINDEX (TABLESPACE tbs) TABLE pg_aggregate;
 ERROR:  cannot move system relation "pg_aggregate_fnoid_index"
 
 -- Test d'une réindexation de BDD avec déplacement des index.
-test=# reindex (tablespace tbs) database test;
+test=# REINDEX (TABLESPACE tbs) DATABASE test;
 WARNING:  cannot move system relations, skipping all
 REINDEX
 ```
