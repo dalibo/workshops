@@ -113,7 +113,7 @@ test=# select pg_column_compression(champ2) from t3;
  lz4
 ```
 
-Concernant la réplication, il est possible de rejouer sur un serveur _standby_ des WAL qui contiennent des données compressées avec `lz4` via réplication physique ou logique même si celui-ci ne dispose pas de `lz4`.
+Concernant la réplication, il est possible de rejouer les WAL qui contiennent des données compressées avec `lz4` sur une instance secondaire via les réplications physique ou logique même si celle-ci ne dispose pas de `lz4`.
 Il faudra cependant faire attention en cas d'utilisation d'algorithmes différents entre primaire et secondaire notamment au niveau de la volumétrie et du temps nécessaire à la compression.
 
 ```sql
