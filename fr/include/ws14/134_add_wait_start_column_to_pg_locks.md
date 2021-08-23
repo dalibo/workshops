@@ -18,7 +18,7 @@ Discussion
 
 <div class="notes">
 
-Cette nouvelle version vient ajouter la colonne `waitstart` à la vue système `pg_locks`. Elle indique l'heure à laquelle le processus serveur a commencé à attendre un verrou ou `null` si le verrou est détenu. Afin d'éviter tout surcôut, la mise à jour de cette colonne est faite sans pause de verrou, il est donc possible que la valeur de `waitstart` soit à `null` pendant une très courte période après le début d'une attente et ce même si la colonne `granted` est à `false`.
+La vue système `pg_locks` présente une nouvelle colonne `waitstart`. Elle indique l'heure à laquelle le processus serveur a commencé l'attente d'un verrou ou alors `null` si le verrou est détenu. Afin d'éviter tout surcôut, la mise à jour de cette colonne est faite sans pause de verrou, il est donc possible que la valeur de `waitstart` soit à `null` pendant une très courte période après le début d'une attente et ce même si la colonne `granted` est à `false`.
 
 ```sql
 -- Une transaction pose un verrou
