@@ -340,7 +340,7 @@ localhost:5444 postgres@postgres=# EXPLAIN (ANALYZE) SELECT * FROM nummultirange
 -->
 
 La documentation détaille l'ensemble des
-[operateurs](https://www.postgresql.org/docs/14/functions-range.html#RANGE-OPERATORS-TABLE),
+[opérateurs](https://www.postgresql.org/docs/14/functions-range.html#RANGE-OPERATORS-TABLE),
 [fonctions](https://www.postgresql.org/docs/14/functions-range.html#RANGE-FUNCTIONS-TABLE),
 et [agrégats](https://www.postgresql.org/docs/14/functions-aggregate.html)
 disponibles pour ce nouveau

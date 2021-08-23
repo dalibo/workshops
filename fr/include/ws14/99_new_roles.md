@@ -71,7 +71,7 @@ afin de faciliter l'application de droits d'une base de données _template_, pr�
 à être déployée. À la création d'une nouvelle base à partir de ce _template_, les droits 
 qui lui ont été donnés s'appliqueront au propriétaire de cette base de données.
 
-Le rôle `pg_database_owner` ne peut pas être octroyé directement à une autre rôle,
+Le rôle `pg_database_owner` ne peut pas être octroyé directement à un autre rôle,
 comme le montre le message ci-dessous. PostgreSQL considère qu'il ne peut y avoir
 qu'un seul propriétaire par base de données.
 
