@@ -14,7 +14,7 @@ Discussion
 
 <div class="slide-content">
 
-* Permet de monitorer l'activité des WAL
+* Permet de surveiller l'activité des WAL
 * Nouveau paramètre : `track_wal_io_timing`
 
 </div>
