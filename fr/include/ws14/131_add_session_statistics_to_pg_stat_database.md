@@ -25,7 +25,7 @@ Discussion
 
 <div class="notes">
 
-Avec la version 14, la vue `pg_stat_database` se voit ajouter de nouveaux compteurs orientés sessions et temps de session :
+La vue `pg_stat_database` dipose à présent de nouveaux compteurs orientés sessions et temps de session :
 
 * `session_time` : temps passé par les sessions sur cette base de données. Ce compteur n'est mis à jour que lorsque l'état d'une session change.
 * `active_time` : temps passé à exécuter des requêtes SQL sur cette base de données. Correspond aux états `active` et `fastpath function call` dans `pg_stat_activity`.
