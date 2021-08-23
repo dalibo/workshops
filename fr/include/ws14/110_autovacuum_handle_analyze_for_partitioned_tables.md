@@ -45,19 +45,19 @@ Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
 
 -- Aucune entrée dans la vue pg_stat_user_tables
 -- Pour la table partitionnée parent
-test=# select * from pg_stat_user_tables where relname = 'parent' \gx
+test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
 
 -- Aucune statistique non plus
-test=# select * from pg_stats where tablename = 'parent' \gx
+test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- On génère de l'activité
-test=# insert into parent SELECT generate_series(0,10000000);
+test=# INSERT INTO parent SELECT generate_series(0,10000000);
 
 -- Toujours aucune statistique pour la table partitionnée
-test=# select * from pg_stats where tablename = 'parent' \gx
+test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- Lancement d'un ANALYZE
-test=# analyze parent;
+test=# ANALYZE parent;
 
 -- Maintenant on dispose des statistiques
 test=# select * from pg_stats where tablename = 'parent' \gx
@@ -104,14 +104,14 @@ analyze_count       | 0
 autoanalyze_count   | 0
 
 -- Pour l'instant pas de statistique
-test=# select * from pg_stats where tablename = 'parent' \gx
+test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- On génère de l'activité
-test=# insert into parent SELECT generate_series(0,10000000);
+test=# INSERT INTO into parent SELECT generate_series(0,10000000);
 
 -- On peut voir dans la vue pg_stat_user_tables qu'un autoanalyze
 -- a été réalisé
-test=# select * from pg_stat_user_tables where relname = 'parent' \gx
+test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
 -[ RECORD 1 ]-------+------------------------------
 relid               | 16551
 schemaname          | public
@@ -123,7 +123,7 @@ last_autoanalyze    | 2021-08-12 14:29:20.905265+02
 autoanalyze_count   | 1
 
 -- On dispose également des statistiques sur la table partitionnée
-test=# select * from pg_stats where tablename = 'parent' \gx
+test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent
