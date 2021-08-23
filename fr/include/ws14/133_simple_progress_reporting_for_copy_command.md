@@ -19,7 +19,7 @@ Discussion
 
 <div class="notes">
 
-Il est maintenant possible de monitorer la progression d'un `COPY` grâce à la vue système `pg_stat_progress_copy`. Celle-ci retourne une ligne par _backend_ lancant un `COPY`.
+Il est maintenant possible de surveiller la progression d'une instruction `COPY` grâce à la vue système `pg_stat_progress_copy`. Celle-ci retourne une ligne par _backend_ lancant un `COPY`.
 
 ```sql
 test=# create table test_copy (i int);
