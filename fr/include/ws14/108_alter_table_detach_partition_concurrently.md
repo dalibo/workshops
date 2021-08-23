@@ -30,7 +30,7 @@ Son fonctionnement repose sur l'utilisation de deux transactions :
   que toutes les transactions qui utilisent la partition se terminent. Cette
   phase est nécessaire pour s'assurer que tout le monde voie le changement de
   statut de la partition.
-* Pendant la seconde, un verrou `SHARE UPDATE EXCLUSIVE` est placé surla table
+* Pendant la seconde, un verrou `SHARE UPDATE EXCLUSIVE` est placé sur la table
   partitionnée et un verrou `ACCESS EXCLUSIVE` sur la partition pour terminer
   le processus de détachement.
 
