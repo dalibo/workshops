@@ -24,7 +24,7 @@ La version 14 apporte quelques modifications mineures de configuration :
 
 * `vacuum_cost_page_miss` : sa valeur par défaut passe de 10 à 2.
 * `checkpoint_completion_target` : sa valeur par défaut passe de 0.5 à 0.9.
-* `huge_page_size` : Permet de surcharger la configuration système pour la taille des Huge Pages. Par défaut, PostgreSQL utilisera la valeur du système d'exploitation.
+* `huge_page_size` : Permet de surcharger la configuration système pour la taille des _Huge Pages_. Par défaut, PostgreSQL utilisera la valeur du système d'exploitation.
 * `log_recovery_conflict_waits` : Ce dernier, une fois activé, permet de tracer toute attente due à un conflit de réplication. Il n'est donc valable et pris en compte que sur un serveur secondaire.
 
 </div>
