@@ -43,12 +43,11 @@ Index :
 
 -- Réindexation de la table t1 et déplacement de l'index idx_col1 dans le tablespace tbs.
 test=# reindex (tablespace tbs) table t1 ;
-```
-\newpage
-```sql
+
 -- L'index a bien été déplacé.
 test=# SELECT c.relname, t.spcname FROM pg_class c 
-      JOIN pg_tablespace t ON (c.reltablespace = t.oid) where c.relname = 'index_col1';
+         JOIN pg_tablespace t ON (c.reltablespace = t.oid) 
+        WHERE c.relname = 'index_col1';
 
   relname   | spcname 
 ------------+---------
@@ -97,9 +96,7 @@ test=# SELECT c.relname, CASE
 
 -- Reindexation de la table parent avec l'option TABLESPACE.
 test=# reindex (tablespace tbs) table parent;
-```
-\newpage
-```sql
+
 -- Seuls les index des partitions ont été déplacés.
 test=# SELECT c.relname, CASE 
                 WHEN c.reltablespace = 0 THEN td.spcname 
@@ -149,14 +146,13 @@ test=# reindex (tablespace tbs) table blog;
 -- Seul l'index de la table blog à été déplacé.
 -- Celui de la table TOAST a uniquement été reconstruit.
 test=# SELECT c.relname, t.spcname FROM pg_class c 
-      JOIN pg_tablespace t ON (c.reltablespace = t.oid) where t.spcname = 'tbs';
+         JOIN pg_tablespace t ON (c.reltablespace = t.oid)
+        WHERE t.spcname = 'tbs';
 
      relname     | spcname 
 -----------------+---------
 blog_title_idx   | tbs
-```
-\newpage
-```sql
+
 -- Test de déplacement d'un index directement sur une table TOAST.
 test=# reindex (tablespace tbs) table pg_toast.pg_toast_16417;
 ERROR:  cannot move system relation "pg_toast_16417_index"
