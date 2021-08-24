@@ -60,7 +60,7 @@ test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 test=# ANALYZE parent;
 
 -- Maintenant on dispose des statistiques
-test=# select * from pg_stats where tablename = 'parent' \gx
+test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent
@@ -87,7 +87,7 @@ Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_2 FOR VALUES FROM (5000000) TO (11000000)
 
 -- Dans cette version on dispose d'une entrée dans la vue pg_stat_user_tables
-test=# select * from pg_stat_user_tables where relname = 'parent' \gx
+test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
 -[ RECORD 1 ]-------+------------------------------
 relid               | 16551
 schemaname          | public
