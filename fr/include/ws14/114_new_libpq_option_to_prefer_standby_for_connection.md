@@ -27,7 +27,16 @@ En plus des options `any` (qui reste celle par défaut) et `read-write`, le para
 * `read-only`, l'instance ne doit accepter que les sessions en lecture seule (mode _hot standby_ ou `default_transaction_read_only` à `on`).
 * `primary`, l'instance ne doit pas être en mode _hot standby_.
 * `standby`, l'instance doit être en mode _hot standby_.
-* `prefer-standby`, dans un premier temps, essaie de trouver une instance secondaire, sinon utilise le mode `any`.
+En plus des options `any` (qui reste celle par défaut) et `read-write`, le
+paramètre `target_session_attrs` de `libpq` supporte désormais les options
+suivantes :
+
+* `read-only`, le serveur ne doit accepter que les sessions en lecture seule
+  (mode _hot standby_ ou `default_transaction_read_only` à `on`) ;
+* `primary`, le serveur ne doit pas être en mode _hot standby_ ;
+* `standby`, le serveur doit être en mode _hot standby_ ;
+* `prefer-standby`, dans un premier temps, essayer de trouver une instance
+  secondaire, sinon utilise le mode `any`.
 
 Avec ces nouvelles options, aucune communication réseau supplémentaire ne sera nécessaire pour obtenir l'état de la session ou du serveur. Les variables GUC fournies sont suffisantes. Pour les versions plus anciennes, une requête `SHOW` ou `SELECT` devait être émise afin de détecter si la session était en lecture seule ou si l'instance était en mode _hot standby_.
 
