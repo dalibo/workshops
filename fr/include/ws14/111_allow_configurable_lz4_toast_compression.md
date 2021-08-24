@@ -37,7 +37,7 @@ Plusieurs options sont disponibles pour changer le mode de compression :
 * Au niveau de la colonne lors des opérations de `CREATE TABLE` et `ALTER TABLE`.
 
 ```sql
-test=# create table t1 (champ1 text compression lz4);
+test=# CREATE TABLE t1 (champ1 text COMPRESSION lz4);
 
 test=# \d+ t1
                                                    Table « public.t1 »
@@ -45,7 +45,7 @@ test=# \d+ t1
 ---------+------+-----------------+-----------+------------+----------+-------------
  champ1  | text |                 |           |            | extended | lz4         
 
-test=# alter table t1 alter column champ1 set compression pglz;
+test=# ALTER TABLE t1 ALTER COLUMN champ1 SET COMPRESSION pglz;
 
 test=# \d+ t1
                                                    Table « public.t1 »
@@ -55,17 +55,21 @@ test=# \d+ t1
 
 ```
 
-* Via le paramètre `default_toast_compression` dans le fichier `postgresql.conf`, la valeur par defaut étant `pglz`. Sa modification ne nécessite qu'un simple rechargement de l'instance. Ce paramètre étant global à l'instance, il n'est pas prioritaire sur la clause `COMPRESSION` des commandes `CREATE TABLE` et `ALTER TABLE`.
+* Via le paramètre `default_toast_compression` dans le fichier `postgresql.conf`,
+  la valeur par defaut étant `pglz`. Sa modification ne nécessite qu'un simple
+  rechargement de la configuration de l'instance. Ce paramètre étant global à
+  l'instance, il n'est pas prioritaire sur la clause `COMPRESSION` des commandes
+  `CREATE TABLE` et `ALTER TABLE`.
 
 ```sql
-test=# show default_toast_compression;
+test=# SHOW default_toast_compression;
  default_toast_compression 
 ---------------------------
  pglz
 
 test=# SET default_toast_compression TO lz4;
 
-test=# show default_toast_compression;
+test=# SHOW default_toast_compression;
  default_toast_compression 
 ---------------------------
  lz4
@@ -80,15 +84,15 @@ test=# SHOW default_toast_compression ;
  default_toast_compression 
 ---------------------------
  pglz
-test=# create table t2 (champ2 text);
+test=# CREATE TABLE t2 (champ2 text);
 
-test=# insert into t2 values (repeat('123456789', 5000));
+test=# INSERT INTO t2 VALUES (repeat('123456789', 5000));
 
 test=# SET default_toast_compression TO lz4;
 
-test=# insert into t2 values (repeat('123456789', 5000));
+test=# INSERT INTO t2 VALUES (repeat('123456789', 5000));
 
-test=# select pg_column_compression(champ2) from t2;
+test=# SELECT pg_column_compression(champ2) FROM t2;
  pg_column_compression 
 -----------------------
  pglz
@@ -98,15 +102,15 @@ test=# select pg_column_compression(champ2) from t2;
 Point particulier concernant les commandes de type `CREATE TABLE AS`, `SELECT INTO` ou encore `INSERT ... SELECT`, les valeurs déjà compressées dans la table source ne seront pas recompressées lors de l'insertion pour des raisons de performance.
 
 ```sql
-test=# select pg_column_compression(champ2) from t2;
+test=# SELECT pg_column_compression(champ2) FROM t2;
  pg_column_compression 
 -----------------------
  pglz
  lz4
 
-test=# create table t3 as select * from t2;
+test=# CREATE TABLE t3 AS SELECT * FROM t2;
 
-test=# select pg_column_compression(champ2) from t3;
+test=# SELECT pg_column_compression(champ2) FROM t3;
  pg_column_compression 
 -----------------------
  pglz
@@ -135,21 +139,21 @@ test=# \d+ compress_lz4
  champ1  | text |                 |           |            | extended | lz4         
 
 -- Comparaison à l'insertion des données
-test=# insert into compress_pglz select repeat('123456789', 100000) from generate_series(1,10000);
+test=# INSERT INTO compress_pglz SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
 Durée : 36934,700 ms
 
-test=# insert into compress_lz4 select repeat('123456789', 100000) from generate_series(1,10000);
+test=# INSERT INTO compress_lz4 SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
 Durée : 2367,150 ms
 
 -- Comparaison de la volumétrie
 -- pour les données TOAST compréssées avec pglz
-test=# select pg_size_pretty(pg_relation_size('pg_toast.pg_toast_16476'));
+test=# SELECT pg_size_pretty(pg_relation_size('pg_toast.pg_toast_16476'));
  pg_size_pretty 
 ----------------
  117 MB
 
 -- pour les données TOAST compressées avec lz4
-test=# select pg_size_pretty(pg_relation_size('pg_toast.pg_toast_16481'));
+test=# SELECT pg_size_pretty(pg_relation_size('pg_toast.pg_toast_16481'));
  pg_size_pretty 
 ----------------
  39 MB
