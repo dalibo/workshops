@@ -35,4 +35,16 @@ La vue `pg_stat_database` dipose à présent de nouveaux compteurs orientés ses
 * `sessions_fatal` : nombre de sessions interrompues par des erreurs fatales.
 * `sessions_killed` : nombre de sessions interrompues par des demandes administrateur.
 
+Ces nouvelles statistiques d'activité permettront d'avoir un aperçu de
+l'activité des sessions sur une base de données. C'est un réel plus lors de la
+réalisation d'un audit car elles permettront de repérer facilement des 
+problèmes de connexion (`sessions_abandoned`), d'éventuels passages de l'_OOM
+killer_ (`sessions_fatal`) ou des problèmes de stabilité (`sessions_fatal`).
+Cela permettra également d'évaluer plus facilement la pertinence de la mise en
+place d'un pooler de connexion (`*_time`).
+ 
+La présence de ces métriques dans l'instance simplifiera également leur
+obtention pour les outils de supervision et métrologie. En effet, certaines
+n'étaient accessibles que par analyse des traces (`session time`, `sessions`)
+ou tout simplement impossible à obtenir.
 </div>
