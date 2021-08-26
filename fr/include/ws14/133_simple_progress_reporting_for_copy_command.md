@@ -22,13 +22,13 @@ Discussion
 Il est maintenant possible de surveiller la progression d'une instruction `COPY` grâce à la vue système `pg_stat_progress_copy`. Celle-ci retourne une ligne par _backend_ lancant un `COPY`.
 
 ```sql
-test=# create table test_copy (i int);
+test=# CREATE TABLE test_copy (i int);
 
-test=# insert into test_copy select generate_series (1,10000000);
+test=# INSERT INTO test_copy SELECT generate_series (1,10000000);
 
-test=# copy test_copy to '/tmp/test_copy';
+test=# COPY test_copy TO '/tmp/test_copy';
 
-postgres=# select * from pg_stat_progress_copy \gx
+postgres=# SELECT * FROM pg_stat_progress_copy \gx
 -[ RECORD 1 ]----+---------
 pid              | 39148
 datid            | 16384
@@ -47,9 +47,9 @@ Parmis ces informations, on retrouve le type de `COPY` exécuté (`command`), le
 Pour le champ `tuples_excluded`, il n'est renseigné qu'en cas d'utilisation d'une clause `WHERE` et remonte le nombre de lignes exclues par cette même clause.
 
 ```sql
-test=# copy test_copy from '/tmp/test_copy' where i > 1000;
+test=# COPY test_copy FROM '/tmp/test_copy' WHERE i > 1000;
 
-postgres=# select * from pg_stat_progress_copy \gx
+postgres=# SELECT * FROM pg_stat_progress_copy \gx
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384
@@ -68,7 +68,7 @@ Le champ `bytes_total` correspond à la taille en octets de la source de donnée
 ```sql
 test=# \copy test_copy from '/tmp/test_copy' where i > 1000;
 
-postgres=# select * from pg_stat_progress_copy \gx
+postgres=# SELECT * FROM pg_stat_progress_copy \gx
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384
