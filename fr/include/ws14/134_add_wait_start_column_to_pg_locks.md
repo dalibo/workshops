@@ -22,13 +22,13 @@ La vue système `pg_locks` présente une nouvelle colonne `waitstart`. Elle indi
 
 ```sql
 -- Une transaction pose un verrou
-test=# begin;
+test=# BEGIN;
 BEGIN
-test=*# lock table test_copy ;
+test=*# LOCK TABLE test_copy ;
 LOCK TABLE
 
 -- Une autre transaction fait une requête sur la même table
-test=# select * from test_copy ;
+test=# SELECT  * FROM test_copy ;
 
 -- Via pg_locks on peut voir quand a débuté l'attente
 -[ RECORD 12 ]-----+------------------------------
