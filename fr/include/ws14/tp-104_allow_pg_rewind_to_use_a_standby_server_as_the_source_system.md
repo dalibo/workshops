@@ -255,7 +255,7 @@ Avec la procédure décrite dans ce tp, le serveur **srv3** archive dans le mêm
 répertoire que le serveur **srv1**. Il serait préférable d'archiver dans un
 répertoire différent. Cela introduit de la complexité. En effet, `pg_rewind`
 aura besoin des _WAL_ avant la divergence (répertoire de **srv3**) et ceux
-générés depuis le dernier checkpoint précédent la divergence (répertoire de
+générés depuis le dernier checkpoint précédent la _divergence_ (répertoire de
 **srv1**).
 
 </div>
