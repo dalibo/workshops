@@ -47,5 +47,6 @@ test=# select database,relation,pid,mode,granted,waitstart from pg_locks where p
 ----------+----------+-------+---------------------+---------+-------------------------------
     16384 |    36500 | 27829 | AccessExclusiveLock | t       | 
     16384 |    36500 | 27680 | AccessShareLock     | f       | 2021-08-26 15:54:53.280405+02
+```
 
 </div>
