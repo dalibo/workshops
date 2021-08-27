@@ -17,11 +17,13 @@ Discussion
 
 <div class="notes">
 
-[`pg_rewind`](https://www.postgresql.org/docs/13/app-pgrewind.html) permet de
-synchroniser le répertoire de données d'une instance avec un autre répertoire
-de données de la même instance. Il est notamment utilisé pour réactiver une
-ancienne instance primaire en tant qu'instance secondaire répliquée depuis la
-nouvelle instance primaire suite à une bascule ayant provoqué une divergence.
+`pg_rewind` permet de synchroniser le répertoire de données d'une instance avec
+un autre répertoire de données de la même instance. Il est notamment utilisé
+lorsqu'une instance d'un dispositif en réplication à divergé de l'instance
+primaire. Cela peut arriver à l'ancienne primaire lors d'un _failover_. 
+`pg_rewind` permet alors de raccrocher l'ancienne instance primaire sans avoir
+besoin de restaurer une sauvegarde ou de cloner l'instance primaire avec
+`pg_basebackup`.
 
 Lorsque l'on dispose de plus de deux serveurs dans une architecture répliquée,
 il est désormais possible d'utiliser une instance secondaire comme source du
