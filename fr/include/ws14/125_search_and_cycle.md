@@ -28,7 +28,7 @@ Elle sont désormais implémentées dans PostgreSQL.
 
 Création d'un jeu d'essais :
 
-```
+```sql
 CREATE TABLE tree(id int, parent_id int, name text);
 ALTER TABLE tree ADD PRIMARY KEY (id);
 INSERT INTO tree(id, parent_id, name) 
@@ -44,166 +44,174 @@ VALUES (1, NULL, 'Albert'),
        (10, 9, 'Edwin');
 ```
 
-Voici un exemple de requête qui remonte toute l'arborescence sous une personne
-avec l'id 1 (Albert):
-
-```
---- Déclaration d'une CTE récursive
-WITH RECURSIVE mtree(id, name) AS (
-   --- Initialisation de la boucle
-   SELECT id, name
-     FROM tree
-    WHERE id = 1
-   --- Parcours de l'arborescence
-   UNION ALL
-   SELECT t.id, t.name
-     FROM tree AS t
-          -- Predicat de jointure pour parcourir l'arborescence
-          INNER JOIN mtree AS m ON t.parent_id = m.id
-)
-SELECT * FROM mtree;
-
-RESULTAT: 
-
- id |  name
-----+---------
-  1 | Albert
-  2 | Bob
-  3 | Barbara
-  4 | Britney
-  5 | Clara
-  6 | Clement
-  7 | Craig
-  8 | Debby
-  9 | Dave
- 10 | Edwin
-(10 rows)
-```
-
 Il est fréquent de vouloir récupérer la profondeur d'un enregistrement dans
-l'arbre que l'on reconstitue. Voici un exemple qui récupère la ou les personnes
-avec le niveau de récursion le plus bas.
+l'arbre que l'on reconstitue afin d'ordonner les données . Voici un exemple
+qui récupère la ou les personnes avec le niveau de récursion le plus bas.
 
-```
+```sql
 --- ajout d'un champ profondeur (depth)
 WITH RECURSIVE mtree(id, name, depth) AS (
-   -- initialisation de la profondeur a 0 pour le point de départ
+   -- initialisation de la profondeur à 0 pour le point de départ
    SELECT id, name, 0
      FROM tree
     WHERE id = 1
+
    UNION ALL
+
    -- Incrémenter la profondeur de 1
    SELECT t.id, t.name, m.depth + 1
      FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
 )
 SELECT * FROm mtree ORDER BY depth DESC LIMIT 1;
+```
 
-RESULTAT:
-
+```text
  id | name  | depth
 ----+-------+-------
  10 | Edwin |     4
 (1 row)
 ```
 
-La syntaxe suivant permet de récupérer des infos simialires : 
+En version 14, la syntaxe suivante permet de récupérer des informations
+similaires : 
 
-```
-with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( select )
-        [ SEARCH BREADTH FIRST BY column_name [, ...] SET search_seq_col_name ];
+
+```text
+with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
+  [ SEARCH BREADTH FIRST BY column_name [, ...] SET search_seq_col_name ];
+
+query: ( select | values | insert | update | delete )
 ```
 
 Exemple :
 
-```
-[local]:5436 postgres@postgres=# WITH RECURSIVE mtree(parent_id, name) AS (
-   SELECT parent_id, name
-     FROM tree
-    WHERE id = 9
-   UNION ALL
-   SELECT t.parent_id, t.name
-     FROM tree AS t
-          INNER JOIN mtree AS m ON m.parent_id = t.id
-) SEARCH BREADTH FIRST BY name SET morder
-SELECT * FROM mtree;
- parent_id |  name   |   morder
------------+---------+-------------
-         5 | Dave    | (0,Dave)
-         3 | Clara   | (1,Clara)
-         1 | Barbara | (2,Barbara)
-         ¤ | Albert  | (3,Albert)
-(4 rows)
-
-[local]:5436 postgres@postgres=# WITH RECURSIVE mtree(parent_id, name) AS (
-   SELECT parent_id, name
-     FROM tree
-    WHERE id = 9
-   UNION ALL
-   SELECT t.parent_id, t.name
-     FROM tree AS t
-          INNER JOIN mtree AS m ON m.parent_id = t.id
-) SEARCH DEPTH FIRST BY name SET morder
-SELECT * FROM mtree;
- parent_id |  name   |               morder
------------+---------+-------------------------------------
-         5 | Dave    | {(Dave)}
-         3 | Clara   | {(Dave),(Clara)}
-         1 | Barbara | {(Dave),(Clara),(Barbara)}
-         ¤ | Albert  | {(Dave),(Clara),(Barbara),(Albert)}
-(4 rows)
-
-[local]:5436 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
+```sql
+WITH RECURSIVE mtree(id, name) AS (
    SELECT id, name
      FROM tree
-    WHERE parent_id IS NULL
+    WHERE id = 1
+
    UNION ALL
+
    SELECT t.id, t.name
      FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
 ) SEARCH BREADTH FIRST BY name SET morder
-SELECT * FROM mtree;
- id |  name   |   morder    
+SELECT * FROM mtree ORDER BY morder DESC;
+```
+
+```text
+ id |  name   |   morder
 ----+---------+-------------
-  1 | Albert  | (0,Albert)
-  2 | Bob     | (1,Bob)
-  3 | Barbara | (1,Barbara)
-  4 | Britney | (1,Britney)
-  5 | Clara   | (2,Clara)
-  6 | Clement | (2,Clement)
-  7 | Craig   | (2,Craig)
+ 10 | Edwin   | (4,Edwin)
   8 | Debby   | (3,Debby)
   9 | Dave    | (3,Dave)
- 10 | Edwin   | (4,Edwin)
+  7 | Craig   | (2,Craig)
+  6 | Clement | (2,Clement)
+  5 | Clara   | (2,Clara)
+  4 | Britney | (1,Britney)
+  2 | Bob     | (1,Bob)
+  3 | Barbara | (1,Barbara)
+  1 | Albert  | (0,Albert)
 (10 rows)
+```
 
-[local]:5436 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
+En appliquand la clause `LIMIT 1`. On obtient donc le même
+résultat que précédemment.
+
+Ce genre de requête a pour inconvénient de risquer de boucler si un cycle
+est introduit dane le jeu de donnée. Il faut donc se prémunir contre ce
+genre de problème.
+
+
+```sql
+# UPDATE tree SET parent_id = 10 WHERE id = 1;
+UPDATE 1
+```
+
+```sql
+-- ajout de deux champs: 
+-- * un booleen qui permet de détecter les cycles (is_cycle)
+-- * le chemin parcourru (path)
+WITH RECURSIVE mtree(id, name, depth, is_cycle, path) AS (
+   -- initialisations
+   SELECT id, name, 0, 
+          false,     -- initialement, on ne boucle pas
+          ARRAY[ROW(id)]  -- le premier élément du chemin
+     FROM tree
+    WHERE id = 1
+
+   UNION ALL
+
+   SELECT t.id, t.name, m.depth + 1, 
+          ROW(t.id) = ANY(m.path), -- déja traitré ?
+          m.path || ROW(t.id)      -- ajouter le tuple au chemin 
+   FROM tree AS t
+          INNER JOIN mtree AS m ON t.parent_id = m.id
+
+   -- stopper l'itération si on détecte un cycle
+   WHERE NOT m.is_cycle
+)
+SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
+```
+
+```text
+ id |  name  | depth | is_cycle |            path
+----+--------+-------+----------+----------------------------
+  1 | Albert |     5 | t        | {(1),(3),(5),(9),(10),(1)}
+(1 row)
+```
+
+Le même résultat peut être obtenu en utilisant la clause CYCLE
+
+```text
+with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
+  [ CYCLE column_name [, ...] SET cycle_mark_col_name 
+                              [ TO cycle_mark_value DEFAULT cycle_mark_default ]
+                              USING cycle_path_col_name ]
+
+query: ( select | values | insert | update | delete )
+```
+
+Voici un exemple :
+
+```sql
+WITH RECURSIVE mtree(id, name) AS (
    SELECT id, name
      FROM tree
-    WHERE parent_id IS NULL
+    WHERE id = 1
    UNION ALL
    SELECT t.id, t.name
      FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
-) SEARCH DEPTH FIRST BY name SET morder
-SELECT * FROM mtree;
- id |  name   |                   morder                    
-----+---------+---------------------------------------------
-  1 | Albert  | {(Albert)}
-  2 | Bob     | {(Albert),(Bob)}
-  3 | Barbara | {(Albert),(Barbara)}
-  4 | Britney | {(Albert),(Britney)}
-  5 | Clara   | {(Albert),(Barbara),(Clara)}
-  6 | Clement | {(Albert),(Barbara),(Clement)}
-  7 | Craig   | {(Albert),(Bob),(Craig)}
-  8 | Debby   | {(Albert),(Barbara),(Clara),(Debby)}
-  9 | Dave    | {(Albert),(Barbara),(Clara),(Dave)}
- 10 | Edwin   | {(Albert),(Barbara),(Clara),(Dave),(Edwin)}
-(10 rows)
+) SEARCH BREADTH FIRST BY name SET morder
+  CYCLE id SET is_cycle USING path
+SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
+```
 
-[local]:5436 postgres@postgres=# UPDATE tree SET parent_id = 10 WHERE id = 1;
+```text
+ id |  name  |   morder   | is_cycle |            path
+----+--------+------------+----------+----------------------------
+  1 | Albert | (5,Albert) | t        | {(1),(3),(5),(9),(10),(1)}
+(1 row)
+```
 
-[local]:5436 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
+Il est également possible de construire un tableau avec le contenu de la
+table et de trier a partir du contenu grâce à la syntaxe suivante :
+
+```text
+with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
+  [ SEARCH DEPTH FIRST BY column_name [, ...] SET search_seq_col_name ];
+
+query: ( select | values | insert | update | delete )
+```
+
+Comme vous pouvez le voir dans l'exemple ci-dessous, il est possible d'utiliser
+la clause `CYCLE` avec cette syntaxe aussi :
+
+```sql
+WITH RECURSIVE mtree(id, name) AS (
    SELECT id, name
      FROM tree
     WHERE id = 1
@@ -213,22 +221,70 @@ SELECT * FROM mtree;
           INNER JOIN mtree AS m ON t.parent_id = m.id
 ) SEARCH DEPTH FIRST BY name SET morder
   CYCLE id SET is_cycle USING path
-SELECT * FROM mtree;
- id |  name   |                        morder                        | is_cycle |            path
-----+---------+------------------------------------------------------+----------+----------------------------
-  1 | Albert  | {(Albert)}                                           | f        | {(1)}
-  2 | Bob     | {(Albert),(Bob)}                                     | f        | {(1),(2)}
-  3 | Barbara | {(Albert),(Barbara)}                                 | f        | {(1),(3)}
-  4 | Britney | {(Albert),(Britney)}                                 | f        | {(1),(4)}
-  5 | Clara   | {(Albert),(Barbara),(Clara)}                         | f        | {(1),(3),(5)}
-  6 | Clement | {(Albert),(Barbara),(Clement)}                       | f        | {(1),(3),(6)}
-  7 | Craig   | {(Albert),(Bob),(Craig)}                             | f        | {(1),(2),(7)}
-  8 | Debby   | {(Albert),(Barbara),(Clara),(Debby)}                 | f        | {(1),(3),(5),(8)}
-  9 | Dave    | {(Albert),(Barbara),(Clara),(Dave)}                  | f        | {(1),(3),(5),(9)}
- 10 | Edwin   | {(Albert),(Barbara),(Clara),(Dave),(Edwin)}          | f        | {(1),(3),(5),(9),(10)}
-  1 | Albert  | {(Albert),(Barbara),(Clara),(Dave),(Edwin),(Albert)} | t        | {(1),(3),(5),(9),(10),(1)}
-(11 rows)
+SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 ```
 
+```text
+ id |  name   |                   morder                    | is_cycle |          path
+----+---------+---------------------------------------------+----------+------------------------
+  4 | Britney | {(Albert),(Britney)}                        | f        | {(1),(4)}
+  7 | Craig   | {(Albert),(Bob),(Craig)}                    | f        | {(1),(2),(7)}
+  2 | Bob     | {(Albert),(Bob)}                            | f        | {(1),(2)}
+  6 | Clement | {(Albert),(Barbara),(Clement)}              | f        | {(1),(3),(6)}
+  8 | Debby   | {(Albert),(Barbara),(Clara),(Debby)}        | f        | {(1),(3),(5),(8)}
+ 10 | Edwin   | {(Albert),(Barbara),(Clara),(Dave),(Edwin)} | f        | {(1),(3),(5),(9),(10)}
+  9 | Dave    | {(Albert),(Barbara),(Clara),(Dave)}         | f        | {(1),(3),(5),(9)}
+  5 | Clara   | {(Albert),(Barbara),(Clara)}                | f        | {(1),(3),(5)}
+  3 | Barbara | {(Albert),(Barbara)}                        | f        | {(1),(3)}
+  1 | Albert  | {(Albert)}                                  | f        | {(1)}
+(10 rows)
+```
+
+L'[implémentation
+actuelle](https://www.postgresql.org/message-id/4a068167-37ed-3d6c-5ec5-c9b03cae84e6%40enterprisedb.com)
+ne le permet interragir avec les valeurs ramenées par les clauses '{ BREADTH |
+DEPTH } FIRST'.
+
+```
+[local]:5444 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
+   SELECT id, name
+     FROM tree
+    WHERE id = 1
+   UNION ALL
+   SELECT t.id, t.name
+     FROM tree AS t
+          INNER JOIN mtree AS m ON t.parent_id = m.id
+) SEARCH BREADTH FIRST BY name SET morder
+  CYCLE id SET is_cycle USING path
+SELECT id, name, (morder).* FROM mtree ORDER BY morder DESC LIMIT 1;
+```
+
+``` text
+ERROR:  CTE mtree does not have attribute 3
+```
+
+Il est cependant possible d'y accéder en transformant le champ en json.
+
+```sql
+ WITH RECURSIVE mtree(id, name) AS (
+   SELECT id, name
+     FROM tree
+    WHERE id = 1
+   UNION ALL
+   SELECT t.id, t.name
+     FROM tree AS t
+          INNER JOIN mtree AS m ON t.parent_id = m.id
+) SEARCH BREADTH FIRST BY name SET morder
+  CYCLE id SET is_cycle USING path
+SELECT id, name, row_to_json(morder) -> '*DEPTH*' AS depth 
+  FROM mtree ORDER BY morder DESC LIMIT 1;
+```
+
+```text
+ id |  name  | depth
+----+--------+-------
+  1 | Albert | 5
+(1 row)
+```
 
 </div>
