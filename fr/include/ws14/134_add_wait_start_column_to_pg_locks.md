@@ -22,32 +22,30 @@ La vue système `pg_locks` présente une nouvelle colonne `waitstart`. Elle indi
 
 ```sql
 -- Une transaction pose un verrou
+test=# SELECT pg_backend_pid();
+ pg_backend_pid 
+----------------
+          27829
 test=# BEGIN;
 BEGIN
 test=*# LOCK TABLE test_copy ;
 LOCK TABLE
 
--- Une autre transaction fait une requête sur la même table
+
+-- Une autre transaction réalise une requête sur la même table
+test=# SELECT pg_backend_pid();
+ pg_backend_pid 
+----------------
+          27680
 test=# SELECT  * FROM test_copy ;
 
--- Via pg_locks on peut voir quand a débuté l'attente
--[ RECORD 12 ]-----+------------------------------
-locktype           | relation
-database           | 16384
-relation           | 36500
-page               | 
-tuple              | 
-virtualxid         | 
-transactionid      | 
-classid            | 
-objid              | 
-objsubid           | 
-virtualtransaction | 5/11
-pid                | 14784
-mode               | AccessShareLock
-granted            | f
-fastpath           | f
-waitstart          | 2021-08-19 10:05:17.423733+02
-```
+
+-- Via la vue pg_locks on peut donc voir qui bloque
+-- le processus 27680 et également depuis quand
+test=# select database,relation,pid,mode,granted,waitstart from pg_locks where pid in (27829,27680);
+ database | relation |  pid  |        mode         | granted |           waitstart           
+----------+----------+-------+---------------------+---------+-------------------------------
+    16384 |    36500 | 27829 | AccessExclusiveLock | t       | 
+    16384 |    36500 | 27680 | AccessShareLock     | f       | 2021-08-26 15:54:53.280405+02
 
 </div>
