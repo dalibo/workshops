@@ -290,7 +290,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/108 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/108_alter_table_detach_partition_concurrently.md
 
 ----
 
