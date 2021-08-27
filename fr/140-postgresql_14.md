@@ -514,7 +514,7 @@ Nous allons décrire ces nouveautés plus en détail.
 ### Nouvelles clauses SEARCH et CYCLE
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/125 -->
-!include include/ws14/
+!include include/ws14/125_search_and_cycle.md
 
 ----
 

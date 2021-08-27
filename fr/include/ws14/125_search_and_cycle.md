@@ -14,17 +14,19 @@ Discussion
 
 <div class="notes">
 
-PostgreSQL permet de créer des requêtes récursives grace à la clause `WITH
-RECURSIVE`. Ce genre de requêtes permet de remonter une arborescences
+PostgreSQL permet de créer des requêtes récursives grâce à la clause `WITH
+RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
 d'enregistrements lié par des colonnes de type `id`, `parent_id`.
 
-Dans ce genre de requête, il est courant d'écrire la requête afin de tracer :
-* le chemin parcouru ;
-* la profondeur de l'enregistrement dans l'arborescence ;
-* l'apparition d'un cycle, une séquence d'enregistrement provoquant une boucle.
+Dans ce genre de requête, il est courant de vouloir :
+* ordonner les données en fonction de leur profondeur ;
+* afficher le chemin parcouru ou la profondeur de l'enregistrement dans
+  l'arborescence ;
+* détecter l'apparition d'un cycle, une séquence d'enregistrement provoquant
+  une boucle.
 
-La norme SQL prémvoit différentes syntaxes pour réaliser ce genre de tâches.
-Elle sont désormais implémentées dans PostgreSQL.
+La norme SQL prévoit différentes syntaxes pour réaliser ce genre de tâches.
+Elles sont désormais implémentées dans PostgreSQL.
 
 Création d'un jeu d'essais :
 
@@ -45,8 +47,9 @@ VALUES (1, NULL, 'Albert'),
 ```
 
 Il est fréquent de vouloir récupérer la profondeur d'un enregistrement dans
-l'arbre que l'on reconstitue afin d'ordonner les données . Voici un exemple
-qui récupère la ou les personnes avec le niveau de récursion le plus bas.
+l'arbre que l'on reconstitue afin d'ordonner les données. Voici un exemple qui
+récupère la ou les personnes avec la plus grande profondeur dans
+l'arborescence.
 
 ```sql
 --- ajout d'un champ profondeur (depth)
@@ -117,12 +120,12 @@ SELECT * FROM mtree ORDER BY morder DESC;
 (10 rows)
 ```
 
-En appliquand la clause `LIMIT 1`. On obtient donc le même
-résultat que précédemment.
+En appliquant la clause `LIMIT 1`. On obtient donc le même résultat que
+précédemment.
 
-Ce genre de requête a pour inconvénient de risquer de boucler si un cycle
-est introduit dane le jeu de donnée. Il faut donc se prémunir contre ce
-genre de problème.
+Ce genre de requête a pour inconvénient de risquer de boucler si un cycle est
+introduit dans le jeu de données. Il faut donc se prémunir contre ce genre de
+problème.
 
 
 ```sql
@@ -131,22 +134,22 @@ UPDATE 1
 ```
 
 ```sql
--- ajout de deux champs: 
+-- ajout de deux champs:
 -- * un booleen qui permet de détecter les cycles (is_cycle)
--- * le chemin parcourru (path)
+-- * un tableau qui contient le chemin parcouru (path)
 WITH RECURSIVE mtree(id, name, depth, is_cycle, path) AS (
    -- initialisations
-   SELECT id, name, 0, 
-          false,     -- initialement, on ne boucle pas
+   SELECT id, name, 0,
+          false,          -- initialement, on ne boucle pas
           ARRAY[ROW(id)]  -- le premier élément du chemin
      FROM tree
     WHERE id = 1
 
    UNION ALL
 
-   SELECT t.id, t.name, m.depth + 1, 
+   SELECT t.id, t.name, m.depth + 1,
           ROW(t.id) = ANY(m.path), -- déja traitré ?
-          m.path || ROW(t.id)      -- ajouter le tuple au chemin 
+          m.path || ROW(t.id)      -- ajouter le tuple au chemin
    FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
 
@@ -163,7 +166,7 @@ SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 (1 row)
 ```
 
-Le même résultat peut être obtenu en utilisant la clause CYCLE
+Le même résultat peut être obtenu en utilisant la clause CYCLE :
 
 ```text
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
@@ -198,7 +201,7 @@ SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
 Il est également possible de construire un tableau avec le contenu de la
-table et de trier a partir du contenu grâce à la syntaxe suivante :
+table et de trier à partir de ce contenu grâce à la syntaxe suivante :
 
 ```text
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
@@ -215,7 +218,9 @@ WITH RECURSIVE mtree(id, name) AS (
    SELECT id, name
      FROM tree
     WHERE id = 1
+
    UNION ALL
+
    SELECT t.id, t.name
      FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
@@ -242,8 +247,9 @@ SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 
 L'[implémentation
 actuelle](https://www.postgresql.org/message-id/4a068167-37ed-3d6c-5ec5-c9b03cae84e6%40enterprisedb.com)
-ne le permet interragir avec les valeurs ramenées par les clauses '{ BREADTH |
-DEPTH } FIRST'.
+ne le permet interagir avec les valeurs ramenées par les clauses '{ BREADTH |
+DEPTH } FIRST' car leur fonction est de produire une colonne qui facilite le
+tri des résultats.
 
 ```
 [local]:5444 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
@@ -263,7 +269,7 @@ SELECT id, name, (morder).* FROM mtree ORDER BY morder DESC LIMIT 1;
 ERROR:  CTE mtree does not have attribute 3
 ```
 
-Il est cependant possible d'y accéder en transformant le champ en json.
+Il est cependant possible d'y accéder en transformant le champ en objet _json_.
 
 ```sql
  WITH RECURSIVE mtree(id, name) AS (
