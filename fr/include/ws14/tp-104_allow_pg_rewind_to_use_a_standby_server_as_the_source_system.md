@@ -5,7 +5,8 @@
   * Création d'une instance primaire ;
   * Mise en place de la réplication sur deux secondaires ;
   * Promotion d'un secondaire pour réaliser des tests ;
-  * Utilisation de `pg_rewind` pour raccrocher l'instance secondaire à la réplication.
+  * Utilisation de `pg_rewind` pour raccrocher l'instance secondaire à la
+    réplication.
 
 </div>
 
@@ -28,7 +29,7 @@ Créer une instance primaire en activant les sommes de contrôle :
 initdb --data-checksums $DATADIRS/$PGNAME -U postgres
 ```
 
-Note: Pour utiliser pg_rewind, il est nécessaire d'activer le paramètre
+Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
 `wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
 de l'instance.
 
@@ -47,7 +48,7 @@ _EOF_
 ```
 
 Démarrer l'instance, y créer une base de données et initialiser une base
-pgbench :
+**pgbench** :
 
 ```bash
 pg_ctl start -D $DATADIRS/$PGNAME -w
@@ -245,7 +246,16 @@ d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
 psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
 ```
 
+### Remarques
+
 Commenter le paramètre `recovery_target_timeline` de la configuration de
 l'instance **srv3**, car elle pourrait poser des problèmes par la suite.
+
+Avec la procédure décrite dans ce tp, le serveur **srv3** archive dans le même
+répertoire que le serveur **srv1**. Il serait préférable d'archiver dans un
+répertoire différent. Cela introduit de la complexité. En effet, `pg_rewind`
+aura besoin des _WAL_ avant la divergence (répertoire de **srv3**) et ceux
+générés depuis le dernier checkpoint précédent la divergence (répertoire de
+**srv1**).
 
 </div>
