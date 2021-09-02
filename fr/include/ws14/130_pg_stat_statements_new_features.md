@@ -37,7 +37,6 @@ create table pg_class_1 as select * from pg_class;
 select * into pg_class_2 FROM pg_class;
 create materialized view pg_class_3 as select * from pg_class;
 refresh materialized view pg_class_3;
-select query,rows from pg_stat_statements;
 ```
 
 On retrouve bien le nombres de lignes affectées par les requêtes, dans le champ
@@ -105,7 +104,7 @@ done
 
 La vue `pg_stat_statements` a bien conservé un nombre de requêtes 
 inférieur à `pg_stat_statement.max`, malgré que 400 requêtes distinctes aient
-été exécutées  :
+été exécutées :
 
 ```sql
 ws14=# select count(*) from pg_stat_statements;
@@ -157,7 +156,7 @@ LANGUAGE SQL;
 ```
 Après avoir réinitialisée les statistiques de `pg_stat_statements`, le nom d'une 
 table est récupérée depuis son `oid` en utilisant une requête SQL directement, 
-puis via la fonction `f_rel_name`.:
+puis via la fonction `f_rel_name` :
 
 ```sql
 select pg_stat_statements_reset();
