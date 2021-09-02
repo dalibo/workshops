@@ -21,7 +21,7 @@ Discussion
 
 <div class="notes">
 
-### Statistiques plus complètes
+#### Statistiques plus complètes
 
 `pg_stat_statements` est désormais capable de comptabiliser les lignes
 lues ou affectées par les commandes `CREATE TABLE AS`, `SELECT INTO`,
@@ -67,7 +67,7 @@ select query,rows from pg_stat_statements;
  create materialized view pg_class_3 as select * from pg_class |    0
 ```
 
-### La vue `pg_stat_statements_info`
+#### La vue `pg_stat_statements_info`
 
 Une nouvelle vue `pg_stat_statements_info` est ajoutée pour tracer les
 statistiques du module lui-même.
@@ -137,7 +137,7 @@ ws14=# select pg_stat_statements_info();
  (31,"2021-09-02 13:35:22.457383+02")
 ```
 
-### Nouvelle colonne `toplevel`
+#### Nouvelle colonne `toplevel`
 
 Une nouvelle colonne `toplevel` apparaît dans la vue `pg_stat_statements`. Elle
 est de type booléen et précise si la requête est directement exécutée ou bien 
