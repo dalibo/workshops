@@ -385,7 +385,7 @@ Nous allons décrire ces nouveautés plus en détail.
 #### Autorise pg_rewind a utiliser un secondaire comme source
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/104-allow-pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
 
@@ -659,6 +659,10 @@ possible.
 ----
 
 !include include/ws14/tp-117_async_append.md
+
+----
+
+!include include/ws14/tp-104_allow_pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
 
