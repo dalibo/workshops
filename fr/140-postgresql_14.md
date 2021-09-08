@@ -550,7 +550,7 @@ possible.
   * Nouveautés dans pg_stat_statements
   * Ajout de statistiques sur les sessions dans pg_stat_database
   * Identifiant pour les requêtes normalisées
-  * Ajout de la colonne waitstart dans pg_locks
+  * Nouveauté dans pg_locks
 
 </div>
 
@@ -601,10 +601,10 @@ possible.
 
 ----
 
-### Ajout de la colonne waitstart dans pg_locks
+### Nouveauté dans pg_locks
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/134_add_wait_start_column_to_pg_locks.md
 
 ----
 
