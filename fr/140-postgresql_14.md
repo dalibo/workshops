@@ -406,7 +406,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Réplication logique
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/115 -->
 !include include/ws14/115_logical_replication_feature_in_pg14.md
 
 ----
