@@ -109,7 +109,6 @@ inférieur à `pg_stat_statement.max`, malgré que 400 requêtes distinctes aien
 ```sql
 ws14=# select count(*) from pg_stat_statements;
 
-> EOF
  count 
 -------
     93
