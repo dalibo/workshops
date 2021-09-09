@@ -178,8 +178,8 @@ order by query;
 
 On retrouve bien l'appel de la fonction, ainsi que les deux exécutions de la 
 requête sur `pg_class`, celle faite directement, et celle faite au sein de la 
-fonction `f_rel_name`. Cette dernière ayant `toplevel` à `false`, elle peut être 
-distinguée de l'exécution directe, ce qui n'était pas possible dans les versions 
-précédentes.
+fonction `f_rel_name`. La requête qui est exécutée dans la fonction ayant 
+`toplevel` à `false`, elle peut être distinguée de l'exécution directe, ce qui 
+n'était pas possible dans les versions précédentes.
 
 </div>
