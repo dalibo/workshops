@@ -25,10 +25,10 @@ Voici la description des colonnes de cette vue :
 
 * `slot_name` : nom du _slot_ de réplication
 * `spill_txns` : nombre de transactions écritent sur disque lorsque la mémoire 
-utilisée pour décoder les changements depuis les WAL à dépasser la valeur du 
+utilisée pour décoder les changements depuis les WAL a dépassé la valeur du 
 paramètre `logical_decoding_work_mem`. Ce compteur est incrémenté pour les 
 transactions de haut niveau et pour les sous-transactions.
-* `spill_count` : nombre de fois où des transactions ont été écritent sur disque
+* `spill_count` : nombre de fois où des transactions ont été écrites sur disque
 lors du décodage des changements depuis les WAL. Ce compteur est incrémenté
 à chaque fois qu'une transaction est écrite sur disque. Une même transaction 
 peut être écrite plusieurs fois.
@@ -52,7 +52,7 @@ liés aux plugin de décodage logique peuvent servir pour optimiser le
 paramètre `logical_decoding_work_mem`.
 * `total_txns` : nombre de transactions décodées et envoyées au plugin de décodage 
 logique. Ne comprend que les transactions de haut niveau (pas de sous-transaction). 
-Cela inclut les transactions écrites sur disques et écrites sur disque.
+Cela inclut les transactions écrites sur disques et envoyées par flux.
 * `total_bytes` : quantité de données décodée et envoyée au plugin de décodage logique 
 lors du décodage des changements depuis les WAL. Cela inclut les transactions 
 envoyées par flux et écrites sur disques.
@@ -72,11 +72,11 @@ WITH (streaming = on);
 Une nouvelle fonction est également disponible : `pg_stat_reset_replication_slot`. 
 Elle permet la remise à zéro des statisques de la vue `pg_stat_replication_slots` 
 et peut prendre comme paramètre `NULL` ou le nom d'un _slot_ de réplication. Dans le 
-cas de `NULL` toutes les statistiques seront remises à zéro et, dans le cas où un nom 
-de _slot_ est précisé, seules les statistiques du _slot_ en question seront réinitialisées.
+cas de `NULL`, toutes les statistiques seront remises à zéro. Si un nom de _slot_ 
+est précisé, seules les statistiques du _slot_ en question seront réinitialisées.
 
 ```sql
--- RAZ statistique pour un slot précis
+-- RAZ pour un slot précis
 SELECT pg_stat_reset_replication_slot(slot_name);
 
 -- RAZ pour tous les slots
