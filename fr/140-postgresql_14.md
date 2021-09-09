@@ -568,7 +568,7 @@ possible.
 ### Nouvelle vue pg_stat_replication_slots
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/135-pg_stat_replicaton_slots.md
 
 ----
 
