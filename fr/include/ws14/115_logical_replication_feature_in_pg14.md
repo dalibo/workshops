@@ -27,8 +27,8 @@ Discussion
 Lorsque l'on utilise la réplication logique, le processus _walsender_ va procéder 
 au décodage logique et réordonner les modifications depuis les fichiers WAL 
 avant de les envoyer au souscripteur. Cette opération est faite en mémoire mais en 
-cas de dépassement, ces données sont écrites sur disque. Le paramètre qui permet de 
-gérer cette zone mémoire est `logical_decoding_work_mem` apparu version 13.
+cas de dépassement du seuil indiqué par le paramètre `logical_decoding_work_mem`, 
+ces données sont écrites sur disque.
 
 Ce comportement à deux inconvénients :
 
@@ -50,8 +50,8 @@ Il va donc être possible de réduire la consommation I/O et également la laten
 le publieur et le souscripteur.
 
 Cependant, certains cas nécessiteront toujours des écritures sur disque, comme par 
-exemple dans le cas où le seuil mémoire de décodage serait atteint mais qu'un tuple 
-n'aurait pas été complètement décodé.
+exemple dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
+n'est pas complètement décodé.
 
 Pour mettre cela en place, il faut ajouter l'option `streaming = on` au 
 souscripteur :
@@ -82,9 +82,10 @@ ERROR:  logical replication target relation "public.t" is missing replicated col
 
 Actuellement, dans le cas d'une mise à jour de publication dans une souscription, il 
 faut utiliser la commande `ALTER SUBSCRIPTION ... SET PUBLICATION ...`. Cette méthode 
-bien que fonctionnnelle à un inconvénient, il faut connaitre la liste des publications  
+bien que fonctionnnelle à un inconvénient, il faut connaitre la liste des publications 
 sous peine d'en perdre. Avec la version 14, il est désormais possible d'utiliser la 
-syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...` pour manipuler les publications.
+syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...` pour manipuler plus 
+facilement les publications.
 
 ```sql
 -- on dispose d'une souscription avec 2 publications
@@ -94,7 +95,7 @@ ws14=# \dRs
 -----+--------------+--------+-------------
  sub | postgres     | t      | {pub,pub2}
 
--- en version 13, afin d'en ajouter une publication 
+-- en version 13, afin d'ajouter une publication 
 -- il faudra exécuter cette commande
 ws14=# ALTER SUBSCRIPTION sub SET PUBLICATION pub,pub2,pub3;
 
