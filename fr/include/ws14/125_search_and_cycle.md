@@ -19,6 +19,8 @@ RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
 d'enregistrements liés par des colonnes de type `id` et `parent_id`.
 
 Dans ce genre de requête, il est courant de vouloir :
+Dans ce genre de requête, il est courant de vouloir :
+
 * ordonner les données en fonction de leur profondeur ;
 * afficher le chemin parcouru ou la profondeur de l'enregistrement dans
   l'arborescence ;
@@ -247,7 +249,7 @@ SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 
 L'[implémentation
 actuelle](https://www.postgresql.org/message-id/4a068167-37ed-3d6c-5ec5-c9b03cae84e6%40enterprisedb.com)
-ne le permet interagir avec les valeurs ramenées par les clauses '{ BREADTH |
+ne permet pas d'interagir avec les valeurs ramenées par les clauses '{ BREADTH |
 DEPTH } FIRST' car leur fonction est de produire une colonne qui facilite le
 tri des résultats.
 
