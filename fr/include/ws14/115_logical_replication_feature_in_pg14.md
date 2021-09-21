@@ -35,7 +35,7 @@ Ce comportement à deux inconvénients :
 * il peut provoquer l'apparition d'une volumétrie non négligeable dans le répertoire 
 `pg_replslot` et jouer sur les I/O.
 * il n'envoie les données au souscripteur qu'au `COMMIT` de la transaction, ce qui 
-peut engendrer un fort retart dans la réplication. Dans le cas de grosses transactions, 
+peut engendrer un fort retard dans la réplication. Dans le cas de grosses transactions, 
 le réseau et le souscripteur peuvent également être mis à rude épreuve car toutes les 
 données seront envoyées en même temps.
 
