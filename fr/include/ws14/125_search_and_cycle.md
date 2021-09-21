@@ -16,7 +16,7 @@ Discussion
 
 PostgreSQL permet de créer des requêtes récursives grâce à la clause `WITH
 RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
-d'enregistrements lié par des colonnes de type `id`, `parent_id`.
+d'enregistrements liés par des colonnes de type `id` et `parent_id`.
 
 Dans ce genre de requête, il est courant de vouloir :
 * ordonner les données en fonction de leur profondeur ;
