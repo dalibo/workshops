@@ -10,6 +10,22 @@ Discussion
 -->
 
 <div class="slide-content">
+
+* Génération d'une colonne de tri pour les requêtes récursives :
+
+```
+  [ SEARCH { BREADTH | DEPTH } FIRST BY column_name [, ...]
+      SET search_seq_col_name ]
+```
+
+* Protection contre les cycles :
+
+```
+  [ CYCLE column_name [, ...]
+      SET cycle_mark_col_name
+      [ TO cycle_mark_value DEFAULT cycle_mark_default ]
+      USING cycle_path_col_name ]
+```
 </div>
 
 <div class="notes">
@@ -34,7 +50,7 @@ Création d'un jeu d'essais :
 ```sql
 CREATE TABLE tree(id int, parent_id int, name text);
 ALTER TABLE tree ADD PRIMARY KEY (id);
-INSERT INTO tree(id, parent_id, name) 
+INSERT INTO tree(id, parent_id, name)
 VALUES (1, NULL, 'Albert'),
        (2, 1, 'Bob'),
        (3, 1, 'Barbara'),
@@ -67,7 +83,7 @@ WITH RECURSIVE mtree(id, name, depth) AS (
      FROM tree AS t
           INNER JOIN mtree AS m ON t.parent_id = m.id
 )
-SELECT * FROm mtree ORDER BY depth DESC LIMIT 1;
+SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
 
 ```text
@@ -78,7 +94,7 @@ SELECT * FROm mtree ORDER BY depth DESC LIMIT 1;
 ```
 
 En version 14, la syntaxe suivante permet de récupérer des informations
-similaires : 
+similaires :
 
 
 ```text
@@ -171,7 +187,7 @@ Le même résultat peut être obtenu en utilisant la clause CYCLE :
 
 ```text
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
-  [ CYCLE column_name [, ...] SET cycle_mark_col_name 
+  [ CYCLE column_name [, ...] SET cycle_mark_col_name
                               [ TO cycle_mark_value DEFAULT cycle_mark_default ]
                               USING cycle_path_col_name ]
 
@@ -283,7 +299,7 @@ Il est cependant possible d'y accéder en transformant le champ en objet _json_.
           INNER JOIN mtree AS m ON t.parent_id = m.id
 ) SEARCH BREADTH FIRST BY name SET morder
   CYCLE id SET is_cycle USING path
-SELECT id, name, row_to_json(morder) -> '*DEPTH*' AS depth 
+SELECT id, name, row_to_json(morder) -> '*DEPTH*' AS depth
   FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
