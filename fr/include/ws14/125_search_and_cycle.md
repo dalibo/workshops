@@ -19,7 +19,6 @@ RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
 d'enregistrements liés par des colonnes de type `id` et `parent_id`.
 
 Dans ce genre de requête, il est courant de vouloir :
-Dans ce genre de requête, il est courant de vouloir :
 
 * ordonner les données en fonction de leur profondeur ;
 * afficher le chemin parcouru ou la profondeur de l'enregistrement dans
