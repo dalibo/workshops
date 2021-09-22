@@ -49,7 +49,7 @@ reçu de `COMMIT`.
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
 le publieur et le souscripteur.
 
-Cependant, certains cas nécessiteront toujours des écritures sur disque, comme par 
+Cependant, certains cas nécessiteront toujours des écritures sur disque, par 
 exemple dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
 n'est pas complètement décodé.
 
@@ -67,8 +67,9 @@ ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 **Log d'erreur plus précise**
 
 Le message d'erreur affiché dans la log lorsqu'il manque certaines colonnes à
-un souscripteur a été amélioré. Il indique maintenant la liste des colonnes 
-manquantes et non plus simplement le message `is missing some replicated columns`.
+une table présente sur un souscripteur a été amélioré. Il indique maintenant
+la liste des colonnes manquantes et non plus simplement le message `is missing
+some replicated columns`.
 
 ```sql
 -- En version 13
@@ -82,7 +83,7 @@ ERROR:  logical replication target relation "public.t" is missing replicated col
 
 Actuellement, dans le cas d'une mise à jour de publication dans une souscription, il 
 faut utiliser la commande `ALTER SUBSCRIPTION ... SET PUBLICATION ...`. Cette méthode 
-bien que fonctionnnelle à un inconvénient, il faut connaitre la liste des publications 
+bien que fonctionnelle à un inconvénient, il faut connaitre la liste des publications 
 sous peine d'en perdre. Avec la version 14, il est désormais possible d'utiliser la 
 syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...` pour manipuler plus 
 facilement les publications.
