@@ -8,7 +8,7 @@ Les commits sur ce sujet sont :
 
 Discussion
 
-* https://gitlab.dalibo.info/formation/workshops/-/issues/135
+* https://gitlab.dalibo.info/formation/workshops/-/issues/115
 
 -->
 
@@ -33,7 +33,7 @@ ces données sont écrites sur disque.
 Ce comportement à deux inconvénients :
 
 * il peut provoquer l'apparition d'une volumétrie non négligeable dans le répertoire 
-`pg_replslot` et jouer sur les I/O.
+`pg_replslot` et jouer sur les I/O ;
 * il n'envoie les données au souscripteur qu'au `COMMIT` de la transaction, ce qui 
 peut engendrer un fort retard dans la réplication. Dans le cas de grosses transactions, 
 le réseau et le souscripteur peuvent également être mis à rude épreuve car toutes les 
@@ -64,10 +64,10 @@ WITH (streaming = on);
 ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 ```
 
-**Log d'erreur plus précise**
+**Messages d'erreur plus précis**
 
-Le message d'erreur affiché dans la log lorsqu'il manque certaines colonnes à
-une table présente sur un souscripteur a été amélioré. Il indique maintenant
+Le message d'erreur affiché dans les traces lorsqu'il manque certaines colonnes à
+une table présente sur un souscripteur, a été amélioré. Il indique maintenant
 la liste des colonnes manquantes et non plus simplement le message `is missing
 some replicated columns`.
 
@@ -83,7 +83,7 @@ ERROR:  logical replication target relation "public.t" is missing replicated col
 
 Actuellement, dans le cas d'une mise à jour de publication dans une souscription, il 
 faut utiliser la commande `ALTER SUBSCRIPTION ... SET PUBLICATION ...`. Cette méthode 
-bien que fonctionnelle à un inconvénient, il faut connaitre la liste des publications 
+bien que fonctionnelle a un inconvénient, il faut connaître la liste des publications 
 sous peine d'en perdre. Avec la version 14, il est désormais possible d'utiliser la 
 syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...` pour manipuler plus 
 facilement les publications.
