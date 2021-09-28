@@ -26,7 +26,7 @@ Discussion
 
 Lorsque l'on utilise la réplication logique, le processus _walsender_ va procéder 
 au décodage logique et réordonner les modifications depuis les fichiers WAL 
-avant de les envoyer au souscripteur. Cette opération est faite en mémoire mais en 
+avant de les envoyer à l'abonné. Cette opération est faite en mémoire mais en 
 cas de dépassement du seuil indiqué par le paramètre `logical_decoding_work_mem`, 
 ces données sont écrites sur disque.
 
@@ -34,9 +34,9 @@ Ce comportement à deux inconvénients :
 
 * il peut provoquer l'apparition d'une volumétrie non négligeable dans le répertoire 
 `pg_replslot` et jouer sur les I/O ;
-* il n'envoie les données au souscripteur qu'au `COMMIT` de la transaction, ce qui 
+* il n'envoie les données à l'abonné qu'au `COMMIT` de la transaction, ce qui 
 peut engendrer un fort retard dans la réplication. Dans le cas de grosses transactions, 
-le réseau et le souscripteur peuvent également être mis à rude épreuve car toutes les 
+le réseau et l'abonné peuvent également être mis à rude épreuve car toutes les 
 données seront envoyées en même temps.
 
 Avec cette nouvelle version, il est maintenant possible d'avoir un comportement 
@@ -47,10 +47,10 @@ va être sélectionnée et diffusée en continu et ce même si elle n'a pas enco
 reçu de `COMMIT`.
 
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
-le publieur et le souscripteur.
+l'éditeur et l'abonné.
 
 Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter 
-l'option `streaming = on` au souscripteur :
+l'option `streaming = on` à l'abonné :
 
 ```sql
 CREATE SUBSCRIPTION sub_stream CONNECTION 'connection string' 
@@ -67,7 +67,7 @@ n'est pas complètement décodé.
 **Messages d'erreur plus précis**
 
 Le message d'erreur affiché dans les traces lorsqu'il manque certaines colonnes à
-une table présente sur un souscripteur, a été amélioré. Il indique maintenant
+une table présente sur un abonné, a été amélioré. Il indique maintenant
 la liste des colonnes manquantes et non plus simplement le message `is missing
 some replicated columns`.
 
