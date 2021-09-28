@@ -49,12 +49,8 @@ reçu de `COMMIT`.
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
 le publieur et le souscripteur.
 
-Cependant, certains cas nécessiteront toujours des écritures sur disque, par 
-exemple dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
-n'est pas complètement décodé.
-
-Pour mettre cela en place, il faut ajouter l'option `streaming = on` au 
-souscripteur :
+Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter 
+l'option `streaming = on` au souscripteur :
 
 ```sql
 CREATE SUBSCRIPTION sub_stream CONNECTION 'connection string' 
@@ -63,6 +59,10 @@ WITH (streaming = on);
 
 ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 ```
+
+Certains cas nécessiteront toujours des écritures sur disque. Par exemple
+dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
+n'est pas complètement décodé.
 
 **Messages d'erreur plus précis**
 
