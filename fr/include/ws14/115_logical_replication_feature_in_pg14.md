@@ -47,7 +47,7 @@ va être sélectionnée et diffusée en continu et ce même si elle n'a pas enco
 reçu de `COMMIT`.
 
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
-l'éditeur et l'abonné.
+le publieur et l'abonné.
 
 Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter 
 l'option `streaming = on` à l'abonné :
