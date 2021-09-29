@@ -404,14 +404,10 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-### Réplication logique - slide commun (#115)
+### Réplication logique
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114
-     * logical streaming of large in-progress transactions
-     * Logical Replication - detail message with names of missing columns
-     * Support ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ... syntax
--->
-!include include/ws14/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/115 -->
+!include include/ws14/115_logical_replication_feature_in_pg14.md
 
 ----
 
