@@ -385,7 +385,7 @@ possible.
 
 ----
 
-### Fonction string_to_table
+### Fonction `string_to_table`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 -->
 !include include/ws14/118_function_string_to_table.md
@@ -441,7 +441,7 @@ possible.
 
 ----
 
-### Nouvelle fonction date_bin
+### Nouvelle fonction `date_bin`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 -->
 !include include/ws14/126-truncating-timestamps-on-arbitrary-intervals-fct-date_bin.md

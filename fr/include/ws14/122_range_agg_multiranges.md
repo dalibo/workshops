@@ -35,13 +35,13 @@ Différents traitements peuvent être effectués sur les données, comme :
 Exemple :
 
 ```sql
-# SELECT x,
-         lower(x) as "borne inf",
-         upper(x) as "borne sup",
-         x @> 2 as "contient 2",
-         x @> 4 as "contient 4",
-         x * '[1,2]'::int4range AS "intersection avec [1,2]"
-    FROM (VALUES ('[1,4)'::int4range) ) AS F(x) \gx
+SELECT x,
+       lower(x) as "borne inf",
+       upper(x) as "borne sup",
+       x @> 2 as "contient 2",
+       x @> 4 as "contient 4",
+       x * '[1,2]'::int4range AS "intersection avec [1,2]"
+  FROM (VALUES ('[1,4)'::int4range) ) AS F(x) \gx
 ```
 ```text
 -[ RECORD 1 ]-----------+------
@@ -60,13 +60,17 @@ plusieurs intervalles disjoints ensemble.
 Exemple :
 
 ```sql
-# SELECT '{ [1,2), (2,3]}'::int4multirange \gx
+SELECT '{ [1,2), (2,3]}'::int4multirange \gx
 
+```
+```text
 -[ RECORD 1 ]--+--------
 int4multirange | {[1,2),[3,4)}
-
-# SELECT '{[1,5], [2,6]}'::int4multirange \gx
-
+```
+```sql
+SELECT '{[1,5], [2,6]}'::int4multirange \gx
+```
+```text
 -[ RECORD 1 ]--+--------
 int4multirange | {[1,7)}
 ```
@@ -75,15 +79,15 @@ Il est possible d'effectuer des opérations similaires à celles permises sur le
 intervalles simples sur ces nouveaux types :
 
 ```sql
-# SELECT x,
-         lower(x) as "borne inf",
-         upper(x) as "borne sup",
-         x @> 2 as "contient 2",
-         x @> 4 as "contient 4",
-         x * '{[1,2],[6,7]}'::int4multirange 
-           AS "intersection avec {[1,2], [6,7]}"
-    FROM (VALUES ('{[1,4), [5,8)}'::int4multirange) ) 
-      AS F(x) \gx
+SELECT x,
+       lower(x) as "borne inf",
+       upper(x) as "borne sup",
+       x @> 2 as "contient 2",
+       x @> 4 as "contient 4",
+       x * '{[1,2],[6,7]}'::int4multirange 
+         AS "intersection avec {[1,2], [6,7]}"
+  FROM (VALUES ('{[1,4), [5,8)}'::int4multirange) ) 
+    AS F(x) \gx
 ```
 ```text
 -[ RECORD 1 ]--------------------+--------------
@@ -100,11 +104,12 @@ possibles avec des intervalles simples. Comme pour cette soustraction
 d'intervalles :
 
 ```sql
-# SELECT '[1,5]'::int4range - '[2,3)'::int4range AS RESULT;
-ERROR:  result of range difference would not be contiguous
+SELECT '[1,5]'::int4range - '[2,3)'::int4range AS RESULT;
+-- ERROR:  result of range difference would not be contiguous
 
-# SELECT '{[1,5]}'::int4multirange - '{[2,3)}'::int4multirange AS result;
-
+SELECT '{[1,5]}'::int4multirange - '{[2,3)}'::int4multirange AS result;
+```
+```text
     result
 ---------------
  {[1,2),[3,6)}
@@ -142,11 +147,11 @@ VALUES
 Planning par classe et salle :
 
 ```sql
-# SELECT classe, salle, range_agg(plage_horaire) AS plages_horaires
-    FROM planning
-   WHERE salle IS NOT NULL 
-   GROUP BY classe, salle
-   ORDER BY classe, salle;
+SELECT classe, salle, range_agg(plage_horaire) AS plages_horaires
+  FROM planning
+ WHERE salle IS NOT NULL 
+ GROUP BY classe, salle
+ ORDER BY classe, salle;
 ```
 ```text
  classe |  salle  |               plages_horaires
@@ -189,15 +194,15 @@ Voici la liste des index qui supportent ces nouveaux types et les opérations
 indexables :
 
 ```sql
-# SELECT a.amname, of.opfname, t1.typname as lefttype, 
-         t2.typname as righttyp, o.oprname, o.oprcode
-    FROM pg_amop ao
-   INNER JOIN pg_am a ON ao.amopmethod = a.oid
-   INNER JOIN pg_opfamily of ON ao.amopfamily = of.oid
-   INNER JOIN pg_type t1 ON ao.amoplefttype = t1.oid
-   INNER JOIN pg_type t2 ON ao.amoplefttype = t2.oid
-   INNER JOIN pg_operator o ON ao.amopopr = o.oid
-   WHERE of.opfname LIKE '%multirange%';
+SELECT a.amname, of.opfname, t1.typname as lefttype, 
+        t2.typname as righttyp, o.oprname, o.oprcode
+  FROM pg_amop ao
+ INNER JOIN pg_am a ON ao.amopmethod = a.oid
+ INNER JOIN pg_opfamily of ON ao.amopfamily = of.oid
+ INNER JOIN pg_type t1 ON ao.amoplefttype = t1.oid
+ INNER JOIN pg_type t2 ON ao.amoplefttype = t2.oid
+ INNER JOIN pg_operator o ON ao.amopopr = o.oid
+ WHERE of.opfname LIKE '%multirange%';
 ```
 ```text
  amname |    opfname     |   lefttype    |   righttyp    | oprname |              oprcode

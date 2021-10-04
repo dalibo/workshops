@@ -43,13 +43,13 @@ a[2:3] := array[3,4];
 
 -- assigner la valeur d'un champ de record personnalisé
 -- où "a" est de type complex[]
-create type complex as (r float8, i float8);
+CREATE TYPE complex AS (r float8, i float8);
 a[1].r := 1;
 a[1].i := 2;
 
 -- assigner la valeur d'une clé hstore
 -- où "h" est de type hstore
-create extension hstore;
+CREATE EXTENSION hstore;
 h['a'] := 'b';
 ```
 
@@ -63,7 +63,7 @@ pouvant survenir à l'assignation.
 Exemple en version 13 et inférieures :
 
 ```sql
-do $$ declare x int := 1/0; begin end $$ ;
+DO $$ DECLARE x int := 1/0; BEGIN END $$ ;
 -- ERROR:  division by zero
 -- CONTEXT:  SQL statement "SELECT 1/0"
 ```
@@ -71,7 +71,7 @@ do $$ declare x int := 1/0; begin end $$ ;
 Exemple en version 14 :
 
 ```sql
-do $$ declare x int := 1/0; begin end $$ ;
+DO $$ DECLARE x int := 1/0; BEGIN END $$ ;
 -- ERROR:  division by zero
 -- CONTEXT:  SQL expression "1/0"
 ```

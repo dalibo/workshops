@@ -10,15 +10,16 @@ Discussion
 -->
 
 <div class="slide-content">
-```
-CREATE OR REPLACE TRIGGER check_update
-  BEFORE UPDATE OF balance ON accounts
-  FOR EACH ROW
-  EXECUTE FUNCTION check_account_update();
-```
 
-* Ne fonctionne pas pour les `CONSTRAINT TRIGGER`
-* Ne pas lancer dans une transaction qui a modifié la table du trigger
+  ```sql
+  CREATE OR REPLACE TRIGGER check_update
+    BEFORE UPDATE OF balance ON accounts
+    FOR EACH ROW
+    EXECUTE FUNCTION check_account_update();
+  ```
+
+  * Ne fonctionne pas pour les `CONSTRAINT TRIGGER`
+  * Ne pas lancer dans une transaction qui a modifié la table du trigger
 
 </div>
 
@@ -33,7 +34,7 @@ Cette fonctionnalité n'est pas disponible pour les triggers de type
 TRIGGER`](https://www.postgresql.org/docs/14/sql-createtrigger.html) et
 provoque le message d'erreur suivant.
 
-```
+```text
 ERROR:  CREATE OR REPLACE CONSTRAINT TRIGGER is not supported
 ```
 

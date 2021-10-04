@@ -13,14 +13,14 @@ Discussion
 
 * Génération d'une colonne de tri pour les requêtes récursives :
 
-```
+```sql
   [ SEARCH { BREADTH | DEPTH } FIRST BY column_name [, ...]
       SET search_seq_col_name ]
 ```
 
 * Protection contre les cycles :
 
-```
+```sql
   [ CYCLE column_name [, ...]
       SET cycle_mark_col_name
       [ TO cycle_mark_value DEFAULT cycle_mark_default ]
@@ -146,8 +146,8 @@ problème.
 
 
 ```sql
-# UPDATE tree SET parent_id = 10 WHERE id = 1;
-UPDATE 1
+UPDATE tree SET parent_id = 10 WHERE id = 1;
+-- UPDATE 1
 ```
 
 ```sql
@@ -264,12 +264,12 @@ SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 
 L'[implémentation
 actuelle](https://www.postgresql.org/message-id/4a068167-37ed-3d6c-5ec5-c9b03cae84e6%40enterprisedb.com)
-ne permet pas d'interagir avec les valeurs ramenées par les clauses '{ BREADTH |
-DEPTH } FIRST' car leur fonction est de produire une colonne qui facilite le
+ne permet pas d'interagir avec les valeurs ramenées par les clauses `{ BREADTH |
+DEPTH } FIRST` car leur fonction est de produire une colonne qui facilite le
 tri des résultats.
 
-```
-[local]:5444 postgres@postgres=# WITH RECURSIVE mtree(id, name) AS (
+```sql
+WITH RECURSIVE mtree(id, name) AS (
    SELECT id, name
      FROM tree
     WHERE id = 1
