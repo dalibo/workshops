@@ -127,29 +127,17 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 
 <div class="slide-content">
   * Administration
-    * Sécurité
-    * Outils clients
-    * Partitionnement
-    * Divers
-    * Contributions
-  * Réplication (logique ou physique) & sharding/FDW
-    * Réplication physique
-    * Réplication logique
-    * Foreing Data Wrapper et sharding
-  * Développement + Changement syntaxe SQL
+  * Réplication
+  * Développement et syntaxe SQL
   * Supervision
   * Performances
-    * Index
-    * Recovery
-    * Divers
-  * Régressions
 </div>
 
 <div class="notes">
 
-PostgreSQL 14 est sorti le FIXME
+PostgreSQL 14 est sorti le 30 septembre 2021.
 
-Les points principaux sont décrits dans le « [press kit](FIXME) ».
+Les points principaux sont décrits dans le « [press kit](https://www.postgresql.org/about/press/presskit14/) ».
 
 Nous allons décrire ces nouveautés plus en détail.
 
@@ -162,6 +150,13 @@ Nous allons décrire ces nouveautés plus en détail.
 ## Administration et maintenance
 
 <div class="slide-content">
+
+  * Sécurité
+  * Configuration
+  * Outils clients
+  * Partitionnement
+  * Divers
+
 </div>
 
 <div class="notes">
@@ -172,14 +167,6 @@ Nous allons décrire ces nouveautés plus en détail.
 \newpage
 
 ### Sécurité
-
-<div class="slide-content">
-  * L'authentification repose par défaut sur SCRAM-SHA-256
-  * Nouveaux rôles prédéfinis
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -201,20 +188,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Nouveautés de configuration (GUC)
 
-<div class="slide-content">
-  * Nouveaux caractères d'échappement pour `log_line_prefix`
-  * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
-  * Modification à chaud du paramètre `restore_command`
-  * Détection des déconnexions pendant l'exécution d'une requête
-  * Changements mineurs de configuration
-</div>
-
-<div class="notes">
-</div>
-
 ----
-
-\newpage
 
 #### Nouveaux caractères d'échappement pour log_line_prefix
 
@@ -255,15 +229,6 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Outils clients
 
-<div class="slide-content">
-  * pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
-  * pg_dump : Nouvelle option pour exporter les extensions
-  * reindexdb : Nouvelle option --tablespace
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
 #### pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
@@ -283,15 +248,6 @@ Nous allons décrire ces nouveautés plus en détail.
 \newpage
 
 ### Partionnement
-
-<div class="slide-content">
-  * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
-  * Nouveautées sur REINDEX et reindexdb
-  * Collecte automatique des statistiques de tables partitionnées
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -319,16 +275,6 @@ Nous allons décrire ces nouveautés plus en détail.
 \newpage
 
 ### Divers
-
-<div class="slide-content">
-  * Compression des toast configurable en LZ4 et pglz
-  * Nouvelle option pour VACUUM : PROCESS_TOAST
-  * Nouvelle option pour REINDEX : TABLESPACE
-  * Nouvelle fonction pour attendre lorsque l'on arrête un backend
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -380,14 +326,6 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Réplication Physique
 
-<div class="slide-content">
-  * Autorise pg_rewind à utiliser un secondaire comme source
-  * Nouveau paramètre de connexion dans libpq
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
 #### Autorise pg_rewind a utiliser un secondaire comme source
@@ -404,6 +342,8 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
+\newpage
+
 ### Réplication logique
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/115 -->
@@ -414,11 +354,6 @@ Nous allons décrire ces nouveautés plus en détail.
 \newpage
 
 ### Foreign Data Wrapper et Sharding
-
-<div class="slide-content">
-  * Support du `TRUNCATE` sur les tables distantes
-  * Lecture asynchrone des tables distantes
-</div>
 
 <div class="notes">
 Deux évolutions majeures sont apparues dans la gestion des tables distantes à
@@ -446,22 +381,7 @@ possible.
 
 \newpage
 
-## Développement + Changement syntaxe SQL
-
-<div class="slide-content">
-  * Fonction string_to_table
-  * Nouvelle syntaxe OR REPLACE pour la modification d'un trigger
-  * PL/pgSQL : assignation pour les types complexes
-  * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
-  * GROUP BY DISTINCT
-  * Corps de routines respectant le standard SQL
-  * Nouvelles clauses SEARCH et CYCLE
-  * Nouvelle fonction date_bin
-  * Possibilité d'attacher un alias à un JOIN .. USING
-</div>
-
-<div class="notes">
-</div>
+## Développement et syntaxe SQL
 
 ----
 
@@ -539,20 +459,6 @@ possible.
 
 ## Supervision
 
-<div class="slide-content">
-  * Nouvelle vue pg_stat_wal
-  * Nouvelle vue pg_stat_progress_copy
-  * Nouvelle vue pg_stat_replication_slots
-  * Nouveautés dans pg_stat_statements
-  * Ajout de statistiques sur les sessions dans pg_stat_database
-  * Identifiant pour les requêtes normalisées
-  * Nouveauté dans pg_locks
-
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
 ### Nouvelle vue pg_stat_wal
@@ -608,16 +514,6 @@ possible.
 
 ## Performances
 
-<div class="slide-content">
-  * Amélioration de l'indexation
-  * Amélioration des performances avec un grand nombre de connexions en lecture seule
-  * Amélioration des performances de la restauration
-  * Autres améliorations
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
 ### Améliorations de l'indexation
@@ -654,6 +550,7 @@ possible.
 <div class="slide-content">
   * Nouveaux rôles prédéfinis
   * Mise en place d'un sharding minimal
+  * Outil `pg_rewind`
 </div>
 
 ----
