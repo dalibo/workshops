@@ -10,7 +10,7 @@ Discussion
 
 -->
 
-## TP - Nouveaux rôles prédéfinis
+## Nouveaux rôles prédéfinis
 
 <div class="slide-content">
 * Utiliser le rôle `pg_database_owner` dans une base _template_
