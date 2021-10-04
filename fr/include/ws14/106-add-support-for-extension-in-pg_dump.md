@@ -56,8 +56,10 @@ pg_restore --dbname postgres \
 On constate alors que l'extension est absente, elle n'a donc pas été incluse
 dans le premier dump.
 
-```sql
+```text
 workshop=# \dx
+```
+```text
 Liste des extensions installées
 -[ RECORD 1 ]-----------------------------
 Nom         | plpgsql
@@ -80,9 +82,10 @@ En listant les extensions de la base de données, on constate cette fois que
 l'extension `pgcrypto` a été restaurée dans la base de données
 `workshop`.
 
-```sql
+```text
 workshop=# \dx
-
+```
+```text
 Liste des extensions installées
 -[ RECORD 1 ]----------------------------------------------------
 Nom         | pgcrypto

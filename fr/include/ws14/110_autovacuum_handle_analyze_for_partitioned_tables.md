@@ -32,7 +32,9 @@ Dans notre exemple, nous observons le comportement en version 13 puis en version
 14 avec la table partitionnée suivante.
 
 ```sql
-test=# \d parent
+\d parent
+```
+```text
                      Table partitionnée « public.parent »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
@@ -42,25 +44,28 @@ Index :
     "parent_id_idx" btree (id)
 Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_2 FOR VALUES FROM (5000000) TO (11000000)
-
+```
+```sql
 -- Aucune entrée dans la vue pg_stat_user_tables
 -- Pour la table partitionnée parent
-test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
+SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
 
 -- Aucune statistique non plus
-test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- On génère de l'activité
-test=# INSERT INTO parent SELECT generate_series(0,10000000);
+INSERT INTO parent SELECT generate_series(0,10000000);
 
 -- Toujours aucune statistique pour la table partitionnée
-test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- Lancement d'un ANALYZE
-test=# ANALYZE parent;
+ANALYZE parent;
 
 -- Maintenant on dispose des statistiques
-test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+```
+```text
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent
@@ -71,47 +76,20 @@ avg_width              | 4
 ...
 ```
 
-À présent, avec une instance en version 14 et la même configuration, à savoir :
-une table partitionnée et deux partitions.
+Avec une instance en version 14 et la même configuration, le comportement est
+bien meilleur avec la collecte des statistiques en tâche de fond, grâce au
+processus `autovacuum`.
 
 ```sql
-test=# \d parent
-                     Table partitionnée « public.parent »
- Colonne |  Type   | Collationnement | NULL-able | Par défaut 
----------+---------+-----------------+-----------+------------
- id      | integer |                 |           |            
-Clé de partition : RANGE (id)
-Index :
-    "parent_id_idx" btree (id)
-Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
-            enfant_2 FOR VALUES FROM (5000000) TO (11000000)
-
--- Dans cette version on dispose d'une entrée dans la vue pg_stat_user_tables
-test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
--[ RECORD 1 ]-------+------------------------------
-relid               | 16551
-schemaname          | public
-relname             | parent
-seq_scan            | 0
-...
-last_vacuum         | 
-last_autovacuum     | 
-last_analyze        | 
-last_autoanalyze    | 
-vacuum_count        | 0
-autovacuum_count    | 0
-analyze_count       | 0
-autoanalyze_count   | 0
-
 -- Pour l'instant pas de statistique
-test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 
 -- On génère de l'activité
-test=# INSERT INTO into parent SELECT generate_series(0,10000000);
+INSERT INTO into parent SELECT generate_series(0,10000000);
 
 -- On peut voir dans la vue pg_stat_user_tables qu'un autoanalyze
 -- a été réalisé
-test=# SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
+SELECT * FROM pg_stat_user_tables WHERE relname = 'parent' \gx
 -[ RECORD 1 ]-------+------------------------------
 relid               | 16551
 schemaname          | public
@@ -123,7 +101,7 @@ last_autoanalyze    | 2021-08-12 14:29:20.905265+02
 autoanalyze_count   | 1
 
 -- On dispose également des statistiques sur la table partitionnée
-test=# SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
+SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent
@@ -134,11 +112,11 @@ avg_width              | 4
 ...
 ```
 
-Précision concernant le déclanchement de l'autovacuum sur des tables partitionnées :
-les opérations `SELECT`, `INSERT` et `DELETE` sur des partitions sont comptabilisées
-pour le paramètre `autovacuum_analyze_threshold`.
+Précisions concernant le déclenchement de l'`autovacuum` sur des tables partitionnées :
 
-Les opérations DDL comme `ATTACH`, `DETACH` et `DROP` ne le sont pas. Il est donc
+* Les opérations `SELECT`, `INSERT` et `DELETE` sur des partitions sont comptabilisées
+pour le paramètre `autovacuum_analyze_threshold` ;
+* Les opérations DDL comme `ATTACH`, `DETACH` et `DROP` ne le sont pas. Il est donc
 recommandé de lancer un `ANALYZE` manuel après ce type d'opération.
 
 </div>

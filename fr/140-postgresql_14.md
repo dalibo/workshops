@@ -190,7 +190,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Nouveaux caractères d'échappement pour log_line_prefix
+#### Nouveaux caractères d'échappement pour `log_line_prefix`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 -->
 !include include/ws14/100_parallel_leader_wildcard_to_log_line_prefix.md

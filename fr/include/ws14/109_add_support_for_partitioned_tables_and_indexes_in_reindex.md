@@ -23,76 +23,80 @@ Discussion
 
 <div class="notes">
 
-Jusqu'à la version 13, la commande `REINDEX` ne pouvait pas être utilisée sur les tables et index partionnés. Il fallait réindexer les partitions une par une.
+Jusqu'à la version 13, la commande `REINDEX` ne pouvait pas être utilisée sur les
+tables et index partionnés. Il fallait réindexer les partitions une par une.
 
 ```sql
--- Avec la version 13 de PostgreSQL, on obtient ce type d'erreur
--- lorsque l'on tente de réindexer une table ou un index partitionné
-test=# REINDEX TABLE parent_index;
-ERREUR:  REINDEX n'est pas implémenté pour des index partitionnés
+REINDEX INDEX parent_index;
+-- ERROR:  REINDEX is not yet implemented for partitioned indexes
 
-test=# REINDEX TABLE parent;
-ATTENTION:  REINDEX n'est pas encore implémenté pour les tables partitionnées, « parent » ignoré
-NOTICE:  la table « parent » n'a pas d'index à réindexer
-REINDEX
+REINDEX TABLE parent;
+-- WARNING:  REINDEX of partitioned tables is not yet implemented, skipping "parent"
+-- REINDEX
 ```
 
-Avec la version 14, il est maintenant possible de passer une table ou un index partitionné comme argument aux commandes `REINDEX INDEX` ou `REINDEX TABLE`.
-L'ensemble des partitions sont parcourues afin de réindexer tous les éléments concernés. Seuls ceux disposant d'un stockage physique sont visés (on écarte donc les tables et index parents).
+Avec la version 14, il est maintenant possible de passer une table ou un index 
+partitionné comme argument aux commandes `REINDEX INDEX` ou `REINDEX TABLE`.
+L'ensemble des partitions sont parcourues afin de réindexer tous les éléments 
+concernés. Seuls ceux disposant d'un stockage physique sont visés (on écarte 
+donc les tables et index parents).
+
+Prenons la table partitionnée `parent` et son index `parent_index`. Il est
+possible de déterminer la fragmentation de l'index à l'aide de l'extension
+`pgstattuple` :
 
 ```sql
--- On dispose d'une table partitionnée avec un index et deux partitions
--- Le test est réalisé avec l'extension pgstattuple
-test=# SELECT * FROM pg_partition_tree('parent');
-   relid    | parentrelid | isleaf | level 
-------------+-------------+--------+-------
- parent     |             | f      |     0
- enfant_1   | parent      | t      |     1
- enfant_2   | parent      | t      |     1
-
-test=# SELECT * FROM pg_partition_tree('parent_index');
-      relid      | parentrelid  | isleaf | level 
------------------+--------------+--------+-------
- parent_index    |              | f      |     0
- enfant_1_id_idx | parent_index | t      |     1
- enfant_2_id_idx | parent_index | t      |     1
-
--- Visualisation de la fragmentation des index des partitions
-test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
+CREATE EXTENSION pgstattuple;
+SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
+```
+```text
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.18 |                 50
-
-test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
+```
+```sql
+SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
+```
+```text
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.17 |                 50
+```
 
--- Réindexation
-test=# REINDEX INDEX parent_index;
+Tous les index peuvent être reconstruits avec une unique commande :
 
--- Vérification de la fragmentation des index des partitions
-test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
+```sql
+REINDEX INDEX parent_index;
+```
+
+```sql
+SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
+```
+```text
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0
-
-test=# SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
+```
+```sql
+SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
+```
+```text
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0
 ```
 
-Côté fonctionnement, celui-ci est _multi transactions_. C'est-à-dire que chaque partition est traitée séquentiellement dans une transaction spécifique.
-Cela à pour avantage de minimiser le nombre d'index invalides en cas d'annulation ou d'échec avec la commande `REINDEX CONCURRENTLY`.
-Cependant, cela empêche son fonctionnement dans un bloc de transaction.
+Côté fonctionnement, celui-ci est _multi transactions_. C'est-à-dire que chaque
+partition est traitée séquentiellement dans une transaction spécifique. Cela à
+pour avantage de minimiser le nombre d'index invalides en cas d'annulation ou
+d'échec avec la commande `REINDEX CONCURRENTLY`. Cependant, cela empêche son
+fonctionnement dans un bloc de transaction.
 
 ```sql
-test=# BEGIN;
-BEGIN
-test=*# REINDEX INDEX parent_index;
-ERROR:  REINDEX INDEX cannot run inside a transaction block
-CONTEXTE : while reindexing partitioned index "public.parent_index"
+BEGIN;
+REINDEX INDEX parent_index;
+-- ERROR:  REINDEX INDEX cannot run inside a transaction block
+-- CONTEXT: while reindexing partitioned index "public.parent_index"
 ```
 
 Les colonnes `partitions_total` et `partitions_done` de la vue `pg_stat_progress_create_index`

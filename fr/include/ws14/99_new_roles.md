@@ -75,9 +75,9 @@ Le rôle `pg_database_owner` ne peut pas être octroyé directement à un autre 
 comme le montre le message ci-dessous. PostgreSQL considère qu'il ne peut y avoir
 qu'un seul propriétaire par base de données.
 
-```text
-postgres=# GRANT pg_database_owner TO atelier;
-ERROR:  role "pg_database_owner" cannot have explicit members
+```sql
+GRANT pg_database_owner TO atelier;
+-- ERROR:  role "pg_database_owner" cannot have explicit members
 ```
 
 Lorsqu'un changement de propriétaire survient dans la base, les droits sur les
@@ -86,22 +86,22 @@ rôle. Le précédent propriétaire n'aura plus accès au contenu des tables ou 
 vues.
 
 ```sql
-test=# CREATE TABLE tab (id int);
-test=# ALTER TABLE tab OWNER TO pg_database_owner;
+CREATE TABLE tab (id int);
+ALTER TABLE tab OWNER TO pg_database_owner;
 
 -- avec un compte superutilisateur
-postgres=# ALTER DATABASE test OWNER TO role1;
+ALTER DATABASE test OWNER TO role1;
 
-test=# SET role = role1;
-test=> INSERT INTO tab VALUES (1), (2), (3);
-INSERT 0 3
+SET role = role1;
+INSERT INTO tab VALUES (1), (2), (3);
+-- INSERT 0 3
 
 -- avec un compte superutilisateur
-postgres=# ALTER DATABASE test OWNER TO role2;
+ALTER DATABASE test OWNER TO role2;
 
-test=# SET role = role1;
-test=> INSERT INTO tab VALUES (4), (5), (6);
-ERROR:  permission denied for table tab
+SET role = role1;
+INSERT INTO tab VALUES (4), (5), (6);
+-- ERROR:  permission denied for table tab
 ```
 
 Pour conclure, les rôles `pg_write_all_data`, `pg_read_all_data` et `pg_database_owner`
