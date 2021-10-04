@@ -21,7 +21,8 @@ Discussion
 
 <div class="notes">
 
-La nouvelle vue système `pg_stat_wal` permet d'obtenir des statistiques sur l'activité des WAL. Elle est composée des champs suivants :
+La nouvelle vue système `pg_stat_wal` permet d'obtenir des statistiques sur 
+l'activité des WAL. Elle est composée des champs suivants :
 
 * `wal_records` : Nombre total d'enregistrement WAL 
 * `wal_fpi` : Nombre total d'enregistrement _full page images_, ces écritures
@@ -51,7 +52,8 @@ surcharge importante en raison d'appels répétés au système d'exploitation.
 Une mesure de ce surcoût pourra être réalisée avec l'outil `pg_test_timing`.
 Seul un super utilisateur peut modifier ce paramètre.
 
-L'activation de `track_wal_io_timing` est nécessaire afin d'obtenir des données pour les colonnes `wal_write_time` et `wal_sync_time` de la vue `pg_stat_wal`.
+L'activation de `track_wal_io_timing` est nécessaire afin d'obtenir des données
+pour les colonnes `wal_write_time` et `wal_sync_time` de la vue `pg_stat_wal`.
 
 Ces nouvelles statistiques vont permettre d'avoir de nouvelles métriques
 pour la métrologie et la supervision. Elles permettront également d'ajuster

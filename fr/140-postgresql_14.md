@@ -461,35 +461,35 @@ possible.
 
 ----
 
-### Nouvelle vue pg_stat_wal
+### Nouvelle vue `pg_stat_wal`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/129 -->
 !include include/ws14/129_nouvelle_vue_pg_stat_wal.md
 
 ----
 
-### Nouvelle vue pg_stat_progress_copy
+### Nouvelle vue `pg_stat_progress_copy`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 -->
 !include include/ws14/133_simple_progress_reporting_for_copy_command.md
 
 ----
 
-### Nouvelle vue pg_stat_replication_slots
+### Nouvelle vue `pg_stat_replication_slots`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
 !include include/ws14/135-pg_stat_replicaton_slots.md
 
 ----
 
-### Nouveautées dans pg_stat_statements
+### Nouveautées dans `pg_stat_statements`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-### Ajout de statistiques sur les sessions dans pg_stat_database
+### Ajout de statistiques sur les sessions dans `pg_stat_database`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 -->
 !include include/ws14/131_add_session_statistics_to_pg_stat_database.md
@@ -503,7 +503,7 @@ possible.
 
 ----
 
-### Nouveauté dans pg_locks
+### Nouveauté dans `pg_locks`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
 !include include/ws14/134_add_wait_start_column_to_pg_locks.md

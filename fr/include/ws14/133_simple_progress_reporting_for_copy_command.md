@@ -19,16 +19,18 @@ Discussion
 
 <div class="notes">
 
-Il est maintenant possible de surveiller la progression d'une instruction `COPY` grâce à la vue système `pg_stat_progress_copy`. Celle-ci retourne une ligne par _backend_ lancant un `COPY`.
+Il est maintenant possible de surveiller la progression d'une instruction `COPY`
+grâce à la vue système `pg_stat_progress_copy`. Celle-ci retourne une ligne par
+_backend_ lancant un `COPY`.
 
 ```sql
-test=# CREATE TABLE test_copy (i int);
+CREATE TABLE test_copy (i int);
+INSERT INTO test_copy SELECT generate_series (1,10000000);
+COPY test_copy TO '/tmp/test_copy';
 
-test=# INSERT INTO test_copy SELECT generate_series (1,10000000);
-
-test=# COPY test_copy TO '/tmp/test_copy';
-
-postgres=# SELECT * FROM pg_stat_progress_copy \gx
+SELECT * FROM pg_stat_progress_copy \gx
+```
+```text
 -[ RECORD 1 ]----+---------
 pid              | 39148
 datid            | 16384
@@ -42,14 +44,19 @@ tuples_processed | 5570696
 tuples_excluded  | 0
 ```
 
-Parmis ces informations, on retrouve le type de `COPY` exécuté (`command`), le type d'entrée/sortie utilisé (`type`), ainsi que le nombre d'octets déjà traités (`bytes_processed`) et le nombre de lignes déjà insérées (`tuples_processed`).
+Parmis ces informations, on retrouve le type de `COPY` exécuté (`command`), le
+type d'entrée/sortie utilisé (`type`), ainsi que le nombre d'octets déjà traités 
+(`bytes_processed`) et le nombre de lignes déjà insérées (`tuples_processed`).
 
-Pour le champ `tuples_excluded`, il n'est renseigné qu'en cas d'utilisation d'une clause `WHERE` et remonte le nombre de lignes exclues par cette même clause.
+Pour le champ `tuples_excluded`, il n'est renseigné qu'en cas d'utilisation d'une
+clause `WHERE` et remonte le nombre de lignes exclues par cette même clause.
 
 ```sql
-test=# COPY test_copy FROM '/tmp/test_copy' WHERE i > 1000;
+COPY test_copy FROM '/tmp/test_copy' WHERE i > 1000;
 
-postgres=# SELECT * FROM pg_stat_progress_copy \gx
+SELECT * FROM pg_stat_progress_copy \gx
+```
+```text
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384
@@ -63,12 +70,18 @@ tuples_processed | 2329752
 tuples_excluded  | 1000
 ```
 
-Le champ `bytes_total` correspond à la taille en octets de la source de données. Il n'est valorisé que dans le cadre d'un `COPY FROM` et si la source de données est située sur le même serveur que l'instance PostgreSQL. Il ne sera pas renseigné si le champ `type` est à `PIPE`, ce qui équivaut à `COPY FROM ... STDIN` ou à une commande psql `\copy`.
+Le champ `bytes_total` correspond à la taille en octets de la source de données.
+Il n'est valorisé que dans le cadre d'un `COPY FROM` et si la source de données
+est située sur le même serveur que l'instance PostgreSQL. Il ne sera pas renseigné
+si le champ `type` est à `PIPE`, ce qui équivaut à `COPY FROM ... STDIN` ou à
+une commande psql `\copy`.
 
 ```sql
-test=# \copy test_copy from '/tmp/test_copy' where i > 1000;
+\copy test_copy from '/tmp/test_copy' where i > 1000;
 
-postgres=# SELECT * FROM pg_stat_progress_copy \gx
+SELECT * FROM pg_stat_progress_copy \gx
+```
+```text
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384
