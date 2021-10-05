@@ -28,16 +28,16 @@ si survenu.
 
 ### Préparer le modèle de données
 
-> Créer la base `region_template`. Ce _template_ permet de recréer le modèle à
-> l'identique dans une nouvelle base sur la même instance par soucis de
-> simplicité.
+* Créer la base `region_template`. Ce _template_ permet de recréer le modèle à
+  l'identique dans une nouvelle base sur la même instance par soucis de
+  simplicité.
 
 ```sql
 CREATE DATABASE region_template WITH IS_TEMPLATE = true;
 ```
 
-> Créer dans ce _template_ la table `regions` avec les correspondances des 
-> régions administratives.
+* Créer dans ce _template_ la table `regions` avec les correspondances des 
+  régions administratives.
 
 L'identifiant de région correspond aux codes issus de la norme [ISO 3166-2] et
 sera stocké dans un champ texte de six caractères.
@@ -64,8 +64,8 @@ INSERT INTO regions VALUES
   ('FR-PDL', 'Pays de la Loire'), ('FR-PAC', 'Provence-Alpes-Côte d''Azur');
 ```
 
-> Ajouter la table `population` avec les champs souhaités pour le recensement et
-> la contrainte de clé étrangère avec la table `regions`.
+* Ajouter la table `population` avec les champs souhaités pour le recensement et
+  la contrainte de clé étrangère avec la table `regions`.
 
 ```sql
 CREATE TABLE population (
@@ -87,9 +87,9 @@ identifiant civile, tel que le numéro de sécurité sociale. Cet identifiant pe
 de préserver la correspondance avec l'individu réel pour mettre à jour ses
 informations, telle que la date du décés.
 
-> Cloner la base `region_template` pour les dix-huits régions administratives.
-> Dans la pratique, il s'agira de dix-huit bases de données ayant leurs propres 
-> ressources serveurs (CPU, mémoire et stockage) sur des instances dédiées.
+* Cloner la base `region_template` pour les dix-huits régions administratives.
+  Dans la pratique, il s'agira de dix-huit bases de données ayant leurs propres 
+  ressources serveurs (CPU, mémoire et stockage) sur des instances dédiées.
 
 ```sql
 SELECT concat(
@@ -101,15 +101,15 @@ SELECT concat(
 
 ### Configurer les accès distants
 
-> Créer la base principale `recensement` à partir du _template_ précédent.
+* Créer la base principale `recensement` à partir du _template_ précédent.
 
 ```sql
 CREATE DATABASE recensement WITH TEMPLATE = region_template;
 ```
 
-> Dans cette nouvelle base, installer l'extension `postgres_fdw`, et créer les
-> serveurs distants pour chaque base de région, ainsi que les correspondances
-> d'utilisateur nécessaires à l'authentification des tables distantes.
+* Dans cette nouvelle base, installer l'extension `postgres_fdw`, et créer les
+  serveurs distants pour chaque base de région, ainsi que les correspondances
+  d'utilisateur nécessaires à l'authentification des tables distantes.
 
 ```sql
 \c recensement
@@ -135,8 +135,8 @@ SELECT concat(
 L'option `async_capable` doit être activée pour bénéficier de la lecture 
 concurrente sur les partitions distantes.
 
-> Dans la base principale `recensement`, recréer la table `population` en 
-> table partitionnée de type `LIST` sur la colonne `region_naissance_id`.
+* Dans la base principale `recensement`, recréer la table `population` en 
+  table partitionnée de type `LIST` sur la colonne `region_naissance_id`.
 
 ```sql
 DROP TABLE IF EXISTS population;
@@ -154,8 +154,8 @@ partitionnée n'en fait pas mention. Le contournement consiste à les définir
 scrupuleusement sur les serveurs distants et de reposer sur un identifiant
 universellement unique comme le type `uuid` pour régler les risques de conflits.
 
-> Pour chaque base région, créer une partition distante rattachée à la table
-> principale `population`.
+* Pour chaque base région, créer une partition distante rattachée à la table
+  principale `population`.
 
 ```sql
 SELECT concat(
@@ -169,7 +169,7 @@ SELECT concat(
 
 ### Alimenter une table partitionnée répartie dans plusieurs bases de données
 
-> Insérer des données aléatoires dans la table principale.
+* Insérer des données aléatoires dans la table principale.
 
 ```sql
 \timing on
@@ -188,7 +188,7 @@ L'insertion est pénalisée par la distribution des lignes à travers les diffé
 tables distantes, les contraintes d'intégrité qui s'appliquent, la mise à jour
 des index de clé primaire, voire l'appel à la fonction `gen_random_uuid()`.
 
-> Exécution la commande `ANALYZE` sur la table principale.
+* Exécuter la commande `ANALYZE` sur la table principale.
 
 ```sql
 ANALYZE VERBOSE population;
@@ -196,8 +196,8 @@ ANALYZE VERBOSE population;
 
 ### Étudier les différents cas d'usage
 
-> Afficher le plan d'exécution d'une requête permettant de comptabiliser le
-> nombre de naissance en 1989.
+* Afficher le plan d'exécution d'une requête permettant de comptabiliser le
+  nombre de naissance en 2010.
 
 ```sql
 EXPLAIN (analyze, costs off) 
@@ -228,7 +228,7 @@ termine vers la 49ème milliseconde d'exécution. Sur de hautes volumétries, l
 lectures non indexées sont plus performantes, grâce à une répartition de travail 
 entre les différentes instances, aussi appelées nœuds de calcul.
 
-> Réexécuter la requête en désactivant l'option `async_capable` sur les partitions.
+* Réexécuter la requête en désactivant l'option `async_capable` sur les partitions.
 
 ```sql
 SELECT concat(
@@ -272,9 +272,9 @@ SELECT concat(
 \gexec
 ```
 
-> Procéder à la mise à jour de la table `population` pour ajouter une date de 
-> décès à une portion de la population. Récupérer le nombre de décès survenus
-> entre 1970 et 1980, regroupés par région.
+* Procéder à la mise à jour de la table `population` pour ajouter une date de 
+  décès à une portion de la population. Récupérer le nombre de décès survenus
+  entre 1970 et 1980, regroupés par région.
 
 ```sql
 EXPLAIN (analyze, verbose, costs off)
@@ -287,29 +287,29 @@ UPDATE population
                                 QUERY PLAN
 --------------------------------------------------------------------------------
  Update on population (actual time=979.144..979.152 rows=0 loops=1)
-   Foreign Update on public.population_frara population_1
-     Remote SQL: UPDATE public.population SET date_deces = $2 WHERE ctid = $1
-   ...
-   Foreign Update on public.population_frpdl population_18
-     Remote SQL: UPDATE public.population SET date_deces = $2 WHERE ctid = $1
-   ->  Append (actual time=137.350..1200.934 rows=701 loops=1)
-         ->  Foreign Scan on public.population_frara population_1 
-             (actual time=137.347..138.112 rows=37 loops=1)
-               Filter: ((population_1.anon_id)::text ~~ 'ff%'::text)
-               Rows Removed by Filter: 9963
-               Remote SQL: 
-                 SELECT anon_id, region_naissance_id, date_naissance, date_deces, ctid 
-                   FROM public.population WHERE ((date_naissance < '1980-01-01'::date))
-                    FOR UPDATE
+  Foreign Update on public.population_frara population_1
+   Remote SQL: UPDATE public.population SET date_deces = $2 WHERE ctid = $1
+  ...
+  Foreign Update on public.population_frpdl population_18
+   Remote SQL: UPDATE public.population SET date_deces = $2 WHERE ctid = $1
+   -> Append (actual time=137.350..1200.934 rows=701 loops=1)
+      -> Foreign Scan on public.population_frara population_1 
+          (actual time=137.347..138.112 rows=37 loops=1)
+           Filter: ((population_1.anon_id)::text ~~ 'ff%'::text)
+           Rows Removed by Filter: 9963
+           Remote SQL: 
+            SELECT anon_id, region_naissance_id, date_naissance, date_deces, ctid 
+              FROM public.population WHERE ((date_naissance < '1980-01-01'::date))
+               FOR UPDATE
  ...
-         ->  Foreign Scan on public.population_frpdl population_18 
-             (actual time=38.566..38.676 rows=39 loops=1)
-               Filter: ((population_18.anon_id)::text ~~ 'ff%'::text)
-               Rows Removed by Filter: 9961
-               Remote SQL: 
-                 SELECT anon_id, region_naissance_id, date_naissance, date_deces, ctid 
-                   FROM public.population WHERE ((date_naissance < '1980-01-01'::date)) 
-                    FOR UPDATE
+      -> Foreign Scan on public.population_frpdl population_18 
+          (actual time=38.566..38.676 rows=39 loops=1)
+           Filter: ((population_18.anon_id)::text ~~ 'ff%'::text)
+           Rows Removed by Filter: 9961
+           Remote SQL: 
+            SELECT anon_id, region_naissance_id, date_naissance, date_deces, ctid 
+              FROM public.population WHERE ((date_naissance < '1980-01-01'::date)) 
+               FOR UPDATE
  Planning Time: 2.370 ms
  Execution Time: 1312.767 ms
 ```

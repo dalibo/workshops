@@ -10,7 +10,7 @@ Discussion
 
 -->
 
-## Nouveaux rôles prédéfinis
+## Découvrir les nouveaux rôles prédéfinis
 
 <div class="slide-content">
 * Utiliser le rôle `pg_database_owner` dans une base _template_
@@ -22,8 +22,8 @@ Discussion
 
 ### Utiliser le rôle `pg_database_owner` dans une base _template_
 
-> Avec le compte `postgres`, créer une nouvelle base modèle `tp1_template` à
-> l'aide de la commande `createdb` ou l'instruction `CREATE DATABASE`.
+* Avec le compte `postgres`, créer une nouvelle base modèle `tp1_template` à
+  l'aide de la commande `createdb` ou l'instruction `CREATE DATABASE`.
 
 ```sh
 createdb -e tp1_template
@@ -32,8 +32,8 @@ createdb -e tp1_template
 CREATE DATABASE tp1_template;
 ```
 
-> Se connecter à cette nouvelle base et y ajouter une table `members` avec les
-> trois colonnes comme suit :
+* Se connecter à cette nouvelle base et y ajouter une table `members` avec les
+  trois colonnes comme suit :
 
 ```sh
 psql -U postgres -d tp1_template
@@ -60,7 +60,7 @@ tp1_template=# \d
  public | members_id_seq | sequence | postgres
 ```
 
-> Modifier le propriétaire des objets avec le nouveau rôle `pg_database_owner`.
+* Modifier le propriétaire des objets avec le nouveau rôle `pg_database_owner`.
 
 ```sql
 ALTER TABLE members OWNER TO pg_database_owner;
@@ -74,9 +74,9 @@ tp1_template=# \d
  public | members_id_seq | sequence | pg_database_owner
 ```
 
-> Créer un utilisateur `atelier`, ainsi qu'une nouvelle base `tp1` basée sur le
-> modèle `tp1_template`, dont il sera propriétaire. Ajouter son mot de passe 
-> dans le fichier `.pgpass` pour simplifier l'authentification.
+* Créer un utilisateur `atelier`, ainsi qu'une nouvelle base `tp1` basée sur le
+  modèle `tp1_template`, dont il sera propriétaire. Ajouter son mot de passe 
+  dans le fichier `.pgpass` pour simplifier l'authentification.
 
 ```sh
 createuser --pwprompt atelier
@@ -86,7 +86,7 @@ echo 'localhost:5432:tp1:*:p@ssword' > ~/.pgpass
 chmod 600 ~/.pgpass
 ```
 
-> Quel est le propriétaire des objets présents dans la base `tp1` ?
+* Quel est le propriétaire des objets présents dans la base `tp1` ?
 
 Les droits sont similaires à la base modèle, notamment le propriétaire
 `pg_database_owner` sur les objets `members` et `members_id_seq`.
@@ -100,8 +100,8 @@ tp1=> \d
  public | members_id_seq | sequence | pg_database_owner
 ```
 
-> Se connecter à la base `tp1` avec le rôle propriétaire `atelier` et ajouter
-> quelques lignes dans la table `members`.
+* Se connecter à la base `tp1` avec le rôle propriétaire `atelier` et ajouter
+  quelques lignes dans la table `members`.
 
 ```sh
 psql -h localhost -U atelier tp1
@@ -122,8 +122,8 @@ Sans être explicitement autorisé à écrire dans la table `members`, le rôle
 
 ### Exporter avec le rôle `pg_read_all_data`
 
-> Créer un nouvel utilisateur `dump_user` et tenter d'exporter les données de la
-> base `atelier` avec l'outil `pg_dump`. Que se passe-t-il ?
+* Créer un nouvel utilisateur `dump_user` et tenter d'exporter les données de la
+  base `atelier` avec l'outil `pg_dump`. Que se passe-t-il ?
 
 ```sh
 createuser --pwprompt dump_user
@@ -134,8 +134,8 @@ pg_dump: error: query failed: ERROR:  permission denied for table members
 pg_dump: error: query was: LOCK TABLE public.members IN ACCESS SHARE MODE
 ```
 
-> Recommencer l'export après lui avoir assignaer les droits du rôle `pg_read_all_data`.
-> Ce droit doit être octroyé par un superutilisateur comme `postgres`.
+* Recommencer l'export après lui avoir assignaer les droits du rôle `pg_read_all_data`.
+  Ce droit doit être octroyé par un superutilisateur comme `postgres`.
 
 ```sh
 psql -U postgres
@@ -209,8 +209,8 @@ ALTER TABLE ONLY public.members
 --
 ```
 
-> Exporter les données globales de l'instance à l'aide de l'outil `pg_dumpall` et
-> le compte `dump_user`.
+* Exporter les données globales de l'instance à l'aide de l'outil `pg_dumpall` et
+  le compte `dump_user`.
 
 ```sh
 pg_dumpall -h localhost -U dump_user --globals-only > dump_tp1_globals.sql
@@ -256,8 +256,8 @@ de la commande `pg_dumpall` ou pour des logiciels plus complets comme [pg_back].
 
 ### Importer avec le rôle `pg_write_all_data`
 
-> Créer un nouveau rôle `load_user` et lui affecter les rôles `pg_write_all_data`.
-> Ce droit doit être octroyé par un superutilisateur comme `postgres`.
+* Créer un nouveau rôle `load_user` et lui affecter les rôles `pg_write_all_data`.
+  Ce droit doit être octroyé par un superutilisateur comme `postgres`.
 
 ```sh
 psql -U postgres
@@ -268,7 +268,7 @@ CREATE ROLE load_user WITH LOGIN;
 GRANT pg_write_all_data TO load_user;
 ```
 
-> Créer un fichier `members.csv` sur le disque et y ajouter les lignes suivantes.
+* Créer un fichier `members.csv` sur le disque et y ajouter les lignes suivantes.
 
 ```text
 id,name,age
@@ -284,8 +284,8 @@ id,name,age
 10,Jérémie,12
 ```
 
-> Se reconnecter avec ce nouveau rôle et tenter de lire les données de la table
-> `members` dans la base `tp1`.
+* Se reconnecter avec ce nouveau rôle et tenter de lire les données de la table
+  `members` dans la base `tp1`.
 
 ```sql
 \c 'host=localhost user=load_user dbname=tp1'
@@ -295,8 +295,8 @@ SELECT id, name, age FROM members LIMIT 10;
 ERROR:  permission denied for table members
 ```
 
-> Charger les données du fichier `.csv` dans la table `members` avec l'utilisateur
-> `load_user` et la méthode `\copy` de l'outil `psql`.
+* Charger les données du fichier `.csv` dans la table `members` avec l'utilisateur
+  `load_user` et la méthode `\copy` de l'outil `psql`.
 
 ```sql
 \copy members FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
@@ -311,16 +311,16 @@ conflit sur la contrainte de clé primaire. Il est nécessaire d'enrichir le
 traitement d'import avec une gestion d'erreurs ou une solution plus complexe
 que l'instruction `COPY`.
 
-> Créer une copie de la table `members` sans les données et charger les données
-> du fichier `.csv`.
+* Créer une copie de la table `members` sans les données et charger les données
+  du fichier `.csv`.
 
 ```sql
 CREATE TABLE members_copy AS TABLE members WITH NO DATA;
 \copy members_copy FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
 ```
 
-> Tenter de charger les données de la table `members_copy` avec l'ordre
-> `INSERT ON CONFLICT` vers la table finale `members`.
+* Tenter de charger les données de la table `members_copy` avec l'ordre
+  `INSERT ON CONFLICT` vers la table finale `members`.
 
 ```sql
 INSERT INTO members OVERRIDING SYSTEM VALUE
@@ -335,8 +335,8 @@ La clause `ON CONFLICT` suppose que l'utilisateur dispose des droits de lecture
 sur la table cible afin de comparer les données de la colonne `id` avant 
 l'insertion. Cette méthode n'est donc pas adaptée.
 
-> Réaliser une boucle avec une gestion d'erreurs pour ignorer les données déjà
-> présentes dans la table cible `members`.
+* Réaliser une boucle avec une gestion d'erreurs pour ignorer les données déjà
+  présentes dans la table cible `members`.
 
 ```sql
 DO $$

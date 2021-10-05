@@ -548,9 +548,9 @@ possible.
 <!-- lister les tp ici, un include par tp -->
 
 <div class="slide-content">
-  * Nouveaux rôles prédéfinis
+  * Découvrir les nouveaux rôles prédéfinis
   * Mise en place d'un sharding minimal
-  * Outil `pg_rewind`
+  * Outil pg_rewind
 </div>
 
 ----
