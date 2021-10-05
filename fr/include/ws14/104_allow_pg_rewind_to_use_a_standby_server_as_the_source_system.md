@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* la source d'un rewind peut être une instance secondaire
+* La source d'un _rewind_ peut être une instance secondaire
 
 </div>
 

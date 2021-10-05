@@ -16,7 +16,7 @@ Discussion
 
 * Mise en place du mode _streaming in-progress_ pour la réplication logique
 * Informations supplémentaires pour les messages d'erreur de type `columns are missing`
-* Ajout de la syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...`
+* Ajout de la syntaxe `ALTER SUBSCRIPTION… ADD/DROP PUBLICATION…`
 
 </div>
 
@@ -53,9 +53,9 @@ Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter
 l'option `streaming = on` à l'abonné :
 
 ```sql
-CREATE SUBSCRIPTION sub_stream CONNECTION 'connection string' 
-PUBLICATION pub 
-WITH (streaming = on);
+CREATE SUBSCRIPTION sub_stream 
+  CONNECTION 'connection string' 
+  PUBLICATION pub WITH (streaming = on);
 
 ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 ```
@@ -73,34 +73,40 @@ some replicated columns`.
 
 ```sql
 -- En version 13
-ERROR:  logical replication target relation "public.t" is missing some replicated columns
+ERROR:  logical replication target relation "public.t" 
+        is missing some replicated columns
 
 -- En version 14
-ERROR:  logical replication target relation "public.t" is missing replicated column: "champ"
+ERROR:  logical replication target relation "public.t" 
+        is missing replicated column: "champ"
 ```
 
-**ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...**
+**ALTER SUBSCRIPTION… ADD/DROP PUBLICATION…**
 
-Actuellement, dans le cas d'une mise à jour de publication dans une souscription, il 
-faut utiliser la commande `ALTER SUBSCRIPTION ... SET PUBLICATION ...`. Cette méthode 
-bien que fonctionnelle a un inconvénient, il faut connaître la liste des publications 
-sous peine d'en perdre. Avec la version 14, il est désormais possible d'utiliser la 
-syntaxe `ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ...` pour manipuler plus 
-facilement les publications.
+Jusqu'alors, dans le cas d'une mise à jour de publication dans une souscription,
+il était nécessaire d'utiliser la commande `ALTER SUBSCRIPTION… SET PUBLICATION…`
+et de connaître la liste des publications sous peine d'en perdre.
+
+Avec la version 14, il est désormais possible d'utiliser la syntaxe
+`ALTER SUBSCRIPTION… ADD/DROP PUBLICATION…` pour manipuler plus facilement les
+publications.
 
 ```sql
 -- on dispose d'une souscription avec 2 publications
-ws14=# \dRs
+\dRs
+```
+```text
           Liste des souscriptions
  Nom | Propriétaire | Activé | Publication 
 -----+--------------+--------+-------------
  sub | postgres     | t      | {pub,pub2}
-
--- en version 13, afin d'ajouter une publication 
--- il faudra exécuter cette commande
+```
+```sql
+-- en version 13 et inférieures, pour ajouter une nouvelle publication, il était
+-- nécessaire de connaître les autres publications pour actualiser la souscription
 ws14=# ALTER SUBSCRIPTION sub SET PUBLICATION pub,pub2,pub3;
 
--- en version 14, il faut simplement exécuter ceci
+-- en version 14, les clauses ADD et DROP simplifient ces modifications
 ws14=# ALTER SUBSCRIPTION sub ADD PUBLICATION pub3;
 ```
 
