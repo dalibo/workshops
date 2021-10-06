@@ -27,23 +27,25 @@ Discussion
 lues ou affectées par les commandes `CREATE TABLE AS`, `SELECT INTO`,
 `CREATE MATERIALIZED VIEW`, `REFRESH MATERIALIZED VIEW` et `FETCH`.
 
-Le script sql suivant permet d'illustrer cette nouvelle fonctionnalité. Il
+Le script SQL suivant permet d'illustrer cette nouvelle fonctionnalité. Il
 effectue plusieurs de ces opérations après avoir réinitialisé les statistiques
 de `pg_stat_statements`.
 
 ```sql
-select pg_stat_statements_reset();
-create table pg_class_1 as select * from pg_class;
-select * into pg_class_2 FROM pg_class;
-create materialized view pg_class_3 as select * from pg_class;
-refresh materialized view pg_class_3;
+SELECT pg_stat_statements_reset();
+
+CREATE TABLE pg_class_1 AS SELECT * FROM pg_class;
+SELECT * INTO pg_class_2 FROM pg_class;
+CREATE MATERIALIZED VIEW pg_class_3 AS SELECT * FROM pg_class;
+REFRESH MATERIALIZED VIEW pg_class_3;
 ```
 
 On retrouve bien le nombres de lignes affectées par les requêtes, dans le champ
-`rows` de la vue pg_stat_statements.
+On retrouve bien le nombre de lignes affectées par les requêtes, dans le champ
+`rows` de la vue `pg_stat_statements`.
 
 ```sql
-select query,rows from pg_stat_statements;
+SELECT query, rows FROM pg_stat_statements;
                              query                             | rows
 ---------------------------------------------------------------+------
  select * into pg_class_2 FROM pg_class                        |  401
@@ -56,7 +58,7 @@ select query,rows from pg_stat_statements;
 Le même scénario de test réalisé en version 13 ne donne pas ces informations.
 
 ```sql
-select query,rows from pg_stat_statements;
+SELECT query, rows FROM pg_stat_statements;
                              query                             | rows
 ---------------------------------------------------------------+------
  select * into pg_class_2 FROM pg_class                        |    0
@@ -103,11 +105,11 @@ done
 ```
 
 La vue `pg_stat_statements` a bien conservé un nombre de requêtes 
-inférieur à `pg_stat_statement.max`, malgré que 400 requêtes distinctes aient
+inférieur à `pg_stat_statement.max`, bien que 400 requêtes distinctes aient
 été exécutées :
 
 ```sql
-ws14=# select count(*) from pg_stat_statements;
+SELECT count(*) FROM pg_stat_statements;
 
  count 
 -------
@@ -119,7 +121,7 @@ tracé dans la vue `pg_stat_statements_info`. Elle a été déclenchée 31 fois
 pendant les créations et suppressions de tables :
 
 ```sql
-ws14=# select * from pg_stat_statements_info;
+SELECT * FROM pg_stat_statements_info;
 
  dealloc |          stats_reset          
 ---------+-------------------------------
@@ -129,7 +131,7 @@ ws14=# select * from pg_stat_statements_info;
 Ces informations peuvent également être obtenues via la fonction du même nom :
 
 ```sql
-ws14=# select pg_stat_statements_info();
+SELECT pg_stat_statements_info();
        pg_stat_statements_info        
 --------------------------------------
  (31,"2021-09-02 13:35:22.457383+02")
@@ -149,18 +151,18 @@ retrouver le nom d'une relation à partir de son `oid`.
 ```sql
 CREATE OR REPLACE FUNCTION f_rel_name(oid int) RETURNS varchar(32) AS 
 $$
-    select relname from pg_class where oid=$1;
+    SELECT relname FROM pg_class WHERE oid=$1;
 $$ 
 LANGUAGE SQL;
 ```
-Après avoir réinitialisée les statistiques de `pg_stat_statements`, le nom d'une 
+Après avoir réinitialisé les statistiques de `pg_stat_statements`, le nom d'une 
 table est récupérée depuis son `oid` en utilisant une requête SQL directement, 
 puis via la fonction `f_rel_name` :
 
 ```sql
-select pg_stat_statements_reset();
-select relname from pg_class where oid=26140 ;
-select f_rel_name(26140);
+SELECT pg_stat_statements_reset();
+SELECT relname FROM pg_class WHERE oid=26140 ;
+SELECT f_rel_name(26140);
 ```
 
 La vue `pg_stat_statements` est consultée directement après :
@@ -168,7 +170,9 @@ La vue `pg_stat_statements` est consultée directement après :
 ```sql
 select query,toplevel from pg_stat_statements
 where query not like '%pg_stat_statements%'
-order by query;
+SELECT query, toplevel FROM pg_stat_statements
+ WHERE query NOT LIKE '%pg_stat_statements%'
+ ORDER BY query;
                   query                   | toplevel 
 -------------------------------------------+----------
  select f_rel_name($1)                     | t
@@ -178,8 +182,8 @@ order by query;
 
 On retrouve bien l'appel de la fonction, ainsi que les deux exécutions de la 
 requête sur `pg_class`, celle faite directement, et celle faite au sein de la 
-fonction `f_rel_name`. La requête qui est exécutée dans la fonction ayant 
-`toplevel` à `false`, elle peut être distinguée de l'exécution directe, ce qui 
-n'était pas possible dans les versions précédentes.
+fonction `f_rel_name`. La requête dont `toplevel` vaut `false` correspond
+à l'exécution dans la fonction. Il n'était pas possible dans une version
+antérieure de distinguer aussi nettement les deux contextes d'exécution.
 
 </div>
