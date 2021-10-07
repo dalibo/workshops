@@ -85,7 +85,7 @@ statistiques du module lui-même.
 La colonne `stats_reset` rapporte la date de la dernière réinitialisation des
 statistiques par la fonction `pg_stat_statements_reset()`.
 
-Le colonne `dealloc` décompte les événements de purge qui sont déclenchés
+La colonne `dealloc` décompte les événements de purge qui sont déclenchés
 lorsque le nombre de requêtes distinctes dépasse le seuil défini par le
 paramètre `pg_stat_statements.max`. Elle sera particulièrement utile pour 
 configurer ce paramètre.
