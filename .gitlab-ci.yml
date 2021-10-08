@@ -53,9 +53,11 @@ pandoc:
     - if: $CI_COMMIT_BRANCH == "master"
       variables:
         TARGET: $MASTER_TARGET
+        MESSAGE: "All archived and active workshops will be published."
     - if: $CI_COMMIT_BRANCH != "master"
       variables:
         TARGET: $BRANCH_TARGET
+        MESSAGE: "Only $BRANCH_TARGET will be published."
 
   script:
     #
@@ -69,6 +71,7 @@ pandoc:
                 make --directory=themes install
         fi
     # pandoc
+    - echo $MESSAGE
     - make $TARGET
 
   artifacts:

@@ -165,8 +165,6 @@ OBJS += $(HANDOUT_HTML_OBJS)
 PDF_OBJS=$(SRC:.md=.nocover.pdf)
 OBJS += $(PDF_OBJS)
 
-.INTERMEDIATE: $(PDF_OBJS)
-
 %.nocover.pdf: %.md
 	$(ECHO)	
 	cd $(DIR) && $(PANDOC) $(PDF_FLAGS) $(IN) -o $(OUT)
@@ -282,7 +280,7 @@ all: reveal handout_html pdf epub index
 
 # Dynamic target definition
 define workshop_target =
-  $(lastword $(subst /, ,$(dir $(1)))): $(subst FILE, $(basename $(1)),$(SRC_FORMATS))
+  $(lastword $(subst /, ,$(dir $(1)))): $(subst FILE, $(basename $(1)),$(SRC_FORMATS)) index
 endef
 
 # Invoke markdown rules for each workshop directory
