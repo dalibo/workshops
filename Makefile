@@ -305,6 +305,13 @@ clean:
 test:
 	@echo $(OBJS) | tr " " "\n"
 
+# stage all generated files into _build directory, needed by deploy CI stage
+build:
+	for LANG in en fr ; do \
+	  mkdir -p _build/$$LANG ;\
+	  find $$LANG \( -name "*.html" -or -name "*.pdf" \) \
+	    -exec cp {} _build/$$LANG \; ;\
+	done
 
 install:
 	ln -s $(HOME)/.dalibo/themes/ 

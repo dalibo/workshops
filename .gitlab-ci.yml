@@ -15,7 +15,7 @@ include:
 ##
 
 variables:
-  BRANCH_TARGET: all
+  BRANCH_TARGET: ws14
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/*'
@@ -74,11 +74,7 @@ pandoc:
     - echo $MESSAGE
     - make $TARGET
     - echo "Move html and pdf files to root directories"
-    - >
-        for LANG in en fr ; do
-          mkdir -p _build/$LANG
-          find $LANG \( -name "*.html" -or -name "*.pdf" \) -exec cp {} _build/$LANG \;
-        done
+    - make build
 
   artifacts:
     paths:
