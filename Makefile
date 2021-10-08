@@ -35,6 +35,7 @@ SOURCES=en fr
 PATHS := $(shell find $(SOURCES) -maxdepth 1 -mindepth 1 -type d)
 PATHS := $(filter-out %/include %/medias, $(PATHS))
 WORKSHOPS := $(notdir $(PATHS))
+INDEX := $(shell find $(SOURCES) -type f -name index.md)
 
 ###############################################################################
 # Functions
@@ -115,7 +116,7 @@ ifeq ("$(wildcard $(LOCAL_DLB))","")
     DOCX_FLAGS=-t doc --toc
     EPUB_FLAGS=-t epub --toc
     HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2
-    HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2
+    HTML_FLAGS=-t html5 --self-contained --standalone
     MARKDOWN_FLAGS=-t markdown
     ODT_FLAGS=-t odt --toc
     PDF_FLAGS=--toc --pdf-engine=xelatex
@@ -129,7 +130,7 @@ else
     EPUB_FLAGS=
     HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2 \
       --template=$(DLB)/html/uikit/dalibo.html 
-    HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2 \
+    HTML_FLAGS=-t html5 --self-contained --standalone \
       --template=$(DLB)/html/uikit/dalibo.html
     MARKDOWN_FLAGS=-t markdown
     ODT_FLAGS=--reference-doc=$(DLB)/odt/template_conference.dokuwiki.odt
@@ -267,9 +268,17 @@ OBJS += $(TEX_OBJS)
 	$(ECHO)
 
 ###############################################################################
+# Index
+INDEX_OJBS=$(INDEX:.md=.html)
+OBJS += $(INDEX_OJBS)
+
+%/index.html: %/index.md
+	$(PANDOC) -t html5 --self-contained --standalone $^ -o $@
+
+###############################################################################
 # Global Targets
 
-all: reveal handout_html pdf epub
+all: reveal handout_html pdf epub index
 
 # Dynamic target definition
 define workshop_target =
@@ -290,12 +299,14 @@ odt: $(ODT_OBJS)
 pdf: $(PEECHO_OBJS)
 reveal: $(REVEAL_OBJS)
 tex: $(TEX_OBJS)
+index: $(INDEX_OJBS)
 
 clean:
 	rm -f $(OBJS)
 
 test:
 	@echo $(OBJS) | tr " " "\n"
+
 
 install:
 	ln -s $(HOME)/.dalibo/themes/ 

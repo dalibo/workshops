@@ -1,5 +1,7 @@
-Workshops en Français
-===============================================================================
+---
+title: "Workshops en Français"
+css: "https://public.dalibo.com/fancy-index/style.css"
+---
 
 Nouveautés de PostgreSQL 14
 --------------------------------------------------------------------------------
