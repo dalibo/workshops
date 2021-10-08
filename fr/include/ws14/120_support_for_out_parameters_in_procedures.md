@@ -28,46 +28,38 @@ désormais possible de déclarer des paramètres avec le mode `OUT`.
 Exemple :
 
 ```sql
-# CREATE PROCEDURE assign(IN a int, OUT b int)
-    LANGUAGE plpgsql
-  AS $$
-  BEGIN
-    -- assigner une valeur à b si a = 10
-    IF a = 10 THEN
-      b := a;
-    END IF;
-  END;
-  $$;
-
-CREATE PROCEDURE
-
-# \df assign
-                            List of functions
- Schema |  Name  | Result data type |     Argument data types     | Type
---------+--------+------------------+-----------------------------+------
- public | assign |                  | IN a integer, OUT b integer | proc
+CREATE PROCEDURE assign(IN a int, OUT b int)
+  LANGUAGE plpgsql
+AS $$
+BEGIN
+  -- assigner une valeur à b si a = 10
+  IF a = 10 THEN
+    b := a;
+  END IF;
+END;
+$$;
+-- CREATE PROCEDURE
 ```
 
 Comme le montre l'exemple ci-dessous, la variable spécifiée comme paramètre de
 sortie est initalisée à `NULL` en début de procédure.
 
 ```sql
-# DO $$
-  DECLARE _a int; _b int;
-  BEGIN
-    _a := 10;
-    CALL assign(_a, _b);
-    RAISE NOTICE '_a: %, _b: %', _a, _b;
+DO $$
+DECLARE _a int; _b int;
+BEGIN
+  _a := 10;
+  CALL assign(_a, _b);
+  RAISE NOTICE '_a: %, _b: %', _a, _b;
 
-    _a := 100;
-    CALL assign(_a, _b);
-    RAISE NOTICE '_a: %, _b: %', _a, _b;
-  END
-  $$;
-
-NOTICE:  _a: 10, _b: 10
-NOTICE:  _a: 100, _b: <NULL>
-DO
+  _a := 100;
+  CALL assign(_a, _b);
+  RAISE NOTICE '_a: %, _b: %', _a, _b;
+END
+$$;
+-- NOTICE:  _a: 10, _b: 10
+-- NOTICE:  _a: 100, _b: <NULL>
+-- DO
 ```
 
 </div>

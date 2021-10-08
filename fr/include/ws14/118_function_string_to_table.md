@@ -27,7 +27,9 @@ Une nouvelle fonction a été créée pour subdiviser une chaîne de caractères
 renvoyer le résultat dans une table :
 
 ```sql
-# \df string_to_table
+\df string_to_table
+```
+```text
                               List of functions
    Schema   |      Name       | Result data type | Argument data types | Type
 ------------+-----------------+------------------+---------------------+------
@@ -39,8 +41,10 @@ renvoyer le résultat dans une table :
 Exemple d'utilisation :
 
 ```sql
-# \pset null '¤'
-# SELECT string_to_table('une chaine à ignorer', ' ', 'ignorer');
+\pset null '¤'
+SELECT string_to_table('une chaine à ignorer', ' ', 'ignorer');
+```
+```text
  string_to_table
 -----------------
  une

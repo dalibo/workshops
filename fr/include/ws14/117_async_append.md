@@ -39,7 +39,7 @@ L'option `async_capable` doit être activée au niveau de l'objet serveur ou de
 la table distante. Ce n'est pas le cas par défaut.
 
 ```sql
-demo=# EXPLAIN (verbose, costs off) SELECT * FROM t1 WHERE b % 100 = 0;
+EXPLAIN (verbose, costs off) SELECT * FROM t1 WHERE b % 100 = 0;
 ```
 ```text
                                     QUERY PLAN                                    

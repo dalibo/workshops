@@ -43,9 +43,10 @@ CREATE TABLE ville (
 ```
 
 ```sql
-# SELECT c.*
+SELECT c.*
   FROM ville a INNER JOIN region b USING (region_id) AS c \gdesc
-
+```
+```text
   Column   |  Type
 -----------+---------
  region_id | integer

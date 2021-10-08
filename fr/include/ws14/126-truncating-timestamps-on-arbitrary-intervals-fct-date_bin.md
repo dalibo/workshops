@@ -23,7 +23,7 @@ Discussion
 
 <!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
 
-La nouvelle fonction `date_bin` permet placer un timestamp fournit en entrée 
+La nouvelle fonction `date_bin` permet de placer un timestamp fourni en entrée 
 (second paramètre) dans un intervalle aussi appellée _bucket_.
 
 Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
@@ -32,7 +32,7 @@ Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
-La valeur mise en second paramètre de la fonction est placée dans un _buckets_
+La valeur mise en second paramètre de la fonction est placée dans un _bucket_
 en se basant sur :
 
 * Un timestamp de début (troisième paramètre).
@@ -40,10 +40,10 @@ en se basant sur :
   L'unité utilisée pour définir la taille du _bucket_ peut être définie \
   en secondes, minutes, heures, jours ou semaines.
 
-La fonction existe pour des timestamp avec et sans timezone :
+La fonction existe pour des timestamp avec et sans fuseau horaire :
 
 ```sql
-=# \df date_bin
+\df date_bin
 ```
 ```text
 List of functions
@@ -64,18 +64,18 @@ Type                | func
 Voici un exemple de cette fonction en action :
 
 ```sql
-=# -- Génération des données
-=# CREATE TABLE sonde(t timestamp with time zone, id_sonde int, mesure int);
-=# INSERT INTO sonde(t, id_sonde, mesure)
-    SELECT  '2021-06-01 00:00:00'::timestamp with time zone + INTERVAL '1s' * x,
-            1,
-            sin(x*3.14/86401)*30
-      FROM generate_series(0, 60*60*24) AS F(x);
+-- Génération des données
+CREATE TABLE sonde(t timestamp with time zone, id_sonde int, mesure int);
+INSERT INTO sonde(t, id_sonde, mesure)
+SELECT '2021-06-01 00:00:00'::timestamp with time zone + INTERVAL '1s' * x,
+       1,
+       sin(x*3.14/86401)*30
+  FROM generate_series(0, 60*60*24) AS F(x);
 
-=# -- création de buckets de 1h30 commençant à minuit le premier juin
-=# SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with time zone),
-         id_sonde, avg(mesure)
-    FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
+-- création de buckets de 1h30 commençant à minuit le premier juin
+SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with time zone),
+       id_sonde, avg(mesure)
+  FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
 ```text
         date_bin        | id_sonde |          avg
@@ -101,14 +101,13 @@ Voici un exemple de cette fonction en action :
 ```
 
 La date de début utilisée pour la création des _buckets_ ne doit pas
-nécessairement coïncider avec le timestamp le plus ancien présent dans la table
-:
+nécessairement coïncider avec le timestamp le plus ancien présent dans la table :
 
 ```sql
-=# SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:11:00'::timestamp with time zone),
-         id_sonde,
-	 avg(mesure)
-   FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
+SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:11:00'::timestamp with time zone),
+       id_sonde,
+       avg(mesure)
+FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
 ```text
         date_bin        | id_sonde |          avg
@@ -138,13 +137,13 @@ définie en mois ou années. Il est cependant possible de spécifier des tailles
 _bucket_ supérieures ou égales à un mois avec les autres unités :
 
 ```sql
-=# SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');
+SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');
 -- ERROR:  timestamps cannot be binned into intervals containing months or years
 
-=# SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
+SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
 -- ERROR:  timestamps cannot be binned into intervals containing months or years
 
-=# SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
+SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
 ```
 ```text
         date_bin
@@ -153,7 +152,7 @@ _bucket_ supérieures ou égales à un mois avec les autres unités :
 (1 row)
 ```
 ```sql
-=# SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
+SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
 ```
 ```text
         date_bin
@@ -170,8 +169,8 @@ utilisée avec les intervalles `1 hour` et `1 minute`.
 Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC>
 
 ```sql
-=# SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
-          date_trunc('hour', '2021-06-01 10:05:10'::timestamp);
+SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
+       date_trunc('hour', '2021-06-01 10:05:10'::timestamp);
 ```
 ```text
       date_bin       |     date_trunc
@@ -180,8 +179,8 @@ Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUN
 (1 row)
 ```
 ```sql
-=# SELECT date_bin('1 minute', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
-          date_trunc('minute', '2021-06-01 10:05:10'::timestamp);
+SELECT date_bin('1 minute', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
+       date_trunc('minute', '2021-06-01 10:05:10'::timestamp);
 ```
 ```text
       date_bin       |     date_trunc

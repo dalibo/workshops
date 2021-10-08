@@ -127,29 +127,17 @@ Ce workshop sera maintenu encore plusieurs mois après la sortie de la version 1
 
 <div class="slide-content">
   * Administration
-    * Sécurité
-    * Outils clients
-    * Partitionnement
-    * Divers
-    * Contributions
-  * Réplication (logique ou physique) & sharding/FDW
-    * Réplication physique
-    * Réplication logique
-    * Foreing Data Wrapper et sharding
-  * Développement + Changement syntaxe SQL
+  * Réplication
+  * Développement et syntaxe SQL
   * Supervision
   * Performances
-    * Index
-    * Recovery
-    * Divers
-  * Régressions
 </div>
 
 <div class="notes">
 
-PostgreSQL 14 est sorti le FIXME
+PostgreSQL 14 est sorti le 30 septembre 2021.
 
-Les points principaux sont décrits dans le « [press kit](FIXME) ».
+Les points principaux sont décrits dans le « [press kit](https://www.postgresql.org/about/press/presskit14/) ».
 
 Nous allons décrire ces nouveautés plus en détail.
 
@@ -162,6 +150,13 @@ Nous allons décrire ces nouveautés plus en détail.
 ## Administration et maintenance
 
 <div class="slide-content">
+
+  * Sécurité
+  * Configuration
+  * Outils clients
+  * Partitionnement
+  * Divers
+
 </div>
 
 <div class="notes">
@@ -172,14 +167,6 @@ Nous allons décrire ces nouveautés plus en détail.
 \newpage
 
 ### Sécurité
-
-<div class="slide-content">
-  * L'authentication repose par défaut sur SCRAM-SHA-256
-  * Nouveaux rôles prédéfinis
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -201,21 +188,9 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Nouveautés de configuration (GUC)
 
-<div class="slide-content">
-  * Nouveaux caractères d'échappement pour `log_line_prefix`
-  * Temps d'attente maximal pour une session inactive (`idle_session_timeout`)
-  * Modification à chaud du paramètre `restore_command`
-  * Détection des déconnexions pendant l'exécution d'une requête
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
-\newpage
-
-#### Nouveaux caractères d'échappement pour log_line_prefix
+#### Nouveaux caractères d'échappement pour `log_line_prefix`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 -->
 !include include/ws14/100_parallel_leader_wildcard_to_log_line_prefix.md
@@ -243,18 +218,16 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
+#### Changements mineurs de configuration
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/141 -->
+!include include/ws14/141_changements_mineurs_de_la_configuration.md
+
+----
+
 \newpage
 
 ### Outils clients
-
-<div class="slide-content">
-  * pg_dump/pg_restore : Possibilité d'exporter et restaurer des partitions individuellement
-  * pg_dump : Nouvelle option pour exporter les extensions
-  * reindex_db : Nouvelle option --tablespace
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -272,46 +245,30 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### reindex_db : Nouvelle option --tablespace
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
-!include include/ws14/EXEMPLE.md
-
-----
-
 \newpage
 
 ### Partionnement
-
-<div class="slide-content">
-  * ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
-  * Nouveautées sur REINDEX et reindexdb
-  * autovacuum gère désormais correctement les statistiques sur les tables paritionnées
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
 #### ALTER TABLE ... DETACH PARTITION ... CONCURRENTLY
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/108 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/108_alter_table_detach_partition_concurrently.md
 
 ----
 
-#### Nouveautées sur REINDEX et reindexdb
+#### Nouveautés sur REINDEX et reindexdb
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/109_add_support_for_partitioned_tables_and_indexes_in_reindex.md
 
 ----
 
-#### autovacuum gère désormais correctement les statistiques sur les tables paritionnées
+#### Collecte automatique des statistiques de tables partitionnées
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/110_autovacuum_handle_analyze_for_partitioned_tables.md
 
 ----
 
@@ -319,28 +276,26 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Divers
 
-<div class="slide-content">
-  * Compression des toast configuratble en : LZ4 et pglz
-  * Nouvelle option pour VACUUM : PROCESS_TOAST
-  * Nouvelle fonction pour attendre lorsque l'on arrête un backend
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
-#### Compression des toast configuratble en : LZ4 et pglz
+#### Compression des toast configurable en : LZ4 et pglz
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/111_allow_configurable_lz4_toast_compression.md
 
 ----
 
 #### Nouvelle option pour VACUUM : PROCESS_TOAST
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/112 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/112_add_option_process_toast_to_vacuum.md
+
+----
+
+#### Nouvelle option pour REINDEX : TABLESPACE
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/107 -->
+!include include/ws14/107_add_tablespace_option_to_reindex.md
 
 ----
 
@@ -371,49 +326,34 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ### Réplication Physique
 
-<div class="slide-content">
-  * Autorise pg_rewind a utiliser une standby comme source
-  * Nouveaux paramètre de connexion dans libpq
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
-#### Autorise pg_rewind a utiliser une standby comme source
+#### Autorise `pg_rewind` a utiliser un secondaire comme source
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/104_allow_pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
 
-#### Nouveaux paramètre de connexion dans libpq
+#### Nouveau paramètre de connexion dans libpq
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/114_new_libpq_option_to_prefer_standby_for_connection.md
 
 ----
 
-### Réplication Logique - slide commun (#115)
+\newpage
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114
-     * logical streaming of large in-progress transactions
-     * Logical Replication - detail message with names of missing columns
-     * Support ALTER SUBSCRIPTION ... ADD/DROP PUBLICATION ... syntax
--->
-!include include/ws14/EXEMPLE.md
+### Réplication logique
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/115 -->
+!include include/ws14/115_logical_replication_feature_in_pg14.md
 
 ----
 
 \newpage
 
 ### Foreign Data Wrapper et Sharding
-
-<div class="slide-content">
-  * Support du `TRUNCATE` sur les tables distantes
-  * Lecture asynchrone des tables distantes
-</div>
 
 <div class="notes">
 Deux évolutions majeures sont apparues dans la gestion des tables distantes à
@@ -441,33 +381,18 @@ possible.
 
 \newpage
 
-## Développement + Changement syntaxe SQL
-
-<div class="slide-content">
-  * Fonction string_to_table
-  * Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
-  * PL/pgSQL : assignation pour les types complexes
-  * Nouveaux types `multirange` et nouvelles fonctions d'agrégats
-  * GROUP BY DISTINCT
-  * Corps de routines respectant le standard SQL
-  * Nouvelles clauses SEARCH et CYCLE
-  * Nouvelle fonction date_bin
-  * Possiblité d'attacher un alias à un JOIN .. USING
-</div>
-
-<div class="notes">
-</div>
+## Développement et syntaxe SQL
 
 ----
 
-### Fonction string_to_table
+### Fonction `string_to_table`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 -->
 !include include/ws14/118_function_string_to_table.md
 
 ----
 
-### Nouvelle syntaxe OR REPLACE pour la re-création d'un trigger
+### Nouvelle syntaxe OR REPLACE pour la modification d'un trigger
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/119 -->
 !include include/ws14/119_create_or_replace_trigger.md
@@ -512,18 +437,18 @@ possible.
 ### Nouvelles clauses SEARCH et CYCLE
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/125 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/125_search_and_cycle.md
 
 ----
 
-### Nouvelle fonction date_bin
+### Nouvelle fonction `date_bin`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 -->
 !include include/ws14/126-truncating-timestamps-on-arbitrary-intervals-fct-date_bin.md
 
 ----
 
-### Possiblité d'attacher un alias à un JOIN .. USING
+### Possibilité d'attacher un alias à un JOIN .. USING
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/127 -->
 !include include/ws14/127_allow_an_alias_to_be_attached_directly_to_a_join_using.md
@@ -534,54 +459,40 @@ possible.
 
 ## Supervision
 
-<div class="slide-content">
-  * Nouvelle vue pg_stat_wal
-  * Nouvelle vue pg_stat_progress_copy
-  * Nouvelle vue pg_stat_replication_slots
-  * Nouveautées dans pg_stat_statements
-  * Ajout de statistiques sur les sessions dans pg_stat_database
-  * Identifiant pour les requêtes normalisées
-  * Ajout de la colonne wait_start dans pg_locks
-
-</div>
-
-<div class="notes">
-</div>
-
 ----
 
-### Nouvelle vue pg_stat_wal
+### Nouvelle vue `pg_stat_wal`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/129 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/129_nouvelle_vue_pg_stat_wal.md
 
 ----
 
-### Nouvelle vue pg_stat_progress_copy
+### Nouvelle vue `pg_stat_progress_copy`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/133_simple_progress_reporting_for_copy_command.md
 
 ----
 
-### Nouvelle vue pg_stat_replication_slots
+### Nouvelle vue `pg_stat_replication_slots`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/135-pg_stat_replicaton_slots.md
 
 ----
 
-### Nouveautées dans pg_stat_statements
+### Nouveautées dans `pg_stat_statements`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-### Ajout de statistiques sur les sessions dans pg_stat_database
+### Ajout de statistiques sur les sessions dans `pg_stat_database`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/131_add_session_statistics_to_pg_stat_database.md
 
 ----
 
@@ -592,26 +503,16 @@ possible.
 
 ----
 
-### Ajout de la colonne wait_start dans pg_locks
+### Nouveauté dans `pg_locks`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/134_add_wait_start_column_to_pg_locks.md
 
 ----
 
 \newpage
 
 ## Performances
-
-<div class="slide-content">
-  * Amélioration de l'indexation
-  * Amélioration des performances avec un grand nombre de connexions read-only
-  * Amélioration des performances de la recovery
-  * Autres améliorations
-</div>
-
-<div class="notes">
-</div>
 
 ----
 
@@ -622,14 +523,14 @@ possible.
 
 ----
 
-### Amélioration des performances avec un grand nombre de connexions read-only
+### Amélioration des performances avec un grand nombre de connexions en lecture seule
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
 !include include/ws14/EXEMPLE.md
 
 ----
 
-### Amélioration des performances de la recovery
+### Amélioration des performances de la restauration
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/138 -->
 !include include/ws14/EXEMPLE.md
@@ -647,8 +548,9 @@ possible.
 <!-- lister les tp ici, un include par tp -->
 
 <div class="slide-content">
-  * Nouveaux rôles prédéfinis
+  * Découvrir les nouveaux rôles prédéfinis
   * Mise en place d'un sharding minimal
+  * Outil pg_rewind
 </div>
 
 ----
@@ -658,6 +560,10 @@ possible.
 ----
 
 !include include/ws14/tp-117_async_append.md
+
+----
+
+!include include/ws14/tp-104_allow_pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
 

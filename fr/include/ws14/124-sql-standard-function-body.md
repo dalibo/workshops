@@ -47,10 +47,11 @@ Ce type de déclaration ne permet pas d'utiliser les [types
 polymorphiques](https://www.postgresql.org/docs/14/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC) :
 
 ```sql
-# CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
-  LANGUAGE SQL
-  RETURN 'The input type is ' || pg_typeof(a);
-
+CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
+LANGUAGE SQL
+RETURN 'The input type is ' || pg_typeof(a);
+```
+```text
 ERROR:  SQL function with unquoted function body cannot have polymorphic arguments
 ```
 
@@ -58,11 +59,10 @@ Pour cela, il faut continuer d'utiliser l'ancienne syntaxe avec l'encadrement
 du corps de la fonction par des doubles `$$` :
 
 ```sql
-# CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
-  LANGuAGE SQL
-  AS $$ SELECT 'The input type is ' || pg_typeof(a); $$
-
-CREATE FUNCTION
+CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
+LANGuAGE SQL
+AS $$ SELECT 'The input type is ' || pg_typeof(a); $$
+-- CREATE FUNCTION
 ```
 
 Cette différence de comportement s'explique par le fait que la nouvelle
@@ -100,15 +100,15 @@ Lors de la création, seule la procédure utilisant la nouvelle méthode est
 supprimée.
 
 ```sql
-# DROP TABLE tbl1, tbl2 CASCADE; 
-NOTICE:  drop cascades to function insert_data_new(integer,integer)
-DROP TABLE
+DROP TABLE tbl1, tbl2 CASCADE; 
+-- NOTICE:  drop cascades to function insert_data_new(integer,integer)
+-- DROP TABLE
 ```
 
 Les deux méthodes renvoient une erreur si on utilise des objets qui n'existent
 pas lors de la création de la routine :
 
-```sql
+```text
 ERROR:  relation "tbl1" does not exist
 LINE 4:   INSERT INTO tbl1 VALUES (a);
 ```
