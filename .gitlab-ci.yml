@@ -15,6 +15,8 @@ include:
 ##
 
 variables:
+  BRANCH_TARGET: ws14
+  MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '*'  
   # 
@@ -47,6 +49,14 @@ image:
 
 pandoc:
   stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == "master"
+      variables:
+        TARGET: $MASTER_TARGET
+    - if: $CI_COMMIT_BRANCH != "master"
+      variables:
+        TARGET: $BRANCH_TARGET
+
   script:
     #
     # The dalibo themes are not mandatory
@@ -59,7 +69,7 @@ pandoc:
                 make --directory=themes install
         fi
     # pandoc
-    - make all
+    - make $TARGET
 
   artifacts:
     paths:
