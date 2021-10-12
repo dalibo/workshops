@@ -123,7 +123,7 @@ Après avoir supprimé l'index btree, on voit que l'index brin classique est
 choisi. Le nombre de pages accédées est beacuoup plus important. Le nombre de
 recheck dans la table en est probablement la cause.
 
-``sql
+```sql
 DROP INDEX test_btree_idx;
 EXPLAIN (ANALYZE,BUFFERS) 
     SELECT * FROM bloom_test
@@ -153,7 +153,7 @@ Après avoir supprimé l'index brin minmax, on voit que l'index brin bloom n'a
 pas été choisi lors du test précédent car son coût d'utilisation est légèrement
 supérieur. Le nombre de pages accédé est pourtant bien inférieur.
 
-``sql
+```sql
 DROP INDEX test_brin_idx;
 EXPLAIN (ANALYZE,BUFFERS) 
     SELECT * FROM bloom_test

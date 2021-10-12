@@ -59,7 +59,7 @@ deux (_page split_) ce qui fait grossir l'index.
 Pour le tester, on peut comparer la taille des index sur une base pgbench
 suite a 10 minutes d'activité en version 13 et 14 :
 
-```
+```bash
 createdb bench
 pgbench -i -s 100 bench
 pgbench -n -c 90 -T 600 bench
