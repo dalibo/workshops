@@ -523,10 +523,10 @@ possible.
 
 ----
 
-### Connexions simultanées en lecture seule
+### Amélioration des performances avec un grand nombre de connexions en lecture seule
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
-!include include/ws14/137_improving_connection_scalability.md
+!include include/ws14/EXEMPLE.md
 
 ----
 
