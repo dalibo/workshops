@@ -310,7 +310,9 @@ build:
 	for LANG in en fr ; do \
 	  mkdir -p _build/$$LANG ;\
 	  find $$LANG \( -name "*.html" -or -name "*.pdf" \) \
-	    -exec cp {} _build/$$LANG \; ;\
+	    -print -exec cp {} _build/$$LANG \; ;\
+	  find _archives/$$LANG \( -name "*.html" -or -name "*.pdf" \) \
+	    -print -exec cp {} _build/$$LANG \; ;\
 	done
 
 install:
