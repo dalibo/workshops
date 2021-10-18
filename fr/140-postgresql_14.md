@@ -172,7 +172,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 #### Authentification SCRAM-SHA-256 par défaut
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 --> 
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/75 -->
 !include include/ws14/scram-par-defaut.md
 
 ----
@@ -485,7 +485,7 @@ possible.
 ### Nouveautées dans `pg_stat_statements`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/130_pg_stat_statements_new_features.md
 
 ----
 
