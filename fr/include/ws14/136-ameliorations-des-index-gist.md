@@ -29,66 +29,71 @@ diminuer la durée des opérations de maintenances sur ces index GiST (`INDEX`,
 
 ```sql
 -- PostgreSQL 14
-=# CREATE TABLE gist_fastbuild AS SELECT point(random(),random()) as pt FROM  generate_series(1,10000000,1);
-SELECT 10000000
-=# \timing on
-Timing is on.
-=# CREATE INDEX ON gist_fastbuild USING gist (pt);
-CREATE INDEX
-Time: 15837.450 ms (00:15.837)
-=# \di+ gist_fastbuild_pt_idx
-                                                    List of relations
- Schema |         Name          | Type  |  Owner   |     Table      | Persistence | Access method |  Size  | Description
---------+-----------------------+-------+----------+----------------+-------------+---------------+--------+-------------
- public | gist_fastbuild_pt_idx | index | postgres | gist_fastbuild | permanent   | gist          | 474 MB |
-(1 row)
+\timing on
+CREATE TABLE gist_fastbuild 
+    AS SELECT point(random(),random()) as pt
+         FROM  generate_series(1,10000000,1);
+COPY gist_fastbuild TO '/tmp/gist_fastbuild.copy';
 
-=# EXPLAIN (ANALYZE, BUFFERS) SELECT pt FROM gist_fastbuild WHERE pt <@ box(point(.5,.5), point(.75,.75));
-                                             QUERY PLAN
-------------------------------------------------------------------------------------------------------
- Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild  (cost=0.42..419.42 rows=10000 width=16)
-                                                                (actual time=0.497..130.077 rows=624484 loops=1)
+CREATE INDEX ON gist_fastbuild USING gist (pt);
+-- Time: 15837.450 ms (00:15.837)
+```
+```text
+=# \di+ gist_fastbuild_pt_idx
+                             List of relations
+         Name          | Type  |     Table      | Access method |  Size  
+-----------------------+-------+----------------+---------------+--------
+ gist_fastbuild_pt_idx | index | gist_fastbuild | gist          | 474 MB 
+```
+```sql
+EXPLAIN (ANALYZE, BUFFERS) 
+ SELECT pt FROM gist_fastbuild 
+  WHERE pt <@ box(point(.5,.5), point(.75,.75));
+```
+```text
+                         QUERY PLAN
+---------------------------------------------------------------
+ Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild
+  (cost=0.42..419.42 rows=10000 width=16)
+  (actual time=0.497..130.077 rows=624484 loops=1)
    Index Cond: (pt <@ '(0.75,0.75),(0.5,0.5)'::box)
    Heap Fetches: 0
    Buffers: shared hit=301793
  Planning Time: 4.406 ms
  Execution Time: 149.662 ms
-(6 rows)
-
-Time: 165.305 ms
-
-=# COPY gist_fastbuild TO '/tmp/gist_fastbuild.copy';
-COPY 10000000
-
+```
+```sql
 -- PostgreSQL 13
-=# CREATE TABLE gist_fastbuild(pt point);
-=# COPY gist_fastbuild FROM '/tmp/gist_fastbuild.copy';
-COPY 10000000
-=# \timing on
-Timing is on.
-=# CREATE INDEX ON gist_fastbuild USING gist (pt);
-CREATE INDEX
-Time: 168469.405 ms (02:48.469)
+\timing on
+CREATE TABLE gist_fastbuild(pt point);
+COPY gist_fastbuild FROM '/tmp/gist_fastbuild.copy';
+
+CREATE INDEX ON gist_fastbuild USING gist (pt);
+-- Time: 168469.405 ms (02:48.469)
+```
+```text
 =# \di+ gist_fastbuild_pt_idx
                                             List of relations
- Schema |         Name          | Type  |  Owner   |     Table      | Persistence |  Size  | Description 
---------+-----------------------+-------+----------+----------------+-------------+--------+-------------
- public | gist_fastbuild_pt_idx | index | postgres | gist_fastbuild | permanent   | 711 MB | 
-(1 row)
-
-=# EXPLAIN (ANALYZE, BUFFERS) SELECT pt FROM gist_fastbuild WHERE pt <@ box(point(.5,.5), point(.75,.75));
-                                             QUERY PLAN
-------------------------------------------------------------------------------------------------------
- Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild  (cost=0.42..539.42 rows=10000 width=16)
-                                                                (actual time=0.492..107.536 rows=624484 loops=1)
+         Name          | Type  |     Table      |  Size  
+-----------------------+-------+----------------+--------
+ gist_fastbuild_pt_idx | index | gist_fastbuild | 711 MB 
+```
+```sql
+EXPLAIN (ANALYZE, BUFFERS) 
+ SELECT pt FROM gist_fastbuild 
+  WHERE pt <@ box(point(.5,.5), point(.75,.75));
+```
+```text
+                         QUERY PLAN
+---------------------------------------------------------------
+ Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild 
+  (cost=0.42..539.42 rows=10000 width=16)
+  (actual time=0.492..107.536 rows=624484 loops=1)
    Index Cond: (pt <@ '(0.75,0.75),(0.5,0.5)'::box)
    Heap Fetches: 0
    Buffers: shared hit=17526
  Planning Time: 0.143 ms
  Execution Time: 126.951 ms
-(6 rows)
-
-Time: 127.601 ms
 ```
 
 On voit que le temps d'exécution et la taille de l'index ont beaucoup diminué
@@ -105,11 +110,11 @@ Actuellement seul la classe d'opérateur pour les types `point` dispose de cette
 fonction :
 
 ```sql
-=# SELECT f.opfname AS famille,
+SELECT f.opfname AS famille,
        ap.amproc AS fonction_de_support,
-       tl.typname AS type_gauche_operateur,
-       tr.typname AS type_droit_operateur,
-       m.amname AS methode_d_acces
+       tl.typname AS type_gauche_op,
+       tr.typname AS type_droit_op,
+       m.amname AS methode
   FROM pg_amproc ap
        INNER JOIN pg_type tl ON tl.oid = ap.amproclefttype
        INNER JOIN pg_type tr ON tr.oid = ap.amprocrighttype
@@ -119,10 +124,9 @@ fonction :
    AND m.amname = 'gist';
 ```
 ```text
-  famille  |  fonction_de_support   | type_gauche_operateur | type_droit_operateur | methode_d_acces
------------+------------------------+-----------------------+----------------------+-----------------
- point_ops | gist_point_sortsupport | point                 | point                | gist
-(1 row)
+  famille  |  fonction_de_support   | type_gauche_op | type_droit_op | methode
+-----------+------------------------+----------------+---------------+---------
+ point_ops | gist_point_sortsupport | point          | point         | gist
 ```
 
 **Index SPGiST couvrants**
@@ -140,8 +144,9 @@ Il est désormais possible d'inclure des colonnes dans les index SPGiST de la
 même façon qu'il était possible d'inclure des colonnes dans les index btree
 depuis la version v11 et GiST depuis la version v12.
 
-```
-CREATE INDEX airports_coordinates_quad_idx ON airports_ml USING spgist(coordinates) INCLUDE (name);
+```sql
+CREATE INDEX airports_coordinates_quad_idx ON airports_ml 
+ USING spgist(coordinates) INCLUDE (name);
 ```
 
 </div>
