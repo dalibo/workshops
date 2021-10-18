@@ -40,7 +40,6 @@ CREATE MATERIALIZED VIEW pg_class_3 AS SELECT * FROM pg_class;
 REFRESH MATERIALIZED VIEW pg_class_3;
 ```
 
-On retrouve bien le nombres de lignes affectées par les requêtes, dans le champ
 On retrouve bien le nombre de lignes affectées par les requêtes, dans le champ
 `rows` de la vue `pg_stat_statements`.
 
@@ -168,8 +167,6 @@ SELECT f_rel_name(26140);
 La vue `pg_stat_statements` est consultée directement après :
 
 ```sql
-select query,toplevel from pg_stat_statements
-where query not like '%pg_stat_statements%'
 SELECT query, toplevel FROM pg_stat_statements
  WHERE query NOT LIKE '%pg_stat_statements%'
  ORDER BY query;
