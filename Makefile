@@ -309,9 +309,9 @@ test:
 build:
 	for LANG in en fr ; do \
 	  mkdir -p _build/$$LANG ;\
-	  find $$LANG \( -name "*.html" -or -name "*.pdf" \) \
+	  find $$LANG \( -name "*.html" -or -name "*.pdf" -or -name "*.epub" \) \
 	    -print -exec cp {} _build/$$LANG \; ;\
-	  find _archives/$$LANG \( -name "*.html" -or -name "*.pdf" \) \
+	  find _archives/$$LANG \( -name "*.html" -or -name "*.pdf" -or -name "*.epub" \) \
 	    -print -exec cp {} _build/$$LANG \; ;\
 	done
 

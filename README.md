@@ -32,23 +32,26 @@ toolchain.
 Compile
 -------------------------------------------------------------------------------
 
-Each workshop is contained in a single markdown file (for instance
-[fr/110-postgresql_11.md](fr/110-postgresql_11.md) )
+Each workshop is written under its own dedicated folder with standalones markdown
+files (for instance [fr/ws14/140-postgresql_14.md](fr/ws14/140-postgresql_14.md))/
 
 You can export the content using `make` by specifying the file extension you want
 
 ```
-make fr/110-postgresql_11.html
-make fr/110-postgresql_11.epub
-make fr/110-postgresql_11.pdf
+make fr/ws14/140-postgresql_14.handout.html
+make fr/ws14/140-postgresql_14.epub
+make fr/ws14/140-postgresql_14.pdf
 etc.
 ```
 
-You can also build all workshops in all formats with:
+You can also build workshops within the same folder in all formats with:
 
 ```
-make all
+make ws14
 ```
+
+Previous workshops generated files are versionned under `_archives_` folder with
+the same logic to preserve templates made in the past.
 
 Contribute
 ------------------------------------------------------------------------------- 
