@@ -28,7 +28,7 @@ dégradent, ce qui limite les cas d'utilisations à des tables d'historisation
 par exemple.
 
 PostgreSQL 14 devrait changer la donne sur ce front, deux nouvelles classes
-d'opérateurs ont été créés pour les index brin : `*_bloom_ops` et
+d'opérateurs ont été créées pour les index brin : `*_bloom_ops` et
 `*_minmax_multi_ops`.
 
 ```sql
