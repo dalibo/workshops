@@ -45,6 +45,8 @@ On retrouve bien le nombre de lignes affectées par les requêtes, dans le champ
 
 ```sql
 SELECT query, rows FROM pg_stat_statements;
+```
+```text
                              query                             | rows
 ---------------------------------------------------------------+------
  select * into pg_class_2 FROM pg_class                        |  401
@@ -58,6 +60,8 @@ Le même scénario de test réalisé en version 13 ne donne pas ces informations
 
 ```sql
 SELECT query, rows FROM pg_stat_statements;
+```
+```text
                              query                             | rows
 ---------------------------------------------------------------+------
  select * into pg_class_2 FROM pg_class                        |    0
@@ -74,6 +78,8 @@ statistiques du module lui-même.
 
 ```sql
 \d pg_stat_statements_info;
+```
+```text
                   View "public.pg_stat_statements_info"
    Column    |           Type           | Collation | Nullable | Default
 -------------+--------------------------+-----------+----------+---------
@@ -109,7 +115,8 @@ inférieur à `pg_stat_statement.max`, bien que 400 requêtes distinctes aient
 
 ```sql
 SELECT count(*) FROM pg_stat_statements;
-
+```
+```text
  count 
 -------
     93
@@ -121,7 +128,8 @@ pendant les créations et suppressions de tables :
 
 ```sql
 SELECT * FROM pg_stat_statements_info;
-
+```
+```text
  dealloc |          stats_reset          
 ---------+-------------------------------
       31 | 2021-09-02 13:30:26.497678+02
@@ -131,7 +139,9 @@ Ces informations peuvent également être obtenues via la fonction du même nom�
 
 ```sql
 SELECT pg_stat_statements_info();
-       pg_stat_statements_info        
+       pg_stat_statements_info
+```
+```text
 --------------------------------------
  (31,"2021-09-02 13:35:22.457383+02")
 ```
@@ -170,6 +180,8 @@ La vue `pg_stat_statements` est consultée directement après :
 SELECT query, toplevel FROM pg_stat_statements
  WHERE query NOT LIKE '%pg_stat_statements%'
  ORDER BY query;
+```
+```text
                   query                   | toplevel 
 -------------------------------------------+----------
  select f_rel_name($1)                     | t
