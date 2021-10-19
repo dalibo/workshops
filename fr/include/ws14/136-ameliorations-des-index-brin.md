@@ -187,6 +187,31 @@ l'index BRIN _bloom_ permet d'accéder un nombre plus petit de pages que l'index
 BRIN _minmax_, ce qui le rend souvent plus performant. L'index BTREE est
 toujours plus performant pour une taille bien supérieure.
 
+La classe d'opérateur `*_bloom_ops` accepte deux paramètres qui permettent de
+dimensionner l'index bloom :
+
+* `n_distinct_per_range` :  permet d'estimer le nombre de valeurs distinctes
+  dans un ensemble de blocs brin. Il doit être supérieur à -1 et sa valeur par
+  défaut est -0.1. Il fonctionne de la même manière que la colonne `n_distinct`
+  de la vue `pg_stats`. S'il est positif, il indique le nombre de valeurs
+  distinctes. S'il est négatif, il indique la fraction de valeurs distinctes
+  pour cette colonne dans la table.
+
+* `false_positive_rate` :  permet d'estimer le nombre de faux positifs généré
+  par l'index bloom. Il doit être compris entre 0.0001 et 0.25, sa valeur par
+  défaut est 0.01.
+
+Un paramètrage incorrect peut rendre impossible la création de l'index:
+
+```sql
+CREATE INDEX test_bloom_parm_idx on bloom_test 
+       USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
+);
+```
+```txt
+ERROR:  the bloom filter is too large (8924 > 8144)
+```
+
 **Classe d'opérateur minmax_multi_ops**
 
 Cette version a également introduit les classes d'opérateurs
