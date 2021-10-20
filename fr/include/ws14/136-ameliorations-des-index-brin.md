@@ -27,8 +27,8 @@ logique. Malheureusement, dès que cette corrélation change les performances se
 dégradent, ce qui limite les cas d'utilisations à des tables d'historisation
 par exemple.
 
-PostgreSQL 14 devrait changer la donne sur ce front, deux nouvelles classes
-d'opérateurs ont été créées pour les index brin : `*_bloom_ops` et
+PostgreSQL 14 élargit le champ d'utilisation des index BRIN. Deux nouvelles
+classes d'opérateurs ont été créées pour les index brin : `*_bloom_ops` et
 `*_minmax_multi_ops`.
 
 ```sql
@@ -64,25 +64,6 @@ INSERT INTO bloom_test
   SELECT md5((mod(i,1000000)/100)::text)::uuid, md5(i::text)
     FROM generate_series(1,2000000) s(i);
 VACUUM ANALYZE bloom_test;
-
-CREATE INDEX test_brin_idx ON bloom_test USING brin (id);
-CREATE INDEX test_bloom_idx on bloom_test USING brin (id uuid_bloom_ops);
-CREATE INDEX test_btree_idx on bloom_test (id);
-```
-
-La comparaison des tailles montre que l'index BRIN utilisant les
-`uuid_bloom_ops` est plus grand que l'index BRIN classique mais nettement plus
-petit que l'index BTREE.
-
-```text
-=# \di+
-                           List of relations
-      Name      | Type  |   Table    | Access method |  Size  
-----------------+-------+------------+---------------+--------
- test_bloom_idx | index | bloom_test | brin          | 304 kB 
- test_brin_idx  | index | bloom_test | brin          | 48 kB  
- test_btree_idx | index | bloom_test | btree         | 13 MB  
-(3 rows)
 ```
 
 Pour le test, nous allons désactiver le parallélisme et les parcours
@@ -93,99 +74,133 @@ SET enable_seqscan TO off;
 SET max_parallel_workers_per_gather TO 0;
 ```
 
-Exécuter un EXPLAIN sur le `SELECT` suivant montre que l'index BTREE est choisi.
+Commençons par tester avec un index BTREE :
 
 ```sql
-EXPLAIN (ANALYZE,BUFFERS) 
+CREATE INDEX test_btree_idx on bloom_test (id);
+EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
 ```
+
+Voici le plan de la requête :
+
 ```text
                                      QUERY PLAN
 ----------------------------------------------------------------------------
- Bitmap Heap Scan on bloom_test (cost=5.98..749.38 rows=200 width=49)
-                                (actual time=0.132..0.227 rows=200 loops=1)
+ Bitmap Heap Scan on bloom_test (cost=5.96..742.23 rows=198 width=49)
+                                (actual time=0.069..0.130 rows=200 loops=1)
    Recheck Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
    Heap Blocks: exact=5
-   Buffers: shared hit=3 read=6
-   -> Bitmap Index Scan on test_btree_idx
-      (cost=0.00..5.93 rows=200 width=0)
-      (actual time=0.078..0.079 rows=200 loops=1)
-       Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
-       Buffers: shared read=4
- Planning:
-   Buffers: shared hit=11 read=4 dirtied=1
- Planning Time: 0.496 ms
- Execution Time: 0.299 ms
-(11 rows)
+   Buffers: shared hit=9
+   ->  Bitmap Index Scan on test_btree_idx
+                                (cost=0.00..5.91 rows=198 width=0)
+                                (actual time=0.043..0.044 rows=200 loops=1)
+         Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
+         Buffers: shared hit=4
+ Planning Time: 0.168 ms
+ Execution Time: 0.198 ms
 ```
 
-Après avoir supprimé l'index BTREE, on voit que l'index BRIN classique est
-choisi. Le nombre de pages accédées est beacuoup plus important. Le nombre de
-`recheck` dans la table en est probablement la cause.
+Essayons maintenant avec un index BRIN utilisant les `uuid_minmax_ops` (la
+classe d'opérateur par défaut) :
 
-```sql
+``sql
 DROP INDEX test_btree_idx;
-EXPLAIN (ANALYZE,BUFFERS) 
+CREATE INDEX test_brin_minmax_idx ON bloom_test USING brin (id);
+EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
 ```
+
+Voici le plan de la requête :
+
 ```text
                                      QUERY PLAN
 ------------------------------------------------------------------------------
- Bitmap Heap Scan on bloom_test (cost=16.26..40957.16 rows=200 width=49)
-                                (actual time=1.537..186.802 rows=200 loops=1)
+ Bitmap Heap Scan on bloom_test (cost=17.23..45636.23 rows=198 width=49)
+                                (actual time=1.527..216.911 rows=200 loops=1)
    Recheck Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
    Rows Removed by Index Recheck: 1999800
    Heap Blocks: lossy=20619
-   Buffers: shared hit=10136 read=10485 written=6
-   -> Bitmap Index Scan on test_brin_idx
-      (cost=0.00..16.21 rows=1625752 width=0)
-      (actual time=1.488..1.489 rows=206190 loops=1)
-       Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
-       Buffers: shared read=2
+   Buffers: shared hit=1 read=20620 written=2
+   ->  Bitmap Index Scan on test_brin_minmax_idx
+                                (cost=0.00..17.18 rows=2000000 width=0)
+                                (actual time=1.465..1.465 rows=206190 loops=1)
+         Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
+         Buffers: shared hit=1 read=1
  Planning:
-   Buffers: shared hit=7 dirtied=1
- Planning Time: 0.228 ms
- Execution Time: 186.857 ms
-(12 rows)
+   Buffers: shared hit=1
+ Planning Time: 0.132 ms
+ Execution Time: 216.968 ms
 ```
 
-Après avoir supprimé l'index BRIN _minmax_, on voit que l'index BRIN _bloom_ n'a
-pas été choisi lors du test précédent car son coût d'utilisation est légèrement
-supérieur. Le nombre de pages accédées est pourtant bien inférieur.
+Le temps d'exécution de la requête avec cet index est beaucoup plus long
+qu'avec l'index btree. Cela peut s'expliquer par le grand nombre d'accès au
+cache qui doivent être réalisés environ 20620 contre une dizaine. On peut noter
+le très grand nombre de vérifications qui doivent être faites dans la table
+(presque 2 millions).
 
-```sql
-DROP INDEX test_brin_idx;
-EXPLAIN (ANALYZE,BUFFERS) 
+Pour terminer, essayons avec l'index BRIN et la nouvelle classe d'opérateur :
+
+``sql
+DROP INDEX test_brin_minmax_idx;
+CREATE INDEX test_brin_bloom_idx on bloom_test USING brin (id uuid_bloom_ops);
+EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
 ```
+
+Voici le plan de la requête :
+
 ```text
                                      QUERY PLAN
 ----------------------------------------------------------------------------
- Bitmap Heap Scan on bloom_test (cost=144.26..41085.16 rows=200 width=49)
-                                (actual time=5.347..7.411 rows=200 loops=1)
+ Bitmap Heap Scan on bloom_test (cost=145.23..45764.23 rows=198 width=49)
+                                (actual time=5.369..7.502 rows=200 loops=1)
    Recheck Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
    Rows Removed by Index Recheck: 25656
    Heap Blocks: lossy=267
-   Buffers: shared hit=272 read=29
-   -> Bitmap Index Scan on test_bloom_idx
-       (cost=0.00..144.21 rows=1625752 width=0)
-       (actual time=5.338..5.338 rows=2670 loops=1)
-        Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
-        Buffers: shared hit=5 read=29
+   Buffers: shared hit=301
+   ->  Bitmap Index Scan on test_brin_bloom_idx
+                                (cost=0.00..145.18 rows=2000000 width=0)
+                                (actual time=5.345..5.345 rows=2670 loops=1)
+         Index Cond: (id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da'::uuid)
+         Buffers: shared hit=34
  Planning:
-   Buffers: shared hit=6
- Planning Time: 0.204 ms
- Execution Time: 7.451 ms
-(12 rows)
+   Buffers: shared hit=1
+ Planning Time: 0.129 ms
+ Execution Time: 7.553 ms
 ```
+
+On voit que le nouvel index accède à soixante fois moins de bloc en mémoire que
+l'index BRIN _minmax_. Le nombre de lignes vérifiées dans la table est
+également nettement inférieur (presque 80 fois moins). Les performances
+globales sont meilleures qu'avec l'index BRIN _minmax_. Dans ce cas, le coût
+estimé est cependant légèrement supérieur, si les deux index sont présents en
+même temps sur la table, l'index BRIN _minmax_sera donc choisi.
+
+Comparé au plan avec l'index BTREE, les performances sont nettement moins
+bonnes. C'est principalement du au nombre d'accès nécessaire pour traiter le
+prédicat.
 
 En répétant les tests avec des quantités de doublons différentes, on voit que
 l'index BRIN _bloom_ permet d'accéder un nombre plus petit de pages que l'index
 BRIN _minmax_, ce qui le rend souvent plus performant. L'index BTREE est
-toujours plus performant pour une taille bien supérieure.
+toujours plus performant.
+
+La comparaison des tailles montre que l'index BRIN utilisant les
+`uuid_bloom_ops` est plus grand que l'index BRIN classique mais nettement plus
+petit que l'index BTREE.
+
+```text
+                           List of relations
+         Name         | Type  |   Table    | Access method |  Size
+----------------------+-------+------------+---------------+--------
+ test_brin_bloom_idx  | index | bloom_test | brin          | 304 kB
+ test_brin_minmax_idx | index | bloom_test | brin          | 48 kB
+ test_btree_idx       | index | bloom_test | btree         | 13 MB
+```
 
 La classe d'opérateur `*_bloom_ops` accepte deux paramètres qui permettent de
 dimensionner l'index bloom :
@@ -201,10 +216,10 @@ dimensionner l'index bloom :
   par l'index bloom. Il doit être compris entre 0.0001 et 0.25, sa valeur par
   défaut est 0.01.
 
-Un paramètrage incorrect peut rendre impossible la création de l'index:
+Un paramétrage incorrect peut rendre impossible la création de l'index:
 
 ```sql
-CREATE INDEX test_bloom_parm_idx on bloom_test 
+CREATE INDEX test_bloom_parm_idx on bloom_test
        USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
 );
 ```
@@ -219,13 +234,11 @@ CREATE TABLE bloom_test (id uuid, padding text);
 CREATE INDEX test_bloom_parm_idx on bloom_test
        USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
 );
-INSERT INTO bloom_test
-   SELECT md5((mod(i,1000000)/100)::text)::uuid, md5(i::text)
-     FROM generate_series(1,2000000) s(i);
+INSERT INTO bloom_test VALUES (md5('a')::uuid, md5('a'));
 ```
 
-On voit que l'erreur ne survient pas lors de la créationde l'index si la table
-est vide.
+Si la table est vide, on voit que l'erreur ne survient pas lors de la création
+de l'index mais lors de la première insertion :
 
 ```text
 CREATE TABLE
@@ -246,59 +259,54 @@ CREATE TABLE brin_multirange AS
        FROM generate_series(1, 1000000) AS F(x);
 
 UPDATE brin_multirange SET d = current_timestamp WHERE random() < .01;
-
-CREATE INDEX brin_multirange_btree_idx 
-  ON brin_multirange USING btree (d);
-CREATE INDEX brin_multirange_minmax_idx 
-  ON brin_multirange USING brin (d);
-CREATE INDEX brin_multirange_minmax_multi_idx 
-  ON brin_multirange USING brin (d timestamp_minmax_multi_ops);
-```
-```text
-=# \di+ brin_multirange*
-                           List of relations
-               Name               |      Table      | Access method | Size  
-----------------------------------+-----------------+---------------+-------
- brin_multirange_btree_idx        | brin_multirange | btree         | 21 MB 
- brin_multirange_minmax_idx       | brin_multirange | brin          | 48 kB 
- brin_multirange_minmax_multi_idx | brin_multirange | brin          | 56 kB 
-(3 rows)
 ```
 
-On peut voir que l'index BRIN avec la classe d'opérateur `*_minmax_multi_ops`
-est plus gros que l'index BRIN traditionnel mais, il est toujours beaucoup plus
-petit que l'index BTREE.
-
-Test d'une requête sélectionnant une plage de donnée sur la colonne `d` :
+Une fois de plus, nous allons désactiver le parallélisme et les parcours
+séquentiels afin de se focaliser sur l'utilisation des index :
 
 ```sql
+SET enable_seqscan TO off;
+SET max_parallel_workers_per_gather TO 0;
+```
+
+Commençons par tester une requête avec un `BETWEEN` sur un index BTREE :
+
+```sql
+CREATE INDEX brin_multirange_btree_idx
+  ON brin_multirange USING btree (d);
 EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
 ```
+
+Voci le plan généré :
+
 ```text
                                    QUERY PLAN
 ---------------------------------------------------------------------------
- Index Only Scan using brin_multirange_btree_idx on brin_multirange 
-  (cost=0.42..61.44 rows=1551 width=8)
-  (actual time=0.110..1.130 rows=1428 loops=1)
-   Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
-            AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
-   Heap Fetches: 1428
-   Buffers: shared hit=8 read=7
- Planning:
-   Buffers: shared hit=9 read=1
- Planning Time: 0.411 ms
- Execution Time: 1.352 ms
-(8 rows)
+ Bitmap Heap Scan on brin_multirange (cost=107.67..4861.46 rows=5000 width=8)
+                                     (actual time=0.254..0.698 rows=1429 loops=1)
+   Recheck Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
+              AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
+   Heap Blocks: exact=7
+   Buffers: shared hit=14
+   ->  Bitmap Index Scan on brin_multirange_btree_idx
+                                     (cost=0.00..106.42 rows=5000 width=0)
+                                     (actual time=0.227..0.227 rows=1429 loops=1)
+         Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
+                  AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
+         Buffers: shared hit=7
+ Planning Time: 0.119 ms
+ Execution Time: 0.922 ms
 ```
 
-On voit qu'un _index scan_ sur l'index BTREE a été choisi par l'optimiseur.
-
-Testons la même requête en supprimant l'index BTREE :
+Testons la même requête en supprimant avec un index BRIN _minmax_ :
 
 ```sql
 DROP INDEX brin_multirange_btree_idx;
+CREATE INDEX brin_multirange_minmax_idx
+  ON brin_multirange USING brin (d);
+
 EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
@@ -306,32 +314,36 @@ EXPLAIN (ANALYZE, BUFFERS)
 ```text
                                   QUERY PLAN
 --------------------------------------------------------------------------------
- Bitmap Heap Scan on brin_multirange
-  (cost=12.42..4909.98 rows=1551 width=8)
-  (actual time=5.408..7.891 rows=1428 loops=1)
+ Bitmap Heap Scan on brin_multirange (cost=12.42..4935.32 rows=1550 width=8)
+                                     (actual time=5.486..7.959 rows=1429 loops=1)
    Recheck Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
               AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
-   Rows Removed by Index Recheck: 53475
-   Heap Blocks: lossy=245
-   Buffers: shared hit=247
-   -> Bitmap Index Scan on brin_multirange_minmax_idx 
-       (cost=0.00..12.03 rows=28571 width=0)
-       (actual time=0.055..0.055 rows=2450 loops=1)
-        Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
-                 AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
-        Buffers: shared hit=2
+   Rows Removed by Index Recheck: 53627
+   Heap Blocks: lossy=246
+   Buffers: shared hit=248
+   ->  Bitmap Index Scan on brin_multirange_minmax_idx
+                                     (cost=0.00..12.03 rows=30193 width=0)
+                                     (actual time=0.056..0.056 rows=2460 loops=1)
+         Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
+                  AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
+         Buffers: shared hit=2
  Planning:
-   Buffers: shared hit=7 dirtied=1
- Planning Time: 0.254 ms
- Execution Time: 7.975 ms
-(12 rows)
+   Buffers: shared hit=1
+ Planning Time: 0.146 ms
+ Execution Time: 8.039 ms
 ```
 
-On voit que l'index BRIN classique a été choisi. Testons à nouveau sans l'index
-BRIN classique.
+Comparé à l'index BTREE, l'index BRIN _minmax_ accéde à beaucoup plus de blocs,
+cela se ressent au niveau du temps d'exécution de la requête qui est plus
+important.
+
+Pour finir, testons avec l'index BRIN *multirange_minmax*:
 
 ```sql
 DROP INDEX brin_multirange_minmax_idx;
+CREATE INDEX brin_multirange_minmax_multi_idx
+  ON brin_multirange USING brin (d timestamp_minmax_multi_ops);
+
 EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
@@ -339,32 +351,42 @@ EXPLAIN (ANALYZE, BUFFERS)
 ```text
                                      QUERY PLAN
 -------------------------------------------------------------------------------
- Bitmap Heap Scan on brin_multirange 
-  (cost=16.42..4913.98 rows=1551 width=8)
-  (actual time=5.443..5.941 rows=1428 loops=1)
+ Bitmap Heap Scan on brin_multirange (cost=16.42..4939.32 rows=1550 width=8)
+                                     (actual time=5.689..6.300 rows=1429 loops=1)
    Recheck Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
               AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
-   Rows Removed by Index Recheck: 27192
+   Rows Removed by Index Recheck: 27227
    Heap Blocks: lossy=128
    Buffers: shared hit=131
-   -> Bitmap Index Scan on brin_multirange_minmax_multi_idx  
-       (cost=0.00..16.03 rows=28571 width=0)
-       (actual time=0.110..0.110 rows=1280 loops=1)
-        Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
-                 AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
-        Buffers: shared hit=3
+   ->  Bitmap Index Scan on brin_multirange_minmax_multi_idx
+                                     (cost=0.00..16.03 rows=30193 width=0)
+                                     (actual time=0.117..0.117 rows=1280 loops=1)
+         Index Cond: ((d >= '2021-04-05 00:00:00'::timestamp without time zone)
+                  AND (d <= '2021-04-06 00:00:00'::timestamp without time zone))
+         Buffers: shared hit=3
  Planning:
-   Buffers: shared hit=6
- Planning Time: 0.228 ms
- Execution Time: 6.019 ms
-(12 rows)
+   Buffers: shared hit=1
+ Planning Time: 0.148 ms
+ Execution Time: 6.380 ms
 ```
 
-L'index BRIN utilisant la nouvelle classe d'opérateur a été choisi. Il
-nécessite globalement moins de lectures (_bitmap index scan_ + _bitmap heap scan_)
-que l'autre index BRIN. En revanche, le coût estimé du plan qui l'utilise est
-légèrement plus élevé, ce qui explique qu'il ne soit pas choisi lorsque les deux
-index sont présents.
+Le plan avec la nouvelle classe d'opérateur est accède à moins de bloc que
+celui avec la classe d'opérateur par défaut. Le temps d'exécution est donc plus
+court. Le coût estimé par l'optimiseur est légèrement supérieur à l'index brin
+_minmax_. Si les deux index sont présents, l'index bin _minmax_ sera donc
+choisi.
+
+On peut voir que l'index BRIN avec la classe d'opérateur `*_minmax_multi_ops`
+est plus gros que l'index BRIN traditionnel mais, il est toujours beaucoup plus
+petit que l'index BTREE.
+
+```text
+               Name               | Type  |     Table      |Access method | Size
+----------------------------------+-------+----------------+--------------+-------
+ brin_multirange_btree_idx        | index |brin_multirange |btree         | 21 MB
+ brin_multirange_minmax_idx       | index |brin_multirange |brin          | 48 kB
+ brin_multirange_minmax_multi_idx | index |brin_multirange |brin          | 56 kB
+```
 
 Pour conclure, les index BTREE sont toujours plus performants que les index
 BRIN. La nouvelle classe d'opérateur améliore les performances par rapport aux
