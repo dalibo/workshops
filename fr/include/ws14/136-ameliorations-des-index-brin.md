@@ -212,6 +212,27 @@ CREATE INDEX test_bloom_parm_idx on bloom_test
 ERROR:  the bloom filter is too large (8924 > 8144)
 ```
 
+Il est impératif de bien tester les insertions comme le montre cet exemple :
+
+```sql
+CREATE TABLE bloom_test (id uuid, padding text);
+CREATE INDEX test_bloom_parm_idx on bloom_test
+       USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
+);
+INSERT INTO bloom_test
+   SELECT md5((mod(i,1000000)/100)::text)::uuid, md5(i::text)
+     FROM generate_series(1,2000000) s(i);
+```
+
+On voit que l'erreur ne survient pas lors de la créationde l'index si la table
+est vide.
+
+```text
+CREATE TABLE
+CREATE INDEX
+ERROR:  the bloom filter is too large (8924 > 8144)
+```
+
 **Classe d'opérateur minmax_multi_ops**
 
 Cette version a également introduit les classes d'opérateurs
