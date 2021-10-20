@@ -4,7 +4,7 @@
 * Amélioration des performances de certains index GiST
   * plus rapide, plus petit
   * type : point
-* Support des index GiST couvrants
+* Support des index SPGiST couvrants
 
 </div>
 
@@ -25,7 +25,7 @@ La création de certains index GiST est rendue plus rapide par l'exécution d'un
 pré-tri. Un effet secondaire de cette amélioration est que la taille des index
 bénéficiant de cette optimisation est plus petite. Cela va permettre de
 diminuer la durée des opérations de maintenances sur ces index GiST (`INDEX`,
-`REINDEX`) et limiter l'espace utilisée.
+`REINDEX`) et limiter l'espace utilisé.
 
 ```sql
 -- PostgreSQL 14

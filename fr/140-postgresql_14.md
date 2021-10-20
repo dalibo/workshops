@@ -516,7 +516,7 @@ possible.
 
 ----
 
-### Améliorations de l'indexation GiST
+### Améliorations de l'indexation GiST / SPGiST
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
 !include include/ws14/136-ameliorations-des-index-gist.md

@@ -208,7 +208,7 @@ CREATE INDEX test_bloom_parm_idx on bloom_test
        USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
 );
 ```
-```txt
+```text
 ERROR:  the bloom filter is too large (8924 > 8144)
 ```
 
