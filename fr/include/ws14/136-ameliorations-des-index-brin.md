@@ -105,7 +105,7 @@ Voici le plan de la requête :
 Essayons maintenant avec un index BRIN utilisant les `uuid_minmax_ops` (la
 classe d'opérateur par défaut) :
 
-``sql
+```sql
 DROP INDEX test_btree_idx;
 CREATE INDEX test_brin_minmax_idx ON bloom_test USING brin (id);
 EXPLAIN (ANALYZE,BUFFERS)
@@ -137,7 +137,7 @@ Voici le plan de la requête :
 
 Le temps d'exécution de la requête avec cet index est beaucoup plus long
 qu'avec l'index btree. Cela peut s'expliquer par le grand nombre d'accès au
-cache qui doivent être réalisés environ 20620 contre une dizaine. On peut noter
+cache qui doivent être réalisés, environ 20620 contre une dizaine. On peut noter
 le très grand nombre de vérifications qui doivent être faites dans la table
 (presque 2 millions).
 
@@ -181,7 +181,7 @@ estimé est cependant légèrement supérieur, si les deux index sont présents 
 même temps sur la table, l'index BRIN _minmax_sera donc choisi.
 
 Comparé au plan avec l'index BTREE, les performances sont nettement moins
-bonnes. C'est principalement du au nombre d'accès nécessaire pour traiter le
+bonnes. C'est principalement dû au nombre d'accès nécessaire pour traiter le
 prédicat.
 
 En répétant les tests avec des quantités de doublons différentes, on voit que
