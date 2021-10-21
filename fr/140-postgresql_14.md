@@ -516,10 +516,24 @@ possible.
 
 ----
 
-### Améliorations de l'indexation
+### Améliorations de l'indexation GiST / SPGiST
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
-!include include/ws14/EXEMPLE.md
+!include include/ws14/136-ameliorations-des-index-gist.md
+
+----
+
+### Nettoyage des index BTree 
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
+!include include/ws14/136-ameliorations-des-index-btree.md
+
+----
+
+### Nouvelles classes d'opérateurs pour les index Brin
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
+!include include/ws14/136-ameliorations-des-index-brin.md
 
 ----
 
