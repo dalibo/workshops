@@ -1,4 +1,0 @@
-
-CentOS8 :
-
-sudo yum-config-manager --enable pgdg13-updates-testing

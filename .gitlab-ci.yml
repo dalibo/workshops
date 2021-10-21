@@ -15,8 +15,10 @@ include:
 ##
 
 variables:
+  BRANCH_TARGET: ws14
+  MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
-  ARTIFACTS: '*'  
+  ARTIFACTS: '_build/*'
   # 
   THEMES_BRANCH: stable # usually 'stable' or 'master'
   ## Limitation des pull docker
@@ -47,6 +49,16 @@ image:
 
 pandoc:
   stage: build
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        TARGET: $MASTER_TARGET
+        MESSAGE: "All archived and active workshops will be published."
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        TARGET: $BRANCH_TARGET
+        MESSAGE: "Only $BRANCH_TARGET will be published."
+
   script:
     #
     # The dalibo themes are not mandatory
@@ -54,17 +66,20 @@ pandoc:
     #
     - > 
         if [[ $GITLAB_DEPLOY_PRIVATE_KEY ]] ; then 
-                ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
-                git clone -b $THEMES_BRANCH git@gitlab.dalibo.info:marketing/themes.git
-                make --directory=themes install
+          ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
+          git clone -b $THEMES_BRANCH git@gitlab.dalibo.info:marketing/themes.git
+          make --directory=themes install
         fi
     # pandoc
-    - make all
+    - echo $MESSAGE
+    - make $TARGET
+    - echo "Move html and pdf files to root directories"
+    - make build
 
   artifacts:
     paths:
-      - fr/
-      - en/
+      - _build/fr/
+      - _build/en/
     expire_in: 1 day
 
 ##
