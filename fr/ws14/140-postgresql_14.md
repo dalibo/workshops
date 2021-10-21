@@ -485,7 +485,7 @@ possible.
 ### Nouveautées dans `pg_stat_statements`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
-!include include/EXEMPLE.md
+!include include/130_pg_stat_statements_new_features.md
 
 ----
 
@@ -516,17 +516,31 @@ possible.
 
 ----
 
-### Améliorations de l'indexation
+### Améliorations de l'indexation GiST / SPGiST
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
-!include include/EXEMPLE.md
+!include include/136-ameliorations-des-index-gist.md
 
 ----
 
-### Amélioration des performances avec un grand nombre de connexions en lecture seule
+### Nettoyage des index BTree 
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
+!include include/136-ameliorations-des-index-btree.md
+
+----
+
+### Nouvelles classes d'opérateurs pour les index Brin
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
+!include include/136-ameliorations-des-index-brin.md
+
+----
+
+### Connexions simultanées en lecture seule
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
-!include include/EXEMPLE.md
+!include include/137_improving_connection_scalability.md
 
 ----
 

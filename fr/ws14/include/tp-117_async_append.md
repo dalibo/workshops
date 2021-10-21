@@ -223,7 +223,7 @@ EXPLAIN (analyze, costs off)
 ```
 
 On constate que les nœuds `Async Foreign Scan` démarrent presque au même instant
-(`actual time=0..`) et que le nœd `Append`, chargé de l'union des résultat, se 
+(`actual time=0..`) et que le nœud `Append`, chargé de l'union des résultat, se 
 termine vers la 49ème milliseconde d'exécution. Sur de hautes volumétries, les 
 lectures non indexées sont plus performantes, grâce à une répartition de travail 
 entre les différentes instances, aussi appelées nœuds de calcul.
