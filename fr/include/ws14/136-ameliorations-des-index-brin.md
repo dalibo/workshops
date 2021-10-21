@@ -34,7 +34,7 @@ classes d'opérateurs ont été créées pour les index brin : `*_bloom_ops` et
 ```sql
 SELECT amname,
        CASE WHEN opcname LIKE '%bloom%' THEN '*_bloom_ops'
-           WHEN opcname LIKE '%multi%' THEN '*_minmax_muli_ops'
+           WHEN opcname LIKE '%multi%' THEN '*_minmax_multi_ops'
            ELSE                             '*_mimmax_ops'
        END AS "classes d'opérateurs",
        count(*) as  "types supportés"
@@ -47,7 +47,7 @@ GROUP BY 1, 2;
  amname | classes d'opérateurs | types supportés
 --------+----------------------+-----------------
  brin   | *_mimmax_ops         |              26
- brin   | *_minmax_muli_ops    |              19
+ brin   | *_minmax_multi_ops    |              19
  brin   | *_bloom_ops          |              24
 (3 rows)
 ```
@@ -143,7 +143,7 @@ le très grand nombre de vérifications qui doivent être faites dans la table
 
 Pour terminer, essayons avec l'index BRIN et la nouvelle classe d'opérateur :
 
-``sql
+```sql
 DROP INDEX test_brin_minmax_idx;
 CREATE INDEX test_brin_bloom_idx on bloom_test USING brin (id uuid_bloom_ops);
 EXPLAIN (ANALYZE,BUFFERS)
@@ -216,7 +216,7 @@ dimensionner l'index bloom :
   par l'index bloom. Il doit être compris entre 0.0001 et 0.25, sa valeur par
   défaut est 0.01.
 
-Un paramétrage incorrect peut rendre impossible la création de l'index:
+Un paramétrage incorrect peut rendre impossible la création de l'index :
 
 ```sql
 CREATE INDEX test_bloom_parm_idx on bloom_test
@@ -262,7 +262,7 @@ UPDATE brin_multirange SET d = current_timestamp WHERE random() < .01;
 ```
 
 Une fois de plus, nous allons désactiver le parallélisme et les parcours
-séquentiels afin de se focaliser sur l'utilisation des index :
+séquentiels afin de se concentrer sur l'utilisation des index :
 
 ```sql
 SET enable_seqscan TO off;
@@ -337,7 +337,7 @@ Comparé à l'index BTREE, l'index BRIN _minmax_ accéde à beaucoup plus de blo
 cela se ressent au niveau du temps d'exécution de la requête qui est plus
 important.
 
-Pour finir, testons avec l'index BRIN *multirange_minmax*:
+Pour finir, testons avec l'index BRIN _multirange_minmax_ :
 
 ```sql
 DROP INDEX brin_multirange_minmax_idx;

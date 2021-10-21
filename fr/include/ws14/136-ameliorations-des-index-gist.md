@@ -106,7 +106,7 @@ la construction de l'index passe par une étape de tri des données avec un ordr
 défini par la fonction de support. Cela permet de regrouper les enregistrements
 plus efficacement et donc de réduire la taille de l'index.
 
-Actuellement seul la classe d'opérateur pour les types `point` dispose de cette
+Actuellement seule la classe d'opérateur pour les types `point` dispose de cette
 fonction :
 
 ```sql
