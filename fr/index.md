@@ -15,14 +15,14 @@ Nouveautés de PostgreSQL 14
 Nouveautés de PostgreSQL 13
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](130-postgresql_13.slides.html)
+* Slides : [HTML](130-postgresql_13.slides.html) [PGSession 13](pgsession13.slides.html)
 * Handout : [HTML](130-postgresql_13.handout.html) [PDF](130-postgresql_13.pdf)
 * Mobile : [EPUB](130-postgresql_13.epub)
 
 Nouveautés de PostgreSQL 12
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](120-postgresql_12.slides.html)
+* Slides : [HTML](120-postgresql_12.slides.html) [PGSession 12](pgsession12.slides.html)
 * Handout : [HTML](120-postgresql_12.handout.html) [PDF](120-postgresql_12.pdf)
 * Mobile : [EPUB](120-postgresql_12.epub)
 
