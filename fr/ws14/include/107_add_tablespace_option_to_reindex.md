@@ -159,7 +159,7 @@ test=# reindex (tablespace tbs) table pg_toast.pg_toast_16417;
 ERROR:  cannot move system relation "pg_toast_16417_index"
 ```
 
-* L'option est interdite sur le catalogue système. Lors de l'utilisation des commandes `REINDEX SCHEMA`, `DATABASE` ou `SYSTEM` les objets systèmes ne seront pas concernés par le déplacement si l'option `TABLESPACE` est utilisée.
+* L'option est interdite sur le catalogue système. Lors de l'utilisation des commandes `REINDEX SCHEMA`, `DATABASE` ou `TABLE` les objets systèmes ne seront pas concernés par le déplacement si l'option `TABLESPACE` est utilisée.
 
 ```sql
 -- Test d'un déplacement d'index sur une table système.
