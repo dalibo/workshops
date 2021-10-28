@@ -248,7 +248,7 @@ Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 > Restaurer le postgresql.conf de **srv3**.
 
 ```bash
-cp ${DATADIRS}/postgresql.srv3.conf ${DATADIRS}/srv3
+cp ${DATADIRS}/postgresql.srv3.conf ${DATADIRS}/srv3/postgresql.conf
 ```
 
 À l'issue de l'opération, les droits donnés à l'utilisateur de réplication
@@ -273,13 +273,13 @@ _EOF_
 
 ### Redémarrer srv3
 
-> Mettre à jour de la configuration de **srv3** pour en faire une instance
+> Mettre à jour la configuration de **srv3** pour en faire une instance
 > secondaire.
 
 ```bash
-touch $DATADIRS/srv3/standby.signal
+touch ${DATADIRS}/srv3/standby.signal
 
-cat <<_EOF_ >> $DATADIRS/srv3/postgresql.conf
+cat <<_EOF_ >> ${DATADIRS}/srv3/postgresql.conf
 recovery_target_timeline = 1 # Forcer la même timeline que le maître pour la recovery
 _EOF_
 ```
@@ -287,7 +287,7 @@ _EOF_
 > Redémarrer l'instance **srv3**.
 
 ```bash
-pg_ctl start -D $DATADIRS/srv3 -w
+/usr/pgsql-14/bin/pg_ctl start --pgdata=${DATADIRS}/srv3 --wait
 ```
 
 La requête suivante doit renvoyer un nombre de lignes égal au nombre
@@ -295,7 +295,7 @@ d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
 **srv1** :
 
 ```bash
-psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
+psql --port=5636 --expanded --command="SELECT * FROM pg_stat_replication;"
 ```
 
 ### Remarques
