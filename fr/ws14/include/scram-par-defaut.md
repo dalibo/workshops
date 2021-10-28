@@ -81,7 +81,7 @@ rolpassword | SCRAM-SHA-256$4096:tEblPJ9ZoVPEkE/AOyreag==$cb/g6sak7SDEL6gCxRd9GU
 Le type de mot de passe est visible au début de `rolpassword`.
 
 Noter que si Pierrot utilise le même mot de passe sur une autre instance
-PostgreSQL avec le chiffrage MD5, on retrouvera
+PostgreSQL avec le chiffrement MD5, on retrouvera
 `md59c20f03b508f8120b2294a8fedd42557`. Cela ouvre la porte à certaines attaques
 par force brute, et peut donner la preuve que le mot de passe est identique sur
 différentes installations.

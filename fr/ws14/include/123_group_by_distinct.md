@@ -28,8 +28,8 @@ CREATE TABLE entreprise(nom text, departement int, ville text, creation date, mo
 COPY entreprise FROM STDIN WITH DELIMITER ',' CSV;
 entreprise1,44,Nantes,20210506,1000
 entreprise2,44,Nantes,20200506,200
-entreprise3,85,Brest,20200605,3000
-entreprise4,85,Brest,20200406,4000
+entreprise3,29,Brest,20200605,3000
+entreprise4,29,Brest,20200406,4000
 \.
 _EOF_
 ```
@@ -50,21 +50,21 @@ SELECT row_number() OVER(), departement, ville,
           1 |           ¤ | ¤       |    ¤ |    2050
           2 |          44 | Nantes  | 2021 |    1000
           3 |          44 | Nantes  | 2020 |     200
-          4 |          85 | Brest   | 2020 |    3500
-          5 |          85 | Brest   |    ¤ |    3500
+          4 |          29 | Brest   | 2020 |    3500
+          5 |          29 | Brest   |    ¤ |    3500
           6 |          44 | Nantes  |    ¤ |     600
-          7 |          85 | Brest   |    ¤ |    3500 << DOUBLON DE 5
+          7 |          29 | Brest   |    ¤ |    3500 << DOUBLON DE 5
           8 |          44 | Nantes  |    ¤ |     600 << DOUBLON DE 6
           9 |          44 | ¤       |    ¤ |     600
-         10 |          85 | ¤       |    ¤ |    3500
+         10 |          29 | ¤       |    ¤ |    3500
          11 |          44 | ¤       |    ¤ |     600 << DOUBLON DE 9
-         12 |          85 | ¤       |    ¤ |    3500 << DOUBLON DE 10
+         12 |          29 | ¤       |    ¤ |    3500 << DOUBLON DE 10
          13 |          44 | ¤       |    ¤ |     600 << DOUBLON DE 9
-         14 |          85 | ¤       |    ¤ |    3500 << DOUBLON DE 10
-         15 |          85 | ¤       | 2020 |    3500
+         14 |          29 | ¤       |    ¤ |    3500 << DOUBLON DE 10
+         15 |          29 | ¤       | 2020 |    3500
          16 |          44 | ¤       | 2020 |     200
          17 |          44 | ¤       | 2021 |    1000
-         18 |          85 | ¤       | 2020 |    3500 << DOUBLON DE 15
+         18 |          29 | ¤       | 2020 |    3500 << DOUBLON DE 15
          19 |          44 | ¤       | 2020 |     200 << DOUBLON DE 16 
          20 |          44 | ¤       | 2021 |    1000 << DOUBLON DE 17
 (20 rows)
@@ -86,12 +86,12 @@ SELECT departement, ville, extract(YEAR FROM  creation) as year,
            ¤ | ¤       |    ¤ |    2050
           44 |  Nantes | 2021 |    1000
           44 |  Nantes | 2020 |     200
-          85 |  Brest  | 2020 |    3500
-          85 |  Brest  |    ¤ |    3500
+          29 |  Brest  | 2020 |    3500
+          29 |  Brest  |    ¤ |    3500
           44 |  Nantes |    ¤ |     600
           44 | ¤       |    ¤ |     600
-          85 | ¤       |    ¤ |    3500
-          85 | ¤       | 2020 |    3500
+          29 | ¤       |    ¤ |    3500
+          29 | ¤       | 2020 |    3500
           44 | ¤       | 2020 |     200
           44 | ¤       | 2021 |    1000
 (11 rows)

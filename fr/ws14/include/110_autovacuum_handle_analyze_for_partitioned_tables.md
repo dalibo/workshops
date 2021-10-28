@@ -114,7 +114,7 @@ avg_width              | 4
 
 Précisions concernant le déclenchement de l'`autovacuum` sur des tables partitionnées :
 
-* Les opérations `SELECT`, `INSERT` et `DELETE` sur des partitions sont comptabilisées
+* Les opérations `UPDATE`, `INSERT` et `DELETE` sur des partitions sont comptabilisées
 pour le paramètre `autovacuum_analyze_threshold` ;
 * Les opérations DDL comme `ATTACH`, `DETACH` et `DROP` ne le sont pas. Il est donc
 recommandé de lancer un `ANALYZE` manuel après ce type d'opération.
