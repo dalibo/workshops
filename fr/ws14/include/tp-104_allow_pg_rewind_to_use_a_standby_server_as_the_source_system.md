@@ -31,6 +31,14 @@ mkdir -p ~/tmp/rewind/srv1
 
 ### Création d'une instance primaire
 
+> Configurer les variables d'environnement pour l'instance à déployer.
+
+```bash
+export PGNAME=srv1
+export PGDATA=$DATADIRS/$PGNAME
+export PGPORT=5636
+```
+
 > Créer une instance primaire dans le dossier `~/tmp/rewind/srv1` en activant les sommes de contrôle.
 
 ```sh
