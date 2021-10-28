@@ -14,21 +14,27 @@
 
 ### Mise en place de l'environnement
 
+> Ouvrir un terminal puis emprunter l'identité de l'utilisateur `postgres` sur votre machine.
+
+```sh
+sudo su - postgres
+```
+
 Pour cet atelier, nous créons des instances temporaires dans le répertoire
 `~/tmp/rewind` :
 
 > Créer le répertoire `~/tmp/rewind`.
 
 ```sh
-mkdir -p ~/tmp/rewind
+mkdir -p ~/tmp/rewind/srv1
 ```
 
 ### Création d'une instance primaire
 
-> Créer une instance primaire en activant les sommes de contrôle.
+> Créer une instance primaire dans le dossier `~/tmp/rewind/srv1` en activant les sommes de contrôle.
 
-```bash
-initdb --data-checksums $DATADIRS/$PGNAME -U postgres
+```sh
+/usr/pgsql-14/bin/pg_ctl --data-checksums ~/tmp/rewind/srv1 -U postgres
 ```
 
 Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
@@ -37,36 +43,51 @@ de l'instance.
 
 > Configurer PostgreSQL.
 
-```bash
-cat <<_EOF_ >> $DATADIRS/${PGNAME}/postgresql.conf
+```sh
+cat <<_EOF_ >> ~/tmp/rewind/srv1/postgresql.conf
 port = 5636
 listen_addresses = '*'
 logging_collector = on
 archive_mode = on
 archive_command = '/usr/bin/rsync -a %p $DATADIRS/archives/%f'
 restore_command = '/usr/bin/rsync -a $DATADIRS/archives/%f %p'
-cluster_name = '${PGNAME}'
+cluster_name = 'srv1'
 _EOF_
 ```
 
-> Démarrer l'instance, y créer une base de données et initialiser une base
-> **pgbench**.
+> Démarrer l'instance.
 
-```bash
-pg_ctl start -D $DATADIRS/$PGNAME -w
-psql -p 5636 -c "CREATE DATABASE bench;"
-pgbench -p 5636 -i -s 10 bench
+```sh
+/usr/pgsql-14/bin/pg_ctl start -D ~/tmp/rewind/srv1 -w
 ```
 
-> Créer un utilisateur pour la réplication et ajouter le mot de passe au
-> fichier `.pgpass`.
+> Se connecter à l'instance PostgreSQL.
 
-```bash
-psql -p 5636 << _EOF_
-CREATE ROLE replication
-  WITH LOGIN REPLICATION PASSWORD 'replication';
-_EOF_
+```sh
+psql --port=5636
+```
 
+> Créer une base de données `pgbench`.
+
+```sh
+psql -p 5636 -c "CREATE DATABASE pgbench;"
+```
+
+> Initialiser la base de données `pgbench` avec la commande **pgbench**.
+
+```sh
+/usr/pgsql-14/bin/pgbench -p 5636 -i -s 10 pgbench
+```
+
+> Créer un utilisateur 'replication' avec le mot de passe `replication` pour la réplication PostgreSQL.
+
+```sh
+psql -p 5636 "CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
+```
+
+>  Ajouter le mot de passe au fichier `.pgpass`.
+
+```sh
 cat << _EOF_ >> ~/.pgpass
 *:5636:replication:replication:replication # srv1
 *:5637:replication:replication:replication # srv2
