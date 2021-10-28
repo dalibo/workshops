@@ -222,14 +222,14 @@ _EOF_
 > pendant le _rewind_.
 
 ```bash
-cp $DATADIRS/srv3/postgresql.conf $DATADIRS/postgresql.srv3.conf
+cp ${DATADIRS}/srv3/postgresql.conf ${DATADIRS}/postgresql.srv3.conf
 ```
 
 > Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
 > **srv2** (commencer par un passage à blanc `--dry-run`).
 
 ```sh
-/usr/pgsql-14/bin/pg_rewind --target-pgdata $DATADIRS/srv3                               \
+/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
           --progress                                                   \
@@ -239,7 +239,7 @@ cp $DATADIRS/srv3/postgresql.conf $DATADIRS/postgresql.srv3.conf
 Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 
 ```sh
-/usr/pgsql-14/bin/pg_rewind --target-pgdata $DATADIRS/srv3                               \
+/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
           --progress
@@ -248,14 +248,14 @@ Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 > Restaurer le postgresql.conf de **srv3**.
 
 ```bash
-cp $DATADIRS/postgresql.srv3.conf $DATADIRS/srv3
+cp ${DATADIRS}/postgresql.srv3.conf ${DATADIRS}/srv3
 ```
 
 À l'issue de l'opération, les droits donnés à l'utilisateur de réplication
 peuvent être révoqués :
 
 ```sh
-psql -p 5636 <<_EOF_
+psql --port=5636 <<_EOF_
 REVOKE EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
   FROM  replication;
