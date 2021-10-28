@@ -170,16 +170,18 @@ export PGPORT=5638
 > Promouvoir l'instance secondaire **srv3**.
 
 ```bash
-pg_ctl promote -D $DATADIRS/srv3 -w
-psql -p 5638 -c CHECKPOINT
+/usr/pgsql-14/bin/pg_ctl promote --pgdata=${DATADIRS}/srv3 --wait
+psql --port=5638 --command="CHECKPOINT;"
 ```
 
 > Ajouter des données aux instances **srv1** et **srv3** afin de les faire
 > diverger (une minute d'attente par instance).
 
 ```bash
-pgbench -p 5636 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv1
-pgbench -p 5638 -c 10 -T 60 -n bench # Simulation d'un traitement spécifique sur l'instance srv3
+# Simulation d'une activité normale sur l'instance srv1
+/usr/pgsql-14/bin/pgbench --port=5636 --client=10 --time=60 --no-vacuum pgbench
+# Simulation d'un traitement spécifique sur l'instance srv3
+/usr/pgsql-14/bin/pgbench --port=5638 --client=10 --time=60 --no-vacuum pgbench
 ```
 
 Les deux instances ont maintenant divergé. Sans action supplémentaire, il n'est
@@ -189,16 +191,17 @@ primaire **srv1**.
 > Stopper l'instance **srv3** proprement.
 
 ```bash
-pg_ctl stop -D $DATADIRS/srv3 -m fast -w
+/usr/pgsql-14/bin/pg_ctl stop --pgdata=${DATADIRS}/srv3 --mode=fast --wait
 ```
 
 ### Utilisation de pg_rewind
 
-> Donner les autorisations à l'utilisateur de réplication, afin qu'il puisse
-> utiliser `pg_rewind`.
+> Donner les autorisations à l'utilisateur `replication` sur les fonctions
+> `pg_ls_dir`, `pg_stat_file`, `pg_read_binary_file` et `pg_read_binary_file` du
+> schéma `pg_catalog` afin qu'il puisse utiliser `pg_rewind`.
 
-```sql
-psql -p 5636 <<_EOF_
+```sh
+psql --port=5636 <<_EOF_
 GRANT EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
   TO replication;
@@ -219,7 +222,7 @@ _EOF_
 > pendant le _rewind_.
 
 ```bash
-cp $DATADIRS/srv3/postgresql.conf $DATADIRS
+cp $DATADIRS/srv3/postgresql.conf $DATADIRS/postgresql.srv3.conf
 ```
 
 > Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
