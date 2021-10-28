@@ -23,10 +23,16 @@ sudo su - postgres
 Pour cet atelier, nous créons des instances temporaires dans le répertoire
 `~/tmp/rewind` :
 
-> Créer le répertoire `~/tmp/rewind`.
+> Configurer la variable `DATADIRS`.
 
 ```sh
-mkdir -p ~/tmp/rewind/srv1
+export DATADIRS=~/tmp/rewind
+```
+
+> Créer le répertoire `~/tmp/rewind` et le répertoire `~/tmp/rewind/archives`.
+
+```sh
+mkdir --parents ${DATADIRS}/archives
 ```
 
 ### Création d'une instance primaire
@@ -39,10 +45,16 @@ export PGDATA=$DATADIRS/$PGNAME
 export PGPORT=5636
 ```
 
+> Créer le répertoire `~/tmp/rewind/srv1`.
+
+```sh
+mkdir --parents ${DATADIRS}/${PGNAME}
+```
+
 > Créer une instance primaire dans le dossier `~/tmp/rewind/srv1` en activant les sommes de contrôle.
 
 ```sh
-/usr/pgsql-14/bin/pg_ctl --data-checksums ~/tmp/rewind/srv1 -U postgres
+/usr/pgsql-14/bin/initdb --data-checksums --pgdata=${PGDATA} --username=postgres
 ```
 
 Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
@@ -52,45 +64,39 @@ de l'instance.
 > Configurer PostgreSQL.
 
 ```sh
-cat <<_EOF_ >> ~/tmp/rewind/srv1/postgresql.conf
-port = 5636
+cat <<_EOF_ >> ${PGDATA}/postgresql.conf
+port = ${PGPORT}
 listen_addresses = '*'
 logging_collector = on
 archive_mode = on
-archive_command = '/usr/bin/rsync -a %p $DATADIRS/archives/%f'
-restore_command = '/usr/bin/rsync -a $DATADIRS/archives/%f %p'
-cluster_name = 'srv1'
+archive_command = '/usr/bin/rsync -a %p ${DATADIRS}/archives/%f'
+restore_command = '/usr/bin/rsync -a ${DATADIRS}/archives/%f %p'
+cluster_name = '${PGNAME}'
 _EOF_
 ```
 
 > Démarrer l'instance.
 
 ```sh
-/usr/pgsql-14/bin/pg_ctl start -D ~/tmp/rewind/srv1 -w
-```
-
-> Se connecter à l'instance PostgreSQL.
-
-```sh
-psql --port=5636
+/usr/pgsql-14/bin/pg_ctl start --pgdata=${PGDATA} --wait
 ```
 
 > Créer une base de données `pgbench`.
 
 ```sh
-psql -p 5636 -c "CREATE DATABASE pgbench;"
+psql --port=${PGPORT} --command="CREATE DATABASE pgbench;"
 ```
 
 > Initialiser la base de données `pgbench` avec la commande **pgbench**.
 
 ```sh
-/usr/pgsql-14/bin/pgbench -p 5636 -i -s 10 pgbench
+/usr/pgsql-14/bin/pgbench --port=${PGPORT} --initialize --scale=10 pgbench
 ```
 
 > Créer un utilisateur 'replication' avec le mot de passe `replication` pour la réplication PostgreSQL.
 
 ```sh
-psql -p 5636 "CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
+psql --port=${PGPORT} --command="CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
 ```
 
 >  Ajouter le mot de passe au fichier `.pgpass`.
@@ -108,25 +114,30 @@ chmod 600 ~/.pgpass
 
 > Configurer les variables d'environnement pour l'instance à déployer.
 
-```bash
+```sh
 export PGNAME=srv2
-export PGDATA=$DATADIRS/$PGNAME
+export PGDATA=${DATADIRS}/${PGNAME}
 export PGPORT=5637
 ```
 
-> Créer une instance secondaire.
+> Créer une instance secondaire à l'aide de l'outil `pg_basebackup`.
 
-```bash
-pg_basebackup -D $PGDATA -p 5636 --progress --username=replication --checkpoint=fast
+```sh
+pg_basebackup --pgdata=${PGDATA} --port=5636 --progress --username=replication --checkpoint=fast
+```
+
+> Ajouter un fichier `standby.signal` dans le répertoire de données de l'instance
+> **srv2**.
+
+```sh
+touch ${PGDATA}/standby.signal
 ```
 
 > Modifier la configuration.
 
 ```bash
-touch $PGDATA/standby.signal
-
-cat << _EOF_ >> $PGDATA/postgresql.conf
-port = $PGPORT
+cat << _EOF_ >> ${PGDATA}/postgresql.conf
+port = ${PGPORT}
 primary_conninfo = 'port=5636 user=replication application_name=${PGNAME}'
 cluster_name = '${PGNAME}'
 _EOF_
@@ -135,7 +146,7 @@ _EOF_
 > Démarrer l'instance secondaire.
 
 ```bash
-pg_ctl start -D $PGDATA -w
+/usr/pgsql-14/bin/pg_ctl start --pgdata=${PGDATA} --wait
 ```
 
 La requête suivante doit renvoyer un nombre de lignes égal au nombre
@@ -143,14 +154,14 @@ d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
 **srv1** :
 
 ```bash
-psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
+psql --port=5636 --expanded --command="SELECT * FROM pg_stat_replication;"
 ```
 
 > Faire les mêmes opérations pour construire une troisième instance.
 
 ```bash
 export PGNAME=srv3
-export PGDATA=$DATADIRS/$PGNAME
+export PGDATA=${DATADIRS}/${PGNAME}
 export PGPORT=5638
 ```
 
