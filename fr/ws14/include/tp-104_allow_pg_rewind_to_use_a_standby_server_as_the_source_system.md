@@ -12,28 +12,30 @@
 
 <div class="notes">
 
-### Création d'une instance primaire
+### Mise en place de l'environnement
 
 Pour cet atelier, nous créons des instances temporaires dans le répertoire
 `~/tmp/rewind` :
 
-```bash
-export DATADIRS=~/tmp/rewind
-mkdir -p $DATADIRS/archives
-export PGNAME=srv1
+> Créer le répertoire `~/tmp/rewind`.
+
+```sh
+mkdir -p ~/tmp/rewind
 ```
 
-* Créer une instance primaire en activant les sommes de contrôle
+### Création d'une instance primaire
+
+> Créer une instance primaire en activant les sommes de contrôle.
 
 ```bash
 initdb --data-checksums $DATADIRS/$PGNAME -U postgres
 ```
 
-> Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
-> `wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
-> de l'instance.
+Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
+`wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
+de l'instance.
 
-* Configurer PostgreSQL
+> Configurer PostgreSQL.
 
 ```bash
 cat <<_EOF_ >> $DATADIRS/${PGNAME}/postgresql.conf
@@ -47,8 +49,8 @@ cluster_name = '${PGNAME}'
 _EOF_
 ```
 
-* Démarrer l'instance, y créer une base de données et initialiser une base
-  **pgbench**
+> Démarrer l'instance, y créer une base de données et initialiser une base
+> **pgbench**.
 
 ```bash
 pg_ctl start -D $DATADIRS/$PGNAME -w
@@ -56,8 +58,8 @@ psql -p 5636 -c "CREATE DATABASE bench;"
 pgbench -p 5636 -i -s 10 bench
 ```
 
-* Créer un utilisateur pour la réplication et ajouter le mot de passe au
-  fichier `.pgpass`
+> Créer un utilisateur pour la réplication et ajouter le mot de passe au
+> fichier `.pgpass`.
 
 ```bash
 psql -p 5636 << _EOF_
@@ -75,7 +77,7 @@ chmod 600 ~/.pgpass
 
 ### Mettre en place la réplication sur deux secondaires
 
-* Configurer les variables d'environnement pour l'instance à déployer
+> Configurer les variables d'environnement pour l'instance à déployer.
 
 ```bash
 export PGNAME=srv2
@@ -83,13 +85,13 @@ export PGDATA=$DATADIRS/$PGNAME
 export PGPORT=5637
 ```
 
-* Créer une instance secondaire
+> Créer une instance secondaire.
 
 ```bash
 pg_basebackup -D $PGDATA -p 5636 --progress --username=replication --checkpoint=fast
 ```
 
-* Modifier la configuration 
+> Modifier la configuration.
 
 ```bash
 touch $PGDATA/standby.signal
@@ -101,7 +103,7 @@ cluster_name = '${PGNAME}'
 _EOF_
 ```
 
-* Démarrer l'instance secondaire
+> Démarrer l'instance secondaire.
 
 ```bash
 pg_ctl start -D $PGDATA -w
@@ -115,7 +117,7 @@ d'instances secondaires. Elle doit être exécutée depuis l'instance primaire
 psql -p 5636 -xc "SELECT * FROM pg_stat_replication;"
 ```
 
-* Faire les mêmes opérations pour construire une troisième instance
+> Faire les mêmes opérations pour construire une troisième instance.
 
 ```bash
 export PGNAME=srv3
@@ -125,15 +127,15 @@ export PGPORT=5638
 
 ### Décrochage volontaire de l'instance secondaire **srv3**
 
-* Promouvoir l'instance secondaire **srv3**
+> Promouvoir l'instance secondaire **srv3**.
 
 ```bash
 pg_ctl promote -D $DATADIRS/srv3 -w
 psql -p 5638 -c CHECKPOINT
 ```
 
-* Ajouter des données aux instances **srv1** et **srv3** afin de les faire
-  diverger (une minute d'attente par instance)
+> Ajouter des données aux instances **srv1** et **srv3** afin de les faire
+> diverger (une minute d'attente par instance).
 
 ```bash
 pgbench -p 5636 -c 10 -T 60 -n bench # Simulation d'une activité normale sur l'instance srv1
@@ -144,7 +146,7 @@ Les deux instances ont maintenant divergé. Sans action supplémentaire, il n'es
 donc pas possible de raccrocher l'ancienne instance secondaire **srv3** à l'instance
 primaire **srv1**.
 
-* Stopper l'instance **srv3** proprement
+> Stopper l'instance **srv3** proprement.
 
 ```bash
 pg_ctl stop -D $DATADIRS/srv3 -m fast -w
@@ -152,8 +154,8 @@ pg_ctl stop -D $DATADIRS/srv3 -m fast -w
 
 ### Utilisation de pg_rewind
 
-* Donner les autorisations à l'utilisateur de réplication, afin qu'il puisse
-  utiliser `pg_rewind`
+> Donner les autorisations à l'utilisateur de réplication, afin qu'il puisse
+> utiliser `pg_rewind`.
 
 ```sql
 psql -p 5636 <<_EOF_
@@ -172,16 +174,16 @@ GRANT EXECUTE
 _EOF_
 ```
 
-* Sauvegarder la configuration qui diffère entre **srv1** et **srv3** (ici
-  `postgresql.conf`) car les fichiers de **srv1** vont écraser ceux de **srv3**
-  pendant le _rewind_
+> Sauvegarder la configuration qui diffère entre **srv1** et **srv3** (ici
+> `postgresql.conf`) car les fichiers de **srv1** vont écraser ceux de **srv3**
+> pendant le _rewind_.
 
 ```bash
 cp $DATADIRS/srv3/postgresql.conf $DATADIRS
 ```
 
-* Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
-  **srv2** (commencer par un passage à blanc `--dry-run`)
+> Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
+> **srv2** (commencer par un passage à blanc `--dry-run`).
 
 ```bash
 pg_rewind --target-pgdata $DATADIRS/srv3                               \
@@ -193,7 +195,7 @@ pg_rewind --target-pgdata $DATADIRS/srv3                               \
 
 Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 
-* Restaurer le postgresql.conf de **srv3**
+> Restaurer le postgresql.conf de **srv3**.
 
 ```bash
 cp $DATADIRS/postgresql.conf $DATADIRS/srv3
@@ -221,8 +223,8 @@ _EOF_
 
 ### Redémarrer srv3
 
-* Mettre à jour de la configuration de **srv3** pour en faire une instance
-  secondaire
+> Mettre à jour de la configuration de **srv3** pour en faire une instance
+> secondaire.
 
 ```bash
 touch $DATADIRS/srv3/standby.signal
@@ -232,7 +234,7 @@ recovery_target_timeline = 1 # Forcer la même timeline que le maître pour la r
 _EOF_
 ```
 
-* Redémarrer l'instance **srv3**
+> Redémarrer l'instance **srv3**.
 
 ```bash
 pg_ctl start -D $DATADIRS/srv3 -w
