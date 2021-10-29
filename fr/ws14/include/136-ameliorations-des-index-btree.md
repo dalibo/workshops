@@ -26,7 +26,7 @@ compris ceux pour lesquels la donnée n'a pas changé), afin de s'assurer qu'ell
 soit visible lors des parcours d'index. Ce processus est très pénalisant pour
 les performances et peut provoquer de la fragmentation.
 
-La notion de `Heap Only Tuple` (_HOT_) a été mis en place pour palier à ce problème.
+La notion de `Heap Only Tuple` (_HOT_) a été mis en place pour palier ce problème.
 Lorsqu'une mise à jour ne touche aucune colonne indexée et que la nouvelle
 version de ligne peut être stockée dans la même page que les autres versions,
 PostgreSQL peut éviter la mise à jour des index.
