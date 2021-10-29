@@ -180,7 +180,7 @@ psql --port=5638 --command="CHECKPOINT;"
 ```bash
 # Simulation d'une activité normale sur l'instance srv1
 /usr/pgsql-14/bin/pgbench --port=5636 --client=10 --time=60 --no-vacuum pgbench
-# Simulation d'un traitement spécifique sur l'instance srv3
+# Simulation d'une activité normale sur l'instance srv3
 /usr/pgsql-14/bin/pgbench --port=5638 --client=10 --time=60 --no-vacuum pgbench
 ```
 
