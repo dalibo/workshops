@@ -136,8 +136,9 @@ Voici le plan de la requête :
 ```
 
 Le temps d'exécution de la requête avec cet index est beaucoup plus long
-qu'avec l'index btree. Cela peut s'expliquer par le grand nombre d'accès au
-cache qui doivent être réalisés, environ 20620 contre une dizaine. On peut noter
+qu'avec l'index btree. Cela s'explique en partie par le grand nombre d'accès
+en dehors du
+cache qui doivent être réalisés, environ 20620 contre une dizaine, et surtout par
 le très grand nombre de vérifications qui doivent être faites dans la table
 (presque 2 millions).
 
