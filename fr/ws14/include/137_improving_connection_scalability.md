@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-![](medias/connection-scalability-improvements.png)
+![](medias/pgbench-read-only-log-scale-prepost.png)
 
 </div>
 
@@ -32,6 +32,17 @@ obtenir les informations sur les transactions du système, nécessitait de consu
 l'état de chacune d'entre elles dans les zones mémoires de tous les CPU du serveur.
 
 [20200301083601]: https://www.postgresql.org/message-id/flat/20200301083601.ews6hz5dduc3w2se@alap3.anarazel.de
+
+Dans un [article à ce sujet][20201025-citusdata], l'auteur du patch indique que
+les bénéfices sont également remarquables lorsqu'un grand nombre de sessions 
+inactives (_idle_) sont connectées à l'instance. Dans le _benchmark_ suivant, on
+peut constater que les performances (TPS : _Transactions Per Second_) restent
+stables pour 48 sessions actives à mesure que le nombre de sessions inactives
+augmentent.
+
+![](medias/performance-impact-of-idle-connections-48active-prepost.jpg)
+
+[20201025-citusdata]: https://www.citusdata.com/blog/2020/10/25/improving-postgres-connection-scalability-snapshots/
 
 La solution consiste à changer la méthode `GetSnapshotData()` afin que seules les
 informations _xmin_ des transactions en écriture soient accessibles depuis un
