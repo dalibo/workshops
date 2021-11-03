@@ -19,19 +19,6 @@ Discussion
 
 <div class="notes">
 
-En plus des options `any` (qui reste celle par défaut) et `read-write`, le 
-paramètre `target_session_attrs` de `libpq` supporte désormais les options 
-suivantes :
-
-* `read-only`, le serveur ne doit accepter que les sessions en lecture seule
-   (mode _hot standby_ ou `default_transaction_read_only` à `on`).
-* `primary`, le serveur ne doit pas être en mode _hot standby_.
-* `standby`, le serveur doit être en mode _hot standby_.
-* `read-only`, l'instance ne doit accepter que les sessions en lecture seule
-   (mode _hot standby_ ou `default_transaction_read_only` à `on`).
-* `primary`, l'instance ne doit pas être en mode _hot standby_.
-* `standby`, l'instance doit être en mode _hot standby_.
-
 En plus des options `any` (qui reste celle par défaut) et `read-write`, le
 paramètre `target_session_attrs` de `libpq` supporte désormais les options
 suivantes :
