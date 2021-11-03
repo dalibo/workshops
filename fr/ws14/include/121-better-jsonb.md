@@ -68,7 +68,7 @@ Cependant, l'opérateur `->>` permettant d'extraire la valeur d'un élément tex
 n'a pas d'équivalent et il est nécessaire d'ajouter les guillemets pour réaliser
 des comparaisons, par exemple.
 
-L'extraction de valeurss imbriquées est également possible avec cette syntaxe. La 
+L'extraction de valeurs imbriquées est également possible avec cette syntaxe. La 
 mise à jour d'un élément est aussi supportée comme le montre l'exemple suivant :
 
 ```sql
