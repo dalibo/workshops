@@ -413,13 +413,6 @@ possible.
 
 ----
 
-### Manipulation du type JSONB
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/121#note_126876 -->
-!include include/121-better-jsonb.md
-
-----
-
 ### Nouveaux types `multirange` et nouvelles fonctions d'agrégats
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 -->
