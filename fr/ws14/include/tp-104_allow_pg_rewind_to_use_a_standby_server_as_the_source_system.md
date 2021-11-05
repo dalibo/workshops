@@ -167,16 +167,16 @@ export PGPORT=5638
 
 ### Décrochage volontaire de l'instance secondaire **srv3**
 
-> Promouvoir l'instance secondaire **srv3**.
-
-```bash
-/usr/pgsql-14/bin/pg_ctl promote --pgdata=${DATADIRS}/srv3 --wait
-```
-
 > Faire un checkpoint sur l'instance **srv3**.
 
 ```bash
 psql --port=5638 --command="CHECKPOINT;"
+```
+
+> Promouvoir l'instance secondaire **srv3**.
+
+```bash
+/usr/pgsql-14/bin/pg_ctl promote --pgdata=${DATADIRS}/srv3 --wait
 ```
 
 > Ajouter des données aux instances **srv1** et **srv3** afin de les faire
