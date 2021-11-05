@@ -171,6 +171,11 @@ export PGPORT=5638
 
 ```bash
 /usr/pgsql-14/bin/pg_ctl promote --pgdata=${DATADIRS}/srv3 --wait
+```
+
+> Faire un checkpoint sur l'instance **srv3**.
+
+```bash
 psql --port=5638 --command="CHECKPOINT;"
 ```
 
