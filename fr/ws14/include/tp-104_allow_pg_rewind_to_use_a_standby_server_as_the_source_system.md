@@ -16,7 +16,7 @@
 
 * Ouvrir un terminal puis emprunter l'identité de l'utilisateur `postgres` sur votre machine.
 
-```sh
+```bash
 sudo su - postgres
 ```
 
@@ -25,13 +25,13 @@ Pour cet atelier, nous créons des instances temporaires dans le répertoire
 
 * Configurer la variable `DATADIRS`.
 
-```sh
+```bash
 export DATADIRS=~/tmp/rewind
 ```
 
 * Créer le répertoire `~/tmp/rewind` et le répertoire `~/tmp/rewind/archives`.
 
-```sh
+```bash
 mkdir --parents ${DATADIRS}/archives
 ```
 
@@ -47,13 +47,13 @@ export PGPORT=5636
 
 * Créer le répertoire `~/tmp/rewind/srv1`.
 
-```sh
+```bash
 mkdir --parents ${DATADIRS}/${PGNAME}
 ```
 
 * Créer une instance primaire dans le dossier `~/tmp/rewind/srv1` en activant les sommes de contrôle.
 
-```sh
+```bash
 /usr/pgsql-14/bin/initdb --data-checksums --pgdata=${PGDATA} --username=postgres
 ```
 
@@ -63,7 +63,7 @@ de l'instance.
 
 * Configurer PostgreSQL.
 
-```sh
+```bash
 cat <<_EOF_ >> ${PGDATA}/postgresql.conf
 port = ${PGPORT}
 listen_addresses = '*'
@@ -77,31 +77,31 @@ _EOF_
 
 * Démarrer l'instance.
 
-```sh
+```bash
 /usr/pgsql-14/bin/pg_ctl start --pgdata=${PGDATA} --wait
 ```
 
 * Créer une base de données `pgbench`.
 
-```sh
+```bash
 psql --port=${PGPORT} --command="CREATE DATABASE pgbench;"
 ```
 
 * Initialiser la base de données `pgbench` avec la commande **pgbench**.
 
-```sh
+```bash
 /usr/pgsql-14/bin/pgbench --port=${PGPORT} --initialize --scale=10 pgbench
 ```
 
 * Créer un utilisateur 'replication' avec le mot de passe `replication` pour la réplication PostgreSQL.
 
-```sh
+```bash
 psql --port=${PGPORT} --command="CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
 ```
 
 *  Ajouter le mot de passe au fichier `.pgpass`.
 
-```sh
+```bash
 cat << _EOF_ >> ~/.pgpass
 *:5636:replication:replication:replication # srv1
 *:5637:replication:replication:replication # srv2
@@ -114,7 +114,7 @@ chmod 600 ~/.pgpass
 
 * Configurer les variables d'environnement pour l'instance à déployer.
 
-```sh
+```bash
 export PGNAME=srv2
 export PGDATA=${DATADIRS}/${PGNAME}
 export PGPORT=5637
@@ -122,14 +122,14 @@ export PGPORT=5637
 
 * Créer une instance secondaire à l'aide de l'outil `pg_basebackup`.
 
-```sh
+```bash
 pg_basebackup --pgdata=${PGDATA} --port=5636 --progress --username=replication --checkpoint=fast
 ```
 
 * Ajouter un fichier `standby.signal` dans le répertoire de données de l'instance
 **srv2**.
 
-```sh
+```bash
 touch ${PGDATA}/standby.signal
 ```
 
@@ -205,7 +205,7 @@ primaire **srv1**.
 `pg_ls_dir`, `pg_stat_file`, `pg_read_binary_file` et `pg_read_binary_file` du
 schéma `pg_catalog` afin qu'il puisse utiliser `pg_rewind`.
 
-```sh
+```bash
 psql --port=5636 <<_EOF_
 GRANT EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
@@ -233,7 +233,7 @@ cp ${DATADIRS}/srv3/postgresql.conf ${DATADIRS}/postgresql.srv3.conf
 * Utiliser `pg_rewind` pour reconstruire l'instance **srv3** depuis l'instance
 **srv2** (commencer par un passage à blanc `--dry-run`).
 
-```sh
+```bash
 /usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
@@ -243,7 +243,7 @@ cp ${DATADIRS}/srv3/postgresql.conf ${DATADIRS}/postgresql.srv3.conf
 
 Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 
-```sh
+```bash
 /usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
@@ -259,7 +259,7 @@ cp ${DATADIRS}/postgresql.srv3.conf ${DATADIRS}/srv3/postgresql.conf
 À l'issue de l'opération, les droits donnés à l'utilisateur de réplication
 peuvent être révoqués :
 
-```sh
+```bash
 psql --port=5636 <<_EOF_
 REVOKE EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)

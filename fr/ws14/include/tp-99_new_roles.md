@@ -24,13 +24,13 @@ Discussion
 
 * Ouvrir un terminal puis emprunter l'identité de l'utilisateur `postgres` sur votre machine.
 
-```sh
+```bash
 sudo su - postgres
 ```
 
 * Se connecter à l'instance PostgreSQL.
 
-```sh
+```bash
 psql
 ```
 
@@ -173,7 +173,7 @@ CREATE ROLE dump_user NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;
 * Exporter les données de la base `tp1` avec l'outil `pg_dump` en tant qu'utilisateur
 `dump_user`. Que se passe-t-il ?
 
-```sh
+```bash
 pg_dump --username=dump_user --dbname tp1
 ```
 
@@ -184,7 +184,7 @@ pg_dump: error: query was: LOCK TABLE public.members IN ACCESS SHARE MODE
 
 * Se connecter de l'instance PostgreSQL.
 
-```sh
+```bash
 psql
 ```
 
@@ -197,7 +197,7 @@ GRANT pg_read_all_data TO dump_user;
 * Exporter de nouveaux les données de la base `tp1` avec l'outil `pg_dump` en tant qu'utilisateur
 `dump_user`. Que se passe-t-il ?
 
-```sh
+```bash
 pg_dump --username=dump_user --dbname tp1
 ```
 
@@ -266,7 +266,7 @@ données `tp1`.
 * Exporter les données globales de l'instance à l'aide de l'outil `pg_dumpall` et
 le compte `dump_user`.
 
-```sh
+```bash
 pg_dumpall --username dump_user --globals-only
 ```
 
@@ -309,7 +309,7 @@ de la commande `pg_dumpall` ou pour des logiciels plus complets comme [pg_back]:
 
 * Se connecter à l'instance PostgreSQL.
 
-```sh
+```bash
 psql
 ```
 
