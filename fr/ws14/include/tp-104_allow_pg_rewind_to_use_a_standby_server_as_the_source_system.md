@@ -75,7 +75,7 @@ cluster_name = '${PGNAME}'
 _EOF_
 ```
 
-* Démarrer l'instance.
+* Démarrer l'instance primaire.
 
 ```bash
 /usr/pgsql-14/bin/pg_ctl start --pgdata=${PGDATA} --wait
@@ -234,7 +234,7 @@ cp ${DATADIRS}/srv3/postgresql.conf ${DATADIRS}/postgresql.srv3.conf
 **srv2** (commencer par un passage à blanc `--dry-run`).
 
 ```bash
-/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
+/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3           \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
           --progress                                                   \
@@ -244,7 +244,7 @@ cp ${DATADIRS}/srv3/postgresql.conf ${DATADIRS}/postgresql.srv3.conf
 Une fois le résultat validé, relancer `pg_rewind` sans `--dry-run`.
 
 ```bash
-/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3                               \
+/usr/pgsql-14/bin/pg_rewind --target-pgdata ${DATADIRS}/srv3           \
           --source-server "port=5637 user=replication dbname=postgres" \
           --restore-target-wal                                         \
           --progress
