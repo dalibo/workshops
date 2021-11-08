@@ -136,8 +136,8 @@ hide_author_in_slide: true
 <div class="slide-content">
 
   * Administration et maintenance
-  * Réplication physique et logique
-  * Sharding (en construction)
+  * Réplication
+  * Sharding
   * Développement et syntaxe SQL
   * Supervision
   * Performances
@@ -157,8 +157,7 @@ hide_author_in_slide: true
 <div class="slide-content">
 
   * Sécurité
-  * Configuration
-  * Outils clients
+  * Nouveautés de configuration (GUC)
   * Partitionnement
   * Divers
 
@@ -292,6 +291,10 @@ hide_author_in_slide: true
 
 ## Sharding
 
+<div class="slide-content">
+  * _Foreign Data Wrapper_ et Sharding
+</div>
+
 ----
 
 ### Foreign Data Wrapper et Sharding
@@ -313,6 +316,11 @@ hide_author_in_slide: true
 \newpage
 
 ## Développement et syntaxe SQL
+
+<div class="slide-content">
+  * Manipulation du type JSONB
+  * Nouvelle fonction `date_bin` 
+</div>
 
 ----
 
@@ -349,6 +357,14 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
 \newpage
 
 ## Supervision
+
+<div class="slide-content">
+  * Nouvelle vue `pg_stat_wal`
+  * Nouveautées dans `pg_stat_statements`
+  * Ajout de statistiques sur les sessions dans `pg_stat_database`
+  * Identifiant pour les requêtes normalisées
+  * Nouveauté dans `pg_locks`
+</div>
 
 ----
 
@@ -391,6 +407,10 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
 
 ## Performances
 
+<div class="slide-content">
+  * Nettoyage des index BTree
+  * Connexions simultanées en lecture seule
+
 ----
 
 ### Nettoyage des index BTree 
@@ -405,4 +425,10 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
 !include include/137_improving_connection_scalability.md
+
+## Questions
+
+<div class="slide-content">
+  _Merci de votre écoute !_
+</div>
 
