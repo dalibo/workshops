@@ -57,9 +57,9 @@ mkdir --parents ${DATADIRS}/${PGNAME}
 /usr/pgsql-14/bin/initdb --data-checksums --pgdata=${PGDATA} --username=postgres
 ```
 
-Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
-`wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
-de l'instance.
+> Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
+> `wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
+> de l'instance.
 
 * Configurer PostgreSQL.
 
