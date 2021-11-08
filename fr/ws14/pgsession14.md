@@ -271,10 +271,15 @@ hide_author_in_slide: true
 
 ----
 
-#### Nouveau paramètre de connexion dans libpq
+#### Nouveautés de libpq pour simplifier HA et répartition de charge
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/114 -->
-!include include/114_new_libpq_option_to_prefer_standby_for_connection.md
+<div class="slide-content">
+  * Nouvelles options pour le paramètre `target_session_attrs`
+  * `read_only`
+  * `primary`
+  * `standby`
+  * `prefer-standby`
+</div>
 
 ----
 
