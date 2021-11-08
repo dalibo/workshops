@@ -113,7 +113,9 @@ CREATE DATABASE tp1 OWNER atelier TEMPLATE tp1_template;
 ```sql
 \c tp1
 ```
-* Exécuter la méta-commande `\d`. Quel est le propriétaire des objets présents dans la base `tp1` ?
+
+* Exécuter la méta-commande `\d`. Quel est le propriétaire des objets présents
+dans la base `tp1` ?
 
 Les droits sont similaires à la base modèle `tp1_template`, notamment le propriétaire
 `pg_database_owner` sur les objets `members` et `members_id_seq`.
@@ -382,8 +384,8 @@ conflit sur la contrainte de clé primaire. Il est nécessaire d'enrichir le
 traitement d'import avec une gestion d'erreurs ou une solution plus complexe
 que l'instruction `COPY`.
 
-* Créer une table `members_copy` qui est une copie de la table `members` sans les
-données.
+* Créer une table `members_copy` qui est une copie de la table `members`
+sans les données.
 
 ```sql
 CREATE TABLE members_copy AS TABLE members WITH NO DATA;
