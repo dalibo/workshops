@@ -119,7 +119,7 @@ hide_author_in_slide: true
 
   * Développement depuis le 7 juin 2020
   * Sortie le 30 septembre 2021
-  * version 13.1 sortie le XXX
+  * version 14.1 sortie le XXX novembre 2021
 
 </div>
 
