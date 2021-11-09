@@ -173,7 +173,6 @@ SELECT concat(
 
 ```sql
 \timing on
-EXPLAIN (verbose, costs off)
 INSERT INTO population (region_naissance_id, date_naissance) 
 SELECT region_id, d FROM regions
  CROSS JOIN generate_series(1, 1000) i
