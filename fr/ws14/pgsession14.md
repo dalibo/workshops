@@ -235,10 +235,15 @@ hide_author_in_slide: true
 
 ----
 
-#### Compression des toast configurable en : LZ4 et pglz
+#### Compression des toast configurable en : LZ4 et PGLZ
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 -->
-!include include/111_allow_configurable_lz4_toast_compression.md
+<div class="slide-content">
+  * Il est maintenant possible de compresser les données `TOAST` au format `LZ4`
+  * Plusieurs niveaux de définition (global ou par colonne)
+  * LZ4 est sensiblement plus rapide
+  * PGLZ a un meilleur taux de compression
+  * Nouvelle option `--no-toast-compression` pour `pg_dump`
+</div>
 
 ----
 
