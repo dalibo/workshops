@@ -235,10 +235,10 @@ hide_author_in_slide: true
 
 ----
 
-#### Compression des toast configurable en : LZ4 et PGLZ
+#### Compression des toast configurable en LZ4 et PGLZ
 
 <div class="slide-content">
-  * Il est maintenant possible de compresser les données `TOAST` au format `LZ4`
+  * Il est maintenant possible de compresser les données `TOAST` avec `LZ4`
   * Plusieurs niveaux de définition (global ou par colonne)
   * LZ4 est sensiblement plus rapide
   * PGLZ a un meilleur taux de compression
