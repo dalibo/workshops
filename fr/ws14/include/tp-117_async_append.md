@@ -101,6 +101,18 @@ SELECT concat(
 
 ### Configurer les accès distants
 
+* Activer le mode `trust` ou `md5` pour l'interface `localhost` dans le fichier
+  `pg_hba.conf`. Dans cet exercice, le compte `postgres` est propriétaire des
+  bases et réalise les connexions distantes. Recharger le service PostgreSQL
+
+```ini
+# TYPE  DATABASE        USER            ADDRESS              METHOD
+host    all             postgres        localhost            trust
+```
+```sql
+SELECT pg_reload_conf();
+```
+
 * Créer la base principale `recensement` à partir du _template_ précédent.
 
 ```sql
@@ -111,6 +123,8 @@ CREATE DATABASE recensement WITH TEMPLATE = region_template;
   serveurs distants pour chaque base de région, ainsi que les correspondances
   d'utilisateur nécessaires à l'authentification des tables distantes.
 
+> Le paquet `postgresql14-contrib` est requis pour installer l'extension.
+
 ```sql
 \c recensement
 
@@ -118,9 +132,9 @@ CREATE EXTENSION postgres_fdw;
 SELECT concat(
   'CREATE SERVER IF NOT EXISTS server_', replace(lower(region_id), '-', ''),
   ' FOREIGN DATA WRAPPER postgres_fdw OPTIONS (',
-  '  host ''/tmp'', port ''' || current_setting('port') || ''','
+  '  host ''localhost'', port ''' || current_setting('port') || ''','
   '  dbname ''region_', replace(lower(region_id), '-', ''), ''',',
-  '  async_capable ''on''',
+  '  async_capable ''on'', fetch_size ''1000''',
   ' );'
 ) FROM regions;
 \gexec
@@ -180,7 +194,7 @@ SELECT region_id, d FROM regions
 ```
 ```text
 INSERT 0 738000
-Time: 52580,749 ms (00:52,581)
+Time: 79229.338 ms (01:19.229)
 ```
 
 L'insertion est pénalisée par la distribution des lignes à travers les différentes
@@ -195,28 +209,11 @@ ANALYZE VERBOSE population;
 
 ### Étudier les différents cas d'usage
 
-Afin que le gain de l'exécution asynchrone des parcours des tables étrangères
-soit visible, on ajoute artificiellement de la latence sur un des serveurs
-distants :
+On ajoute artificiellement une latence de 10ms sur l'interface _loopback_ pour
+simuler un trafic réaliste entre les différents nœuds de calcul.
 
-```
+```bash
 sudo tc qdisc add dev lo root netem delay 10msec
-```
-
-On autorise `postgres` à se connecter sur un socket réseau en local, en
-ajoutant cette ligne au fichier `pg_hba.conf` :
-
-```
-host    all             postgres        localhost            trust
-```
-
-Et on modifie le serveur distant :
-
-```sql
-ALTER SERVER server_frara OPTIONS (SET host 'localhost');
-
--- rechargement pour la prise en compte de la modification du pg_hba
-SELECT pg_reload_conf();
 ```
 
 * Afficher le plan d'exécution d'une requête permettant de comptabiliser le
@@ -230,27 +227,25 @@ EXPLAIN (analyze, costs off)
 ```text
                                 QUERY PLAN
 --------------------------------------------------------------------------------
-Aggregate (actual time=273.371..273.397 rows=1 loops=1)
-   ->  Append (actual time=54.902..272.354 rows=18000 loops=1)
-         ->  Async Foreign Scan on population_frara population_1
-               (actual time=21.505..23.030 rows=1000 loops=1)
-         ->  Async Foreign Scan on population_frbfc population_2
-               (actual time=2.109..6.330 rows=1000 loops=1)
+Aggregate (actual time=499.397..499.439 rows=1 loops=1)
+   ->  Append (actual time=449.175..498.574 rows=18000 loops=1)
+         ->  Async Foreign Scan on population_frara population_1 
+              (actual time=27.010..27.121 rows=1000 loops=1)
+         ->  Async Foreign Scan on population_frbfc population_2 
+              (actual time=24.218..24.306 rows=1000 loops=1)
 ...
-         ->  Async Foreign Scan on population_frpac population_17
-               (actual time=1.558..5.117 rows=1000 loops=1)
-         ->  Async Foreign Scan on population_frpdl population_18
-               (actual time=1.180..4.548 rows=1000 loops=1)
- Planning Time: 1.492 ms
- Execution Time: 319.857 ms
+         ->  Async Foreign Scan on population_frpac population_17 
+              (actual time=26.453..26.552 rows=1000 loops=1)
+         ->  Async Foreign Scan on population_frpdl population_18 
+              (actual time=43.529..43.802 rows=1000 loops=1)
+ Planning Time: 18.564 ms
+ Execution Time: 4466.645 ms
 ```
 
-On constate que le nœud `Async Foreign Scan` pour la table distante `population_frara`
-se termine vers la 23e milliseconde d'exécution (`actual time=21.505..23.030`)
-et que le nœud `Append`, chargé de l'union des résultat, se
-termine vers la 272e milliseconde d'exécution. Sur de hautes volumétries, les
-lectures non indexées sont plus performantes, grâce à une répartition de travail 
-entre les différentes instances, aussi appelées nœuds de calcul.
+On constate que les nœuds `Async Foreign Scan` démarrent presque au même instant
+(`actual time=24..`). Sur de hautes volumétries, les lectures asynchrones sont 
+plus performantes, grâce à une répartition de travail entre les différentes 
+instances, aussi appelées nœuds de calcul.
 
 * Réexécuter la requête en désactivant l'option `async_capable` sur les partitions.
 
@@ -268,29 +263,23 @@ EXPLAIN (analyze, costs off)
 ```text
                                 QUERY PLAN
 --------------------------------------------------------------------------------
- Aggregate (actual time=362.766..362.775 rows=1 loops=1)
-   ->  Append (actual time=43.217..361.381 rows=18000 loops=1)
-         ->  Foreign Scan on population_frara population_1
-	       (actual time=43.213..262.848 rows=1000 loops=1)
-         ->  Foreign Scan on population_frbfc population_2
-	       (actual time=2.176..16.347 rows=1000 loops=1)
+Aggregate (actual time=1986.016..1986.047 rows=1 loops=1)
+   ->  Append (actual time=90.848..1982.710 rows=18000 loops=1)
+         ->  Foreign Scan on population_frara population_1 
+              (actual time=90.844..112.269 rows=1000 loops=1)
+         ->  Foreign Scan on population_frbfc population_2 
+              (actual time=72.032..93.117 rows=1000 loops=1)
 ...
          ->  Foreign Scan on population_frpac population_17
-	       (actual time=0.469..3.860 rows=1000 loops=1)
-         ->  Foreign Scan on population_frpdl population_18
-	       (actual time=0.473..3.895 rows=1000 loops=1)
- Planning Time: 2.620 ms
- Execution Time: 408.282 ms
+              (actual time=91.000..112.080 rows=1000 loops=1)
+         ->  Foreign Scan on population_frpdl population_18 
+              (actual time=87.655..108.378 rows=1000 loops=1)
+ Planning Time: 7.878 ms
+ Execution Time: 6161.891 ms
 ```
 
-Cette fois-ci, on constate que le nœud `Async Foreign Scan` pour la table
-distante `population_frara` se termine vers la 262e milliseconde
-d'exécution, et que le nœud `Append` se termine après 361 millisecondes.
-
-On voit donc qu'il faut 262 millisecondes pour récupérer toutes
-les lignes de la table `population_frara`, et environ 90ms pour récupérer
-les lignes de l'ensemble des autres tables distantes, et contrairement au
-test précedent, les temps s'additionnent ici.
+Cette fois-ci, on constate un retard dans le démarrage des lectures et que le
+nœud `Append` ne termine l'union des 18 résultats qu'après 1986 millisecondes.
 
 Pour réactiver les options, exécuter la requête suivante :
 
@@ -304,7 +293,7 @@ SELECT concat(
 
 On supprime la latence avec la commande suivante :
 
-```
+```bash
 sudo tc qdisc del dev lo root
 ```
 
