@@ -242,8 +242,8 @@ Aggregate (actual time=499.397..499.439 rows=1 loops=1)
  Execution Time: 4466.645 ms
 ```
 
-On constate que les nœuds `Async Foreign Scan` démarrent presque au même instant
-(`actual time=24..`). Sur de hautes volumétries, les lectures asynchrones sont 
+On constate que les nœuds `Async Foreign Scan` se terminent presque au même instant
+(`actual time=26..`). Sur de hautes volumétries, les lectures asynchrones sont 
 plus performantes, grâce à une répartition de travail entre les différentes 
 instances, aussi appelées nœuds de calcul.
 
@@ -278,8 +278,9 @@ Aggregate (actual time=1986.016..1986.047 rows=1 loops=1)
  Execution Time: 6161.891 ms
 ```
 
-Cette fois-ci, on constate un retard dans le démarrage des lectures et que le
-nœud `Append` ne termine l'union des 18 résultats qu'après 1986 millisecondes.
+Cette fois-ci, on constate un retard dans les lectures (`actual time=112..`) et
+que le nœud `Append` ne termine l'union des 18 résultats après 1986 millisecondes
+au lieu de 499 dans le cas d'une configuration asynchrone.
 
 Pour réactiver les options, exécuter la requête suivante :
 
