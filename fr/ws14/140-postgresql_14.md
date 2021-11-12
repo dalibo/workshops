@@ -587,7 +587,3 @@ possible.
 !include include/tp-104_allow_pg_rewind_to_use_a_standby_server_as_the_source_system.md
 
 ----
-
-!include include/tp-EXEMPLE.md
-
-----
