@@ -57,7 +57,7 @@ mkdir --parents ${DATADIRS}/${PGNAME}
 /usr/pgsql-14/bin/initdb --data-checksums --pgdata=${PGDATA} --username=postgres
 ```
 
-> Note: Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
+> Pour utiliser `pg_rewind`, il est nécessaire d'activer le paramètre
 > `wal_log_hints` dans le `postgresql.conf` ou les sommes de contrôles au niveau
 > de l'instance.
 
@@ -84,19 +84,19 @@ _EOF_
 * Créer une base de données `pgbench`.
 
 ```bash
-psql --port=${PGPORT} --command="CREATE DATABASE pgbench;"
+psql --command="CREATE DATABASE pgbench;"
 ```
 
 * Initialiser la base de données `pgbench` avec la commande **pgbench**.
 
 ```bash
-/usr/pgsql-14/bin/pgbench --port=${PGPORT} --initialize --scale=10 pgbench
+/usr/pgsql-14/bin/pgbench --initialize --scale=10 pgbench
 ```
 
-* Créer un utilisateur 'replication' avec le mot de passe `replication` pour la réplication PostgreSQL.
+* Créer un utilisateur `replication`.
 
 ```bash
-psql --port=${PGPORT} --command="CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
+psql --command="CREATE ROLE replication WITH LOGIN REPLICATION PASSWORD 'replication';"
 ```
 
 *  Ajouter le mot de passe au fichier `.pgpass`.
@@ -205,7 +205,7 @@ primaire **srv1**.
 `pg_ls_dir`, `pg_stat_file`, `pg_read_binary_file` et `pg_read_binary_file` du
 schéma `pg_catalog` afin qu'il puisse utiliser `pg_rewind`.
 
-```bash
+```sql
 psql --port=5636 <<_EOF_
 GRANT EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
@@ -259,7 +259,7 @@ cp ${DATADIRS}/postgresql.srv3.conf ${DATADIRS}/srv3/postgresql.conf
 À l'issue de l'opération, les droits donnés à l'utilisateur de réplication
 peuvent être révoqués :
 
-```bash
+```sql
 psql --port=5636 <<_EOF_
 REVOKE EXECUTE
   ON function pg_catalog.pg_ls_dir(text, boolean, boolean)
@@ -285,7 +285,8 @@ secondaire.
 touch ${DATADIRS}/srv3/standby.signal
 
 cat <<_EOF_ >> ${DATADIRS}/srv3/postgresql.conf
-recovery_target_timeline = 1 # Forcer la même timeline que le maître pour la recovery
+# Forcer la même timeline que l'instance principal pour la recovery
+recovery_target_timeline = 1
 _EOF_
 ```
 
@@ -312,7 +313,7 @@ Avec la procédure décrite dans cet atelier, le serveur **srv3** archive dans l
 même répertoire que le serveur **srv1**. Il serait préférable d'archiver dans un
 répertoire différent. Cela introduit de la complexité. En effet, `pg_rewind`
 aura besoin des _WAL_ avant la divergence (répertoire de **srv3**) et ceux
-générés depuis le dernier checkpoint précédent la _divergence_ (répertoire de
+générés depuis le dernier _checkpoint_ précédant la divergence (répertoire de
 **srv1**).
 
 </div>
