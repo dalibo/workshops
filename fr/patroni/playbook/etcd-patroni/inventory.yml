@@ -1,0 +1,49 @@
+---
+
+all:
+  hosts:
+    e1:
+      ansible_host: 10.0.3.101
+    e2:
+      ansible_host: 10.0.3.102
+    e3:
+      ansible_host: 10.0.3.103
+    pg-1:
+      ansible_host: 10.0.3.201
+    pg-2:
+      ansible_host: 10.0.3.202
+    pg-3:
+      ansible_host: 10.0.3.203
+    backup:
+      ansible_host: 10.0.3.204
+  children:
+    patroni_servers:
+      hosts:
+        pg-1:
+        pg-2:
+        pg-3:
+    etcd_servers:
+      hosts:
+        e1:
+        e2:
+        e3:
+    backup_servers:
+      hosts:
+        backup:
+    primary:
+      hosts:
+        pg-1:
+    secondary:
+      hosts:
+        pg-2:
+        pg-3:
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    ansible_python_interpreter: "/usr/bin/python3"
+    debian_codename: "buster"
+    postgresql_version: "14"
+    postgresql_instance: "main"
+      
+
+
