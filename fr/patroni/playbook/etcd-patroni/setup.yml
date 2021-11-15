@@ -1,0 +1,327 @@
+---
+
+#  CREATE STOPPED CONTAINERS
+
+- hosts: localhost
+  connection: local
+  become: true
+  become_user: root
+  gather_facts: false
+
+  vars:
+  - interface: lxcbr0
+
+  tasks:
+
+
+
+  - name: apt lxc packages are installed on host
+    apt:
+      name:
+      - lxc
+      - lxc-dev
+      - python3-pip
+      - python3-lxc
+      - python-lxc
+      - sudo
+
+  - name: generate local root ssh-key if not there
+    shell:
+      cmd: cat /dev/zero | ssh-keygen -q -N '' || /bin/true
+
+  - name: cleanup known_host for root
+    become: yes
+    become_user: root
+    shell:
+      cmd: echo "" >  ~root/.ssh/known_hosts
+
+
+  - name: Config lxc-net
+    copy:
+      dest: /etc/default/lxc-net
+      content: |
+        USE_LXC_BRIDGE="true"
+
+  - name: config dnsmasq
+    copy:
+      dest: "/etc/dnsmasq.conf"
+      content: |
+        dhcp-host=e1,10.0.3.101
+        dhcp-host=e2,10.0.3.102
+        dhcp-host=e3,10.0.3.103
+        dhcp-host=pg-1,10.0.3.201
+        dhcp-host=pg-2,10.0.3.202
+        dhcp-host=pg-3,10.0.3.203
+        dhcp-host=backup,10.0.3.204
+
+  - name: Config lxc default
+    copy:
+      dest: /etc/lxc/default.conf
+      content: |
+        lxc.net.0.type = veth
+        lxc.net.0.link = {{ interface }}
+        lxc.net.0.flags = up
+        lxc.net.0.hwaddr = 00:16:3e:xx:xx:xx
+
+  - name: start lxc-net
+    service:
+      name: lxc-net
+      state: started
+
+  - name: Cleanup dhcp leases
+    copy:
+      content: ""
+      dest: /var/lib/misc/dnsmasq.lxcbr0.leases
+      force: yes
+      group: root
+      owner: root
+      mode: 0644
+
+  - name: restart lxc-net
+    service:
+      name: lxc-net
+      state: restarted
+
+- hosts: all
+  connection: local
+  become: true
+  become_user: root
+  gather_facts: false
+
+  vars:
+  - interface: lxcbr0
+
+  tasks:
+
+  - name: Create a stopped container
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      container_log: true
+      template: debian
+      state: started
+      template_options: --release buster
+      container_config:
+        - lxc.net.0.type = veth
+        - lxc.net.0.flags = up
+        - lxc.net.0.link = {{ interface }}
+        - lxc.net.0.ipv4.address = {{ ansible_host }}/24
+        - lxc.net.0.ipv4.gateway = auto
+
+# SETUP CONTAINERS
+
+- hosts: all
+  gather_facts: no
+
+  tasks:
+
+  - name: Load in local SSH key path for root
+    become: yes
+    become_user: root
+    set_fact:
+      my_ssh_key: "~root/.ssh/id_rsa.pub"
+
+
+
+# CLEANUP known_hosts root
+  - name: cleanup local know_hosts by name for root
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    command:
+      ssh-keygen -f "~root/.ssh/known_hosts" -R {{ inventory_hostname }}
+
+  - name: cleanup local know_hosts by ip for root
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    command:
+      ssh-keygen -f "~root/.ssh/known_hosts" -R {{ ansible_host }}
+
+
+# known_hosts contains all ip addresses for root
+  - name: container key is up-to-date locally by ip for root (know_hosts)
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    shell:
+      cmd: ssh-keyscan {{ ansible_host }} >> ~root/.ssh/known_hosts
+ 
+ # known_hosts contains all names for root
+  - name: container key is up-to-date locally by name for root (know_hosts)
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    shell:
+      cmd: ssh-keyscan {{ inventory_hostname }} >> ~root/.ssh/known_hosts
+
+  - name: generate root ssh-key if not there in containers
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: started
+      container_command: |
+        cat /dev/zero | ssh-keygen -q -N '' || /bin/true
+
+
+  - name: copy ssh key into root authorized_keys for root
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: started
+      container_command: |
+        echo "" | tee ~root/.ssh/authorized_keys
+        echo "{{ lookup('file', my_ssh_key) }}" | tee -a ~root/.ssh/authorized_keys
+
+
+  - name: apt update allow-releaseinfo-change
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: started
+      container_command: |
+        apt-get update --allow-releaseinfo-change
+
+  - name: install packages python3 python3-apt sudo
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: started
+      container_command: |
+        apt install -y python3 python3-apt sudo
+
+# CONTAINERS PACKAGES
+
+  - name: install all containers packages
+    become: true
+    apt:
+      name:
+        - vim
+        - less
+        - jq
+        - curl
+        - wget
+        - iputils-ping
+      state: present
+
+# ETCD SERVERS SETUP
+# --------------------------
+
+- hosts: etcd_servers
+  gather_facts: no
+  tasks:
+
+  - name: install etcd_servers packages
+    apt:
+      name:
+      state: present
+      update_cache: false
+
+# --------------------------
+# PATRONI SERVERS SETUP
+
+- hosts: patroni_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: install packages to import the repository key
+    become: true
+    become_user: root
+    apt:
+      name:
+        - ca-certificates
+        - gnupg
+        - curl
+      state: present
+      update_cache: false
+
+  - name: Configure pgdg repository
+    become: true
+    become_user: root
+    copy:
+      dest: /etc/apt/sources.list.d/pgdg.list
+      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+
+  - name: Import pgdg gnupg key
+    become: true
+    become_user: root
+    shell:
+      warn: false
+      cmd:
+        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+
+  - name: apt update
+    become: yes
+    apt: update_cache=yes
+
+
+# BACKUP SERVERS SETUP
+
+- hosts: backup_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: install packages to import the repository key
+    become: true
+    become_user: root
+    apt:
+      name:
+        - ca-certificates
+        - gnupg
+        - curl
+      state: present
+      update_cache: false
+
+  - name: Configure pgdg repository
+    become: true
+    become_user: root
+    copy:
+      dest: /etc/apt/sources.list.d/pgdg.list
+      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+
+  - name: Import pgdg gnupg key
+    become: true
+    become_user: root
+    shell:
+      warn: false
+      cmd:
+        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+
+  - name: apt update
+    become: yes
+    apt: update_cache=yes
+
+  - name: install backup_server packages
+    become: yes
+    apt:
+      name:
+        - pgbackrest
+      state: present
+
+# File /etc/hosts
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+
+  - name: add all the hosts to /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      line: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      state: present
+      backup: no
+    loop: "{{ groups['all'] }}"
+
+# # ---------------
+# # EOF
