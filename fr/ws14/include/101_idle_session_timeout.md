@@ -13,10 +13,10 @@ Discussion
 <div class="slide-content">
 
 * Nouveau paramètre `idle_session_timeout`
-* Détermine le temps d'attente avant d'interrompre une session inactive
+* Temps d'attente avant d'interrompre une session inactive
   * Désactivé par défaut (valeur `0`)
-  * Comportement similaire au paramètre `idle_in_transaction_session_timeout`
-  * Paramètre de session ou globalement pour l'instance
+  * Comportement voisin de `idle_in_transaction_session_timeout`
+  * Paramètre de session, ou globalement pour l'instance
 
 </div>
 
@@ -25,12 +25,13 @@ Discussion
 Le paramètre `idle_session_timeout` définit la durée maximale sans activité entre 
 deux requêtes lorsque l'utilisateur n'est pas dans une transaction. Son
 comportement est similaire à celui du paramètre `idle_in_transaction_session_timeout`
-introduit dans PostgreSQL 9.6.
+introduit dans PostgreSQL 9.6, qui ne concerne que les session en statut
+`idle in transaction`.
 
 Ce paramètre a pour conséquence d'interrompre toute session inactive depuis plus 
 longtemps que la durée indiquée par ce paramètre. Cela permet de limiter la 
-consommation de ressources effectuée par des sessions inactives (mémoire par
-exemple) et de diminuer le coût de maintenance des sessions connectées à l'instance
+consommation de ressources des sessions inactives (mémoire
+notamment) et de diminuer le coût de maintenance des sessions connectées à l'instance
 en limitant leur nombre.
 
 Si cette valeur est indiquée sans unité, elle est comprise comme un nombre en
