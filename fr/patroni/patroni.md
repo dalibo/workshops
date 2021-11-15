@@ -1309,7 +1309,11 @@ postgres@backup:~$ pgbackrest --stanza main --pg1-host=$(./leader.sh) backup
 --type=full
 ```
 ```console
-2021-11-12 16:32:32.128 P00   INFO: backup command begin 2.35: --exec-id=6717-e7512f6c --log-level-console=detail --pg1-host=pg-1 --pg1-host-user=postgres --pg1-path=/var/lib/postgresql/14/main --pg1-port=5432 --pg1-user=postgres --repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-fast --type=full
+2021-11-12 16:32:32.128 P00   INFO: backup command begin 2.35: --exec-id=6717-
+e7512f6c --log-level-console=detail --pg1-host=pg-1 --pg1-host-user=postgres --
+pg1-path=/var/lib/postgresql/14/main --pg1-port=5432 --pg1-user=postgres --
+repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-
+fast --type=full
 2021-11-12 16:32:33.114 P00   INFO: execute non-exclusive pg_start_backup(): 
 backup begins after the requested immediate checkpoint completes
 2021-11-12 16:32:34.129 P00   INFO: backup start archive = 
@@ -1324,10 +1328,14 @@ main/base/13706/1255 (752KB, 5%) checksum
 ...
 2021-11-12 16:32:45.786 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
 main/base/1/13528 (0B, 100%)
-2021-11-12 16:32:45.791 P00   INFO: execute non-exclusive pg_stop_backup() and wait for all WAL segments to archive
-2021-11-12 16:32:46.095 P00   INFO: backup stop archive = 00000008000000000000000B, lsn = 0/B000138
-2021-11-12 16:32:46.101 P00 DETAIL: wrote 'backup_label' file returned from pg_stop_backup()
-2021-11-12 16:32:46.103 P00   INFO: check archive for segment(s) 00000008000000000000000B:00000008000000000000000B
+2021-11-12 16:32:45.791 P00   INFO: execute non-exclusive pg_stop_backup() and 
+wait for all WAL segments to archive
+2021-11-12 16:32:46.095 P00   INFO: backup stop archive = 
+00000008000000000000000B, lsn = 0/B000138
+2021-11-12 16:32:46.101 P00 DETAIL: wrote 'backup_label' file returned from 
+pg_stop_backup()
+2021-11-12 16:32:46.103 P00   INFO: check archive for segment(s) 
+00000008000000000000000B:00000008000000000000000B
 2021-11-12 16:32:49.611 P00   INFO: new backup label = 20211112-163233F
 2021-11-12 16:32:49.673 P00   INFO: full backup size = 25.1MB, file total = 952
 2021-11-12 16:32:49.674 P00   INFO: backup command end: completed successfully 
