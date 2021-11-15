@@ -60,8 +60,8 @@ alors réaffecter les droits précédents sur le nouveau schéma pour corriger l
 
 Le rôle `pg_write_all_data` permet de donner un droit d'écriture sur toutes les 
 tables de tous les schémas de l'instance PostgreSQL à un rôle spécifique. Ce rôle
-peut être utile lors de traitement d'import de type _ETL_, où les données 
-existantes doivent ne pas être lues pour des raisons de sécurité.
+peut être utile lors de traitement d'import de type ETL, où les données 
+existantes ne doivent pas être lues pour des raisons de sécurité.
 
 * `pg_database_owner`
 

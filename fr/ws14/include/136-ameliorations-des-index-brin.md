@@ -74,7 +74,7 @@ SET enable_seqscan TO off;
 SET max_parallel_workers_per_gather TO 0;
 ```
 
-Commençons par tester avec un index BTREE :
+Commençons par tester avec un index B-tree :
 
 ```sql
 CREATE INDEX test_btree_idx on bloom_test (id);
@@ -136,7 +136,7 @@ Voici le plan de la requête :
 ```
 
 Le temps d'exécution de la requête avec cet index est beaucoup plus long
-qu'avec l'index btree. Cela s'explique en partie par le grand nombre d'accès
+qu'avec l'index B-tree. Cela s'explique en partie par le grand nombre d'accès
 en dehors du
 cache qui doivent être réalisés, environ 20620 contre une dizaine, et surtout par
 le très grand nombre de vérifications qui doivent être faites dans la table
@@ -181,18 +181,18 @@ globales sont meilleures qu'avec l'index BRIN _minmax_. Dans ce cas, le coût
 estimé est cependant légèrement supérieur, si les deux index sont présents en
 même temps sur la table, l'index BRIN _minmax_sera donc choisi.
 
-Comparé au plan avec l'index BTREE, les performances sont nettement moins
+Comparé au plan avec l'index B-tree, les performances sont nettement moins
 bonnes. C'est principalement dû au nombre d'accès nécessaire pour traiter le
 prédicat.
 
 En répétant les tests avec des quantités de doublons différentes, on voit que
 l'index BRIN _bloom_ permet d'accéder un nombre plus petit de pages que l'index
-BRIN _minmax_, ce qui le rend souvent plus performant. L'index BTREE est
+BRIN _minmax_, ce qui le rend souvent plus performant. L'index B-tree est
 toujours plus performant.
 
 La comparaison des tailles montre que l'index BRIN utilisant les
 `uuid_bloom_ops` est plus grand que l'index BRIN classique mais nettement plus
-petit que l'index BTREE.
+petit que l'index B-tree.
 
 ```text
                            List of relations
@@ -270,7 +270,7 @@ SET enable_seqscan TO off;
 SET max_parallel_workers_per_gather TO 0;
 ```
 
-Commençons par tester une requête avec un `BETWEEN` sur un index BTREE :
+Commençons par tester une requête avec un `BETWEEN` sur un index B-tree :
 
 ```sql
 CREATE INDEX brin_multirange_btree_idx
@@ -334,7 +334,7 @@ EXPLAIN (ANALYZE, BUFFERS)
  Execution Time: 8.039 ms
 ```
 
-Comparé à l'index BTREE, l'index BRIN _minmax_ accéde à beaucoup plus de blocs,
+Comparé à l'index B-tree, l'index BRIN _minmax_ accéde à beaucoup plus de blocs,
 cela se ressent au niveau du temps d'exécution de la requête qui est plus
 important.
 
@@ -379,7 +379,7 @@ choisi.
 
 On peut voir que l'index BRIN avec la classe d'opérateur `*_minmax_multi_ops`
 est plus gros que l'index BRIN traditionnel mais, il est toujours beaucoup plus
-petit que l'index BTREE.
+petit que l'index B-tree.
 
 ```text
                Name               | Type  |     Table      |Access method | Size
@@ -389,11 +389,11 @@ petit que l'index BTREE.
  brin_multirange_minmax_multi_idx | index |brin_multirange |brin          | 56 kB
 ```
 
-Pour conclure, les index BTREE sont toujours plus performants que les index
+Pour conclure, les index B-tree sont toujours plus performants que les index
 BRIN. La nouvelle classe d'opérateur améliore les performances par rapport aux
 index BRIN classiques. Ce gain de performance est fait au prix d'une
 augmentation de la taille de l'index. La taille de l'index est toujours bien
-inférieure à celle d'un index BTREE. Cette nouvelle version permet donc de
+inférieure à celle d'un index B-tree. Cette nouvelle version permet donc de
 rendre polyvalent les index BRIN tout en conservant leurs atouts.
 
 </div>
