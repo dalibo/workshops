@@ -439,6 +439,7 @@ Le démarrage du service est automatique sous Debian.
 ```Bash
 $ for node in e1 e2 e3; do  
 sudo ssh $node etcdctl member list
+done
 ```
 
 ```console
