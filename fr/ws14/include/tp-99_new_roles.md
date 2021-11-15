@@ -22,22 +22,32 @@ Discussion
 
 ### Utiliser le rôle `pg_database_owner` dans une base _template_
 
-* Avec le compte `postgres`, créer une nouvelle base modèle `tp1_template` à
-  l'aide de la commande `createdb` ou l'instruction `CREATE DATABASE`.
+* Ouvrir un terminal puis emprunter l'identité de l'utilisateur `postgres` sur votre machine.
 
-```sh
-createdb -e tp1_template
+```bash
+sudo su - postgres
 ```
+
+* Se connecter à l'instance PostgreSQL.
+
+```bash
+psql
+```
+
+* Créer une nouvelle base modèle `tp1_template` à l'aide de l'instruction `CREATE DATABASE`.
+
 ```sql
 CREATE DATABASE tp1_template;
 ```
 
-* Se connecter à cette nouvelle base et y ajouter une table `members` avec les
-  trois colonnes comme suit :
+* Se connecter à la base de données `tp1_template`.
 
-```sh
-psql -U postgres -d tp1_template
+```sql
+\c tp1_template
 ```
+
+* Créer une table `members` comme suit dans la base de données `tp1_template`:
+
 ```sql
 CREATE TABLE members (
   id int PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
@@ -46,8 +56,8 @@ CREATE TABLE members (
 );
 ```
 
-Par défaut, le propriétaire d'un objet correspond au rôle qui le créé dans la
-base, en l'occurrence le rôle `postgres` dans notre exemple. La commande `\d`
+Par défaut, le propriétaire d'un objet correspond au rôle qui le crée dans la
+base, en l'occurrence le rôle `postgres` dans notre exemple. La méta-commande `\d`
 de l'outil `psql` permet de lister les tables, vues et séquences présentes dans
 les schémas courants de l'utilisateur.
 
@@ -60,11 +70,18 @@ tp1_template=# \d
  public | members_id_seq | sequence | postgres
 ```
 
+Remarque : L'utilisation du type `IDENTITY` déclenche la création automatique
+> L'utilisation du type `IDENTITY` déclenche la création automatique d'une séquence.
+
 * Modifier le propriétaire des objets avec le nouveau rôle `pg_database_owner`.
 
 ```sql
 ALTER TABLE members OWNER TO pg_database_owner;
 ```
+
+En exécutant une nouvelle fois la méta-commande `\d` nous pouvons voir la modification
+du propriétaire de la séquence et de la table.
+
 ```text
 tp1_template=# \d
                    List of relations
@@ -74,21 +91,33 @@ tp1_template=# \d
  public | members_id_seq | sequence | pg_database_owner
 ```
 
-* Créer un utilisateur `atelier`, ainsi qu'une nouvelle base `tp1` basée sur le
-  modèle `tp1_template`, dont il sera propriétaire. Ajouter son mot de passe 
-  dans le fichier `.pgpass` pour simplifier l'authentification.
+Il est à noter que le propriétaire de la séquence a été modifié, cela vient du
+fait de l'utilisation du type `IDENTITY` pour la colonne `id` lors de la création
+de la table `members`.
 
-```sh
-createuser --pwprompt atelier
-createdb -e --owner=atelier --template=tp1_template tp1
+* Créer un utilisateur `atelier`.
 
-echo 'localhost:5432:tp1:*:p@ssword' > ~/.pgpass
-chmod 600 ~/.pgpass
+```sql
+CREATE ROLE atelier NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;
 ```
 
-* Quel est le propriétaire des objets présents dans la base `tp1` ?
+* Créer une base de données `tp1` basée sur le modèle `tp1_template`, dont
+l'utilisateur `atelier` sera propriétaire.
 
-Les droits sont similaires à la base modèle, notamment le propriétaire
+```sql
+CREATE DATABASE tp1 OWNER atelier TEMPLATE tp1_template;
+```
+
+* Se connecter à la base de données `tp1`.
+
+```sql
+\c tp1
+```
+
+* Exécuter la méta-commande `\d`. Quel est le propriétaire des objets présents
+dans la base `tp1` ?
+
+Les droits sont similaires à la base modèle `tp1_template`, notamment le propriétaire
 `pg_database_owner` sur les objets `members` et `members_id_seq`.
 
 ```
@@ -100,56 +129,80 @@ tp1=> \d
  public | members_id_seq | sequence | pg_database_owner
 ```
 
-* Se connecter à la base `tp1` avec le rôle propriétaire `atelier` et ajouter
-  quelques lignes dans la table `members`.
+* Se connecter à la base `tp1` avec le rôle propriétaire `atelier`.
 
-```sh
-psql -h localhost -U atelier tp1
-```
 ```sql
-INSERT INTO members (name, age) VALUES 
+\c tp1 atelier
+```
+
+* Ajouter 3 lignes dans la table `members`.
+
+```sql
+INSERT INTO members (name, age) VALUES
   ('Jean', 41),
   ('John', 38),
   ('Jessica', 26);
 ```
+
 ```text
 INSERT 0 3
 ```
 
-Sans être explicitement autorisé à écrire dans la table `members`, le rôle 
-`atelier` bénéficie de tous les droits des objets appartenant au rôle 
+Sans être explicitement autorisé à écrire dans la table `members`, le rôle
+`atelier` bénéficie de tous les droits des objets appartenant au rôle
 `pg_database_owner` en sa qualité de propriétaire de la base de données.
 
 ### Exporter avec le rôle `pg_read_all_data`
 
-* Créer un nouvel utilisateur `dump_user` et tenter d'exporter les données de la
-  base `atelier` avec l'outil `pg_dump`. Que se passe-t-il ?
+* Se connecter à la base de données `postgres` avec l'utilisateur **postgres**.
 
-```sh
-createuser --pwprompt dump_user
-pg_dump -h localhost -U dump_user -d tp1 > dump_tp1.sql
+```sql
+\c postgres postgres
 ```
+
+* Créer un nouvel utilisateur `dump_user`.
+
+```sql
+CREATE ROLE dump_user NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;
+```
+
+* Se déconnecter de l'instance PostgreSQL.
+
+```sql
+\q
+```
+
+* Exporter les données de la base `tp1` avec l'outil `pg_dump` en tant qu'utilisateur
+`dump_user`. Que se passe-t-il ?
+
+```bash
+pg_dump --username=dump_user --dbname tp1
+```
+
 ```text
 pg_dump: error: query failed: ERROR:  permission denied for table members
 pg_dump: error: query was: LOCK TABLE public.members IN ACCESS SHARE MODE
 ```
 
-* Recommencer l'export après lui avoir assignaer les droits du rôle `pg_read_all_data`.
-  Ce droit doit être octroyé par un superutilisateur comme `postgres`.
+* Se connecter de l'instance PostgreSQL.
 
-```sh
-psql -U postgres
+```bash
+psql
 ```
+
+* Assigner les droits du rôle `pg_read_all_data` à l'utilisateur `dump_user`.
+
 ```sql
 GRANT pg_read_all_data TO dump_user;
 ```
 
-Il est alors possible pour l'utilisateur `dump_user` de sauvegarder la base de 
-données `tp1`.
+* Exporter de nouveaux les données de la base `tp1` avec l'outil `pg_dump` en tant qu'utilisateur
+`dump_user`. Que se passe-t-il ?
 
-```sh
-pg_dump -h localhost -U dump_user -d tp1 > dump_tp1.sql
+```bash
+pg_dump --username=dump_user --dbname tp1
 ```
+
 ```sql
 --
 -- PostgreSQL database dump
@@ -209,12 +262,16 @@ ALTER TABLE ONLY public.members
 --
 ```
 
-* Exporter les données globales de l'instance à l'aide de l'outil `pg_dumpall` et
-  le compte `dump_user`.
+Il est alors possible pour l'utilisateur `dump_user` de sauvegarder la base de
+données `tp1`.
 
-```sh
-pg_dumpall -h localhost -U dump_user --globals-only > dump_tp1_globals.sql
+* Exporter les données globales de l'instance à l'aide de l'outil `pg_dumpall` et
+le compte `dump_user`.
+
+```bash
+pg_dumpall --username dump_user --globals-only
 ```
+
 ```sql
 --
 -- PostgreSQL database cluster dump
@@ -225,16 +282,14 @@ pg_dumpall -h localhost -U dump_user --globals-only > dump_tp1_globals.sql
 --
 
 CREATE ROLE atelier;
-ALTER ROLE atelier 
- WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS 
- PASSWORD 'SCRAM-SHA-256$:xxx';
+ALTER ROLE atelier
+ WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS;
 CREATE ROLE postgres;
 ALTER ROLE postgres
  WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS;
 CREATE ROLE dump_user;
 ALTER ROLE dump_user
- WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS
- PASSWORD 'SCRAM-SHA-256$xxx';
+ WITH NOSUPERUSER INHERIT NOCREATEROLE NOCREATEDB LOGIN NOREPLICATION NOBYPASSRLS;
 
 --
 -- Role memberships
@@ -248,27 +303,37 @@ GRANT pg_read_all_data TO dump_user GRANTED BY postgres;
 ```
 
 Le compte `dump_user` est bien adapté pour les exports multiples à l'aide
-de la commande `pg_dumpall` ou pour des logiciels plus complets comme [pg_back].
-
-[pg_back]: https://github.com/orgrim/pg_back
+de la commande `pg_dumpall` ou de logiciels plus complets comme [pg_back](https://github.com/orgrim/pg_back).
 
 ----
 
 ### Importer avec le rôle `pg_write_all_data`
 
-* Créer un nouveau rôle `load_user` et lui affecter les rôles `pg_write_all_data`.
-  Ce droit doit être octroyé par un superutilisateur comme `postgres`.
+* Se connecter à l'instance PostgreSQL.
 
-```sh
-psql -U postgres
+```bash
+psql
 ```
+
+* Créer un utilisateur `load_user`.
+
 ```sql
-CREATE ROLE load_user WITH LOGIN;
-\password load_user
+CREATE ROLE load_user WITH NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;
+```
+
+* Assigner les droits du rôle `pg_write_all_data` à l'utilisateur `load_user`.
+
+```sql
 GRANT pg_write_all_data TO load_user;
 ```
 
-* Créer un fichier `members.csv` sur le disque et y ajouter les lignes suivantes.
+* Se déconnecter de l'instance PostgreSQL.
+
+```sql
+\q
+```
+
+* Créer un fichier `members.csv` et y ajouter les lignes suivantes.
 
 ```text
 id,name,age
@@ -284,56 +349,52 @@ id,name,age
 10,Jérémie,12
 ```
 
-* Se reconnecter avec ce nouveau rôle et tenter de lire les données de la table
-  `members` dans la base `tp1`.
+* Se connecter à la base de données `tp1` avec l'utilisateur `load_user`.
 
 ```sql
-\c 'host=localhost user=load_user dbname=tp1'
+psql --username=load_user --dbname=tp1
+```
+
+* Tenter de lire les données de la table `members` dans la base de données `tp1`.
+
+```sql
 SELECT id, name, age FROM members LIMIT 10;
 ```
+
 ```text
 ERROR:  permission denied for table members
 ```
 
-* Charger les données du fichier `.csv` dans la table `members` avec l'utilisateur
-  `load_user` et la méthode `\copy` de l'outil `psql`.
+* Charger les données du fichier `members.csv` dans la table `members` à l'aide
+de la méta-commande `\copy`.
 
 ```sql
 \copy members FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
 ```
+
 ```text
 ERROR:  duplicate key value violates unique constraint "members_pkey"
 CONTEXT:  COPY members, line 2
 ```
 
 Le chargement tombe en erreur car les premières lignes de la table entre en
-conflit sur la contrainte de clé primaire. Il est nécessaire d'enrichir le 
+conflit sur la contrainte de clé primaire. Il est nécessaire d'enrichir le
 traitement d'import avec une gestion d'erreurs ou une solution plus complexe
 que l'instruction `COPY`.
 
-* Créer une copie de la table `members` sans les données et charger les données
-  du fichier `.csv`.
+* Créer une table `members_copy` qui est une copie de la table `members`
+sans les données.
 
 ```sql
 CREATE TABLE members_copy AS TABLE members WITH NO DATA;
-\copy members_copy FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
 ```
 
-* Tenter de charger les données de la table `members_copy` avec l'ordre
-  `INSERT ON CONFLICT` vers la table finale `members`.
+* Charger les données du fichier `members.csv` dans la table `members_copy` à
+l'aide de la méta-commande `\copy`.
 
 ```sql
-INSERT INTO members OVERRIDING SYSTEM VALUE
-SELECT id, name, age FROM members_copy
-    ON CONFLICT (id) DO NOTHING;
+\copy members_copy FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
 ```
-```text
-ERROR:  permission denied for table members
-```
-
-La clause `ON CONFLICT` suppose que l'utilisateur dispose des droits de lecture 
-sur la table cible afin de comparer les données de la colonne `id` avant 
-l'insertion. Cette méthode n'est donc pas adaptée.
 
 * Réaliser une boucle avec une gestion d'erreurs pour ignorer les données déjà
   présentes dans la table cible `members`.
@@ -347,7 +408,7 @@ BEGIN
     BEGIN
       INSERT INTO members (id, name, age) OVERRIDING SYSTEM VALUE
       VALUES (m.id, m.name, m.age);
-    EXCEPTION 
+    EXCEPTION
       WHEN unique_violation THEN null;
     END;
   END LOOP;
