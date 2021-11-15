@@ -704,10 +704,9 @@ etcd:
 
 ```Bash
  $ sudo ssh pg-1 "pg_createconfig_patroni 14 main"
-
 ```
 
-La configuration `/etc/patroni/14-main.yml` sera générée.
+La configuration `/etc/patroni/14-main.yml` est générée.
 
 </div>
 
@@ -745,10 +744,32 @@ L'utilisateur permettant la mise en réplication doit être créé sur ce nœud,
 
 ##### Suppression des instances secondaires
 
+Les instances secondaires ont été initialisées lors de l'installation du paquet Debian, il faut donc vider leur répertoire de données :.
 
 
+`pg-1` étant notre primaire :
+
+```Bash
+ $ for node in pg-2 pg-3; do
+  sudo ssh  $node "rm -rf /var/lib/postgresql/14/main/*"
+done
+```
+
+```Bash
+postgres@pg-3:~$ rm -rf /var/lib/postgresql/14/main/*
+```
+
+Les secondaires seront recréés automatiquement depuis le primaire par Patroni.
 
 ##### Démarrage des instances secondaires
+
+Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
+
+```Bash
+ $ for node in pg-1 pg-2; do
+  ssh $node "systemctl start patroni@14-main"
+  done
+```
 
 
 </div>
