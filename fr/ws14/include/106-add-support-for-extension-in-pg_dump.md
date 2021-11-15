@@ -11,10 +11,9 @@ Discussion
 
 <div class="slide-content">
 
-* Option `--extension` ajoutée à la ligne de commande pg_dump
-* Permet de spécifier un sous-ensemble d'extensions à exporter
-* Permet d'exporter les extensions même lorsque l'option `--schema` est
-  spécifiée
+* `pg_dump --extension=…`
+  * spécifier un sous-ensemble d'extensions à exporter
+  * exporter les extensions même avec `--schema`
 
 </div>
 
@@ -54,7 +53,7 @@ pg_restore --dbname postgres \
            /backup/encrypted_data.dmp
 ```
 On constate alors que l'extension est absente, elle n'a donc pas été incluse
-dans le premier dump.
+dans le premier dump. Cela peut gêner lors de la restauration des données.
 
 ```text
 workshop=# \dx
@@ -68,8 +67,9 @@ Schéma      | pg_catalog
 Description | PL/pgSQL procedural language
 ```
 
-La base de données `workshop` est à nouveau supprimée et le second dump
-`workshop_encrypted_data_with_ext.dmp` est importé à l'aide de `pg_restore`.
+La base `workshop` est à nouveau supprimée.  
+Puis
+`workshop_encrypted_data_with_ext.dmp` est ensuite importé à l'aide de `pg_restore`.
 
 ```bash
 dropdb workshop
@@ -99,7 +99,10 @@ Version     | 1.0
 Schéma      | pg_catalog
 Description | PL/pgSQL procedural language
 ```
-On voit donc que lorsque l'option `--schema` est utilisée, aucune extension n'est
+Lorsque `--schema` est utilisé, aucune extension n'est donc
 incluse dans l'export, à moins d'utiliser la nouvelle option `--extension`.
+
+Dans l'export d'une base entière, le comportement par défaut reste d'inclure les
+extensions.
 
 </div>
