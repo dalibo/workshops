@@ -119,7 +119,7 @@ hide_author_in_slide: true
 
   * Développement depuis le 7 juin 2020
   * Sortie le 30 septembre 2021
-  * version 14.1 sortie le XXX novembre 2021
+  * version 14.1 sortie le 12 novembre 2021
 
 </div>
 
@@ -435,6 +435,8 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/137 -->
 !include include/137_improving_connection_scalability.md
+
+----
 
 ## Questions
 
