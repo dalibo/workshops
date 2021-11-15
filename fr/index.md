@@ -61,3 +61,9 @@ Workshop réplication logique
 * Handout : [HTML](replication-logique.handout.html) [PDF](replication-logique.pdf)
 * Mobile : [EPUB](replication-logique.epub)
 
+Workshop Haute disponibilité : Patroni
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](patroni.slides.html)
+* Handout : [HTML](patroni.handout.html) [PDF](patroni.pdf)
+* Modile : [EPUB](patroni.epub)
