@@ -71,7 +71,7 @@ tp1_template=# \d
 ```
 
 Remarque : L'utilisation du type `IDENTITY` déclenche la création automatique
-d'une séquence.
+> L'utilisation du type `IDENTITY` déclenche la création automatique d'une séquence.
 
 * Modifier le propriétaire des objets avec le nouveau rôle `pg_database_owner`.
 
