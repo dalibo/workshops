@@ -303,7 +303,7 @@ GRANT pg_read_all_data TO dump_user GRANTED BY postgres;
 ```
 
 Le compte `dump_user` est bien adapté pour les exports multiples à l'aide
-de la commande `pg_dumpall` ou pour des logiciels plus complets comme [pg_back]: https://github.com/orgrim/pg_back
+de la commande `pg_dumpall` ou de logiciels plus complets comme [pg_back](https://github.com/orgrim/pg_back).
 
 ----
 
