@@ -23,7 +23,7 @@ Discussion
 <div class="notes">
 
 Détacher une partition peut maintenant se faire de façon non bloquante grâce à
-la commande `ALTER TABLE...DETACH PARTITION...CONCURRENTLY`.
+la commande `ALTER TABLE … DETACH PARTITION … CONCURRENTLY`.
 
 Son fonctionnement repose sur l'utilisation de deux transactions :
 
@@ -31,30 +31,28 @@ Son fonctionnement repose sur l'utilisation de deux transactions :
   partitionnée et la partition. Pendant cette phase, la partition est marquée
   comme en cours de détachement, la transaction est validée et on attend
   que toutes les transactions qui utilisent la partition se terminent. Cette
-  phase est nécessaire pour s'assurer que tout le monde voie le changement de
+  phase est nécessaire pour s'assurer que tout le monde voit le changement de
   statut de la partition.
 * Pendant la seconde, un verrou `SHARE UPDATE EXCLUSIVE` est placé sur la table
   partitionnée et un verrou `ACCESS EXCLUSIVE` sur la partition pour terminer
   le processus de détachement.
 
 Dans le cas d'une annulation ou d'un crash lors de la deuxième transaction,
-la commande `ALTER TABLE...DETACH PARTITION...FINALIZE` devra être exécutée
+la commande `ALTER TABLE … DETACH PARTITION … FINALIZE` devra être exécutée
 pour terminer l'opération.
 
 Lors de la séparation d'une partition, une contrainte `CHECK` est créée à 
-l'identique de la contrainte de partitionnement. Celle-ci peut être supprimée par
-la suite.
-
-Cependant, en cas de rattachement de la partition, le système n'aura pas besoin
+l'identique de la contrainte de partitionnement.
+Ainsi, en cas de ré-attachement de la partition, le système n'aura pas besoin
 d'effectuer un parcours de la table pour valider la contrainte de partition si
 cette contrainte existe.
+Sans elle, la table serait parcourue entièrement pour valider la contrainte de 
+partition tout en nécessitant un verrou de niveau `ACCESS EXCLUSIVE` sur la table parente.
 
-Sans elle, la table sera parcourue entièrement pour valider la contrainte de 
-partition tout en ayant un verrou de niveau `ACCESS EXCLUSIVE` sur la table parente.
-Elle pourra bien entendu être supprimée après le rattachement de la partition 
+La contrainte peut bien entendu être supprimée après le ré-attachement de la partition 
 afin d'éviter des doublons.
 
-On dispose d'une table partitionnée avec deux partitions :
+L'exemple suivant porte sur une table partitionnée avec deux partitions :
 
 ```sql
 \d+ parent
@@ -102,7 +100,7 @@ Contraintes de vérification :
 
 Concernant les restrictions :
 
-* Il n'est pas possible d'utiliser `ALTER TABLE...DETACH PARTITION...CONCURRENTLY`
+* Il n'est pas possible d'utiliser `ALTER TABLE … DETACH PARTITION … CONCURRENTLY`
   dans un bloc de transactions à cause de son mode _multi-transactions_.
 
 ```sql
@@ -112,9 +110,9 @@ ALTER TABLE parent DETACH PARTITION enfant_2 CONCURRENTLY;
 ```
 
 * Il est impossible d'utiliser cette commande si une partition par défaut existe
-  car les contrainte associées sont trop importante pour le mode concurrent. En
+  car les contraintes associées sont trop importante pour le mode concurrent. En
   effet, il faut obtenir un verrou de type `EXCLUSIVE LOCK` sur la partition par
-  defaut.
+  défaut.
 
 ```sql
 ALTER TABLE parent DETACH PARTITION enfant_1 CONCURRENTLY;
