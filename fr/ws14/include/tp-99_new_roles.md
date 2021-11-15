@@ -358,9 +358,7 @@ psql --username=load_user --dbname=tp1
 * Tenter de lire les données de la table `members` dans la base de données `tp1`.
 
 ```sql
-SELECT id, name, age
-FROM members
-LIMIT 10;
+SELECT id, name, age FROM members LIMIT 10;
 ```
 
 ```text
