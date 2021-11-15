@@ -39,8 +39,9 @@ Sa valeur par défaut passe de 10 à 2. Cette modification
 
 La valeur par défaut passe de 0.5 à 0.9. Ce paramétrage
   était déjà largement adopté par la communauté et permet de lisser les écritures faites lors
-  d'un `CHECKPOINT` sur une durée plus longue (90 % de `checkpoint_timeout`). Cela à pour effet
-  de limiter les pics d'IO suite aux CHECKPOINTS.
+  d'un `CHECKPOINT` sur une durée plus longue (90 % de `checkpoint_timeout`, qui vaut 5 minutes).
+  Cela a pour effet
+  de limiter les pics d'IO suite aux _checkpoints_.
 
 **huge_page_size** :
 
