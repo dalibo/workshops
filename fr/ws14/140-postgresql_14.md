@@ -324,7 +324,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-### Réplication Physique
+### Réplication physique
 
 ----
 
@@ -530,14 +530,14 @@ possible.
 
 ----
 
-### Nettoyage des index BTree 
+### Nettoyage des index B-tree 
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
 !include include/136-ameliorations-des-index-btree.md
 
 ----
 
-### Nouvelles classes d'opérateurs pour les index Brin
+### Nouvelles classes d'opérateurs pour les index BRIN
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
 !include include/136-ameliorations-des-index-brin.md
