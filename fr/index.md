@@ -8,7 +8,7 @@ css: "https://public.dalibo.com/fancy-index/style.css"
 Nouveautés de PostgreSQL 14
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](140-postgresql_14.slides.html)
+* Slides : [HTML](140-postgresql_14.slides.html) [PGSession 14](pgsession14.slides.html)
 * Handout : [HTML](140-postgresql_14.handout.html) [PDF](140-postgresql_14.pdf) 
 * Mobile : [EPUB](140-postgresql_14.epub)
 

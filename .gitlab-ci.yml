@@ -15,7 +15,7 @@ include:
 ##
 
 variables:
-  BRANCH_TARGET: patroni
+  BRANCH_TARGET: ws14
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/*'
@@ -53,10 +53,12 @@ pandoc:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       variables:
         TARGET: $MASTER_TARGET
+        ACTION: archives
         MESSAGE: "All archived and active workshops will be published."
     - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
       variables:
         TARGET: $BRANCH_TARGET
+        ACTION: deploy
         MESSAGE: "Only $BRANCH_TARGET will be published."
 
   script:
@@ -74,7 +76,7 @@ pandoc:
     - echo $MESSAGE
     - make $TARGET
     - echo "Move html and pdf files to root directories"
-    - make build
+    - make $ACTION
 
   artifacts:
     paths:

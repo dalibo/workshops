@@ -31,6 +31,7 @@
 # Folders
 
 SOURCES=en fr
+DEST=_build
 
 PATHS := $(shell find $(SOURCES) -maxdepth 1 -mindepth 1 -type d)
 PATHS := $(filter-out %/include %/medias, $(PATHS))
@@ -301,18 +302,25 @@ index: $(INDEX_OJBS)
 
 clean:
 	rm -f $(OBJS)
+	rm -r $(DEST)
 
 test:
 	@echo $(OBJS) | tr " " "\n"
 
-# stage all generated files into _build directory, needed by deploy CI stage
-build:
+# stage generated files into _build directory, needed by deploy CI stage
+deploy:
 	for LANG in en fr ; do \
-	  mkdir -p _build/$$LANG ;\
+	  mkdir -p $(DEST)/$$LANG ;\
 	  find $$LANG \( -name "*.html" -or -name "*.pdf" -or -name "*.epub" \) \
 	    -print -exec cp {} _build/$$LANG \; ;\
+	done
+
+# stage all archived files from _archives to $(DEST) directory
+archives: deploy
+	for LANG in en fr ; do \
+	  mkdir -p $(DEST)/$$LANG ;\
 	  find _archives/$$LANG \( -name "*.html" -or -name "*.pdf" -or -name "*.epub" \) \
-	    -print -exec cp {} _build/$$LANG \; ;\
+	    -print -exec cp {} $(DEST)/$$LANG \; ;\
 	done
 
 install:
