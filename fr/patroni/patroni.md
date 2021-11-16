@@ -166,6 +166,8 @@ Pour ce rôle, nous utiliserons Etcd.
 
 </div>
 
+---
+
 ### Service PostgreSQL et Patroni
 
 <div class="slide-content">
@@ -572,7 +574,7 @@ Le nœud `e1`, que nous considérons comme premier _leader_ sera démarré en pr
 
 ```Bash
  $ for node in e1 e2 e3; do 
- sudo ssh $node "systemctl start etcd"
+ sudo ssh -o StrictHostKeyChecking=no $node "systemctl start etcd" &
  sleep 1
  done
 ```
@@ -724,9 +726,10 @@ La configuration `/etc/patroni/14-main.yml` est générée.
 
 </div>
 
+<div class="notes">
+
 ##### Démarrage du primaire
 
-<div class="notes">
 
 La création de l'agrégat commence par la mise en route du primaire sur le nœud `pg-1`, c'est lui qui sera la référence pour les secondaires.
 
@@ -739,8 +742,8 @@ L'utilisateur permettant la mise en réplication doit être créé sur ce nœud,
 ##### Création de l'utilisateur de réplication
 
 ```Bash
- $ sudo ssh pg-1 sudo -iu postgres psql -c "create user replicator replication 
- password 'rep-pass'"
+ $ sudo ssh pg-1 "sudo -iu postgres psql -c \"create user replicator replication 
+ password 'rep-pass'\" "
 ```
 
 ##### Suppression des instances secondaires
@@ -756,10 +759,6 @@ Les instances secondaires ont été initialisées lors de l'installation du paqu
 done
 ```
 
-```Bash
-postgres@pg-3:~$ rm -rf /var/lib/postgresql/14/main/*
-```
-
 Les secondaires seront recréés automatiquement depuis le primaire par Patroni.
 
 ##### Démarrage des instances secondaires
@@ -767,11 +766,10 @@ Les secondaires seront recréés automatiquement depuis le primaire par Patroni.
 Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 
 ```Bash
- $ for node in pg-1 pg-2; do
-  ssh $node "systemctl start patroni@14-main"
+ $ for node in pg-2 pg-3; do
+  sudo ssh $node "systemctl start patroni@14-main"
   done
 ```
-
 
 </div>
 
@@ -789,6 +787,13 @@ Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 <div class="notes">
 
 ###### Liste des nœuds Patroni
+
+Sur chaque nœud Patroni, modifier le `.profile` de l'utilisateur `postgres` en ajoutant :
+
+```Bash
+export PATRONICTL_CONFIG_FILE=/etc/patroni/14-main.yml
+```
+
 
 ```Bash
  $ sudo ssh pg-1 sudo -iu postgres patronictl list
@@ -1159,9 +1164,10 @@ L'application d'un paramètre qui ne nécessite pas de redémarrage est transpar
 
 </div>
 
-### Détermination du primaire
 
 <div class="notes">
+
+### Détermination du primaire
 
 Nous proposons de déclencher la sauvegarde sur le primaire courant, il faut donc d'abord l'identifier.
  
