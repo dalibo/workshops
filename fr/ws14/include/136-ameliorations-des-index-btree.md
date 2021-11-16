@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* Nettoyage des index BTREE « par le haut »
+* Nettoyage des index B-tree « par le haut »
   * limite la fragmentation lorsque des lignes sont fréquemment modifiées
 
 </div>

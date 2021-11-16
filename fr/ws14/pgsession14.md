@@ -280,10 +280,10 @@ hide_author_in_slide: true
 
 <div class="slide-content">
   * Nouvelles options pour le paramètre `target_session_attrs`
-  * `read_only`
-  * `primary`
-  * `standby`
-  * `prefer-standby`
+    * `read_only`
+    * `primary`
+    * `standby`
+    * `prefer-standby`
 </div>
 
 ----
@@ -346,12 +346,12 @@ hide_author_in_slide: true
 
 <div class="slide-content">
   * Nouvelle fonction pour répartir des timestamps dans des intervalles (buckets)
-```
-SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with time zone),
+```sql
+SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamptz),
        id_sonde, avg(mesure)
   FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
-```text
+```bash
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-06-01 00:00:00+02 |        1 |     2.9318518518518519
@@ -418,12 +418,12 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
 ## Performances
 
 <div class="slide-content">
-  * Nettoyage des index BTree
+  * Nettoyage des index B-tree
   * Connexions simultanées en lecture seule
 
 ----
 
-### Nettoyage des index BTree 
+### Nettoyage des index B-tree 
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/136 -->
 !include include/136-ameliorations-des-index-btree.md
