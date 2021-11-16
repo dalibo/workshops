@@ -87,7 +87,7 @@ SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
 ```
 
 Côté fonctionnement, celui-ci est _multi transactions_. C'est-à-dire que chaque
-partition est traitée séquentiellement dans une transaction spécifique. Cela à
+partition est traitée séquentiellement dans une transaction spécifique. Cela a
 pour avantage de minimiser le nombre d'index invalides en cas d'annulation ou
 d'échec avec la commande `REINDEX CONCURRENTLY`. Cependant, cela empêche son
 fonctionnement dans un bloc de transaction.
@@ -99,8 +99,9 @@ REINDEX INDEX parent_index;
 -- CONTEXT: while reindexing partitioned index "public.parent_index"
 ```
 
-Les colonnes `partitions_total` et `partitions_done` de la vue `pg_stat_progress_create_index`
-sont positionnées à 0 durant la durée de l'opération. Il est néanmoins possible de voir les
-`REINDEX` passer les un après les autres dans cette vue.
+La vue `pg_stat_progress_create_index` peut être utilisée pour suivre la réindexation, mais
+les colonnes `partitions_total` et `partitions_done`
+resteront à 0 durant la durée de l'opération. Il est néanmoins possible de voir les
+`REINDEX` passer les uns après les autres dans cette vue.
 
 </div>
