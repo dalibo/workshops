@@ -4,6 +4,7 @@
   * Créer un fichier `.md` à la racine de ce répertoire
   * Créer une nouvelle branche portant le même nom
   * Modifier la variable `BRANCH_TARGET` dans le fichier `.gitlab-ci.yml`
+  * Activer les options "Delete source branch" et "Squash commits" dans la MR Gitlab
 
 # Publication sur le dépôt Github
 
