@@ -492,7 +492,7 @@ La configuration du service Etcd se trouve dans le fichier `/etc/default/etcd`, 
 ```sh
 ETCD_NAME='e1'
 
-ETCD_DATADIR='/var/lib/etcd/default'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.101:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.101:2379'
@@ -508,10 +508,11 @@ http://10.0.3.103:2379'
 
 **Sur le nœud e2 :**
 
+
 ```sh
 ETCD_NAME='e2'
 
-ETCD_DATADIR='/var/lib/etcd/default'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.102:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.102:2379'
@@ -519,7 +520,7 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.102:2380'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380, e2=http://10.0.3.102:2380,
+ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,
 e3=http://10.0.3.103:2380'
 ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379,http://10.0.3.102:2379,
 http://10.0.3.103:2379'
@@ -530,7 +531,7 @@ http://10.0.3.103:2379'
 ```sh
 ETCD_NAME='e3'
 
-ETCD_DATADIR='/var/lib/etcd/default'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.103:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.103:2379'
@@ -538,7 +539,7 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.103:2380'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380, e2=http://10.0.3.102:2380,
+ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,
 e3=http://10.0.3.103:2380'
 ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379,http://10.0.3.102:2379,
 http://10.0.3.103:2379'
