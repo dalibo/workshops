@@ -166,6 +166,8 @@ Pour ce rôle, nous utiliserons Etcd.
 
 </div>
 
+---
+
 ### Service PostgreSQL et Patroni
 
 <div class="slide-content">
@@ -724,9 +726,10 @@ La configuration `/etc/patroni/14-main.yml` est générée.
 
 </div>
 
+<div class="notes">
+
 ##### Démarrage du primaire
 
-<div class="notes">
 
 La création de l'agrégat commence par la mise en route du primaire sur le nœud `pg-1`, c'est lui qui sera la référence pour les secondaires.
 
@@ -767,7 +770,6 @@ Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
   sudo ssh $node "systemctl start patroni@14-main"
   done
 ```
-
 
 </div>
 
@@ -1162,9 +1164,10 @@ L'application d'un paramètre qui ne nécessite pas de redémarrage est transpar
 
 </div>
 
-### Détermination du primaire
 
 <div class="notes">
+
+### Détermination du primaire
 
 Nous proposons de déclencher la sauvegarde sur le primaire courant, il faut donc d'abord l'identifier.
  
