@@ -1,0 +1,31 @@
+---
+
+- hosts: localhost
+  gather_facts: false
+  
+  tasks:
+
+  - name: remove all the hosts from /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      state: absent
+      backup: no
+    loop: "{{ groups['all'] }}"
+
+- hosts: all
+  connection: local
+  become: true
+  become_user: root
+  gather_facts: false
+  
+  tasks:
+
+  - name: Containers do not exist
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: absent
+
+
+
