@@ -363,7 +363,7 @@ L'état final de chaque conteneur étant *RUNNING* avec une adresse *IPV4* attri
 
 ```
 
-Renseigner le fichier `/etc/hosts` sur tous les conteneurs :
+Sur tous les conteneurs, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
 
 ```ini
 10.0.3.101 e1
@@ -487,6 +487,11 @@ La configuration du service Etcd se trouve dans le fichier `/etc/default/etcd`, 
 
 <!-- **Attention aux espaces insécables dans la chaîne ETCD_INITIAL_CLUSTER -->
 
+<div class="box warning">
+
+Attention aux caractères invisibles ou aux sauts de ligne 
+</div>
+
 **Sur le nœud e1 :**
 
 ```sh
@@ -500,10 +505,14 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.101:2380'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,
-e3=http://10.0.3.103:2380'
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379,http://10.0.3.102:2379,
-http://10.0.3.103:2379'
+
+ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
+ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
+ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
 ```
 
 **Sur le nœud e2 :**
@@ -520,10 +529,14 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.102:2380'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,
-e3=http://10.0.3.103:2380'
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379,http://10.0.3.102:2379,
-http://10.0.3.103:2379'
+
+ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
+ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
+ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
 ```
 
 **Sur le nœud e3 :**
@@ -539,10 +552,14 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.103:2380'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,
-e3=http://10.0.3.103:2380'
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379,http://10.0.3.102:2379,
-http://10.0.3.103:2379'
+
+ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
+ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
+ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
+ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
 ```
 
 </div>
