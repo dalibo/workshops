@@ -363,7 +363,7 @@ L'état final de chaque conteneur étant *RUNNING* avec une adresse *IPV4* attri
 
 ```
 
-Renseigner le fichier `/etc/hosts` sur tous les conteneurs :
+Sur tous les conteneurs, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
 
 ```ini
 10.0.3.101 e1
