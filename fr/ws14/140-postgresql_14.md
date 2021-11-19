@@ -278,7 +278,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Compression des toast configurable en : LZ4 et pglz
+#### Compression des TOAST configurable en lz4 ou pglz
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/111 -->
 !include include/111_allow_configurable_lz4_toast_compression.md
