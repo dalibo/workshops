@@ -19,17 +19,24 @@ Discussion
 
 <div class="notes">
 
-Avant la version 14, l'autovacuum ignorait les tables partitionnées. Ce comportement
-avait pour conséquence de ne générer aucune statistique pour ces objets et 
+Avant la version 14, l'autovacuum ignorait les tables partitionnées.
+Il ne créait des statistiques que pour les partitions elles-mêmes.
+Ce comportement
+avait pour conséquence de ne générer aucune statistique pour la table partitionnée, et
 pouvait provoquer des mauvais choix de plan d'exécution.
 
-Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel. Avec cette 
+Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel sur la table partitionnée.
+Avec cette
 nouvelle version, ce n'est plus le cas et les statistiques des tables partitionnées
-sont collectées comme pour une table classique en fonction des paramètres 
+sont collectées comme pour une table classique, toujours en fonction des paramètres
 `autovacuum_analyze_scale_factor` et `autovacuum_analyze_threshold`.
 
 Dans notre exemple, nous observons le comportement en version 13 puis en version
-14 avec la table partitionnée suivante.
+14 avec la table partitionnée suivante :
+
+<!-- FIXME
+Manque le CREATE TABLE
+-->
 
 ```sql
 \d parent
