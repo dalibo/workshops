@@ -14,7 +14,8 @@ Discussion
 
 <div class="slide-content">
 
-* Mise en place du mode _streaming in-progress_ pour la réplication logique
+* Nouveau mode _streaming in-progress_ pour la réplication logique
+  + à activer
 * Informations supplémentaires pour les messages d'erreur de type `columns are missing`
 * Ajout de la syntaxe `ALTER SUBSCRIPTION… ADD/DROP PUBLICATION…`
 
@@ -22,7 +23,7 @@ Discussion
 
 <div class="notes">
 
-**streaming in-progress**
+**Streaming in-progress**
 
 Lorsque l'on utilise la réplication logique, le processus _walsender_ va procéder 
 au décodage logique et réordonner les modifications depuis les fichiers WAL 
@@ -49,7 +50,7 @@ reçu de `COMMIT`.
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
 le publieur et l'abonné.
 
-Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter 
+Ce nouveau comportement n'est pas activé par défaut ; il faut ajouter 
 l'option `streaming = on` à l'abonné :
 
 ```sql
@@ -61,7 +62,7 @@ ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 ```
 
 Certains cas nécessiteront toujours des écritures sur disque. Par exemple
-dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
+dans le cas où le seuil mémoire de décodage est atteint, mais qu'un tuple 
 n'est pas complètement décodé.
 
 **Messages d'erreur plus précis**
