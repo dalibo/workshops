@@ -12,7 +12,7 @@ Discussion
 
 <div class="slide-content">
 
-  * Traite les tables de débordement `TOAST` lors d'un `VACUUM` manuel
+  * Traite les tables de débordement TOAST lors d'un `VACUUM` manuel
   * Activé par défaut
 
   ```sql
@@ -24,14 +24,15 @@ Discussion
 <div class="notes">
 
 `VACUUM` dispose désormais de l'option `PROCESS_TOAST` qui permet de lui spécifier
-s'il doit traiter ou non les tables `TOAST`. C'est un booléen et il est positionné
+s'il doit traiter ou non les tables TOAST. C'est un booléen et il est positionné
 à `true` par défaut.
 
-Ce paramètre pourra être particulièrement utile si le taux de fragmentation
+À `false`, ce paramètre pourra être particulièrement utile pour accélérer un `VACUUM` si le taux de fragmentation
 (_bloat_) ou l'âge des transactions diffère grandement entre la table principale
-et la table `TOAST`.
+et la table TOAST, pour ne pas perdre de temps sur cette dernière.
+Les TOAST sont toujours concernées par un `VACUUM FULL`. <!-- erreur si PROCESS_TOAST à false  -->
 
-On dispose d'une table blog avec une table TOAST :
+Dans cet exemple, on dispose d'une table `blog` avec une table TOAST associée :
 
 ```sql
 test=# SELECT relname, reltoastrelid::regclass AS reltoastname
@@ -39,7 +40,7 @@ test=# SELECT relname, reltoastrelid::regclass AS reltoastname
 
 test=# \d blog
 ```
-```console
+```sh
  relname |      reltoastname       
 ---------+-------------------------
  blog    | pg_toast.pg_toast_16565
@@ -52,13 +53,13 @@ test=# \d blog
  content | text    |                 |           |            
 ```
 
-Lancement d'un VACUUM sans l'option `PROCESS_TOAST` et vérification de l'horodatage
-du traitement à travers la vue `pg_stat_all_tables` pour la table blog et la 
-table TOAST. Les deux ont bien été traitées par le VACUUM.
+Après lancement d'un VACUUM sans l'option `PROCESS_TOAST`, l'horodatage
+du traitement, à travers la vue `pg_stat_all_tables`,
+montre que la table `blog` et la table TOAST associée ont bien été traitées par le VACUUM.
 
 ```sql
 test=# VACUUM blog;
-test=# SELECT relname, last_vacuum FROM pg_stat_all_tables 
+test=# SELECT relname, last_vacuum FROM pg_stat_all_tables
         WHERE relname IN ('blog', 'pg_toast_16565');
 ```
 ```console
@@ -68,12 +69,12 @@ test=# SELECT relname, last_vacuum FROM pg_stat_all_tables
  pg_toast_16565 | 2021-08-16 12:03:43.994995+02
 ```
 
-Cette fois avec le lancement d'un VACUUM avec l'option `PROCESS_TOAST`, seule 
-la table principale a été traitée par le VACUUM.
+Lors d'un lancement d'un VACUUM avec l'option `PROCESS_TOAST`, seule
+la table principale est traitée par le VACUUM :
 
 ```sql
 test=# VACUUM (PROCESS_TOAST false) blog;
-test=# SELECT relname, last_vacuum FROM pg_stat_all_tables 
+test=# SELECT relname, last_vacuum FROM pg_stat_all_tables
         WHERE relname IN ('blog', 'pg_toast_16565');
 ```
 ```console
@@ -87,3 +88,4 @@ Cette fonctionnalité est également disponible avec la commande
 `vacuumdb --no-process-toast`.
 
 </div>
+
