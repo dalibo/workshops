@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* Ajout d'une routine dans l'API Foreign Data Wrapper pour la commande `TRUNCATE`
+* Nouvelle routine dans l'API Foreign Data Wrapper pour la commande `TRUNCATE`
 * Supportée pour les serveurs distants PostgreSQL avec l'extension `postgres_fdw`
 * Valable pour les partitions distantes d'une table partitionnée
 * Option `truncatable` activée par défaut
@@ -21,7 +21,7 @@ Discussion
 <div class="notes">
 
 La commande `TRUNCATE` dispose à présent d'un `callback` dans l'API _Foreign
-Data Wrapper_. L'extension `postgres_fwd` propose une implémentation pour les 
+Data Wrapper_. L'extension `postgres_fdw` propose une implémentation pour les 
 serveurs distants PostgreSQL avec l'ensemble des options existantes pour cette 
 commande :
 
@@ -36,9 +36,11 @@ commande :
 
 L'usage du `TRUNCATE` apporte un gain de performance par rapport à la commande
 `DELETE`, qui était jusqu'à présent la seule alternative pour vider les tables 
-distantes. La commande `TRUNCATE` sur une table partitionnée est également
-propagée vers les différents serveurs distants pour réaliser le vidage des partitions
 distantes.
+
+Si dans une table partitionnée il existe des partitions distantes,
+la commande `TRUNCATE` est également
+propagée vers les différents serveurs distants.
 
 Ce nouveau comportement peut être désactivé par l'option `truncatable` au niveau
 de la table ou du serveur distant.
