@@ -20,9 +20,9 @@ Discussion
 * Possibilité de déplacer des index vers un autre tablespace tout en les reconstruisant
 * Avec ou sans la clause `CONCURRENTLY`
 * Restrictions :
-    * Sur les tables et index partitionnés
-    * Sur les tables `TOAST`
-    * Sur le catalogue système
+    * sur les tables et index partitionnés
+    * sur les tables TOAST
+    * sur le catalogue système
 
 </div>
 
@@ -115,8 +115,8 @@ test=# SELECT c.relname, CASE
  enfant_2_id_idx | tbs
 ```
 
-* Les index des tables `TOAST` sont conservés dans leur tablespace d'origine. Ils seront
-  déplacés avec la table `TOAST` si la table utilisateur rattachée est déplacée.
+* Les index des tables TOAST sont conservés dans leur tablespace d'origine. Ils seront
+  déplacés avec la table TOAST si la table utilisateur rattachée est déplacée.
 
 ```sql
 -- On dispose d'une table blog avec une table TOAST.
