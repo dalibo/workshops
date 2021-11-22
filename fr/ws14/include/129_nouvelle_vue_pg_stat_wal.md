@@ -31,7 +31,7 @@ l'activité des WAL. Elle est composée des champs suivants :
    à `on` ;
 * `wal_bytes` : Quantité totale de WAL générés en octets ;
 * `wal_buffers_full` : Nombre de fois où des enregistrements WAL ont été
-  écrit sur disque car le _WAL buffers_ était plein ;
+  écrits sur disque car les _WAL buffers_ était pleins ;
 * `wal_write` : Nombre de fois ou les données du _WAL buffers_
   ont été écrit sur disque via une requête `XLogWrite` ;
 * `wal_sync` : Nombre de fois ou les données du _WAL buffers_ ont été
@@ -42,9 +42,10 @@ l'activité des WAL. Elle est composée des champs suivants :
   sur disque via une requête `issue_xlog_fsync` ;
 * `stats_reset` : Date de la dernière remise à zéro des statistiques.
 
-Ces statistiques de cette vue peuvent être remises à zéro grace à l'appel
+Les statistiques de cette vue peuvent être remises à zéro grâce à l'appel
 de la fonction `pg_stat_reset_shared()` avec le paramètre `wal`.
-Cette vue introduit également un nouveau paramètre : `track_wal_io_timing`.
+
+Cette vue est couplée à un nouveau paramètre : `track_wal_io_timing`.
 Il permet d'activer ou non le chronométrage des appels d'entrées/sortie
 pour les WAL. Par défaut celui-ci est à `off`. Comme pour le paramètre
 `track_io_timing`, l'activation de ce nouveau paramètre peut entraîner une
