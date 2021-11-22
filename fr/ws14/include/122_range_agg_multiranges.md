@@ -43,7 +43,7 @@ SELECT x,
        x * '[1,2]'::int4range AS "intersection avec [1,2]"
   FROM (VALUES ('[1,4)'::int4range) ) AS F(x) \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]-----------+------
 x                       | [1,4)
 borne inf               | 1
@@ -63,14 +63,14 @@ Exemple :
 SELECT '{ [1,2), (2,3]}'::int4multirange \gx
 
 ```
-```text
+```sh
 -[ RECORD 1 ]--+--------
 int4multirange | {[1,2),[3,4)}
 ```
 ```sql
 SELECT '{[1,5], [2,6]}'::int4multirange \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]--+--------
 int4multirange | {[1,7)}
 ```
@@ -89,7 +89,7 @@ SELECT x,
   FROM (VALUES ('{[1,4), [5,8)}'::int4multirange) ) 
     AS F(x) \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]--------------------+--------------
 x                                | {[1,4),[5,8)}
 borne inf                        | 1
@@ -109,7 +109,7 @@ SELECT '[1,5]'::int4range - '[2,3)'::int4range AS RESULT;
 
 SELECT '{[1,5]}'::int4multirange - '{[2,3)}'::int4multirange AS result;
 ```
-```text
+```sh
     result
 ---------------
  {[1,2),[3,6)}
@@ -153,7 +153,7 @@ SELECT classe, salle, range_agg(plage_horaire) AS plages_horaires
  GROUP BY classe, salle
  ORDER BY classe, salle;
 ```
-```text
+```sh
  classe |  salle  |               plages_horaires
 --------+---------+--------------------------------------------------
  1      | Salle 1 | {["2021-07-19 09:00:00","2021-07-19 10:00:00")}
@@ -182,7 +182,7 @@ SELECT salle,
  GROUP BY salle HAVING count(*) > 1
  ORDER BY salle;
 ```
-```text
+```sh
   salle  |                 plages_horaires                 | classes
 ---------+-------------------------------------------------+---------
  Salle 1 | {["2021-07-19 09:00:00","2021-07-19 10:00:00")} | {1,2}
@@ -204,33 +204,33 @@ SELECT a.amname, of.opfname, t1.typname as lefttype,
  INNER JOIN pg_operator o ON ao.amopopr = o.oid
  WHERE of.opfname LIKE '%multirange%';
 ```
-```text
- amname |    opfname     |   lefttype    |   righttyp    | oprname |              oprcode
---------+----------------+---------------+---------------+---------+------------------------------------
- gist   | multirange_ops | anymultirange | anymultirange | <<      | multirange_before_multirange
- gist   | multirange_ops | anymultirange | anymultirange | <<      | multirange_before_range
- gist   | multirange_ops | anymultirange | anymultirange | &<      | multirange_overleft_multirange
- gist   | multirange_ops | anymultirange | anymultirange | &<      | multirange_overleft_range
- gist   | multirange_ops | anymultirange | anymultirange | &&      | multirange_overlaps_multirange
- gist   | multirange_ops | anymultirange | anymultirange | &&      | multirange_overlaps_range
- gist   | multirange_ops | anymultirange | anymultirange | &>      | multirange_overright_multirange
- gist   | multirange_ops | anymultirange | anymultirange | &>      | multirange_overright_range
- gist   | multirange_ops | anymultirange | anymultirange | >>      | multirange_after_multirange
- gist   | multirange_ops | anymultirange | anymultirange | >>      | multirange_after_range
- gist   | multirange_ops | anymultirange | anymultirange | -|-     | multirange_adjacent_multirange
- gist   | multirange_ops | anymultirange | anymultirange | -|-     | multirange_adjacent_range
- gist   | multirange_ops | anymultirange | anymultirange | @>      | multirange_contains_multirange
- gist   | multirange_ops | anymultirange | anymultirange | @>      | multirange_contains_range
- gist   | multirange_ops | anymultirange | anymultirange | <@      | multirange_contained_by_multirange
- gist   | multirange_ops | anymultirange | anymultirange | <@      | multirange_contained_by_range
- gist   | multirange_ops | anymultirange | anymultirange | @>      | multirange_contains_elem
- gist   | multirange_ops | anymultirange | anymultirange | =       | multirange_eq
- btree  | multirange_ops | anymultirange | anymultirange | <       | multirange_lt
- btree  | multirange_ops | anymultirange | anymultirange | <=      | multirange_le
- btree  | multirange_ops | anymultirange | anymultirange | =       | multirange_eq
- btree  | multirange_ops | anymultirange | anymultirange | >=      | multirange_ge
- btree  | multirange_ops | anymultirange | anymultirange | >       | multirange_gt
- hash   | multirange_ops | anymultirange | anymultirange | =       | multirange_eq
+```sh
+amname |    opfname     |   lefttype    |   righttyp    |oprname|          oprcode
+-------+----------------+---------------+---------------+-------+---------------------------------
+gist   | multirange_ops | anymultirange | anymultirange | <<    |multirange_before_multirange
+gist   | multirange_ops | anymultirange | anymultirange | <<    |multirange_before_range
+gist   | multirange_ops | anymultirange | anymultirange | &<    |multirange_overleft_multirange
+gist   | multirange_ops | anymultirange | anymultirange | &<    |multirange_overleft_range
+gist   | multirange_ops | anymultirange | anymultirange | &&    |multirange_overlaps_multirange
+gist   | multirange_ops | anymultirange | anymultirange | &&    |multirange_overlaps_range
+gist   | multirange_ops | anymultirange | anymultirange | &>    |multirange_overright_multirange
+gist   | multirange_ops | anymultirange | anymultirange | &>    |multirange_overright_range
+gist   | multirange_ops | anymultirange | anymultirange | >>    |multirange_after_multirange
+gist   | multirange_ops | anymultirange | anymultirange | >>    |multirange_after_range
+gist   | multirange_ops | anymultirange | anymultirange | -|-   |multirange_adjacent_multirange
+gist   | multirange_ops | anymultirange | anymultirange | -|-   |multirange_adjacent_range
+gist   | multirange_ops | anymultirange | anymultirange | @>    |multirange_contains_multirange
+gist   | multirange_ops | anymultirange | anymultirange | @>    |multirange_contains_range
+gist   | multirange_ops | anymultirange | anymultirange | <@    |multirange_contained_by_multirange
+gist   | multirange_ops | anymultirange | anymultirange | <@    |multirange_contained_by_range
+gist   | multirange_ops | anymultirange | anymultirange | @>    |multirange_contains_elem
+gist   | multirange_ops | anymultirange | anymultirange | =     |multirange_eq
+btree  | multirange_ops | anymultirange | anymultirange | <     |multirange_lt
+btree  | multirange_ops | anymultirange | anymultirange | <=    |multirange_le
+btree  | multirange_ops | anymultirange | anymultirange | =     |multirange_eq
+btree  | multirange_ops | anymultirange | anymultirange | >=    |multirange_ge
+btree  | multirange_ops | anymultirange | anymultirange | >     |multirange_gt
+hash   | multirange_ops | anymultirange | anymultirange | =     |multirange_eq
 ```
 
 La lecture du catalogue nous montre que les opérations simples (exp : `=`, `>`, `<`)
