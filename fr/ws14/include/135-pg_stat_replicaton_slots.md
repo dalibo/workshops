@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=98681675002d852d926a49d7bc4d4b4856b2fc4a
 
@@ -21,7 +21,7 @@ Discussion
 Il est maintenant possible d'obtenir des statistiques d'utilisation des _slots_ de 
 réplication logique via la vue système `pg_stat_replication_slots`. 
 
-Voici la description des colonnes de cette vue :
+Voici la description des colonnes de cette vue :
 
 * `slot_name` : nom du _slot_ de réplication
 * `spill_txns` : nombre de transactions écritent sur disque lorsque la mémoire 

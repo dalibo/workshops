@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2714/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=71f4c8c6f74ba021e55d35b1128d22fb8c6e1629
@@ -14,7 +14,7 @@ Discussion
 
 * Détachement de partition non bloquant
 * Fonctionne en mode multi-transactions
-* Quelques restrictions :
+* Quelques restrictions :
     * Ne fonctionne pas dans un bloc de transactions
     * Impossible en cas de partition par défaut
 
@@ -25,7 +25,7 @@ Discussion
 Détacher une partition peut maintenant se faire de façon non bloquante grâce à
 la commande `ALTER TABLE … DETACH PARTITION … CONCURRENTLY`.
 
-Son fonctionnement repose sur l'utilisation de deux transactions :
+Son fonctionnement repose sur l'utilisation de deux transactions :
 
 * La première ne requiert qu'un verrou `SHARE UPDATE EXCLUSIVE` sur la table
   partitionnée et la partition. Pendant cette phase, la partition est marquée
@@ -75,7 +75,7 @@ Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
 ---------+---------+-----------------+-----------+------------
  id      | integer |                 |           |            
 Partition de : parent FOR VALUES FROM (5000000) TO (11000000)
-Index :
+Index :
     "enfant_2_id_idx" btree (id)
 ```
 
@@ -92,13 +92,13 @@ ALTER TABLE parent DETACH PARTITION enfant_2 CONCURRENTLY ;
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
  id      | integer |                 |           |            
-Index :
+Index :
     "enfant_2_id_idx" btree (id)
-Contraintes de vérification :
+Contraintes de vérification :
     "enfant_2_id_check" CHECK (id IS NOT NULL AND id >= 5000000 AND id < 11000000)
 ```
 
-Concernant les restrictions :
+Concernant les restrictions :
 
 * Il n'est pas possible d'utiliser `ALTER TABLE … DETACH PARTITION … CONCURRENTLY`
   dans un bloc de transactions à cause de son mode _multi-transactions_.

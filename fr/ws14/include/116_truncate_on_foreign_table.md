@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=8ff1c94649f5c9184ac5f07981d8aea9dfd7ac19
 
@@ -23,7 +23,7 @@ Discussion
 La commande `TRUNCATE` dispose à présent d'un `callback` dans l'API _Foreign
 Data Wrapper_. L'extension `postgres_fdw` propose une implémentation pour les 
 serveurs distants PostgreSQL avec l'ensemble des options existantes pour cette 
-commande :
+commande :
 
 * `CASCADE` : supprime automatiquement les lignes des tables disposant d'une 
   contrainte de clé étrangère sur la table concernée ;

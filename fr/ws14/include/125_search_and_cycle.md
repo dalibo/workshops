@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=3696a600e2292d43c00949ddf0352e4ebb487e5b
 
@@ -34,18 +34,18 @@ PostgreSQL permet de créer des requêtes récursives grâce à la clause `WITH
 RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
 d'enregistrements liés par des colonnes de type `id` et `parent_id`.
 
-Dans ce genre de requête, il est courant de vouloir :
+Dans ce genre de requête, il est courant de vouloir :
 
-* ordonner les données en fonction de leur profondeur ;
+* ordonner les données en fonction de leur profondeur ;
 * afficher le chemin parcouru ou la profondeur de l'enregistrement dans
-  l'arborescence ;
+  l'arborescence ;
 * détecter l'apparition d'un cycle, une séquence d'enregistrement provoquant
   une boucle.
 
 La norme SQL prévoit différentes syntaxes pour réaliser ce genre de tâches.
 Elles sont désormais implémentées dans PostgreSQL.
 
-Création d'un jeu d'essais :
+Création d'un jeu d'essais :
 
 ```sql
 CREATE TABLE tree(id int, parent_id int, name text);
@@ -94,7 +94,7 @@ SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
 
 En version 14, la syntaxe suivante permet de récupérer des informations
-similaires :
+similaires :
 
 
 ```text
@@ -104,7 +104,7 @@ with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query 
 query: ( select | values | insert | update | delete )
 ```
 
-Exemple :
+Exemple :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (
@@ -183,7 +183,7 @@ SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 (1 row)
 ```
 
-Le même résultat peut être obtenu en utilisant la clause CYCLE :
+Le même résultat peut être obtenu en utilisant la clause CYCLE :
 
 ```text
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
@@ -194,7 +194,7 @@ with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query 
 query: ( select | values | insert | update | delete )
 ```
 
-Voici un exemple :
+Voici un exemple :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (
@@ -218,7 +218,7 @@ SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
 Il est également possible de construire un tableau avec le contenu de la
-table et de trier à partir de ce contenu grâce à la syntaxe suivante :
+table et de trier à partir de ce contenu grâce à la syntaxe suivante :
 
 ```text
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
@@ -228,7 +228,7 @@ query: ( select | values | insert | update | delete )
 ```
 
 Comme vous pouvez le voir dans l'exemple ci-dessous, il est possible d'utiliser
-la clause `CYCLE` avec cette syntaxe aussi :
+la clause `CYCLE` avec cette syntaxe aussi :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (

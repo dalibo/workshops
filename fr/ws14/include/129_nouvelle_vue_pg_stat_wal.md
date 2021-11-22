@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/30/2693/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=8d9a935965f01b7759a8c23ff6291000b670a2bf
@@ -22,24 +22,24 @@ Discussion
 <div class="notes">
 
 La nouvelle vue système `pg_stat_wal` permet d'obtenir des statistiques sur 
-l'activité des WAL. Elle est composée des champs suivants :
+l'activité des WAL. Elle est composée des champs suivants :
 
 * `wal_records` : Nombre total d'enregistrement WAL 
 * `wal_fpi` : Nombre total d'enregistrement _full page images_, ces écritures
    de page complètes sont déclenchées lors de la première modification d'une
    page après un `CHECKPOINT` si le paramètre `full_page_writes` est configuré
-   à `on` ;
-* `wal_bytes` : Quantité totale de WAL générés en octets ;
+   à `on` ;
+* `wal_bytes` : Quantité totale de WAL générés en octets ;
 * `wal_buffers_full` : Nombre de fois où des enregistrements WAL ont été
-  écrit sur disque car le _WAL buffers_ était plein ;
+  écrit sur disque car le _WAL buffers_ était plein ;
 * `wal_write` : Nombre de fois ou les données du _WAL buffers_
-  ont été écrit sur disque via une requête `XLogWrite` ;
+  ont été écrit sur disque via une requête `XLogWrite` ;
 * `wal_sync` : Nombre de fois ou les données du _WAL buffers_ ont été
-  synchronisées sur disque via une requête `issue_xlog_fsync` ;
+  synchronisées sur disque via une requête `issue_xlog_fsync` ;
 * `wal_write_time` : Temps total passé à écrire les données du _WAL buffers_
-  sur disque via une requête `XLogWrite` ;
+  sur disque via une requête `XLogWrite` ;
 * `wal_sync_time` : Temps total passé à synchroniser les données du _WAL buffers_
-  sur disque via une requête `issue_xlog_fsync` ;
+  sur disque via une requête `issue_xlog_fsync` ;
 * `stats_reset` : Date de la dernière remise à zéro des statistiques.
 
 Ces statistiques de cette vue peuvent être remises à zéro grace à l'appel

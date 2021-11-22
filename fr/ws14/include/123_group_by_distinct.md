@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=be45be9c33a85e72cdaeb9967e9f6d2d00199e09
 
@@ -35,7 +35,7 @@ entreprise4,29,Brest,20200406,4000
 _EOF_
 ```
 
-En exécutant cette requête, on voit que certaines lignes sont en double :
+En exécutant cette requête, on voit que certaines lignes sont en double :
 
 ```sql
 SELECT row_number() OVER(), departement, ville, 

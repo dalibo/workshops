@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/1677/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=ee28cacf619f4d9c23af5a80e1171a5adae97381
@@ -28,9 +28,9 @@ En plus des options `any` (qui reste celle par défaut) et `read-write`
 supporte désormais les options suivantes :
 
 * `read-only`, le serveur ne doit accepter que les sessions en lecture seule
-  (mode _hot standby_ ou `default_transaction_read_only` à `on`) ;
-* `primary`, le serveur ne doit pas être en mode _hot standby_ ;
-* `standby`, le serveur doit être en mode _hot standby_ ;
+  (mode _hot standby_ ou `default_transaction_read_only` à `on`) ;
+* `primary`, le serveur ne doit pas être en mode _hot standby_ ;
+* `standby`, le serveur doit être en mode _hot standby_ ;
 * `prefer-standby`, dans un premier temps, essayer de trouver une instance
   secondaire, sinon utilise le mode `any`.
 

@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2492/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=0827e8af70f4653ba17ed773f123a60eadd9f9c9
@@ -47,7 +47,7 @@ Manque le CREATE TABLE
 ---------+---------+-----------------+-----------+------------
  id      | integer |                 |           |            
 Clé de partition : RANGE (id)
-Index :
+Index :
     "parent_id_idx" btree (id)
 Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_2 FOR VALUES FROM (5000000) TO (11000000)

@@ -1,7 +1,7 @@
 <!--
 Les commits sur ce sujet sont : BRIN multi-minmax and bloom indexes
 
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=77b88cd1bb9041a735f24072150cacfa06c699a3
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=77b88cd1bb9041a735f24072150cacfa06c699a3
 
@@ -67,7 +67,7 @@ VACUUM ANALYZE bloom_test;
 ```
 
 Pour le test, nous allons désactiver le parallélisme et les parcours
-séquentiels afin de se focaliser sur l'utilisation des index :
+séquentiels afin de se focaliser sur l'utilisation des index :
 
 ```sql
 SET enable_seqscan TO off;
@@ -103,7 +103,7 @@ Voici le plan de la requête :
 ```
 
 Essayons maintenant avec un index BRIN utilisant les `uuid_minmax_ops` (la
-classe d'opérateur par défaut) :
+classe d'opérateur par défaut) :
 
 ```sql
 DROP INDEX test_btree_idx;
@@ -204,7 +204,7 @@ petit que l'index B-tree.
 ```
 
 La classe d'opérateur `*_bloom_ops` accepte deux paramètres qui permettent de
-dimensionner l'index bloom :
+dimensionner l'index bloom :
 
 * `n_distinct_per_range` :  permet d'estimer le nombre de valeurs distinctes
   dans un ensemble de blocs brin. Il doit être supérieur à -1 et sa valeur par
@@ -263,7 +263,7 @@ UPDATE brin_multirange SET d = current_timestamp WHERE random() < .01;
 ```
 
 Une fois de plus, nous allons désactiver le parallélisme et les parcours
-séquentiels afin de se concentrer sur l'utilisation des index :
+séquentiels afin de se concentrer sur l'utilisation des index :
 
 ```sql
 SET enable_seqscan TO off;

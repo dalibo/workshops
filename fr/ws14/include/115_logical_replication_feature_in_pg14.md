@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/29/1927/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=45fdc9738b36d1068d3ad8fdb06436d6fd14436b
@@ -31,7 +31,7 @@ avant de les envoyer à l'abonné. Cette opération est faite en mémoire mais e
 cas de dépassement du seuil indiqué par le paramètre `logical_decoding_work_mem`, 
 ces données sont écrites sur disque.
 
-Ce comportement à deux inconvénients :
+Ce comportement à deux inconvénients :
 
 * il peut provoquer l'apparition d'une volumétrie non négligeable dans le répertoire 
 `pg_replslot` et jouer sur les I/O ;
@@ -51,7 +51,7 @@ Il va donc être possible de réduire la consommation I/O et également la laten
 le publieur et l'abonné.
 
 Ce nouveau comportement n'est pas activé par défaut ; il faut ajouter 
-l'option `streaming = on` à l'abonné :
+l'option `streaming = on` à l'abonné :
 
 ```sql
 CREATE SUBSCRIPTION sub_stream 

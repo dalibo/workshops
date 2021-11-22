@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/31/2802/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=942305a36365433eff3c1937945758f2dbf1662b

@@ -275,7 +275,7 @@ Création d'un index btree :
 CREATE INDEX idx_nummultiranges_btree ON nummultiranges USING btree(r);
 ```
 
-On voit que ce type d'index peut être utilisé pour une égalité :
+On voit que ce type d'index peut être utilisé pour une égalité :
 
 ```
 # EXPLAIN (ANALYZE, COSTS off) SELECT * FROM nummultiranges WHERE r = '{[0.0,0.1]}'::nummultirange;

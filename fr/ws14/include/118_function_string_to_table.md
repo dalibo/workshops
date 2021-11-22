@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=66f163068030b5c5fe792a0daee27822dac43791
 
@@ -32,7 +32,7 @@ string_to_table
 <div class="notes">
 
 Une nouvelle fonction a été créée pour subdiviser une chaîne de caractères et
-renvoyer le résultat dans une table :
+renvoyer le résultat dans une table :
 
 ```sql
 \df string_to_table
@@ -46,7 +46,7 @@ renvoyer le résultat dans une table :
 (2 rows)
 ```
 
-Exemple d'utilisation :
+Exemple d'utilisation :
 
 ```sql
 \pset null '¤'

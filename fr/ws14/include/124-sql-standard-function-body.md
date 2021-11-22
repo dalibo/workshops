@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=e717a9a18b2e34c9c40e5259ad4d31cd7e420750
 
@@ -106,7 +106,7 @@ DROP TABLE tbl1, tbl2 CASCADE;
 ```
 
 Les deux méthodes renvoient une erreur si on utilise des objets qui n'existent
-pas lors de la création de la routine :
+pas lors de la création de la routine :
 
 ```text
 ERROR:  relation "tbl1" does not exist

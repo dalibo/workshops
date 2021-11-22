@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=49ab61f0bdc93984a8d36b602f6f2a15f09ebcc7
 
@@ -33,14 +33,14 @@ et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
 La valeur mise en second paramètre de la fonction est placée dans un _bucket_
-en se basant sur :
+en se basant sur :
 
 * Un timestamp de début (troisième paramètre).
 * Une taille définie sous forme d'intervalle (premier paramètre). \
   L'unité utilisée pour définir la taille du _bucket_ peut être définie \
   en secondes, minutes, heures, jours ou semaines.
 
-La fonction existe pour des timestamp avec et sans fuseau horaire :
+La fonction existe pour des timestamp avec et sans fuseau horaire :
 
 ```sql
 \df date_bin
@@ -61,7 +61,7 @@ Argument data types | interval, timestamp without time zone, timestamp without t
 Type                | func
 ```
 
-Voici un exemple de cette fonction en action :
+Voici un exemple de cette fonction en action :
 
 ```sql
 -- Génération des données
@@ -134,7 +134,7 @@ FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 
 Comme dit précédemment, il n'est pas possible d'utiliser une taille de _bucket_
 définie en mois ou années. Il est cependant possible de spécifier des tailles de
-_bucket_ supérieures ou égales à un mois avec les autres unités :
+_bucket_ supérieures ou égales à un mois avec les autres unités :
 
 ```sql
 SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');

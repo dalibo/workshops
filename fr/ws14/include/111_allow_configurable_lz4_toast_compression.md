@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2813/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=bbe0a81db69bd10bd166907c3701492a29aca294
@@ -14,7 +14,7 @@ Discussion
 * Historiquement : `pglz`
 * Nouveau : `lz4`, plus rapide
 * Nécessite `--with-lz4` à la compilation
-* Définition :
+* Définition :
   * `SET default_toast_compression = …`
   * `ALTER TABLE … SET COMPRESSION …`
 * Compatibilité : `pg_dump --no-toast-compression`
@@ -37,7 +37,7 @@ postgres@pop-os:~$ pg_config | grep 'with-lz4'
 CONFIGURE =  [...] '--with-lz4' [...]
 ```
 
-Plusieurs options sont disponibles pour changer le mode de compression :
+Plusieurs options sont disponibles pour changer le mode de compression :
 
 * Au niveau de la colonne, lors des opérations de `CREATE TABLE` et `ALTER TABLE`.
 

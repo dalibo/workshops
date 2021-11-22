@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=055fee7eb4dcc78e58672aef146334275e1cc40d
 
@@ -27,7 +27,7 @@ C'est une fonctionnalité du standard SQL. Elle s'ajoute à la liste des
 [fonctionnalitées
 supportées](https://docs.postgresql.fr/14/features.html).
 
-Exemple :
+Exemple :
 
 ```sql
 CREATE TABLE region (

@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2269/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=c5b286047cd698021e57a527215b48865fd4ad4e
@@ -19,7 +19,7 @@ Discussion
 * Ajout de l'option `TABLESPACE` pour la commande `REINDEX`
 * Possibilité de déplacer des index vers un autre tablespace tout en les reconstruisant
 * Avec ou sans la clause `CONCURRENTLY`
-* Restrictions :
+* Restrictions :
     * sur les tables et index partitionnés
     * sur les tables TOAST
     * sur le catalogue système
@@ -38,7 +38,7 @@ test=# \d t1
  Colonne |  Type   | Collationnement | NULL-able | Par défaut  
 ---------+---------+-----------------+-----------+------------
  col1    | integer |                 |           |            
-Index :
+Index :
     "idx_col1" btree (col1)
 
 -- Réindexation de la table t1 et déplacement de l'index idx_col1 dans le tablespace tbs.
@@ -54,7 +54,7 @@ test=# SELECT c.relname, t.spcname FROM pg_class c
  index_col1 | tbs
 ```
 
-Quelques restrictions s'appliquent :
+Quelques restrictions s'appliquent :
 
 * Lors de l'utilisation de l'option `TABLESPACE` sur des tables et index partitionnés, seuls les index des partitions seront déplacés vers le nouveau
 tablespace. Aucune modification du tablespace ne sera effectuée dans `pg_class.reltablespace`, il faudra pour cela utiliser la commande `ALTER TABLE SET TABLESPACE`.
@@ -127,7 +127,7 @@ test=# \d blog
  id      | integer |                 |           |            
  title   | text    |                 |           |            
  content | text    |                 |           |            
-Index :
+Index :
     "blog_title_idx" btree (title)
 
 test=# \d+ pg_toast.pg_toast_16417
@@ -138,7 +138,7 @@ Table TOAST « pg_toast.pg_toast_16417 »
  chunk_seq  | integer | plain
  chunk_data | bytea   | plain
 Table propriétaire : « public.blog »
-Index :
+Index :
     "pg_toast_16417_index" PRIMARY KEY, btree (chunk_id, chunk_seq)
 
 -- réindexation de la table blog
