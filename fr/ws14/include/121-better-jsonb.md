@@ -57,7 +57,7 @@ SELECT id, product->'name' AS product, product->'price' AS price
 SELECT id, product['name'] AS product, product['price'] AS price
   FROM products WHERE product['brand'] = '"AniOne"';
 ```
-```text
+```sh
  id  |            product             | price 
 -----+--------------------------------+-------
  100 | "Arbre à chat tonneau Aurelio" | 189

@@ -30,7 +30,7 @@ COPY test_copy TO '/tmp/test_copy';
 
 SELECT * FROM pg_stat_progress_copy \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]----+---------
 pid              | 39148
 datid            | 16384
@@ -56,7 +56,7 @@ COPY test_copy FROM '/tmp/test_copy' WHERE i > 1000;
 
 SELECT * FROM pg_stat_progress_copy \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384
@@ -81,7 +81,7 @@ une commande psql `\copy`.
 
 SELECT * FROM pg_stat_progress_copy \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]----+----------
 pid              | 39148
 datid            | 16384

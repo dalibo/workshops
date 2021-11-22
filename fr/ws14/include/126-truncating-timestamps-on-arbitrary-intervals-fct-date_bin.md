@@ -45,7 +45,7 @@ La fonction existe pour des timestamp avec et sans fuseau horaire :
 ```sql
 \df date_bin
 ```
-```text
+```sh
 List of functions
 -[ RECORD 1 ]-------+-------------------------------------------------------------------
 Schema              | pg_catalog
@@ -77,7 +77,7 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
        id_sonde, avg(mesure)
   FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
-```text
+```sh
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-06-01 00:00:00+02 |        1 |     2.9318518518518519
@@ -109,7 +109,7 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:11:00'::timestamp with ti
        avg(mesure)
 FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
-```text
+```sh
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-05-31 22:41:00+02 |        1 | 0.30454545454545454545
@@ -145,7 +145,7 @@ SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
 
 SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
 ```
-```text
+```sh
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
@@ -154,7 +154,7 @@ SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
 ```sql
 SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
 ```
-```text
+```sh
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
@@ -172,7 +172,7 @@ Documentation : <https://docs.postgresql.fr/14/functions-datetime.html#FUNCTION
 SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
        date_trunc('hour', '2021-06-01 10:05:10'::timestamp);
 ```
-```text
+```sh
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:00:00 | 2021-06-01 10:00:00
@@ -182,7 +182,7 @@ SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
 SELECT date_bin('1 minute', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
        date_trunc('minute', '2021-06-01 10:05:10'::timestamp);
 ```
-```text
+```sh
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:05:00 | 2021-06-01 10:05:00

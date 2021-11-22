@@ -51,7 +51,7 @@ ALTER FOREIGN TABLE tbl1 OPTIONS (ADD truncatable 'false');
 
 TRUNCATE tbl1;
 ```
-```text
+```sh
 ERROR:  foreign table "tbl1" does not allow truncates
 ```
 

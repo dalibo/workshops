@@ -46,7 +46,7 @@ CREATE TABLE ville (
 SELECT c.*
   FROM ville a INNER JOIN region b USING (region_id) AS c \gdesc
 ```
-```text
+```sh
   Column   |  Type
 -----------+---------
  region_id | integer

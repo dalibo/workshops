@@ -34,7 +34,7 @@ Cette fonctionnalité n'est pas disponible pour les triggers de type
 TRIGGER`](https://docs.postgresql.fr/14/sql-createtrigger.html) et
 provoque le message d'erreur suivant.
 
-```text
+```sh
 ERROR:  CREATE OR REPLACE CONSTRAINT TRIGGER is not supported
 ```
 

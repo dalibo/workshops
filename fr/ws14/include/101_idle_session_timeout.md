@@ -45,7 +45,7 @@ SET idle_session_timeout TO '5s';
 
 SELECT 1;
 ```
-```text
+```sh
 FATAL:  terminating connection due to idle-session timeout
 server closed the connection unexpectedly
 	This probably means the server terminated abnormally
@@ -54,7 +54,7 @@ server closed the connection unexpectedly
 
 Un message apparaît dans les journaux d'activité :
 
-```text
+```sh
 FATAL:  terminating connection due to idle-session timeout
 ```
 </div>

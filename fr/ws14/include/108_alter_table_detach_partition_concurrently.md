@@ -57,7 +57,7 @@ L'exemple suivant porte sur une table partitionnée avec deux partitions :
 ```sql
 \d+ parent
 ```
-```text
+```sh
                      Table partitionnée « public.parent »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
@@ -69,7 +69,7 @@ Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
 ```sql
 \d enfant_2
 ```
-```text
+```sh
                      Table « public.enfant_2 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
@@ -87,7 +87,7 @@ ALTER TABLE parent DETACH PARTITION enfant_2 CONCURRENTLY ;
 -- Celle-ci correspond à la contrainte de partition
 \d enfant_2
 ```
-```text
+```sh
                      Table « public.enfant_2 »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------

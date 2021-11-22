@@ -51,7 +51,7 @@ CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
 LANGUAGE SQL
 RETURN 'The input type is ' || pg_typeof(a);
 ```
-```text
+```sh
 ERROR:  SQL function with unquoted function body cannot have polymorphic arguments
 ```
 
@@ -108,7 +108,7 @@ DROP TABLE tbl1, tbl2 CASCADE;
 Les deux méthodes renvoient une erreur si on utilise des objets qui n'existent
 pas lors de la création de la routine :
 
-```text
+```sh
 ERROR:  relation "tbl1" does not exist
 LINE 4:   INSERT INTO tbl1 VALUES (a);
 ```

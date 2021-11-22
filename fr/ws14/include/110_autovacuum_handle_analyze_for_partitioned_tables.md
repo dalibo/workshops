@@ -41,7 +41,7 @@ Manque le CREATE TABLE
 ```sql
 \d parent
 ```
-```text
+```sh
                      Table partitionnée « public.parent »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
@@ -72,7 +72,7 @@ ANALYZE parent;
 -- Maintenant on dispose des statistiques
 SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent

@@ -57,7 +57,7 @@ SELECT * FROM test_copy ;
 SELECT pid, mode, granted, waitstart 
   FROM pg_locks WHERE pid in (27829,27680);
 ```
-```text
+```sh
   pid  |        mode         | granted |           waitstart           
 -------+---------------------+---------+-------------------------------
  27829 | AccessExclusiveLock | t       | 

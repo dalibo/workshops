@@ -96,7 +96,7 @@ publications.
 -- on dispose d'une souscription avec 2 publications
 \dRs
 ```
-```text
+```sh
           Liste des souscriptions
  Nom | Propriétaire | Activé | Publication 
 -----+--------------+--------+-------------

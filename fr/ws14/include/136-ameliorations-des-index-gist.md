@@ -38,7 +38,7 @@ COPY gist_fastbuild TO '/tmp/gist_fastbuild.copy';
 CREATE INDEX ON gist_fastbuild USING gist (pt);
 -- Time: 15837.450 ms (00:15.837)
 ```
-```text
+```sh
 =# \di+ gist_fastbuild_pt_idx
                              List of relations
          Name          | Type  |     Table      | Access method |  Size  
@@ -50,7 +50,7 @@ EXPLAIN (ANALYZE, BUFFERS)
  SELECT pt FROM gist_fastbuild 
   WHERE pt <@ box(point(.5,.5), point(.75,.75));
 ```
-```text
+```sh
                          QUERY PLAN
 ---------------------------------------------------------------
  Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild
@@ -71,7 +71,7 @@ COPY gist_fastbuild FROM '/tmp/gist_fastbuild.copy';
 CREATE INDEX ON gist_fastbuild USING gist (pt);
 -- Time: 168469.405 ms (02:48.469)
 ```
-```text
+```sh
 =# \di+ gist_fastbuild_pt_idx
                                             List of relations
          Name          | Type  |     Table      |  Size  
@@ -83,7 +83,7 @@ EXPLAIN (ANALYZE, BUFFERS)
  SELECT pt FROM gist_fastbuild 
   WHERE pt <@ box(point(.5,.5), point(.75,.75));
 ```
-```text
+```sh
                          QUERY PLAN
 ---------------------------------------------------------------
  Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild 
@@ -123,7 +123,7 @@ SELECT f.opfname AS famille,
  WHERE ap.amproc::text LIKE '%sortsupport'
    AND m.amname = 'gist';
 ```
-```text
+```sh
   famille  |  fonction_de_support   | type_gauche_op | type_droit_op | methode
 -----------+------------------------+----------------+---------------+---------
  point_ops | gist_point_sortsupport | point          | point         | gist

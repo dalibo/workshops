@@ -85,8 +85,7 @@ WITH RECURSIVE mtree(id, name, depth) AS (
 )
 SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
-
-```text
+```sh
  id | name  | depth
 ----+-------+-------
  10 | Edwin |     4
@@ -97,7 +96,7 @@ En version 14, la syntaxe suivante permet de récupérer des informations
 similaires :
 
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ SEARCH BREADTH FIRST BY column_name [, ...] SET search_seq_col_name ];
 
@@ -121,7 +120,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree ORDER BY morder DESC;
 ```
 
-```text
+```sh
  id |  name   |   morder
 ----+---------+-------------
  10 | Edwin   | (4,Edwin)
@@ -176,7 +175,7 @@ WITH RECURSIVE mtree(id, name, depth, is_cycle, path) AS (
 SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  | depth | is_cycle |            path
 ----+--------+-------+----------+----------------------------
   1 | Albert |     5 | t        | {(1),(3),(5),(9),(10),(1)}
@@ -185,7 +184,7 @@ SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 
 Le même résultat peut être obtenu en utilisant la clause CYCLE :
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ CYCLE column_name [, ...] SET cycle_mark_col_name
                               [ TO cycle_mark_value DEFAULT cycle_mark_default ]
@@ -210,7 +209,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  |   morder   | is_cycle |            path
 ----+--------+------------+----------+----------------------------
   1 | Albert | (5,Albert) | t        | {(1),(3),(5),(9),(10),(1)}
@@ -220,7 +219,7 @@ SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 Il est également possible de construire un tableau avec le contenu de la
 table et de trier à partir de ce contenu grâce à la syntaxe suivante :
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ SEARCH DEPTH FIRST BY column_name [, ...] SET search_seq_col_name ];
 
@@ -246,7 +245,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 ```
 
-```text
+```sh
  id |  name   |                   morder                    | is_cycle |          path
 ----+---------+---------------------------------------------+----------+------------------------
   4 | Britney | {(Albert),(Britney)}                        | f        | {(1),(4)}
@@ -286,7 +285,7 @@ SELECT id, name, (morder).* FROM mtree ORDER BY morder DESC LIMIT 1;
 ERROR:  CTE mtree does not have attribute 3
 ```
 
-Il est cependant possible d'y accéder en transformant le champ en objet _json_.
+Il est cependant possible d'y accéder en transformant le champ en objet JSON.
 
 ```sql
  WITH RECURSIVE mtree(id, name) AS (
@@ -303,7 +302,7 @@ SELECT id, name, row_to_json(morder) -> '*DEPTH*' AS depth
   FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  | depth
 ----+--------+-------
   1 | Albert | 5

@@ -43,7 +43,7 @@ SELECT amname,
  WHERE opcname LIKE ANY(ARRAY['%bloom%', '%minmax%'])
 GROUP BY 1, 2;
 ```
-```text
+```sh
  amname | classes d'opérateurs | types supportés
 --------+----------------------+-----------------
  brin   | *_mimmax_ops         |              26
@@ -85,7 +85,7 @@ EXPLAIN (ANALYZE,BUFFERS)
 
 Voici le plan de la requête :
 
-```text
+```sh
                                      QUERY PLAN
 ----------------------------------------------------------------------------
  Bitmap Heap Scan on bloom_test (cost=5.96..742.23 rows=198 width=49)
@@ -115,7 +115,7 @@ EXPLAIN (ANALYZE,BUFFERS)
 
 Voici le plan de la requête :
 
-```text
+```sh
                                      QUERY PLAN
 ------------------------------------------------------------------------------
  Bitmap Heap Scan on bloom_test (cost=17.23..45636.23 rows=198 width=49)
@@ -154,7 +154,7 @@ EXPLAIN (ANALYZE,BUFFERS)
 
 Voici le plan de la requête :
 
-```text
+```sh
                                      QUERY PLAN
 ----------------------------------------------------------------------------
  Bitmap Heap Scan on bloom_test (cost=145.23..45764.23 rows=198 width=49)
@@ -194,7 +194,7 @@ La comparaison des tailles montre que l'index BRIN utilisant les
 `uuid_bloom_ops` est plus grand que l'index BRIN classique mais nettement plus
 petit que l'index B-tree.
 
-```text
+```sh
                            List of relations
          Name         | Type  |   Table    | Access method |  Size
 ----------------------+-------+------------+---------------+--------
@@ -224,7 +224,7 @@ CREATE INDEX test_bloom_parm_idx on bloom_test
        USING brin (id uuid_bloom_ops(false_positive_rate=.0001)
 );
 ```
-```text
+```sh
 ERROR:  the bloom filter is too large (8924 > 8144)
 ```
 
@@ -241,7 +241,7 @@ INSERT INTO bloom_test VALUES (md5('a')::uuid, md5('a'));
 Si la table est vide, on voit que l'erreur ne survient pas lors de la création
 de l'index mais lors de la première insertion :
 
-```text
+```sh
 CREATE TABLE
 CREATE INDEX
 ERROR:  the bloom filter is too large (8924 > 8144)
@@ -282,7 +282,7 @@ EXPLAIN (ANALYZE, BUFFERS)
 
 Voci le plan généré :
 
-```text
+```sh
                                    QUERY PLAN
 ---------------------------------------------------------------------------
  Bitmap Heap Scan on brin_multirange (cost=107.67..4861.46 rows=5000 width=8)
@@ -312,7 +312,7 @@ EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
 ```
-```text
+```sh
                                   QUERY PLAN
 --------------------------------------------------------------------------------
  Bitmap Heap Scan on brin_multirange (cost=12.42..4935.32 rows=1550 width=8)
@@ -349,7 +349,7 @@ EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
 ```
-```text
+```sh
                                      QUERY PLAN
 -------------------------------------------------------------------------------
  Bitmap Heap Scan on brin_multirange (cost=16.42..4939.32 rows=1550 width=8)
@@ -381,7 +381,7 @@ On peut voir que l'index BRIN avec la classe d'opérateur `*_minmax_multi_ops`
 est plus gros que l'index BRIN traditionnel mais, il est toujours beaucoup plus
 petit que l'index B-tree.
 
-```text
+```sh
                Name               | Type  |     Table      |Access method | Size
 ----------------------------------+-------+----------------+--------------+-------
  brin_multirange_btree_idx        | index |brin_multirange |btree         | 21 MB

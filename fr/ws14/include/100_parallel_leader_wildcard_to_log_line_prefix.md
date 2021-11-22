@@ -51,7 +51,7 @@ quatre processus auxiliaires (pid `20992` à `20995`) et d'un processus princip
 (pid `20969`). Chacun de ses processus partage le même identifiant de requête
 `-8329068551672606797`.
 
-```text
+```sh
 [20969-20995]: id=-8329068551672606797 
     LOG:  temporary file: path "pgsql_tmp20995.0", size 29450240
 [20969-20993]: id=-8329068551672606797 
