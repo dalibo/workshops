@@ -345,9 +345,9 @@ localhost:5444 postgres@postgres=# EXPLAIN (ANALYZE) SELECT * FROM nummultirange
 -->
 
 La documentation détaille l'ensemble des
-[opérateurs](https://www.postgresql.org/docs/14/functions-range.html#RANGE-OPERATORS-TABLE),
-[fonctions](https://www.postgresql.org/docs/14/functions-range.html#RANGE-FUNCTIONS-TABLE),
-et [agrégats](https://www.postgresql.org/docs/14/functions-aggregate.html)
+[opérateurs](https://docs.postgresql.fr/14/functions-range.html#RANGE-OPERATORS-TABLE),
+[fonctions](https://docs.postgresql.fr/14/functions-range.html#RANGE-FUNCTIONS-TABLE),
+et [agrégats](https://docs.postgresql.fr/14/functions-aggregate.html)
 disponibles pour ce nouveau
-[type](https://www.postgresql.org/docs/14/rangetypes.html#RANGETYPES-BUILTIN).
+[type](https://docs.postgresql.fr/14/rangetypes.html#RANGETYPES-BUILTIN).
 </div>

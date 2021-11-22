@@ -25,7 +25,7 @@ colonnes de jointures.
 
 C'est une fonctionnalité du standard SQL. Elle s'ajoute à la liste des
 [fonctionnalitées
-supportées](https://www.postgresql.org/docs/14/features.html).
+supportées](https://docs.postgresql.fr/14/features.html).
 
 Exemple :
 

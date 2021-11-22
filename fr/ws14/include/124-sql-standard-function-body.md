@@ -44,7 +44,7 @@ END;
 ```
 
 Ce type de déclaration ne permet pas d'utiliser les [types
-polymorphiques](https://www.postgresql.org/docs/14/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC) :
+polymorphiques](https://docs.postgresql.fr/14/extend-type-system.html#EXTEND-TYPES-POLYMORPHIC) :
 
 ```sql
 CREATE OR REPLACE FUNCTION display_type(a anyelement) RETURNS text
