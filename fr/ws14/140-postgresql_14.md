@@ -190,7 +190,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Nouveaux caractères d'échappement pour `log_line_prefix`
+#### Nouveaux caractères d'échappement pour log_line_prefix
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/100 -->
 !include include/100_parallel_leader_wildcard_to_log_line_prefix.md
@@ -328,7 +328,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 ----
 
-#### Autorise `pg_rewind` a utiliser un secondaire comme source
+#### Autorise pg_rewind à utiliser un secondaire comme source
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/104 -->
 !include include/104_allow_pg_rewind_to_use_a_standby_server_as_the_source_system.md
@@ -385,7 +385,7 @@ possible.
 
 ----
 
-### Fonction `string_to_table`
+### Fonction string_to_table
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/118 -->
 !include include/118_function_string_to_table.md
@@ -420,7 +420,7 @@ possible.
 
 ----
 
-### Nouveaux types `multirange` et nouvelles fonctions d'agrégats
+### Nouveaux types multirange et nouvelles fonctions d'agrégats
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/122 -->
 !include include/122_range_agg_multiranges.md
@@ -448,7 +448,7 @@ possible.
 
 ----
 
-### Nouvelle fonction `date_bin`
+### Nouvelle fonction date_bin
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/126 -->
 !include include/126-truncating-timestamps-on-arbitrary-intervals-fct-date_bin.md
@@ -468,35 +468,35 @@ possible.
 
 ----
 
-### Nouvelle vue `pg_stat_wal`
+### Nouvelle vue pg_stat_wal
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/129 -->
 !include include/129_nouvelle_vue_pg_stat_wal.md
 
 ----
 
-### Nouvelle vue `pg_stat_progress_copy`
+### Nouvelle vue pg_stat_progress_copy
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/133 -->
 !include include/133_simple_progress_reporting_for_copy_command.md
 
 ----
 
-### Nouvelle vue `pg_stat_replication_slots`
+### Nouvelle vue pg_stat_replication_slots
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
 !include include/135-pg_stat_replicaton_slots.md
 
 ----
 
-### Nouveautées dans `pg_stat_statements`
+### Nouveautées dans pg_stat_statements
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/130 -->
 !include include/130_pg_stat_statements_new_features.md
 
 ----
 
-### Ajout de statistiques sur les sessions dans `pg_stat_database`
+### Ajout de statistiques sur les sessions dans pg_stat_database
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/131 -->
 !include include/131_add_session_statistics_to_pg_stat_database.md
@@ -510,7 +510,7 @@ possible.
 
 ----
 
-### Nouveauté dans `pg_locks`
+### Nouveauté dans pg_locks
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/134 -->
 !include include/134_add_wait_start_column_to_pg_locks.md
