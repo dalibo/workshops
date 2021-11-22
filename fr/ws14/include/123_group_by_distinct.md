@@ -11,6 +11,7 @@ Discussion
 
 <div class="slide-content">
   * Dédoublonnage des résultats d'agrégations multiples produit par un `GROUP BY`
+  * Utile avec `ROLLUP` ou `CUBE`
 </div>
 
 <div class="notes">
@@ -44,7 +45,7 @@ SELECT row_number() OVER(), departement, ville,
  GROUP BY rollup(departement, ville),
           rollup(departement, year);
 ```
-```text
+```sh
  row_number | departement |  ville  | year | montant 
 ------------+-------------+---------+------+---------
           1 |           ¤ | ¤       |    ¤ |    2050
@@ -71,7 +72,7 @@ SELECT row_number() OVER(), departement, ville,
 ```
 
 L'utilisation de `GROUP BY DISTINCT` permet de régler ce problème sans étape
-supplémentaire :
+supplémentaire :
 
 ```sql
 SELECT departement, ville, extract(YEAR FROM  creation) as year, 
@@ -80,7 +81,7 @@ SELECT departement, ville, extract(YEAR FROM  creation) as year,
  GROUP BY DISTINCT rollup(departement, ville),
                    rollup(departement, year);
 ```
-```text
+```sh
  departement |  ville  | year | montant
 -------------+---------+------+---------
            ¤ | ¤       |    ¤ |    2050
