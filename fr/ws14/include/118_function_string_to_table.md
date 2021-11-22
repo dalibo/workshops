@@ -12,10 +12,18 @@ Discussion
 <div class="slide-content">
 
 * Nouvelle fonction pour subdiviser une chaîne de caractère et renvoyer le
-  résultat dans une table :
-  * `text` : chaîne de caractères à traiter
-  * `text` : séparateur
-  * `text` : chaîne de caractères à remplacer par `NULL` si rencontrée 
+  résultat dans une table :
+
+```sql
+SELECT string_to_table('une chaine à ignorer', ' ', 'ignorer');
+
+string_to_table
+-----------------
+ une
+ chaine
+ à
+ ¤
+```
 * Alternative plus performante à `regexp_split_to_table()` et
   `unnest(string_to_array())`.
 
@@ -29,7 +37,7 @@ renvoyer le résultat dans une table :
 ```sql
 \df string_to_table
 ```
-```text
+```sh
                               List of functions
    Schema   |      Name       | Result data type | Argument data types | Type
 ------------+-----------------+------------------+---------------------+------
@@ -44,7 +52,7 @@ Exemple d'utilisation :
 \pset null '¤'
 SELECT string_to_table('une chaine à ignorer', ' ', 'ignorer');
 ```
-```text
+```sh
  string_to_table
 -----------------
  une
