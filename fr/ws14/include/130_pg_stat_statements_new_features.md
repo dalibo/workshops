@@ -93,12 +93,13 @@ statistiques par la fonction `pg_stat_statements_reset()`.
 La colonne `dealloc` décompte les événements de purge qui sont déclenchés
 lorsque le nombre de requêtes distinctes dépasse le seuil défini par le
 paramètre `pg_stat_statements.max`. Elle sera particulièrement utile pour 
-configurer ce paramètre.
+configurer ce paramètre. En effet, si `pg_stat_statements.max` est trop bas,
+des purges trop fréquentes peuvent avoir un impact négatif sur les performances.
 
 Sur une instance en version 14 avec `pg_stat_statement.max` configuré à une valeur
 basse de 100, des requêtes distinctes sont exécutées via un script après une 
 réinitialisation des statistiques de `pg_stat_statements`, afin de provoquer un
-dépassement volontaire du seuil.
+dépassement volontaire du seuil :
 
 ```bash
 psql -d ws14 -c "select pg_stat_statements_reset();"
