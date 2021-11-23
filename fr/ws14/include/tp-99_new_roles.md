@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=6c3ffd697e2242f5497ea4b40fffc8f6f922ff60
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=a14a0118a1fecf4066e53af52ed0f188607d0c4b
@@ -61,7 +61,7 @@ base, en l'occurrence le rôle `postgres` dans notre exemple. La méta-commande 
 de l'outil `psql` permet de lister les tables, vues et séquences présentes dans
 les schémas courants de l'utilisateur.
 
-```text
+```sh
 tp1_template=# \d
                List of relations
  Schema |      Name      |   Type   |  Owner   
@@ -82,7 +82,7 @@ ALTER TABLE members OWNER TO pg_database_owner;
 En exécutant une nouvelle fois la méta-commande `\d` nous pouvons voir la modification
 du propriétaire de la séquence et de la table.
 
-```text
+```sh
 tp1_template=# \d
                    List of relations
  Schema |      Name      |   Type   |       Owner       
@@ -144,7 +144,7 @@ INSERT INTO members (name, age) VALUES
   ('Jessica', 26);
 ```
 
-```text
+```sh
 INSERT 0 3
 ```
 
@@ -179,7 +179,7 @@ CREATE ROLE dump_user NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT LOGIN;
 pg_dump --username=dump_user --dbname tp1
 ```
 
-```text
+```sh
 pg_dump: error: query failed: ERROR:  permission denied for table members
 pg_dump: error: query was: LOCK TABLE public.members IN ACCESS SHARE MODE
 ```
@@ -335,7 +335,7 @@ GRANT pg_write_all_data TO load_user;
 
 * Créer un fichier `members.csv` et y ajouter les lignes suivantes.
 
-```text
+```sh
 id,name,age
 1,Jean,41
 2,John,38
@@ -361,7 +361,7 @@ psql --username=load_user --dbname=tp1
 SELECT id, name, age FROM members LIMIT 10;
 ```
 
-```text
+```sh
 ERROR:  permission denied for table members
 ```
 
@@ -372,7 +372,7 @@ de la méta-commande `\copy`.
 \copy members FROM 'members.csv' WITH DELIMITER ',' CSV HEADER;
 ```
 
-```text
+```sh
 ERROR:  duplicate key value violates unique constraint "members_pkey"
 CONTEXT:  COPY members, line 2
 ```

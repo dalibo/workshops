@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=676887a3b0b8e3c0348ac3f82ab0d16e9a24bd43
 
@@ -48,7 +48,7 @@ INSERT INTO products VALUES
 ```
 -->
 
-Les deux requêtes suivantes sont similaires :
+Les deux requêtes suivantes sont similaires :
 
 ```sql
 SELECT id, product->'name' AS product, product->'price' AS price 
@@ -57,7 +57,7 @@ SELECT id, product->'name' AS product, product->'price' AS price
 SELECT id, product['name'] AS product, product['price'] AS price
   FROM products WHERE product['brand'] = '"AniOne"';
 ```
-```text
+```sh
  id  |            product             | price 
 -----+--------------------------------+-------
  100 | "Arbre à chat tonneau Aurelio" | 189
@@ -69,7 +69,7 @@ n'a pas d'équivalent et il est nécessaire d'ajouter les guillemets pour réali
 des comparaisons, par exemple.
 
 L'extraction de valeurs imbriquées est également possible avec cette syntaxe. La 
-mise à jour d'un élément est aussi supportée comme le montre l'exemple suivant :
+mise à jour d'un élément est aussi supportée comme le montre l'exemple suivant :
 
 ```sql
 UPDATE products SET product['dimension']['L'] = '50' WHERE id = 100; 

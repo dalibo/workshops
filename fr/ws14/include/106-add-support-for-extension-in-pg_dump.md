@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=6568cef26e0f40c25ae54b8e20aad8d1410a854b
 
@@ -55,10 +55,10 @@ pg_restore --dbname postgres \
 On constate alors que l'extension est absente, elle n'a donc pas été incluse
 dans le premier dump. Cela peut gêner lors de la restauration des données.
 
-```text
+```sh
 workshop=# \dx
 ```
-```text
+```sh
 Liste des extensions installées
 -[ RECORD 1 ]-----------------------------
 Nom         | plpgsql
@@ -82,10 +82,10 @@ En listant les extensions de la base de données, on constate cette fois que
 l'extension `pgcrypto` a été restaurée dans la base de données
 `workshop`.
 
-```text
+```sh
 workshop=# \dx
 ```
-```text
+```sh
 Liste des extensions installées
 -[ RECORD 1 ]----------------------------------------------------
 Nom         | pgcrypto

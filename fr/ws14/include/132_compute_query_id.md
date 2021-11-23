@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=5fd9dfa5f50e4906c35133a414ebec5b6d518493
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=4f0b0966c866ae9f0e15d7cc73ccf7ce4e1af84b
@@ -48,7 +48,7 @@ SET compute_query_id = on;
 EXPLAIN (verbose, costs off)
  SELECT abalance FROM pgbench_accounts WHERE aid = 28742;
 ```
-```text
+```sh
                             QUERY PLAN
 -------------------------------------------------------------------
  Index Scan using pgbench_accounts_pkey on public.pgbench_accounts
@@ -66,7 +66,7 @@ l'extension `pg_stat_statements`, l'identifiant ne sera pas disponible.
 CREATE EXTENSION pg_stat_statements;
 SHOW compute_query_id ;
 ```
-```text
+```sh
  compute_query_id 
 ------------------
  auto
@@ -75,7 +75,7 @@ SHOW compute_query_id ;
 SELECT query_id, query FROM pg_stat_activity 
  WHERE state = 'active';
 ```
-```text
+```sh
       query_id       |                           query
 ---------------------+---------------------------------------------------------
  2691537454541915536 | SELECT abalance FROM pgbench_accounts WHERE aid = 85694;
@@ -87,7 +87,7 @@ SELECT query_id, query FROM pg_stat_activity
 SELECT query, calls, mean_exec_time FROM pg_stat_statements 
  WHERE queryid = 2691537454541915536 \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]--+-----------------------------------------------------
 query          | SELECT abalance FROM pgbench_accounts WHERE aid = $1
 calls          | 3786805

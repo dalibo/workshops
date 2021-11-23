@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2492/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=0827e8af70f4653ba17ed773f123a60eadd9f9c9
@@ -19,28 +19,35 @@ Discussion
 
 <div class="notes">
 
-Avant la version 14, l'autovacuum ignorait les tables partitionnées. Ce comportement
-avait pour conséquence de ne générer aucune statistique pour ces objets et 
+Avant la version 14, l'autovacuum ignorait les tables partitionnées.
+Il ne créait des statistiques que pour les partitions elles-mêmes.
+Ce comportement
+avait pour conséquence de ne générer aucune statistique pour la table partitionnée, et
 pouvait provoquer des mauvais choix de plan d'exécution.
 
-Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel. Avec cette 
+Pour corriger ce problème, il fallait réaliser un `ANALYZE` manuel sur la table partitionnée.
+Avec cette
 nouvelle version, ce n'est plus le cas et les statistiques des tables partitionnées
-sont collectées comme pour une table classique en fonction des paramètres 
+sont collectées comme pour une table classique, toujours en fonction des paramètres
 `autovacuum_analyze_scale_factor` et `autovacuum_analyze_threshold`.
 
 Dans notre exemple, nous observons le comportement en version 13 puis en version
-14 avec la table partitionnée suivante.
+14 avec la table partitionnée suivante :
+
+<!-- FIXME
+Manque le CREATE TABLE
+-->
 
 ```sql
 \d parent
 ```
-```text
+```sh
                      Table partitionnée « public.parent »
  Colonne |  Type   | Collationnement | NULL-able | Par défaut 
 ---------+---------+-----------------+-----------+------------
  id      | integer |                 |           |            
 Clé de partition : RANGE (id)
-Index :
+Index :
     "parent_id_idx" btree (id)
 Partitions: enfant_1 FOR VALUES FROM (0) TO (5000000),
             enfant_2 FOR VALUES FROM (5000000) TO (11000000)
@@ -65,7 +72,7 @@ ANALYZE parent;
 -- Maintenant on dispose des statistiques
 SELECT * FROM pg_stats WHERE tablename = 'parent' \gx
 ```
-```text
+```sh
 -[ RECORD 1 ]----------+------------------------------
 schemaname             | public
 tablename              | parent

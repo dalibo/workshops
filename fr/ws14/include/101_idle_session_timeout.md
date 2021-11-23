@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/31/2646/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=9877374bef76ef03923f6aa8b955f2dbcbe6c2c7
@@ -45,7 +45,7 @@ SET idle_session_timeout TO '5s';
 
 SELECT 1;
 ```
-```text
+```sh
 FATAL:  terminating connection due to idle-session timeout
 server closed the connection unexpectedly
 	This probably means the server terminated abnormally
@@ -54,7 +54,7 @@ server closed the connection unexpectedly
 
 Un message apparaît dans les journaux d'activité :
 
-```text
+```sh
 FATAL:  terminating connection due to idle-session timeout
 ```
 </div>

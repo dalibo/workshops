@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=b8fdee7d0ca8bd2165d46fb1468f75571b706a01
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=4f0b0966c866ae9f0e15d7cc73ccf7ce4e1af84b
@@ -51,7 +51,7 @@ quatre processus auxiliaires (pid `20992` à `20995`) et d'un processus princip
 (pid `20969`). Chacun de ses processus partage le même identifiant de requête
 `-8329068551672606797`.
 
-```text
+```sh
 [20969-20995]: id=-8329068551672606797 
     LOG:  temporary file: path "pgsql_tmp20995.0", size 29450240
 [20969-20993]: id=-8329068551672606797 

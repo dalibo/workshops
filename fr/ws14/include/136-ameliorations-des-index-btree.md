@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=d168b666823b6e0bcf60ed19ce24fb5fb91b8ccf
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=9dc718bd
@@ -59,7 +59,7 @@ de faire de la place dans la page. En dernier recours, la page se divise en
 deux (_page split_) ce qui fait grossir l'index.
 
 Pour le tester, on peut comparer la taille des index sur une base `pgbench`
-après 10 minutes d'activité en version 13 et 14 :
+après 10 minutes d'activité en version 13 et 14 :
 
 ```bash
 createdb bench

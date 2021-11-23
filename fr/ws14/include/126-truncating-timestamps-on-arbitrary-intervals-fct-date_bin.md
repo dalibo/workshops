@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=49ab61f0bdc93984a8d36b602f6f2a15f09ebcc7
 
@@ -21,31 +21,31 @@ Discussion
 
 <div class="notes">
 
-<!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
+<!-- https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
 
 La nouvelle fonction `date_bin` permet de placer un timestamp fourni en entrée 
 (second paramètre) dans un intervalle aussi appellée _bucket_.
 
-Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
+Documentation : <https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
 
 Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
 regroupant les données par plages de 15 minutes.
 
 La valeur mise en second paramètre de la fonction est placée dans un _bucket_
-en se basant sur :
+en se basant sur :
 
 * Un timestamp de début (troisième paramètre).
 * Une taille définie sous forme d'intervalle (premier paramètre). \
   L'unité utilisée pour définir la taille du _bucket_ peut être définie \
   en secondes, minutes, heures, jours ou semaines.
 
-La fonction existe pour des timestamp avec et sans fuseau horaire :
+La fonction existe pour des timestamp avec et sans fuseau horaire :
 
 ```sql
 \df date_bin
 ```
-```text
+```sh
 List of functions
 -[ RECORD 1 ]-------+-------------------------------------------------------------------
 Schema              | pg_catalog
@@ -61,7 +61,7 @@ Argument data types | interval, timestamp without time zone, timestamp without t
 Type                | func
 ```
 
-Voici un exemple de cette fonction en action :
+Voici un exemple de cette fonction en action :
 
 ```sql
 -- Génération des données
@@ -77,7 +77,7 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:00:00'::timestamp with ti
        id_sonde, avg(mesure)
   FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
-```text
+```sh
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-06-01 00:00:00+02 |        1 |     2.9318518518518519
@@ -109,7 +109,7 @@ SELECT date_bin('1 hour 30 minutes', t, '2021-06-01 00:11:00'::timestamp with ti
        avg(mesure)
 FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 ```
-```text
+```sh
         date_bin        | id_sonde |          avg
 ------------------------+----------+------------------------
  2021-05-31 22:41:00+02 |        1 | 0.30454545454545454545
@@ -134,7 +134,7 @@ FROM sonde GROUP BY 1, 2 ORDER BY 1 ASC;
 
 Comme dit précédemment, il n'est pas possible d'utiliser une taille de _bucket_
 définie en mois ou années. Il est cependant possible de spécifier des tailles de
-_bucket_ supérieures ou égales à un mois avec les autres unités :
+_bucket_ supérieures ou égales à un mois avec les autres unités :
 
 ```sql
 SELECT date_bin('1 year', '2021-06-01 10:05:10', '2021-06-01');
@@ -145,7 +145,7 @@ SELECT date_bin('1 month', '2021-06-01 10:05:10', '2021-06-01');
 
 SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
 ```
-```text
+```sh
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
@@ -154,25 +154,25 @@ SELECT date_bin('12 weeks', '2021-06-01 10:05:10', '2021-06-01');
 ```sql
 SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
 ```
-```text
+```sh
         date_bin
 ------------------------
  2021-06-01 00:00:00+02
 (1 row)
 ```
 
-<!-- https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC -->
+<!-- https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC -->
 
 La fonction `date_bin` a un effet similaire à `date_trunc` lorsqu'elle est 
 utilisée avec les intervalles `1 hour` et `1 minute`.
 
-Documentation : <https://www.postgresql.org/docs/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC>
+Documentation : <https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC>
 
 ```sql
 SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
        date_trunc('hour', '2021-06-01 10:05:10'::timestamp);
 ```
-```text
+```sh
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:00:00 | 2021-06-01 10:00:00
@@ -182,7 +182,7 @@ SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
 SELECT date_bin('1 minute', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),
        date_trunc('minute', '2021-06-01 10:05:10'::timestamp);
 ```
-```text
+```sh
       date_bin       |     date_trunc
 ---------------------+---------------------
  2021-06-01 10:05:00 | 2021-06-01 10:05:00

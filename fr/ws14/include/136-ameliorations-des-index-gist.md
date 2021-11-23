@@ -12,7 +12,7 @@
 
 **Améliorations lors de la création d'index GiST**
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=16fa9b2b30a357b4aea982bd878ec2e5e002dbcc
 
@@ -38,7 +38,7 @@ COPY gist_fastbuild TO '/tmp/gist_fastbuild.copy';
 CREATE INDEX ON gist_fastbuild USING gist (pt);
 -- Time: 15837.450 ms (00:15.837)
 ```
-```text
+```sh
 =# \di+ gist_fastbuild_pt_idx
                              List of relations
          Name          | Type  |     Table      | Access method |  Size  
@@ -50,7 +50,7 @@ EXPLAIN (ANALYZE, BUFFERS)
  SELECT pt FROM gist_fastbuild 
   WHERE pt <@ box(point(.5,.5), point(.75,.75));
 ```
-```text
+```sh
                          QUERY PLAN
 ---------------------------------------------------------------
  Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild
@@ -71,7 +71,7 @@ COPY gist_fastbuild FROM '/tmp/gist_fastbuild.copy';
 CREATE INDEX ON gist_fastbuild USING gist (pt);
 -- Time: 168469.405 ms (02:48.469)
 ```
-```text
+```sh
 =# \di+ gist_fastbuild_pt_idx
                                             List of relations
          Name          | Type  |     Table      |  Size  
@@ -83,7 +83,7 @@ EXPLAIN (ANALYZE, BUFFERS)
  SELECT pt FROM gist_fastbuild 
   WHERE pt <@ box(point(.5,.5), point(.75,.75));
 ```
-```text
+```sh
                          QUERY PLAN
 ---------------------------------------------------------------
  Index Only Scan using gist_fastbuild_pt_idx on gist_fastbuild 
@@ -107,7 +107,7 @@ défini par la fonction de support. Cela permet de regrouper les enregistrements
 plus efficacement et donc de réduire la taille de l'index.
 
 Actuellement seule la classe d'opérateur pour les types `point` dispose de cette
-fonction :
+fonction :
 
 ```sql
 SELECT f.opfname AS famille,
@@ -123,7 +123,7 @@ SELECT f.opfname AS famille,
  WHERE ap.amproc::text LIKE '%sortsupport'
    AND m.amname = 'gist';
 ```
-```text
+```sh
   famille  |  fonction_de_support   | type_gauche_op | type_droit_op | methode
 -----------+------------------------+----------------+---------------+---------
  point_ops | gist_point_sortsupport | point          | point         | gist
@@ -131,7 +131,7 @@ SELECT f.opfname AS famille,
 
 **Index SPGiST couvrants**
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=09c1c6ab4bc5764dd69c53ccfd43b2060b1fd090
 

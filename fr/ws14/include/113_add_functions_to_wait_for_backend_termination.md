@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=aaf043257205ec523f1ba09a3856464d17cf2281
 
@@ -31,7 +31,7 @@ Il est désormais possible d'attendre l'arrêt du backend ciblé par l'exécutio
 de `pg_terminate_backend()` pendant un temps configuré avec le nouveau
 paramètre `timeout` de cette fonction :
 
-```text
+```sh
 # \df pg_terminate_backend
 
 List of functions
@@ -53,7 +53,7 @@ d'avertissement sera affiché à l'écran et la fonction renverra `false` :
 ```sql
 # SELECT pg_terminate_backend(358855, 200);
 ```
-```text
+```sh
 WARNING:  backend with PID 358818 did not terminate within 200 milliseconds
 -[ RECORD 1 ]--------+--
 pg_terminate_backend | f

@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/29/1927/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=45fdc9738b36d1068d3ad8fdb06436d6fd14436b
@@ -14,7 +14,8 @@ Discussion
 
 <div class="slide-content">
 
-* Mise en place du mode _streaming in-progress_ pour la réplication logique
+* Nouveau mode _streaming in-progress_ pour la réplication logique
+  + à activer
 * Informations supplémentaires pour les messages d'erreur de type `columns are missing`
 * Ajout de la syntaxe `ALTER SUBSCRIPTION… ADD/DROP PUBLICATION…`
 
@@ -22,7 +23,7 @@ Discussion
 
 <div class="notes">
 
-**streaming in-progress**
+**Streaming in-progress**
 
 Lorsque l'on utilise la réplication logique, le processus _walsender_ va procéder 
 au décodage logique et réordonner les modifications depuis les fichiers WAL 
@@ -30,7 +31,7 @@ avant de les envoyer à l'abonné. Cette opération est faite en mémoire mais e
 cas de dépassement du seuil indiqué par le paramètre `logical_decoding_work_mem`, 
 ces données sont écrites sur disque.
 
-Ce comportement à deux inconvénients :
+Ce comportement à deux inconvénients :
 
 * il peut provoquer l'apparition d'une volumétrie non négligeable dans le répertoire 
 `pg_replslot` et jouer sur les I/O ;
@@ -49,8 +50,8 @@ reçu de `COMMIT`.
 Il va donc être possible de réduire la consommation I/O et également la latence entre 
 le publieur et l'abonné.
 
-Ce nouveau comportement n'est pas disponible par défaut, il faut ajouter 
-l'option `streaming = on` à l'abonné :
+Ce nouveau comportement n'est pas activé par défaut ; il faut ajouter 
+l'option `streaming = on` à l'abonné :
 
 ```sql
 CREATE SUBSCRIPTION sub_stream 
@@ -61,7 +62,7 @@ ALTER SUBSCRIPTION sub_stream SET (streaming = on);
 ```
 
 Certains cas nécessiteront toujours des écritures sur disque. Par exemple
-dans le cas où le seuil mémoire de décodage est atteint mais qu'un tuple 
+dans le cas où le seuil mémoire de décodage est atteint, mais qu'un tuple 
 n'est pas complètement décodé.
 
 **Messages d'erreur plus précis**
@@ -95,7 +96,7 @@ publications.
 -- on dispose d'une souscription avec 2 publications
 \dRs
 ```
-```text
+```sh
           Liste des souscriptions
  Nom | Propriétaire | Activé | Publication 
 -----+--------------+--------+-------------

@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=3696a600e2292d43c00949ddf0352e4ebb487e5b
 
@@ -34,18 +34,18 @@ PostgreSQL permet de créer des requêtes récursives grâce à la clause `WITH
 RECURSIVE`. Ce genre de requêtes permet de remonter une arborescence
 d'enregistrements liés par des colonnes de type `id` et `parent_id`.
 
-Dans ce genre de requête, il est courant de vouloir :
+Dans ce genre de requête, il est courant de vouloir :
 
-* ordonner les données en fonction de leur profondeur ;
+* ordonner les données en fonction de leur profondeur ;
 * afficher le chemin parcouru ou la profondeur de l'enregistrement dans
-  l'arborescence ;
+  l'arborescence ;
 * détecter l'apparition d'un cycle, une séquence d'enregistrement provoquant
   une boucle.
 
 La norme SQL prévoit différentes syntaxes pour réaliser ce genre de tâches.
 Elles sont désormais implémentées dans PostgreSQL.
 
-Création d'un jeu d'essais :
+Création d'un jeu d'essais :
 
 ```sql
 CREATE TABLE tree(id int, parent_id int, name text);
@@ -85,8 +85,7 @@ WITH RECURSIVE mtree(id, name, depth) AS (
 )
 SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
-
-```text
+```sh
  id | name  | depth
 ----+-------+-------
  10 | Edwin |     4
@@ -94,17 +93,17 @@ SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
 
 En version 14, la syntaxe suivante permet de récupérer des informations
-similaires :
+similaires :
 
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ SEARCH BREADTH FIRST BY column_name [, ...] SET search_seq_col_name ];
 
 query: ( select | values | insert | update | delete )
 ```
 
-Exemple :
+Exemple :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (
@@ -121,7 +120,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree ORDER BY morder DESC;
 ```
 
-```text
+```sh
  id |  name   |   morder
 ----+---------+-------------
  10 | Edwin   | (4,Edwin)
@@ -176,16 +175,16 @@ WITH RECURSIVE mtree(id, name, depth, is_cycle, path) AS (
 SELECT * FROM mtree ORDER BY depth DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  | depth | is_cycle |            path
 ----+--------+-------+----------+----------------------------
   1 | Albert |     5 | t        | {(1),(3),(5),(9),(10),(1)}
 (1 row)
 ```
 
-Le même résultat peut être obtenu en utilisant la clause CYCLE :
+Le même résultat peut être obtenu en utilisant la clause CYCLE :
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ CYCLE column_name [, ...] SET cycle_mark_col_name
                               [ TO cycle_mark_value DEFAULT cycle_mark_default ]
@@ -194,7 +193,7 @@ with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query 
 query: ( select | values | insert | update | delete )
 ```
 
-Voici un exemple :
+Voici un exemple :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (
@@ -210,7 +209,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  |   morder   | is_cycle |            path
 ----+--------+------------+----------+----------------------------
   1 | Albert | (5,Albert) | t        | {(1),(3),(5),(9),(10),(1)}
@@ -218,9 +217,9 @@ SELECT * FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
 Il est également possible de construire un tableau avec le contenu de la
-table et de trier à partir de ce contenu grâce à la syntaxe suivante :
+table et de trier à partir de ce contenu grâce à la syntaxe suivante :
 
-```text
+```sh
 with_query_name [ ( column_name [, ...] ) ] AS [ [ NOT ] MATERIALIZED ] ( query )
   [ SEARCH DEPTH FIRST BY column_name [, ...] SET search_seq_col_name ];
 
@@ -228,7 +227,7 @@ query: ( select | values | insert | update | delete )
 ```
 
 Comme vous pouvez le voir dans l'exemple ci-dessous, il est possible d'utiliser
-la clause `CYCLE` avec cette syntaxe aussi :
+la clause `CYCLE` avec cette syntaxe aussi :
 
 ```sql
 WITH RECURSIVE mtree(id, name) AS (
@@ -246,7 +245,7 @@ WITH RECURSIVE mtree(id, name) AS (
 SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 ```
 
-```text
+```sh
  id |  name   |                   morder                    | is_cycle |          path
 ----+---------+---------------------------------------------+----------+------------------------
   4 | Britney | {(Albert),(Britney)}                        | f        | {(1),(4)}
@@ -286,7 +285,7 @@ SELECT id, name, (morder).* FROM mtree ORDER BY morder DESC LIMIT 1;
 ERROR:  CTE mtree does not have attribute 3
 ```
 
-Il est cependant possible d'y accéder en transformant le champ en objet _json_.
+Il est cependant possible d'y accéder en transformant le champ en objet JSON.
 
 ```sql
  WITH RECURSIVE mtree(id, name) AS (
@@ -303,7 +302,7 @@ SELECT id, name, row_to_json(morder) -> '*DEPTH*' AS depth
   FROM mtree ORDER BY morder DESC LIMIT 1;
 ```
 
-```text
+```sh
  id |  name  | depth
 ----+--------+-------
   1 | Albert | 5

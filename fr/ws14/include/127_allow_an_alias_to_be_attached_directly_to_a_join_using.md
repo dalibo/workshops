@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=055fee7eb4dcc78e58672aef146334275e1cc40d
 
@@ -25,9 +25,9 @@ colonnes de jointures.
 
 C'est une fonctionnalité du standard SQL. Elle s'ajoute à la liste des
 [fonctionnalitées
-supportées](https://www.postgresql.org/docs/14/features.html).
+supportées](https://docs.postgresql.fr/14/features.html).
 
-Exemple :
+Exemple :
 
 ```sql
 CREATE TABLE region (
@@ -46,7 +46,7 @@ CREATE TABLE ville (
 SELECT c.*
   FROM ville a INNER JOIN region b USING (region_id) AS c \gdesc
 ```
-```text
+```sh
   Column   |  Type
 -----------+---------
  region_id | integer

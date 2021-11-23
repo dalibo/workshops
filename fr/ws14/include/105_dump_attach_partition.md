@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=9a4c0e36fbd671b5e7426a5a0670bdd7ba2714a0
 
@@ -59,7 +59,7 @@ SELECT date_vente,
 ```
 -->
 
-```text
+```sh
            Partitioned table "ventes"
    Column   |  Type   | Collation | Nullable | Default 
 ------------+---------+-----------+----------+---------
@@ -91,7 +91,7 @@ _table of contents_), dont la nouvelle ligne `ATTACH` pour la partition exporté
 pg_restore -l ventes.dump
 ```
 
-```text
+```sh
 ; Selected TOC Entries:
 ;
 210; 1259 18728 TABLE public ventes_y2001 user
@@ -105,7 +105,7 @@ table partitionnée sur la base cible.
 ```bash
 pg_restore -v -d staging -t ventes_y2001 ventes.dump
 ```
-```text
+```sh
 pg_restore: connecting to database for restore
 pg_restore: creating TABLE "ventes_y2001"
 pg_restore: processing data for table "ventes_y2001"
@@ -114,7 +114,7 @@ pg_restore: processing data for table "ventes_y2001"
 Dans les versions précédentes, l'erreur suivante empêchait ce type de restauration
 et la table principale devait être présente pour aboutir au résultat souhaité.
 
-```text
+```sh
 pg_restore: connecting to database for restore
 pg_restore: creating TABLE "ventes_y2001"
 pg_restore: while PROCESSING TOC:

@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/30/2584/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=a6642b3ae060976b42830b7dc8f29ec190ab05e4
@@ -49,7 +49,7 @@ possible de déterminer la fragmentation de l'index à l'aide de l'extension
 CREATE EXTENSION pgstattuple;
 SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
 ```
-```text
+```sh
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.18 |                 50
@@ -57,7 +57,7 @@ SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
 ```sql
 SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
 ```
-```text
+```sh
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             74.17 |                 50
@@ -72,7 +72,7 @@ REINDEX INDEX parent_index;
 ```sql
 SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
 ```
-```text
+```sh
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0
@@ -80,7 +80,7 @@ SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_1_id_idx');
 ```sql
 SELECT avg_leaf_density, leaf_fragmentation FROM pgstatindex('enfant_2_id_idx');
 ```
-```text
+```sh
  avg_leaf_density | leaf_fragmentation 
 ------------------+--------------------
             90.23 |                  0

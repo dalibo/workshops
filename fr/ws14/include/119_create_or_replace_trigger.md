@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=92bf7e2d027466d750b4ac5b026f6f4ac29be881
 
@@ -31,10 +31,10 @@ définition d'un trigger sans devoir le supprimer au préalable.
 
 Cette fonctionnalité n'est pas disponible pour les triggers de type
 [`CONSTRAINT
-TRIGGER`](https://www.postgresql.org/docs/14/sql-createtrigger.html) et
+TRIGGER`](https://docs.postgresql.fr/14/sql-createtrigger.html) et
 provoque le message d'erreur suivant.
 
-```text
+```sh
 ERROR:  CREATE OR REPLACE CONSTRAINT TRIGGER is not supported
 ```
 

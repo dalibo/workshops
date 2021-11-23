@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://commitfest.postgresql.org/32/2883/
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=46d6e5f567906389c31c4fb3a2653da1885c18ee
@@ -57,7 +57,7 @@ SELECT * FROM test_copy ;
 SELECT pid, mode, granted, waitstart 
   FROM pg_locks WHERE pid in (27829,27680);
 ```
-```text
+```sh
   pid  |        mode         | granted |           waitstart           
 -------+---------------------+---------+-------------------------------
  27829 | AccessExclusiveLock | t       | 

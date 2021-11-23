@@ -1,5 +1,5 @@
 <!--
-Les commits sur ce sujet sont :
+Les commits sur ce sujet sont :
 
 * https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=c9d5298485b78a37923a23f9af9aa0ade06762db
 
@@ -14,15 +14,14 @@ Discussion
 
 * Évolution du _parser_ de requêtes
 * Supporte l'assignation de valeurs pour les types complexes en PL/pgSQL
-  * un élément ou une portion (_slice_) d'un tableau
-  * un champ dans un tableau de lignes (_record_)
-  * un couple clé/valeur pour le type `hstore`
   
-  ```sql
-  a[2:3] := array[3,4];
-  a[1].i := 2;
-  h['a'] := 'b';
-  ```
+```sql
+  a[2:3] := array[3,4];    -- slice de tableaux  int[]
+  a[1].i := 2;             -- champ de record
+  h['a'] := 'b';           -- hstore
+```
+
+* et plus performants !
 
 </div>
 
@@ -55,7 +54,7 @@ h['a'] := 'b';
 
 D'autres bénéfices sont obtenus avec cette évolution dans l'analyse de la syntaxe
 de ces types d'assignations. Tom Lane, à l'origine de ce patch, [annonce][plpgsql-assignment] 
-un gain de performance subtanciel ainsi qu'une meilleure lisibilité des erreurs
+un gain de performance substantiel ainsi qu'une meilleure lisibilité des erreurs
 pouvant survenir à l'assignation.
 
 [plpgsql-assignment]: https://www.postgresql.org/message-id/flat/4165684.1607707277@sss.pgh.pa.us

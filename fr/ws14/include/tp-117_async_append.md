@@ -192,7 +192,7 @@ SELECT region_id, d FROM regions
  CROSS JOIN generate_series(1, 1000) i
  CROSS JOIN generate_series('1970-01-01', '2010-01-01', '1 year'::interval) d;
 ```
-```text
+```sh
 INSERT 0 738000
 Time: 79229.338 ms (01:19.229)
 ```
@@ -224,7 +224,7 @@ EXPLAIN (analyze, costs off)
  SELECT count(anon_id) FROM population 
   WHERE date_naissance BETWEEN '2010-01-01' AND '2011-01-01';
 ```
-```text
+```sh
                                 QUERY PLAN
 --------------------------------------------------------------------------------
 Aggregate (actual time=499.397..499.439 rows=1 loops=1)
@@ -260,7 +260,7 @@ EXPLAIN (analyze, costs off)
  SELECT count(anon_id) FROM population 
   WHERE date_naissance BETWEEN '2010-01-01' AND '2011-01-01';
 ```
-```text
+```sh
                                 QUERY PLAN
 --------------------------------------------------------------------------------
 Aggregate (actual time=1986.016..1986.047 rows=1 loops=1)
@@ -309,7 +309,7 @@ UPDATE population
  WHERE anon_id::text like 'ff%'
    AND date_naissance < '1980-01-01';
 ```
-```text
+```sh
                                 QUERY PLAN
 --------------------------------------------------------------------------------
  Update on population (actual time=979.144..979.152 rows=0 loops=1)
