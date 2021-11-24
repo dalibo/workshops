@@ -20,7 +20,7 @@ Discussion
 
 <div class="notes">
 
-### Utiliser le rôle `pg_database_owner` dans une base _template_
+### Utiliser le rôle pg_database_owner dans une base _template_
 
 * Ouvrir un terminal puis emprunter l'identité de l'utilisateur `postgres` sur votre machine.
 
@@ -71,7 +71,7 @@ tp1_template=# \d
 ```
 
 Remarque : L'utilisation du type `IDENTITY` déclenche la création automatique
-> L'utilisation du type `IDENTITY` déclenche la création automatique d'une séquence.
+d'une séquence.
 
 * Modifier le propriétaire des objets avec le nouveau rôle `pg_database_owner`.
 
@@ -152,7 +152,7 @@ Sans être explicitement autorisé à écrire dans la table `members`, le rôle
 `atelier` bénéficie de tous les droits des objets appartenant au rôle
 `pg_database_owner` en sa qualité de propriétaire de la base de données.
 
-### Exporter avec le rôle `pg_read_all_data`
+### Exporter avec le rôle pg_read_all_data
 
 * Se connecter à la base de données `postgres` avec l'utilisateur **postgres**.
 
@@ -307,7 +307,7 @@ de la commande `pg_dumpall` ou de logiciels plus complets comme [pg_back](https:
 
 ----
 
-### Importer avec le rôle `pg_write_all_data`
+### Importer avec le rôle pg_write_all_data
 
 * Se connecter à l'instance PostgreSQL.
 
