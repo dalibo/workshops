@@ -282,7 +282,7 @@ Cette fois-ci, on constate un retard dans les lectures (`actual time=112..`) et
 que le nœud `Append` ne termine l'union des 18 résultats après 1986 millisecondes
 au lieu de 499 dans le cas d'une configuration asynchrone.
 
-Pour réactiver les options, exécuter la requête suivante :
+Pour réactiver les options sur les tables, exécuter la requête suivante :
 
 ```sql
 SELECT concat(
