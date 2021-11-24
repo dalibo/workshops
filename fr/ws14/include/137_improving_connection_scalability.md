@@ -17,17 +17,20 @@ Discussion
 
 <div class="notes">
 
+(Les graphiques sont empruntés à l'article de blog d'Andres Freund cité plus bas.)
+<!-- FIXME   on va dire que c'est couvert par le droit de citation ?  -->
+
 Pour rappel, le mécanisme MVCC (_MultiVersion Concurrency Control_) de PostgreSQL
 facilite l’accès concurrent de plusieurs utilisateurs (sessions) à la base en 
 disposant en permanence de plusieurs versions différentes d’un même enregistrement.
 Chaque session peut travailler simultanément sur la version qui s’applique à son
-contexte (on parle d’« instantané » ou de _snapshot_).
+contexte (on parle d’« instantané » ou de _snapshot_).
 
-Une série d'optimisation ont été apportées dans cette version 14 sur la gestion
+Une série d'optimisations ont été apportées dans cette version 14 sur la gestion
 des _snapshots_ induits par ce mécanisme lorsqu'un très grand nombre de connexions
 est atteint. Dans un [mail destiné aux développeurs][20200301083601], Andres Freund
 explique qu'une transaction consomme beaucoup de ressources pour actualiser l'état
-_xmin_ de sa propre session et que la méthode `GetSnapshotData()` requise pour
+_xmin_ de sa propre session, et que la méthode `GetSnapshotData()`, requise pour
 obtenir les informations sur les transactions du système, nécessitait de consulter
 l'état de chacune d'entre elles dans les zones mémoires de tous les CPU du serveur.
 
@@ -49,5 +52,8 @@ informations _xmin_ des transactions en écriture soient accessibles depuis un
 cache partagé. Dans une architecture où les lectures sont majoritaires, cette
 astuce permet de reconstituer les instantanés bien plus rapidement, augmentant 
 considérablement la quantité d'opérations par transaction.
+
+PostgreSQL 14 est donc un gros progrès pour les instances supportant de très nombreuses
+connexions simultanées, actives ou non.
 
 </div>
