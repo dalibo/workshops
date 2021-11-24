@@ -11,6 +11,9 @@ Discussion
 
 <div class="slide-content">
 
+* BRIN : index compact
+  + jusque là : si corrélation ordres physique/logique
+
 * Nouvelles classes d'opérateurs
   * `*_bloom_ops` : permet d'utiliser les index BRIN pour des données dont
     l'ordre physique ne coïncide pas avec l'ordre logique
@@ -21,15 +24,23 @@ Discussion
 
 <div class="notes">
 
-Les index BRIN permettent de créer des index très petits, ils sont très
-efficaces lorsque l'ordre physique des données est corrélé avec l'ordre
+Les index BRIN permettent de créer des index très petits.
+Jusque là ils n'étaient efficaces que lorsque l'ordre physique des données est corrélé avec l'ordre
 logique. Malheureusement, dès que cette corrélation change les performances se
-dégradent, ce qui limite les cas d'utilisations à des tables d'historisation
-par exemple.
+dégradent, ce qui limite les cas d'utilisation : tables d'historisation,
+décisionnel rechargé régulièrement, etc.
 
-PostgreSQL 14 élargit le champ d'utilisation des index BRIN. Deux nouvelles
-classes d'opérateurs ont été créées pour les index brin : `*_bloom_ops` et
-`*_minmax_multi_ops`.
+PostgreSQL 14 élargit le champ d'utilisation des index BRIN. De nouvelles
+classes d'opérateurs ont été créées pour les index BRIN,
+déclinées pour [chaque type de données](https://docs.postgresql.fr/14/brin-builtin-opclasses.html),
+et regroupées en deux grandes familles :
+
+  * `*_bloom_ops`
+  * `*_minmax_multi_ops`
+
+à ne pas confondre avec les [index bloom](https://docs.postgresql.fr/14/bloom.html),
+qui nécessitent une extension de même nom
+(des principes sont voisins mais l'implémentation est différente).
 
 ```sql
 SELECT amname,
@@ -47,7 +58,7 @@ GROUP BY 1, 2;
  amname | classes d'opérateurs | types supportés
 --------+----------------------+-----------------
  brin   | *_mimmax_ops         |              26
- brin   | *_minmax_multi_ops    |              19
+ brin   | *_minmax_multi_ops   |              19
  brin   | *_bloom_ops          |              24
 (3 rows)
 ```
@@ -60,9 +71,11 @@ table ne correspond pas à son ordre logique.
 
 ```sql
 CREATE TABLE bloom_test (id uuid, padding text);
+
 INSERT INTO bloom_test
   SELECT md5((mod(i,1000000)/100)::text)::uuid, md5(i::text)
     FROM generate_series(1,2000000) s(i);
+
 VACUUM ANALYZE bloom_test;
 ```
 
@@ -78,6 +91,7 @@ Commençons par tester avec un index B-tree :
 
 ```sql
 CREATE INDEX test_btree_idx on bloom_test (id);
+
 EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
@@ -102,19 +116,25 @@ Voici le plan de la requête :
  Execution Time: 0.198 ms
 ```
 
+Ce plan est optimal. `\di+` indique que l'index fait 13 Mo.
+
 Essayons maintenant avec un index BRIN utilisant les `uuid_minmax_ops` (la
 classe d'opérateur par défaut) :
 
 ```sql
 DROP INDEX test_btree_idx;
+
 CREATE INDEX test_brin_minmax_idx ON bloom_test USING brin (id);
+```
+Ce nouvel index ne pèse que 48 ko, ce qui est dérisoire.
+
+Relançons la même requête : 
+
+```sql
 EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
 ```
-
-Voici le plan de la requête :
-
 ```sh
                                      QUERY PLAN
 ------------------------------------------------------------------------------
@@ -136,17 +156,19 @@ Voici le plan de la requête :
 ```
 
 Le temps d'exécution de la requête avec cet index est beaucoup plus long
-qu'avec l'index B-tree. Cela s'explique en partie par le grand nombre d'accès
-en dehors du
-cache qui doivent être réalisés, environ 20620 contre une dizaine, et surtout par
+qu'avec l'index B-tree. Cela s'explique par le grand nombre d'accès
+qui doivent être réalisés, environ 20 620 contre une dizaine, et surtout par
 le très grand nombre de vérifications qui doivent être faites dans la table
-(presque 2 millions).
+(presque 2 millions). C'est logique : l'index BRIN est utilisé ici à contre-emploi,
+dans une configuration où les données (des UUID) sont presque aléatoires et non triés.
 
 Pour terminer, essayons avec l'index BRIN et la nouvelle classe d'opérateur :
 
 ```sql
 DROP INDEX test_brin_minmax_idx;
+
 CREATE INDEX test_brin_bloom_idx on bloom_test USING brin (id uuid_bloom_ops);
+
 EXPLAIN (ANALYZE,BUFFERS)
   SELECT * FROM bloom_test
    WHERE id = 'cfcd2084-95d5-65ef-66e7-dff9f98764da';
@@ -174,24 +196,25 @@ Voici le plan de la requête :
  Execution Time: 7.553 ms
 ```
 
-On voit que le nouvel index accède à soixante fois moins de bloc en mémoire que
-l'index BRIN _minmax_. Le nombre de lignes vérifiées dans la table est
-également nettement inférieur (presque 80 fois moins). Les performances
-globales sont meilleures qu'avec l'index BRIN _minmax_. Dans ce cas, le coût
-estimé est cependant légèrement supérieur, si les deux index sont présents en
-même temps sur la table, l'index BRIN _minmax_sera donc choisi.
+Le nouvel index entraîne la vérification de soixante fois moins de blocs en mémoire que
+l'index BRIN _minmax_ (301 contre 20 620), et le nombre de lignes vérifiées dans la table est
+également nettement inférieur (environ 27 000 contre 2 millions). Les performances
+globales sont en conséquence bien meilleures qu'avec l'index BRIN _minmax_.
+(Dans ce cas précis, le coût
+estimé est cependant légèrement supérieur à cause de la taille des index :
+si les deux index sont présents en même temps sur la table, l'index BRIN _minmax_sera donc choisi.)
 
-Comparé au plan avec l'index B-tree, les performances sont nettement moins
-bonnes. C'est principalement dû au nombre d'accès nécessaire pour traiter le
+Comparé au plan avec l'index B-tree, les performances restent nettement moins
+bonnes. C'est principalement dû au nombre d'accès nécessaires pour traiter le
 prédicat.
 
 En répétant les tests avec des quantités de doublons différentes, on voit que
-l'index BRIN _bloom_ permet d'accéder un nombre plus petit de pages que l'index
+l'index BRIN _bloom_ permet d'accéder à un nombre plus petit de pages que l'index
 BRIN _minmax_, ce qui le rend souvent plus performant. L'index B-tree est
 toujours plus performant.
 
 La comparaison des tailles montre que l'index BRIN utilisant les
-`uuid_bloom_ops` est plus grand que l'index BRIN classique mais nettement plus
+`uuid_bloom_ops` est plus grand que l'index BRIN classique, mais nettement plus
 petit que l'index B-tree.
 
 ```sh
@@ -207,7 +230,7 @@ La classe d'opérateur `*_bloom_ops` accepte deux paramètres qui permettent de
 dimensionner l'index bloom :
 
 * `n_distinct_per_range` :  permet d'estimer le nombre de valeurs distinctes
-  dans un ensemble de blocs brin. Il doit être supérieur à -1 et sa valeur par
+  dans un ensemble de blocs BRIN. Il doit être supérieur à -1 et sa valeur par
   défaut est -0.1. Il fonctionne de la même manière que la colonne `n_distinct`
   de la vue `pg_stats`. S'il est positif, il indique le nombre de valeurs
   distinctes. S'il est négatif, il indique la fraction de valeurs distinctes
@@ -259,8 +282,12 @@ CREATE TABLE brin_multirange AS
      SELECT '2021-09-29'::timestamp - INTERVAL '1 min' * x AS d
        FROM generate_series(1, 1000000) AS F(x);
 
-UPDATE brin_multirange SET d = current_timestamp WHERE random() < .01;
+UPDATE brin_multirange SET d ='2021-04-05'::timestamp   WHERE random() < .01;
 ```
+<!-- FIXME : la version original mettait un current_timestamp qui rend le TP non reproductible.
+La date en dur est un pis aller. C'est toute la suite qu'il faut redérouler sur une config de base
+même si sur le fond ça ne change heureusement rien.
+-->
 
 Une fois de plus, nous allons désactiver le parallélisme et les parcours
 séquentiels afin de se concentrer sur l'utilisation des index :
@@ -275,6 +302,7 @@ Commençons par tester une requête avec un `BETWEEN` sur un index B-tree :
 ```sql
 CREATE INDEX brin_multirange_btree_idx
   ON brin_multirange USING btree (d);
+
 EXPLAIN (ANALYZE, BUFFERS)
   SELECT * FROM brin_multirange
    WHERE d BETWEEN '2021-04-05'::timestamp AND '2021-04-06'::timestamp;
@@ -300,11 +328,15 @@ Voci le plan généré :
  Planning Time: 0.119 ms
  Execution Time: 0.922 ms
 ```
+(Le plan exact peut varier en fonction du `random()` plus haut.)
+C'est satisfaisant, même si cet exemple est délibérément non optimal pour les
+comparaisons qui suivent (avec un `VACUUM`, on peut même arriver à un _Index Only Scan_ encore plus rapide).
 
-Testons la même requête en supprimant avec un index BRIN _minmax_ :
+Testons la même requête en supprimant avec un index BRIN classique (_minmax_) :
 
 ```sql
 DROP INDEX brin_multirange_btree_idx;
+
 CREATE INDEX brin_multirange_minmax_idx
   ON brin_multirange USING brin (d);
 
@@ -334,14 +366,17 @@ EXPLAIN (ANALYZE, BUFFERS)
  Execution Time: 8.039 ms
 ```
 
-Comparé à l'index B-tree, l'index BRIN _minmax_ accéde à beaucoup plus de blocs,
+Comparé à l'index B-tree, l'index BRIN _minmax_ accède à beaucoup plus de blocs
+et effectue beaucoup plus de vérifications,
 cela se ressent au niveau du temps d'exécution de la requête qui est plus
 important.
 
-Pour finir, testons avec l'index BRIN _multirange_minmax_ :
+Pour finir, testons avec l'index BRIN _multirange_minmax_ et la méthode
+`timestamp_minmax_multi_ops` adaptée à ce champ :
 
 ```sql
 DROP INDEX brin_multirange_minmax_idx;
+
 CREATE INDEX brin_multirange_minmax_multi_idx
   ON brin_multirange USING brin (d timestamp_minmax_multi_ops);
 
@@ -371,14 +406,14 @@ EXPLAIN (ANALYZE, BUFFERS)
  Execution Time: 6.380 ms
 ```
 
-Le plan avec la nouvelle classe d'opérateur est accède à moins de bloc que
+Le plan avec la nouvelle classe d'opérateur accède à moins de blocs que
 celui avec la classe d'opérateur par défaut. Le temps d'exécution est donc plus
-court. Le coût estimé par l'optimiseur est légèrement supérieur à l'index brin
+court. Le coût estimé par l'optimiseur est légèrement supérieur à l'index BRIN
 _minmax_. Si les deux index sont présents, l'index bin _minmax_ sera donc
 choisi.
 
 On peut voir que l'index BRIN avec la classe d'opérateur `*_minmax_multi_ops`
-est plus gros que l'index BRIN traditionnel mais, il est toujours beaucoup plus
+est plus gros que l'index BRIN traditionnel, mais reste beaucoup plus
 petit que l'index B-tree.
 
 ```sh
@@ -389,11 +424,13 @@ petit que l'index B-tree.
  brin_multirange_minmax_multi_idx | index |brin_multirange |brin          | 56 kB
 ```
 
-Pour conclure, les index B-tree sont toujours plus performants que les index
+Pour conclure : les index B-tree sont toujours plus performants que les index
 BRIN. La nouvelle classe d'opérateur améliore les performances par rapport aux
-index BRIN classiques. Ce gain de performance est fait au prix d'une
-augmentation de la taille de l'index. La taille de l'index est toujours bien
+index BRIN classiques pour les données mal triées physiquement.
+Ce gain de performance est fait au prix d'une
+augmentation de la taille de l'index, mais elle reste toujours bien
 inférieure à celle d'un index B-tree. Cette nouvelle version permet donc de
-rendre polyvalent les index BRIN tout en conservant leurs atouts.
+rendre plus polyvalents les index BRIN tout en conservant leurs atouts, dans
+des contextes où les tailles des index peuvent poser des problèmes.
 
 </div>
