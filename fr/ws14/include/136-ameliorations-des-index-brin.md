@@ -284,7 +284,7 @@ CREATE TABLE brin_multirange AS
 
 UPDATE brin_multirange SET d ='2021-04-05'::timestamp   WHERE random() < .01;
 ```
-<!-- FIXME : la version original mettait un current_timestamp qui rend le TP non reproductible.
+<!-- FIXME : la version originale mettait un current_timestamp qui rend le TP non reproductible.
 La date en dur est un pis aller. C'est toute la suite qu'il faut redérouler sur une config de base
 même si sur le fond ça ne change heureusement rien.
 -->
