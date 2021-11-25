@@ -61,7 +61,7 @@ L'intérêt est évidemment de faire fonctionner simultanément plusieurs serveu
 distants, ce qui peut amener de gros gains de performance. C'est un grand pas
 dans l'intégration d'un _sharding_ natif dans PostgreSQL.
 
-En ce qui concerne la syntaxe, les ordres d'activation et désactivation de l'option,
+En ce qui concerne la syntaxe, les ordres d'activation et de désactivation de l'option,
 sur le serveur ou la table sont par exemple :
 
 ```sql
