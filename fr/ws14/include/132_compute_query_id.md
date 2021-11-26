@@ -13,7 +13,7 @@ Discussion
 
 <div class="slide-content">
 * Le _query id_ est disponible globalement
-  * valeur hâchée sur 64 bits d'une requête normalisée
+  * valeur hachée sur 64 bits d'une requête normalisée
   * introduit avec `pg_stat_statements` en version 9.4
   * `pg_stat_activity`, `log_line_prefix`, `EXPLAIN VERBOSE`
 * nouveau paramètre `compute_query_id` (`auto` par défaut)
@@ -39,9 +39,9 @@ La méthode pour générer cet identifiant a été élargie globalement dans le 
 PostgreSQL, rendant possible son exposition en dehors de `pg_stat_statements`.
 Les quelques composants de supervision en ayant bénéficié sont :
 
-* La vue `pg_stat_activity` dispose à présent de sa colonne `query_id` ;
-* Le paramètre `log_line_prefix` peut afficher l'identifiant avec le nouveau caractère d'échappement `%Q` ;
-* Le mode `VERBOSE` de la commande `EXPLAIN`.
+* la vue `pg_stat_activity` dispose à présent de sa colonne `query_id` ;
+* le paramètre `log_line_prefix` peut afficher l'identifiant avec le nouveau caractère d'échappement `%Q` ;
+* le mode `VERBOSE` de la commande `EXPLAIN`.
 
 ```sql
 SET compute_query_id = on;

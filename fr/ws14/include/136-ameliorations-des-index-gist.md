@@ -2,8 +2,8 @@
 <div class="slide-content">
 
 * Amélioration des performances de certains index GiST
-  * plus rapide, plus petit
-  * type : point
+  * plus rapides, plus petits
+  * type : `point`
 * Support des index SPGiST couvrants
 
 </div>
@@ -97,8 +97,9 @@ EXPLAIN (ANALYZE, BUFFERS)
 ```
 
 On voit que le temps d'exécution et la taille de l'index ont beaucoup diminué
-en version 14. On voit égalemement que dans ce cas le plan en version 14 montre
+en version 14. Malheureusement, dans ce cas, le plan en version 14 montre
 une augmentation du nombre de pages lues et du temps d'exécution.
+<!-- FIXME : pourquoi ??? -->
 
 Pour permettre cette fonctionnalité, une nouvelle fonction de support
 optionnelle a été ajoutée à la méthode d'accès `gist`. Lorsqu'elle est définie,

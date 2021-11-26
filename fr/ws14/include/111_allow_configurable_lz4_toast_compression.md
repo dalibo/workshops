@@ -13,7 +13,6 @@ Discussion
 <div class="slide-content">
 * Historiquement : `pglz`
 * Nouveau : `lz4`, plus rapide
-* Nécessite `--with-lz4` à la compilation
 * Définition :
   * `SET default_toast_compression = …`
   * `ALTER TABLE … SET COMPRESSION …`
@@ -192,7 +191,10 @@ Total              | 119 MB
 Dans ce cas précis, `lz4` est plus efficace à la compression. Ce n'est pas le cas
 général, comme constaté dans cet [article de Fujitsu](https://www.postgresql.fastware.com/blog/what-is-the-new-lz4-toast-compression-in-postgresql-14) : `lz4` est généralement un peu moins
 efficace en compression.
-<!--  TODO ? Refaire l'exemple avec la base textes du projet Gutenberg ?
+<!--  FIXME ?
+Entropie trop faible
+
+Refaire l'exemple avec la base textes du projet Gutenberg, en guise de TP ?
 La compression est la même.
 create table textes_pglz AS SELECT livre, string_agg (contenu, ' ') AS contenu
 FROM (SELECT * FROM textes  ORDER BY livre, ligne) t GROUP BY livre;

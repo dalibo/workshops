@@ -31,7 +31,7 @@ Lorsqu'une mise à jour ne touche aucune colonne indexée et que la nouvelle
 version de ligne peut être stockée dans la même page que les autres versions,
 PostgreSQL peut éviter la mise à jour des index.
 
-Il y a cependant beaucoup de cas ou il n'est pas possible d'éviter la mise à
+Il y a cependant beaucoup de cas où il n'est pas possible d'éviter la mise à
 jour de colonnes indexées. Dans certains profils d'activité avec beaucoup de
 mise à jour, cela peut mener à la création de beaucoup d'enregistrements d'index
 correspondant à des versions différentes d'une même ligne dans la table, mais
@@ -59,7 +59,11 @@ de faire de la place dans la page. En dernier recours, la page se divise en
 deux (_page split_) ce qui fait grossir l'index.
 
 Pour le tester, on peut comparer la taille des index sur une base `pgbench`
-après 10 minutes d'activité en version 13 et 14 :
+après 10 minutes d'activité, en version 13 et 14 :
+
+<!-- FIXME   pgbench mauvais exemple même en laissant tourner plus longtemps ;
+il faudrait des insertions et suppressions d'ID en cascade
+-->
 
 ```bash
 createdb bench
