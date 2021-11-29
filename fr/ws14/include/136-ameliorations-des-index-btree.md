@@ -131,12 +131,12 @@ Le résultat montre que les index ont moins grossi en version 14 :
 Dans la réalité, l'autovacuum fonctionnera et nettoiera une partie des lignes au fil de l'eau,
 mais il peut être gêné par les autres transactions en cours.
 PostgreSQL 14 permettra donc d'éviter quelques `REINDEX`.
-
+<!------
 Les commits sur ce sujet sont :
 
 * [Enhance nbtree index tuple deletion](https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=d168b666823b6e0bcf60ed19ce24fb5fb91b8ccf)
 * [Pass down "logically unchanged index" hint](https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=9dc718bd)
 * [Discussion](https://www.postgresql.org/message-id/flat/CAH2-Wzm+maE3apHB8NOtmM=p-DO65j2V5GzAWCOEEuy3JZgb2g@mail.gmail.com)
-
+----->
 </div>
 
