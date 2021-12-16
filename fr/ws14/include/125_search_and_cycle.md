@@ -244,7 +244,7 @@ WITH RECURSIVE mtree(id, name) AS (
   CYCLE id SET is_cycle USING path
 SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
 ```
-
+\tiny
 ```sh
  id |  name   |                   morder                    | is_cycle |          path
 ----+---------+---------------------------------------------+----------+------------------------
@@ -260,6 +260,7 @@ SELECT * FROM mtree WHERE not is_cycle ORDER BY morder DESC;
   1 | Albert  | {(Albert)}                                  | f        | {(1)}
 (10 rows)
 ```
+\normalsize
 
 L'[implémentation
 actuelle](https://www.postgresql.org/message-id/4a068167-37ed-3d6c-5ec5-c9b03cae84e6%40enterprisedb.com)

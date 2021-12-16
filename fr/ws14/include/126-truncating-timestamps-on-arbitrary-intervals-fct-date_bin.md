@@ -21,12 +21,11 @@ Discussion
 
 <div class="notes">
 
-<!-- https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN -->
-
 La nouvelle fonction `date_bin` permet de placer un timestamp fourni en entrée 
 (second paramètre) dans un intervalle aussi appellée _bucket_.
 
-Documentation : <https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN>
+<!-- sortie coupée dans le pdf avec <lien> -->
+Documentation : [FUNCTIONS-DATETIME-BIN](https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-BIN)
 
 Les valeurs produites correspondent au timestamp en début de l'intervalle
 et peuvent par exemple être utilisées pour calculer des statistiques en
@@ -45,6 +44,7 @@ La fonction existe pour des timestamp avec et sans fuseau horaire :
 ```sql
 \df date_bin
 ```
+\tiny
 ```sh
 List of functions
 -[ RECORD 1 ]-------+-------------------------------------------------------------------
@@ -60,6 +60,7 @@ Result data type    | timestamp without time zone
 Argument data types | interval, timestamp without time zone, timestamp without time zone
 Type                | func
 ```
+\normalsize
 
 Voici un exemple de cette fonction en action :
 
@@ -161,12 +162,11 @@ SELECT date_bin('365 days', '2021-06-01 10:05:10', '2021-06-01');
 (1 row)
 ```
 
-<!-- https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC -->
-
 La fonction `date_bin` a un effet similaire à `date_trunc` lorsqu'elle est 
 utilisée avec les intervalles `1 hour` et `1 minute`.
 
-Documentation : <https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC>
+<!-- sortie coupée dans le pdf avec <lien> -->
+Documentation : [#FUNCTIONS-DATETIME-TRUNC](https://docs.postgresql.fr/14/functions-datetime.html#FUNCTIONS-DATETIME-TRUNC)
 
 ```sql
 SELECT date_bin('1 hour', '2021-06-01 10:05:10'::timestamp, '2021-06-01'),

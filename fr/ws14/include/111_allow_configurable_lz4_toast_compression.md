@@ -146,10 +146,12 @@ test=# \d+ compress_lz4
  champ1  | text |                 |           |            | extended | lz4         
 
 -- Comparaison à l'insertion des données
-test=# INSERT INTO compress_pglz SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
+test=# INSERT INTO compress_pglz
+          SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
 Durée : 36934,700 ms
 
-test=# INSERT INTO compress_lz4 SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
+test=# INSERT INTO compress_lz4
+          SELECT repeat('123456789', 100000) FROM generate_series(1,10000);
 Durée : 2367,150 ms
 ```
 

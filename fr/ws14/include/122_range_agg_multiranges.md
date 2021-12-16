@@ -204,6 +204,7 @@ SELECT a.amname, of.opfname, t1.typname as lefttype,
  INNER JOIN pg_operator o ON ao.amopopr = o.oid
  WHERE of.opfname LIKE '%multirange%';
 ```
+\tiny
 ```sh
 amname |    opfname     |   lefttype    |   righttyp    |oprname|          oprcode
 -------+----------------+---------------+---------------+-------+---------------------------------
@@ -232,6 +233,7 @@ btree  | multirange_ops | anymultirange | anymultirange | >=    |multirange_ge
 btree  | multirange_ops | anymultirange | anymultirange | >     |multirange_gt
 hash   | multirange_ops | anymultirange | anymultirange | =     |multirange_eq
 ```
+\normalsize
 
 La lecture du catalogue nous montre que les opérations simples (exp : `=`, `>`, `<`)
 peuvent être indexées avec un `btree`. En revanche, pour les opérations plus
