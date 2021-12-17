@@ -119,15 +119,15 @@ apres
 
 --->
 
-À l'issue du pgbench, on constate que :
+À l'issue du pgbench, on constate que :
 * l'index `pgbench_accounts_abalance_idx` a une fragmentation quasi identique
   en version 13 et 14. Ce résultat est attendu car la colonne `abalance` est
-  celle qui est mise à jour ;
+  celle qui est mise à jour ;
 * l'index `pgbench_accounts_pkey` n'est pas fragmenté en version 14,
   contrairement à en la version 13. Là encore le résultat est attendu, la clé
   primaire n'est jamais modifiée, c'est le genre d'index que cible cette
-  optimisation ;
-* les index `pgbench_branches_pkey` et `pgbench_tellers_pkey` sont très petit
+  optimisation ;
+* les index `pgbench_branches_pkey` et `pgbench_tellers_pkey` sont très petits et
   la fragmentation n'est pas significative.
 
 |         Name                   |  Taille avant | Taille après (v13)| Taille après (v14)|
