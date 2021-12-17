@@ -551,19 +551,6 @@ possible.
 
 ----
 
-### Amélioration des performances de la restauration
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/138 -->
-!include include/EXEMPLE.md
-
-----
-
-### Autres améliorations
-
-!include include/EXEMPLE.md
-
-----
-
 # Ateliers
 
 <!-- lister les tp ici, un include par tp -->
