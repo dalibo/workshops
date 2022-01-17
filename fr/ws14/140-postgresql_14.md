@@ -371,7 +371,6 @@ possible.
 
 ----
 
-
 #### Lecture asynchrone des tables distantes
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/117 -->
