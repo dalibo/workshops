@@ -18,7 +18,7 @@ variables:
   BRANCH_TARGET: ws14
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
-  ARTIFACTS: '_build/*'
+  ARTIFACTS: '_build/* _archives'
   # 
   THEMES_BRANCH: stable # usually 'stable' or 'master'
   ## Limitation des pull docker
