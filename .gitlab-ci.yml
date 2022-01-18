@@ -5,10 +5,14 @@
 ## I N C L U D E S
 ##
 
-# How To Export artefacts to the private environment
 include:
+  # Export artefacts to the private environment
   - project: 'dalibo/gitlab-templates'
     file: 'artifacts_private_env.yml'
+  # Export artefacts to the public environment  
+  - project: 'dalibo/gitlab-templates'
+    file: 'artifacts_public_env.yml'
+
 
 ##
 ## V A R I A B L E S
@@ -18,13 +22,9 @@ variables:
   BRANCH_TARGET: ws14
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
-  ARTIFACTS: '_build/*'
-  # 
-  THEMES_BRANCH: stable # usually 'stable' or 'master'
-  ## Limitation des pull docker
-  ## https://gitlab.dalibo.info/formation/manuels/-/issues/482
-  ## Pointer temporairement vers un registre cache externe chez Gitlab (https://gitlab.com/dalibo/pandocker/container_registry/1505688)
-  CI_REGISTRY: registry.gitlab.com
+  ARTIFACTS: '_build/* _archives'
+  # THEMES_BRANCH is usually 'stable' or 'master'
+  THEMES_BRANCH: stable
 
 
 before_script:
@@ -84,18 +84,3 @@ pandoc:
       - _build/en/
     expire_in: 1 day
 
-##
-##  D E P L O Y 
-##
-
-## Export the master branch in a public location  
-public:
-  stage: deploy
-  script:
-    ## Install Deploy Key
-    - ssh-add <(echo "$CLOUD_DEPLOY_PRIVATE_KEY")
-    ## Push
-    - rsync -avp fr $CLOUD_DEPLOY_DEST
-    - rsync -avp en $CLOUD_DEPLOY_DEST
-  only:
-    - master@formation/workshops
