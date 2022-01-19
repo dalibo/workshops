@@ -84,3 +84,12 @@ pandoc:
       - _build/en/
     expire_in: 1 day
 
+##
+## D E P L O Y
+##
+
+# overiding the job template because we need to force GIT_STRATEGY 
+# for this pipeline in order to deploy `_archives`
+public_env:
+  variables:
+    GIT_STRATEGY: fetch
