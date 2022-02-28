@@ -5,6 +5,13 @@ css: "https://public.dalibo.com/fancy-index/style.css"
 # all generated files are moved to root directory, aside index.html
 ---
 
+Nouveautés de PostgreSQL 15
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](150-postgresql_15.slides.html) [PGSession 15](pgsession15.slides.html)
+* Handout : [HTML](150-postgresql_15.handout.html) [PDF](150-postgresql_15.pdf) 
+* Mobile : [EPUB](150-postgresql_15.epub)
+
 Nouveautés de PostgreSQL 14
 --------------------------------------------------------------------------------
 
