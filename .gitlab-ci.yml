@@ -24,7 +24,7 @@ variables:
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/* _archives'
   # THEMES_BRANCH is usually 'stable' or 'master'
-  THEMES_BRANCH: stable
+  THEMES_BRANCH: master
 
 
 before_script:
