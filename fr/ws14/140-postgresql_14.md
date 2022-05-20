@@ -247,7 +247,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-### Partionnement
+### Partitionnement
 
 ----
 
