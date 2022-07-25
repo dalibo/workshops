@@ -53,8 +53,8 @@ apparu en version 14 est définit. Si c'est le cas, il sera utiliser pour le cal
 paramétrage du système qui sera utilisé (`/proc/meminfo`).
 
 Il faut également que PostgreSQL puisse utiliser les _Huge Pages_. Le paramètre `huge_pages` doit  
-donc être définit à `on` ou `try`. Si ce n'est pas le cas, `shared_memory_size_in_huge_pages` 
-retournera `-1`.
+donc être définit à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on se trouve sur un 
+autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
 
 ```sql
 # show shared_memory_size_in_huge_pages;
