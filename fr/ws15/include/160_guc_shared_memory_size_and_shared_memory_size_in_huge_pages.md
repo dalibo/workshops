@@ -35,7 +35,7 @@ des modules complémentaires (`shared_preload_libraries`).
  143MB
 ```
 
-On obtient quelque chose de similaire en faisant la somme des zones de mémoire partagées allouées 
+On obtient quelque chose de similaire en faisant la somme des zones de mémoire partagée allouées 
 avec la vue `pg_shmem_allocations` :
 
 ```sql
