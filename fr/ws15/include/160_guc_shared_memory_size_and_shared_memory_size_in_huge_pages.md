@@ -56,6 +56,13 @@ Il faut également que PostgreSQL puisse utiliser les _Huge Pages_. Le paramètr
 donc être définit à `on` ou `try`. Si ce n'est pas le cas, `shared_memory_size_in_huge_pages` 
 retournera `-1`.
 
+```sql
+# show shared_memory_size_in_huge_pages;
+ shared_memory_size_in_huge_pages 
+----------------------------------
+ 72
+```
+
 Autre particularité avec ces deux variables, ce sont des variables dites _calculées durant l'exécution_ 
 (`runtime-computed GUC`). Elles nécessitent de charger différents éléments en mémoire avant de 
 retourner une valeur viable. Avec la version 15 de PostgreSQL, il est maintenant possible d'estimer leur 
