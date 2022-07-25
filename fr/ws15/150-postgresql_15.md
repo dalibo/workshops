@@ -222,7 +222,7 @@ hide_author_in_slide: true
 ### Ajout de la vue système pg_ident_file_mappings pour reporter les informations du fichier pg_ident.conf
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+!include include/159_nouvelle_vue_pg_ident_file_mappings.md
 
 ---
 
