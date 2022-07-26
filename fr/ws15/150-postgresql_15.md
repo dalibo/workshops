@@ -228,8 +228,8 @@ hide_author_in_slide: true
 
 ### Ajout de la vue système pg_stat_subscription_stats pour reporter l'activité d'un souscripteur (cf. Réplication logique)
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/161 -->
+!include include/161_nouvelle_vue_pg_stat_subscription_stats.md
 
 ---
 
@@ -387,8 +387,8 @@ hide_author_in_slide: true
 
 ## Ajout de la vue système pg_stat_subscription_stats pour reporter l'activité d'un souscripteur
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/161 -->
+!include include/161_nouvelle_vue_pg_stat_subscription_stats.md
 
 ---
 
