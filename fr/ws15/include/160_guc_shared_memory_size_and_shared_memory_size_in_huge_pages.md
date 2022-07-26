@@ -12,7 +12,7 @@ Discussion
 
 <div class="slide-content">
 
-* Ajout de deux nouvelles variables serveurs :
+* Ajout de deux nouvelles variables serveur :
   + `shared_memory_size` : détermine la taille de la mémoire partagée
   + `shared_memory_size_in_huge_pages` : détermine le nombre de _Huge Pages_ 
     nécessaires pour stocker la mémoire partagée
@@ -24,9 +24,9 @@ Discussion
 <div class="notes">
 
 La variable `shared_memory_size` renvoie la taille de la mémoire partagée de PostgreSQL.
-Le résultat tient bien entendu compte des éventuels modules et extensions qui pourraient 
-consommer de la mémoire partagée supplémentaire. Il est donc calculé après le chargement 
-des modules complémentaires (`shared_preload_libraries`).
+Le résultat est calculé après le chargement des modules complémentaires (`shared_preload_libraries`).
+Il tient donc compte des éventuels modules et extensions qui pourraient 
+consommer de la mémoire partagée supplémentaire.
 
 ```sql
 # show shared_memory_size;
@@ -52,19 +52,19 @@ récupérer cette taille, PostgreSQL va en premier lieu regarder si le paramètr
 apparu en version 14 est définit. Si c'est le cas, il sera utiliser pour le calcul sinon, c'est le 
 paramétrage du système qui sera utilisé (`/proc/meminfo`).
 
-Il faut également que PostgreSQL puisse utiliser les _Huge Pages_. Le paramètre `huge_pages` doit  
-donc être définit à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on se trouve sur un 
-autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
-
 ```sql
 # show shared_memory_size_in_huge_pages;
- shared_memory_size_in_huge_pages 
+ shared_memory_size_in_huge_pages
 ----------------------------------
  72
 ```
 
-Autre particularité avec ces deux variables, ce sont des variables dites _calculées durant l'exécution_ 
-(`runtime-computed GUC`). Elles nécessitent de charger différents éléments en mémoire avant de 
+Il faut également que PostgreSQL puisse utiliser les _Huge Pages_. Le paramètre `huge_pages` doit  
+donc être définit à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on se trouve sur un 
+autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
+
+Autre particularité avec ces deux variables, ce sont des variables _calculées durant l'exécution_ 
+(`runtime-computed GUC`). Elles nécessitent de charger différents éléments avant de 
 retourner une valeur viable. Avec la version 15 de PostgreSQL, il est maintenant possible d'estimer leur 
 valeur sans avoir à allouer de mémoire partagée avec la commande suivante :
 
