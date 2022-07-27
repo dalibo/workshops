@@ -312,8 +312,8 @@ hide_author_in_slide: true
 
 ### Ajout de la possibilité de créer des séquences UNLOGGED
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/164 -->
+!include include/164_sequences_unlogged.md
 
 ---
 
