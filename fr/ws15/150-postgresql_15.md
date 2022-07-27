@@ -303,10 +303,10 @@ hide_author_in_slide: true
 
 ---
 
-### Révocation du droit par défaut CREATE ON SCHEMA public TO public
+### Révocation du droit par défaut CREATE sur le schéma public pour le groupe PUBLIC
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/163 -->
+!include include/163_revocation_du_droit_par_defaut_create_on_schema_public_to_public.md
 
 ---
 
