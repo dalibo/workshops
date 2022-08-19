@@ -45,7 +45,7 @@ Voici un exemple d'une ligne de trace, la première générée au démarrage de 
 
 ```
 
-Les traces au format _JSON_ peuvent s'avérer utile pour alimenter les traces de 
+Le format _JSON_ peut s'avérer utile pour alimenter les traces de 
 l'instance dans un autre programme. _pg_badger_ supporte déjà l'analyse de traces 
 dans ce format, car il supportait auparavant l'extension `jsonlog` qui ajoutait 
 cette fonctionnalité avant qu'elle soit intégrée en standard dans PostgreSQL.
