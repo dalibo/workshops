@@ -272,8 +272,8 @@ hide_author_in_slide: true
 
 ### Activation de la journalisation des CHECKPOINT et opérations de VACUUM lentes
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/156 -->
+!include include/156-journalisation_checkpoints_et_autovacuum.md
 
 ---
 
