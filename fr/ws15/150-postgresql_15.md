@@ -284,10 +284,10 @@ hide_author_in_slide: true
 
 ---
 
-### VACUUM VERBOSE et autovacuum sont plus détaillés sur l'état d'avancement de relfrozenxid et de relminmxid
+### Informations supplémentaires dans VACUUM VERBOSE
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/158 -->
+!include include/158-informations-supplementaires-dans-vacuum-verbose.md
 
 ---
 
