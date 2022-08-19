@@ -134,10 +134,10 @@ hide_author_in_slide: true
 
 ## psql
 
-### Optimisation des performances de la commande \copy
+### Optimisation des performances de la commande `\copy`
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/151 -->
+!include include/151-psql-copy-performance.md
 
 ---
 
