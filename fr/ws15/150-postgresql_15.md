@@ -141,10 +141,10 @@ hide_author_in_slide: true
 
 ---
 
-### Nouvelles commandes \getenv et \dconfig
+### Nouvelles commandes `\getenv` et `\dconfig`
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/153 -->
+!include include/153-psql-nouvelles-commandes.md
 
 ---
 
