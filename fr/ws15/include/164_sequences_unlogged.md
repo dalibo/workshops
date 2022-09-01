@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* Evite de répliquer une séquence d'une table `unlogged`
+* Évite de répliquer une séquence d'une table `unlogged`
 * Pas dans un but de performance
 * Une séquence d'identité hérite automatiquement de la persistance de la table de référence
 
@@ -23,7 +23,7 @@ Il est maintenant possible de définir une séquence comme non journalisée (`un
 aux tables, cette option n'est pas destinée à améliorer les performances mais principalement à éviter de 
 répliquer des objets inutilement.
 
-Dorénavent, une séquence identitaire hérite automatiquement de la persistance de la table dont elle dépend.
+Dorénavant, une séquence identitaire hérite automatiquement de la persistance de la table dont elle dépend.
 
 ```sql
 # En version 14
@@ -56,7 +56,7 @@ CREATE UNLOGGED SEQUENCE ma_seq;
 ALTER SEQUENCE ma_seq SET LOGGED|UNLOGGED;
 ```
 
-Enfin, la persistance des séquences est concervée lors des opération d'export / import avec des outils 
+Enfin, la persistance des séquences est conservée lors des opérations d'export / import avec des outils 
 comme `pg_dump` et `pg_restore`.
 
 </div>
