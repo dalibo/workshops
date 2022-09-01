@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* `USAGE` par défaut pour le rôle de groupe `PUBLIC`
+* `USAGE` par défaut pour le rôle `PUBLIC`
 * `CREATE` et `USAGE` par défaut pour le rôle `pg_database_owner`
 * Attention lors des montées de version !
 
@@ -20,7 +20,9 @@ Discussion
 <div class="notes">
 
 Cette nouvelle version supprime le privilège par défaut `CREATE` sur le schema `public` 
-pour le rôle de groupe `PUBLIC`. De plus, le propriétaire par défaut du schéma `public` ne sera 
+pour le rôle `PUBLIC`. Pour rappel, `PUBLIC` peut être vu comme un rôle 
+implicitement défini qui inclut en permanence tous les rôles. Le  propriétaire
+par défaut du schéma `public` n'est 
 plus `postgres` mais le rôle `pg_database_owner`. Ce mécanisme permet au propriétaire 
 de la base de données d'obtenir implicitement le droit `CREATE` sur le schéma `public`.
 
@@ -48,8 +50,9 @@ On constate bien le changement de propriétaire et la perte de l'abréviation `C
 qui correspond aux privilèges par défaut du rôle `PUBLIC`.
 
 Même si la configuration des privilèges est reprise lors d'une montée de version, il convient de réaliser une étape 
-préalable de vérification afin de déterminer d'eventuel impact que pourrait avoir ce changement. Notamment, si un 
+préalable de vérification afin de déterminer d'éventuel impact que pourrait avoir ce changement. Notamment, si un 
 rôle doit créer des objets dans le schéma `public`, qu'il n'est pas propriétaire de la base de données et, qu'aucun
-privilège `CREATE` spécifique n'a été donné à cause du `CREATE` par défaut du rôle de groupe `PUBLIC`.
+privilège `CREATE` spécifique n'a été donné car on se basait sur le privilègé 
+`CREATE` qui était implicitement donné au rôle `PUBLIC`.
 
 </div>
