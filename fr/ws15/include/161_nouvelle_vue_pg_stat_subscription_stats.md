@@ -20,7 +20,7 @@ Discussion
 <div class="notes">
 
 La vue système `pg_stat_subscription_stats` permet de récupérer des 
-informations sur les erreurs qui se sont produitent au niveau des souscriptions 
+informations sur les erreurs qui se sont produisent au niveau des souscriptions 
 avec la réplication logique. Ces données sont stockées sous forme de compteur 
 et concernent les erreurs rencontrées lors de l'application des changements 
 ou lors de la synchronisation initiale. Elle contient une ligne par souscription.
