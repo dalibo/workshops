@@ -19,7 +19,27 @@ Discussion
 
 <div class="notes">
 
-Afin de faciliter la lecture du résultat des requêtes exécutées avec la commande `\watch`, il 
+La méta-commande `\watch [durée]` de psql peut être placée juste après un ordre SQL pour le 
+réexécuter à intervalle régulier.
+
+```sh
+[local]:5445 postgres@postgres=# SELECT 'hello world' \watch 1
+Thu 18 Aug 2022 02:11:59 PM CEST (every 1s)
+
+  ?column?   
+-------------
+ hello world
+(1 row)
+
+Thu 18 Aug 2022 02:12:00 PM CEST (every 1s)
+
+  ?column?   
+-------------
+ hello world
+(1 row)
+```
+
+Afin de faciliter la lecture du résultat des requêtes exécutées de cette manière, il 
 est maintenant possible de définir un _pager_ via la variable d'environnement `PSQL_WATCH_PAGER`.
 
 N'importe quel _pager_ peut-être utilisé. Cependant, seul _pspg_ semble pour le moment réussir à interpréter correctement 
