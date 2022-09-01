@@ -49,7 +49,7 @@ La variable `shared_memory_size_in_huge_pages` va quant à elle indiquer le nomb
 nécessaires pour stocker la mémoire partagée de PostgreSQL. Elle est basée sur la valeur de  
 `shared_memory_size` vue précédemment et sur la taille des _Huge Pages_ du système. Pour 
 récupérer cette taille, PostgreSQL va en premier lieu regarder si le paramètre `huge_page_size` 
-apparu en version 14 est définit. Si c'est le cas, il sera utiliser pour le calcul sinon, c'est le 
+apparu en version 14 est défini. Si c'est le cas, il sera utilisé pour le calcul sinon, c'est le 
 paramétrage du système qui sera utilisé (`/proc/meminfo`).
 
 ```sql
@@ -60,7 +60,7 @@ paramétrage du système qui sera utilisé (`/proc/meminfo`).
 ```
 
 Il faut également que PostgreSQL puisse utiliser les _Huge Pages_. Le paramètre `huge_pages` doit  
-donc être définit à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on se trouve sur un 
+donc être défini à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on se trouve sur un 
 autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
 
 Autre particularité avec ces deux variables, ce sont des variables _calculées durant l'exécution_ 
@@ -73,8 +73,8 @@ postgres -C shared_memory_size -D $PGDATA
 postgres -C shared_memory_size_in_huge_pages -D $PGDATA
 ```
 
-On peut donc dorénavant savoir avant de démarrer une instance PostgreSQL (cette commande ne fonctionne pas 
-sur une instance démarrée), combien celle-ci va utiliser de mémoire partagée et de combien de 
-_Huge Pages_ mon système à besoin.
+On peut donc dorénavant savoir combien de mémoire partagée et de _Huge Pages_
+le système à besoin avant de démarrer une instance PostgreSQL. Ces commandes
+ne fonctionnent pas sur une instance démarrée.
 
 </div>
