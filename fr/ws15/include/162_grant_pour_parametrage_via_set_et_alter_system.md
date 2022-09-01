@@ -87,9 +87,10 @@ REVOKE SET ON PARAMETER log_lock_waits FROM dalibo;
 REVOKE ALTER SYSTEM ON PARAMETER shared_buffers FROM dalibo;
 ```
 
-Une précision sur l'utilisation de la commande `ALTER SYSTEM RESET ...` avec le privilège `ALTER SYSTEM`. Même si vous disposez des droits 
-pour tous les paramètres présents dans le fichier `postgresql.auto.conf`, ce privilège ne donne pas le droit de faire un `ALTER SYSTEM RESET ALL`.
-Il faudra passer par un super utilisateur ou les annuler un par un.
+Même si un utilisateur dispose des droits pour modifier tous les paramètres 
+présents dans le fichier `postgresql.auto.conf`, ce privilège ne donne 
+pas le droit de faire un `ALTER SYSTEM RESET ALL`. Il faudra passer par 
+un super utilisateur ou les annuler un par un.
 
 Afin d'enregistrer la configuration de ces nouveaux privilèges, une nouvelle table système est disponible : `pg_parameter_acl`.
 
