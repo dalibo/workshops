@@ -64,9 +64,12 @@ donc être défini à `on` ou `try`. Si elles ne sont pas utilisables ou si l'on
 autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
 
 Autre particularité avec ces deux variables, ce sont des variables _calculées durant l'exécution_ 
-(`runtime-computed GUC`). Elles nécessitent de charger différents éléments avant de 
-retourner une valeur viable. Avec la version 15 de PostgreSQL, il est maintenant possible d'estimer leur 
-valeur sans avoir à allouer de mémoire partagée avec la commande suivante :
+(`runtime-computed GUC`). Dans les versions antérieures, la consultation de ce type de paramètre 
+avec la commande `postgres -C` renvoyait des valeurs éronnées car elle nécessitait le chargement 
+d'éléments complémentaires (ce que ne faisait pas l'ancienne implémentation). La version 15 vient corriger 
+ce problème et permet d'obtenir des valeurs correctes pour ces paramètres. Seule restriction, les 
+paramètres `runtime-computed GUC` ne sont consultables avec `postgres -C` que lorsque 
+l'instance est arrêtée.
 
 ```bash
 postgres -C shared_memory_size -D $PGDATA
@@ -74,7 +77,6 @@ postgres -C shared_memory_size_in_huge_pages -D $PGDATA
 ```
 
 On peut donc dorénavant savoir combien de mémoire partagée et de _Huge Pages_
-le système à besoin avant de démarrer une instance PostgreSQL. Ces commandes
-ne fonctionnent pas sur une instance démarrée.
+le système à besoin avant de démarrer une instance PostgreSQL.
 
-</div>
+</div> 
