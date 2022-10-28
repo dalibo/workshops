@@ -317,10 +317,10 @@ hide_author_in_slide: true
 
 ---
 
-### Nouvelle variable d'environnement PSQL_WATCH_PAGER pour définir un pager à la commande \watch
+### Nouvelle variable d'environnement PSQL_WATCH_PAGER
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/165 -->
+!include include/165_nouvelle_variable_d_environnement_psql_watch_pager.md
 
 ---
 
