@@ -233,17 +233,10 @@ hide_author_in_slide: true
 
 ---
 
-### Ajout de la variable serveur shared_memory_size pour obtenir la mémoire allouée en mémoire partagée
+### Ajout des variables serveur shared_memory_size et shared_memory_size_in_huge_pages
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
-### Ajout de la variable serveur shared_memory_size_in_huge_pages pour déterminer le nombre de huge page nécessaires
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/145 -->
+!include include/160_guc_shared_memory_size_and_shared_memory_size_in_huge_pages.md
 
 ---
 
