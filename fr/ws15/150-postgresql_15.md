@@ -298,8 +298,8 @@ hide_author_in_slide: true
 
 ### Possibilité de donner/restreindre les droits aux commandes SET / ALTER SYSTEM pour les utilisateurs non privilégiés
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/162 -->
+!include include/162_grant_pour_parametrage_via_set_et_alter_system.md
 
 ---
 
