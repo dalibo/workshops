@@ -18,7 +18,7 @@ Discussion
 <div class="notes">
 
 Le paramètre `log_destination` se voit enrichi d'une nouvelle option `jsonlog` 
-qui permet d'obtenir une journalisation au format _JSON_.
+qui permet d'obtenir une journalisation au format JSON.
 
 ```sql
 postgres=# show log_destination ;
@@ -27,6 +27,16 @@ postgres=# show log_destination ;
  jsonlog
 ```
 
+Le fichier de log produit aura alors l'extension `.json` :
+
+```sql
+postgres=# SELECT pg_current_logfile();
+   pg_current_logfile    
+-------------------------
+ log/postgresql-Fri.json
+(1 row)
+
+```
 Voici un exemple d'une ligne de trace, la première générée au démarrage de l'instance :
 
 ```json
@@ -45,8 +55,8 @@ Voici un exemple d'une ligne de trace, la première générée au démarrage de 
 
 ```
 
-Le format _JSON_ peut s'avérer utile pour alimenter les traces de 
-l'instance dans un autre programme. _pg_badger_ supporte déjà l'analyse de traces 
+Le format JSON peut s'avérer utile pour alimenter les traces de 
+l'instance dans un autre programme. pgBadger supporte déjà l'analyse de traces 
 dans ce format, car il supportait auparavant l'extension `jsonlog` qui ajoutait 
 cette fonctionnalité avant qu'elle soit intégrée en standard dans PostgreSQL.
 
