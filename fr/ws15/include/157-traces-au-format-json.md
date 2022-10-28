@@ -88,4 +88,18 @@ spécifiques dans les traces, par exemple pour n'afficher que les erreurs :
 }
 ```
 
+Les données peuvent également être chargées dans une table. Il n'est pas possible
+d'utiliser `COPY` directement pour cela car les caractère d'échappement disparaissent.
+
+```
+postgres=# CREATE TABLE pglog( data jsonb);
+CREATE TABLE
+postgres=# COPY pglog FROM PROGRAM 'sed ''s/\\/\\\\/g'' log/postgresql-Fri.json';
+COPY 52
+postgres=# SELECT data->>'timestamp' AS starttime FROM pglog WHERE data ->> 'message' LIKE 'starting%';
+          starttime           
+------------------------------
+ 2022-08-19 16:47:48.412 CEST
+(1 row)
+```
 </div>
