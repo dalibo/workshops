@@ -125,8 +125,8 @@ hide_author_in_slide: true
 
 ### Préservation de l'OID des relfilenodes, tablespaces, et bases de données après une migration pg_upgrade
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/154 -->
+!include include/154-psql-auto-completion.md
 
 ---
 
