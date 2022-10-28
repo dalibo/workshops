@@ -324,11 +324,10 @@ hide_author_in_slide: true
 
 ---
 
-### Les collations ICU peuvent être définies par défaut pour les instances et les bases de données
-+ La collation de chaque base de données est enregistrée et vérifiée
+### Collation icu déclarées globalement
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/149 -->
+!include include/149-icu.md
 
 ---
 
