@@ -395,27 +395,6 @@ hide_author_in_slide: true
 
 ---
 
-## Fonctions JSON JSON_ARRAY(), JSON_ARRAYAGG(), JSON_OBJECT(), JSON_OBJECTAGG()
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
-## Fonctions SQL/JSON
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
-## Fonction JSON_TABLE()
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
 ## Permettre l'usage d'index pour les condition basées sur ^@ et starts_with()
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
