@@ -13,13 +13,14 @@ Discussion
 
 * `USAGE` par défaut pour le rôle `PUBLIC`
 * `CREATE` et `USAGE` par défaut pour le rôle `pg_database_owner`
+* adaptation de `pg_dump` pour extraire ces changements
 * Attention lors des montées de version !
 
 </div>
 
 <div class="notes">
 
-Cette nouvelle version supprime le privilège par défaut `CREATE` sur le schema `public` 
+Cette nouvelle version supprime le privilège par défaut `CREATE` sur le schéma `public` 
 pour le rôle `PUBLIC`. Pour rappel, `PUBLIC` peut être vu comme un rôle 
 implicitement défini qui inclut en permanence tous les rôles. Le  propriétaire
 par défaut du schéma `public` n'est 
@@ -52,7 +53,15 @@ qui correspond aux privilèges par défaut du rôle `PUBLIC`.
 Même si la configuration des privilèges est reprise lors d'une montée de version, il convient de réaliser une étape 
 préalable de vérification afin de déterminer d'éventuel impact que pourrait avoir ce changement. Notamment, si un 
 rôle doit créer des objets dans le schéma `public`, qu'il n'est pas propriétaire de la base de données et, qu'aucun
-privilège `CREATE` spécifique n'a été donné car on se basait sur le privilègé 
+privilège `CREATE` spécifique n'a été donné car on se basait sur le privilège 
 `CREATE` qui était implicitement donné au rôle `PUBLIC`.
+
+Ces changements sur le schéma public ont donné lieu à des ajustements dans
+l'outil `pg_dump`. Il extrait désormais correctement le propriétaire du schéma,
+les privilèges et [_security labels_] sur le schéma public même s'il a été
+supprimé puis recréé.
+
+[security labels]: https://www.postgresql.org/docs/15/sql-security-label.html
+
 
 </div>

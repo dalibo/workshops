@@ -206,7 +206,6 @@ hide_author_in_slide: true
 
 ### pg_dump
 
-[pg_dump] Export du propriétaire du schéma public et des security labels
 [pg_dump] Amélioration des performances d'export de bases de données avec de nombreux objets
 [pg_dump] Amélioration des performances d'export parallélisé de tables TOAST
 
