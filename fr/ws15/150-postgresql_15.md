@@ -104,8 +104,8 @@ hide_author_in_slide: true
 
 ### Lancement du background writer et du checkpointer lors d'une récupération suite à un crash
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/178 -->
+!include include/178-lancement-du-background-writer-et-du-checkpointer-lors-d-une-recuperation-suite-a-un-crash.md
 
 ---
 
