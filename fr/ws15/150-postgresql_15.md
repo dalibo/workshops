@@ -197,10 +197,10 @@ hide_author_in_slide: true
 
 ---
 
-### [pg_base_backup] Ajout du support des algorithmes LZ4 et Zstandard pour les sauvegardes et les WAL (pg_receivewal)
+### Ajout de nouveaux algorithmes de compression
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/155 -->
+!include include/155-compression-lz4-et-zstandard.md
 
 ---
 
