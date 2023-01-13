@@ -325,8 +325,8 @@ hide_author_in_slide: true
 
 ### Ajout de l'option --config-file à pg_rewind
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/167 -->
+!include include/167-ws15-ajout-de-l-option-config-file-a-pg_rewind.md
 
 ---
 
