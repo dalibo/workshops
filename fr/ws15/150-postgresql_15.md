@@ -252,8 +252,8 @@ hide_author_in_slide: true
 
 ### Amélioration du comportement des clés étrangère lors de mises à jour qui déplacent des lignes entres les partitions
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/171 -->
+!include include/171-amelioration-du-comportement-des-cles-etrangere-lors-de-mises-a-jour-qui-deplacent-des.md
 
 ---
 
