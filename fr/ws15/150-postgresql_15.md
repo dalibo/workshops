@@ -111,8 +111,8 @@ hide_author_in_slide: true
 
 ### Plus de checkpoint lors de la création d'une database
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/177 -->
+!include include/177-plus-de-checkpoint-lors-de-la-creation-d-une-database.md
 
 ---
 
