@@ -396,8 +396,8 @@ hide_author_in_slide: true
 
 ## Permettre l'usage d'index pour les condition basées sur ^@ et starts_with()
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/173 -->
+!include include/173-w15-permettre-l-usage-d-index-pour-les-condition-basees-sur-et-starts_with.md
 
 ---
 
