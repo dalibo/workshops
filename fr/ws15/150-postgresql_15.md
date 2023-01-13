@@ -168,8 +168,8 @@ hide_author_in_slide: true
 
 ### Archive_library & module "basic archive"
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/150 -->
+!include include/150-archive_library-module-basic-archive.md
 
 ---
 
