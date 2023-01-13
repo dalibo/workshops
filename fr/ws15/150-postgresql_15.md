@@ -389,8 +389,8 @@ hide_author_in_slide: true
 
 ## Ajout de la commande SQL MERGE
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/172 -->
+!include include/172-ajout-de-la-commande-sql-merge.md
 
 ---
 
