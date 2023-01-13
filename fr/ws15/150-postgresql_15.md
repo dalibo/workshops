@@ -187,13 +187,10 @@ hide_author_in_slide: true
 
 ---
 
-### pg_basebackup --target 
+### pg_basebackup `--target`
 
-[pg_base_backup] Module contrib basebackup_to_shell
-[pg_base_backup] Nouvelle option --target
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/152 -->
+!include include/152-backup-targets.md
 
 ---
 
