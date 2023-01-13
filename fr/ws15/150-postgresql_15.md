@@ -118,8 +118,8 @@ hide_author_in_slide: true
 
 ### Statistiques d'activité en mémoire partagée
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/148 -->
+!include include/148-ws15-statistiques-d-activite.md
 
 ---
 
