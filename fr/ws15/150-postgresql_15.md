@@ -403,8 +403,8 @@ hide_author_in_slide: true
 
 ## Ajout de fonctions d'expression régulières pour la compatibilité avec d'autres SGBD
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/175 -->
+!include include/175-ajout-de-fonctions-d-expression-regulieres-pour-la-compatibilite-avec-d-autres-sgbd.md
 
 ---
 
