@@ -73,7 +73,7 @@ il suffit d'activer l'archivage, d'ajouter le module à l'archive_library et de
 configurer le répertoire cible pour l'archivage. Il faut ensuite redémarrer
 l'instance.
 
-Afin d'observer le fonctionement de ce module, nous allons créer une instance
+Afin d'observer le fonctionnement de ce module, nous allons créer une instance
 neuve :
 
 ```bash

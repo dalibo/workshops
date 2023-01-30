@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
-* Donne des informations sur les erreurs qui se sont produitent 
+* Donne des informations sur les erreurs qui se sont produites 
   durant la réplication logique
 * Ajout de la fonction `pg_stat_reset_subscription_stats()`
 

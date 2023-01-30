@@ -11,7 +11,7 @@ Discussion
 
 <div class="slide-content">
 
- * Statistiques d'activitées stockées en mémoire
+ * Statistiques d'activité stockées en mémoire
  * Données perdues en cas de crash.
  * Disparition du processus `stats collector`
  * Disparition du paramètre `stats_temp_directory`
@@ -49,8 +49,8 @@ SELECT *
 (1 row)
 ```
 
-Ce changement d'architecture se traduit par la disparition du processus `stats
-collector` et du paramètre `stats_temp_directory`. Le répertoire `pg_stat_tmp`
+Ce changement d'architecture se traduit par la disparition du processus 
+`stats collector` et d(u paramètre `stats_temp_directory`. Le répertoire `pg_stat_tmp`
 existe toujours dans le répertoire de données de l'instance car certaines
 extensions dont `pg_stat_statements` l'utilisent toujours.
 

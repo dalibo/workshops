@@ -23,7 +23,7 @@ Les commits sur ce sujet sont :
 
 <div class="slide-content">
 
-* Écritures de page complêtes :
+* Écritures de page complètes :
   + `pglz` (défaut utilisé pour `on`), `lz4`, `zstd`
 
 * Sauvegardes avec `pg_basebackup` :
@@ -65,7 +65,7 @@ Le paramètre `--with-zstd` a été ajouté en version 15 pour permettre
 l'utilisation de l'algorithme `zstd`. Ces paramètres sont activés par défaut
 sur les distributions de type RockyLinux et Debian.
 
-**Écriture de pages complêtes**
+**Écriture de pages complètes**
 
 Le paramètre `wal_compression` acceptait précédemment deux valeurs `on` et
 `off`. Il permettait d'activer ou non la compression des images de page
@@ -218,7 +218,7 @@ compressé et que l'extension des fichiers compressé est `.gz`.
 
 ```bash
 $ pg_basebackup -Ft --compress=gzip --pgdata tgzip
-]$ ls ./tgzip/
+$ ls ./tgzip/
 ```
 ```text
 backup_manifest base.tar.gz pg_wal.tar.gz

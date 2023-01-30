@@ -65,7 +65,7 @@ autre système que linux, `shared_memory_size_in_huge_pages` retournera `-1`.
 
 Autre particularité avec ces deux variables, ce sont des variables _calculées durant l'exécution_ 
 (`runtime-computed GUC`). Dans les versions antérieures, la consultation de ce type de paramètre 
-avec la commande `postgres -C` renvoyait des valeurs éronnées car elle nécessitait le chargement 
+avec la commande `postgres -C` renvoyait des valeurs erronées car elle nécessitait le chargement 
 d'éléments complémentaires (ce que ne faisait pas l'ancienne implémentation). La version 15 vient corriger 
 ce problème et permet d'obtenir des valeurs correctes pour ces paramètres. Seule restriction, les 
 paramètres `runtime-computed GUC` ne sont consultables avec `postgres -C` que lorsque 

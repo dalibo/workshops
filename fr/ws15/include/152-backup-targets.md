@@ -68,7 +68,7 @@ de nouveaux types de cibles. Le module de test `basebackup_to_shell` est fourni
 standard un fichier généré par la sauvegarde.
 
 Le module ajoute à `pg_basebackup` la cible `shell`, pour laquelle il est
-possible d'affixer `:` et une chaine de caractère. Cette chaine de caractère ne
+possible d'affixer `:` et une chaîne de caractère. Cette chaîne de caractère ne
 peut contenir que des caractères alphanumériques.
 
 Pour l'utiliser, il faut ajouter le module à `shared_preload_libraries` ou
@@ -77,7 +77,7 @@ Pour l'utiliser, il faut ajouter le module à `shared_preload_libraries` ou
 * `basebackup_to_shell.command` : une commande que le serveur va utiliser pour
   chaque fichier généré par `pg_basebackup`. Si `%f` est spécifié dans la
   commande, il sera remplacé par le nom de fichier. Si `%d` est spécifié dans
-  la commande, il sera remplacé par la chaine spécifiée après la cible ;
+  la commande, il sera remplacé par la chaîne spécifiée après la cible ;
 
 * `basebackup_to_shell.required_role` : le rôle requis pour pouvoir utiliser la
   cible `shell`. Il faut que l'utilisateur dispose de l'attribut `REPLICATION`.
