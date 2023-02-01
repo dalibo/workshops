@@ -99,8 +99,11 @@ hide_author_in_slide: true
 \newpage
 # Administration
 
-\newpage
+---
+
 ## Fonctionnement interne
+
+---
 
 ### Lancement du background writer et du checkpointer lors d'une récupération suite à un crash
 
