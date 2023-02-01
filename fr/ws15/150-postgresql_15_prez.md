@@ -102,7 +102,6 @@ hide_author_in_slide: true
 \newpage
 ## Fonctionnement interne
 
-\newpage
 ### Lancement du background writer et du checkpointer lors d'une récupération suite à un crash
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/178 -->
