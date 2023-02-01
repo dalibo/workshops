@@ -94,7 +94,7 @@ title-transform : none
 # Mettre en commentaire pour désactiver
 hide_author_in_slide: true
 
----
+
 
 \newpage
 # Administration
