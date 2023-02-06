@@ -50,7 +50,7 @@ SELECT *
 ```
 
 Ce changement d'architecture se traduit par la disparition du processus 
-`stats collector` et d(u paramètre `stats_temp_directory`. Le répertoire `pg_stat_tmp`
+`stats collector` et du paramètre `stats_temp_directory`. Le répertoire `pg_stat_tmp`
 existe toujours dans le répertoire de données de l'instance car certaines
 extensions dont `pg_stat_statements` l'utilisent toujours.
 

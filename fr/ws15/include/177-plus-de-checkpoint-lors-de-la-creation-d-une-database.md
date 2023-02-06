@@ -47,7 +47,7 @@ DATABASE` sans checkpoint.
 
 Ce changement a plusieurs avantages :
 
-* éviter deux checkpoints qui peuvent être très couteux en performance à la
+* éviter deux checkpoints qui peuvent être très coûteux en performance à la
   fois pendant le checkpoint et après si `full_page_writes` est configuré à
   `on` (ce qui est la valeur par défaut). Ce problème peut arriver  sur des
   systèmes avec une grosse activité. La nouvelle méthode permet également

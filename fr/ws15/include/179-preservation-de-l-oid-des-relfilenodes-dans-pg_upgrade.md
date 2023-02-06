@@ -29,7 +29,7 @@ _database oid_.
 Le relfilenode est le nom utilisé par le fichier qui contient les données d'une
 relation. Les différents segments et forks de la relation ajoutent un suffixe
 au relfilenode (ex: `_vm` pour la _visibility map_). Il peut être différent de
-l'oid de l'objet (identitifiant unique d'un objet) car certaines opérations
+l'oid de l'objet (identifiant unique d'un objet) car certaines opérations
 peuvent conduire à la recréation des fichiers de la relation comme un `VACUUM
 FULL`.
 
@@ -75,7 +75,7 @@ inférieurs à `16384`.
 
 <!-- Note
 
-pg_largeobject voit aussi son oid fixé, cela peut provoquer l'apparitition de
+pg_largeobject voit aussi son oid fixé, cela peut provoquer l’apparition de
 fichiers orphelins correspondant à la nouvelle version de pg_largeobject. Les
 anciens fichiers liés a pg_largeobjects sont toujours présents et correctement
 référencé ce qui est le principal.
