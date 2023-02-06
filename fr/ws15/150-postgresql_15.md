@@ -347,11 +347,13 @@ hide_author_in_slide: true
 
 ## pg_stat_statements
 
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/181
+
 [pg_stat_statements] Ajout de métriques supplémentaires pour JIT
 [pg_stat_statements] Ajout de métriques supplémentaires sur l'utilisateur des fichiers temporaires
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+--> 
+!include include/181-pg_stat_statements-ajout-de-metriques-supplementaires-pour-jit.md
 
 ---
 
