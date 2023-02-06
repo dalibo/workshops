@@ -55,7 +55,7 @@ discussion : https://www.postgresql.org/message-id/flat/0fafb73f3a0c6bcec817a25c
 
 L'auto-complétion dans `psql` a été améliorée à différents niveaux.
 
-## Recherche insensible à la casse
+**Recherche insensible à la casse**
 
 L'auto-complétion est désormais capable de suggérer ou compléter une commande
 même si la casse n'est pas respectée.
@@ -78,7 +78,7 @@ log_executor_stats                 log_min_duration_statement         log_parame
 logical_decoding_work_mem          log_min_error_statement            log_parser_stats                   log_statement_sample_rate   
 ```
 
-## Noms de paramètres
+**Noms de paramètres**
 
 La complétion d'un `\` via une double tabulation permet de lister les commandes 
 disponibles. Cette liste affiche désormais le nom complet de chaque commande, 
@@ -105,7 +105,7 @@ Display all 106 possibilities? (y or n)
 \dAf               \dF                \drds              \encoding          \ir                \setenv            
 \dAo               \dFd               \dRp               \endif             \list              \sf  
 ```
-## EXPLAIN EXECUTE
+**EXPLAIN EXECUTE**
 
 La complétion de la commande `EXPLAIN` ajoute l'option `EXECUTE`.
 
@@ -114,7 +114,7 @@ postgres=# EXPLAIN
 ANALYZE      DECLARE      DELETE FROM  EXECUTE      INSERT INTO  MERGE        SELECT       UPDATE       VERBOSE 
 ```
 
-## LOCK TABLE
+**LOCK TABLE**
 
 La commande LOCK TABLE permet désormais la complétion de l'option `ONLY` avant 
 le nom de la table :
@@ -132,7 +132,7 @@ IN      NOWAIT
 ```
 </div>
 
-## `CREATE`, `ALTER`, `DROP`
+**`CREATE`, `ALTER`, `DROP`**
 
 Enfin, diverses améliorations ont été apportées aux options de complétion de 
 plusieurs commandes `CREATE`, `ALTER` et `DROP` :

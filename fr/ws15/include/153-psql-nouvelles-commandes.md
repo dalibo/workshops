@@ -22,7 +22,7 @@ Discussions :
 
 <div class="notes">
 
-## Commande `\dconfig`
+**Commande `\dconfig`**
 
 La commande `\dconfig` permet d'afficher les paramètres de configuration de 
 l'instance.
@@ -96,7 +96,7 @@ postgres=# \dconfig *work_mem*
 > l'appel `\dconfig *` permet ainsi de lister l'ensemble des paramètres 
 > de l'instance.
 
-## Commande `\getenv`
+**Commande `\getenv`**
 
 La commande `\getenv` permet d'enregistrer la valeur d'une variable
 d'environnement dans une variable sql.
