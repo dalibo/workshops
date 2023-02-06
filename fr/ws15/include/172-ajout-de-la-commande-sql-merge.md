@@ -12,6 +12,9 @@ Discussion
 -->
 
 <div class="slide-content">
+ * Insérer, mettre à jour ou supprimer des lignes conditionnellement 
+ en un seul ordre SQL.
+ 
 </div>
 
 <div class="notes">
@@ -178,7 +181,7 @@ deux fois :
 ```sql
 BEGIN;
 
--- mesurepour le capteur numéro 3 qui déclenche une mise à jour des
+-- mesures pour le capteur numéro 3 qui déclenche une mise à jour des
 -- colonnes derniere_mesure et derniere_maj
 INSERT INTO import_mesures_capteurs VALUES (3,1);
 
@@ -191,7 +194,7 @@ WHEN NOT MATCHED THEN
 WHEN MATCHED AND ( c.derniere_maj + INTERVAL '10 days' <= current_timestamp ) THEN
   DELETE  
 WHEN MATCHED AND ( c.top_mesure > i.mesure ) THEN
-  -- clause WHEN déchenchée
+  -- clause WHEN déclenchée
   UPDATE
   SET derniere_mesure = i.mesure,
       derniere_maj = current_timestamp
@@ -275,7 +278,7 @@ DELETE
 Lorsqu'elles sont exécutées, ces actions ont les mêmes effets que des ordres
 `INSERT`, `UPDATE` ou `DELETE` classiques. La syntaxe est similaire, à la
 différence prêt qu'il n'a ni clause `FROM` ni clause `WHERE`. Les actions
-agissent sur la cible, utilisnet les lignes courantes de la jointure et
+agissent sur la cible, utilisent les lignes courantes de la jointure et
 agissent sur la cible. Il est possible de spécifier `DO NOTHING` si on souhaite
 ignorer la ligne en cours. Ce résultat peut également être obtenu si aucune
 clause n'est évaluée à `vrai`.
