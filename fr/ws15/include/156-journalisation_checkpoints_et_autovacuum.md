@@ -20,7 +20,7 @@ https://www.postgresql.org/message-id/flat/CALj2ACX-rW_OeDcp4gqrFUAkf1f50Fnh138d
 
 <div class="notes">
 
-## `log_checkpoints`
+**`log_checkpoints`**
 
 Le paramètre `log_checkpoints` est désormais à `on` par défaut, chaque 
 `CHECKPOINT` sera par conséquent journalisé dans les traces de l'instance.
@@ -44,8 +44,8 @@ des `CHECKPOINT` et sur les écritures effectuées :
    0 WAL file(s) added, 0 removed, 134 recycled;
    write=94.874 s, sync=0.028 s, total=95.693 s; sync files=9, longest=0.016 s, average=0.004 s; 
    distance=2192128 kB, estimate=2198003 kB
-
-## `log_autovacuum_min_duration`
+```
+**`log_autovacuum_min_duration`**
 
 Le paramètre `log_autovacuum_min_duration` est désormais configuré à 10 minutes.
 Cela signifie que chaque opération d'_autovacuum_ qui dépasse ce délai sera 
