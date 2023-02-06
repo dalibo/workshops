@@ -161,8 +161,8 @@ hide_author_in_slide: true
 
 ### Fin des backups exclusifs
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/183 -->
+!include include/183-fin-des-backups-exclusifs.md
 
 ---
 
