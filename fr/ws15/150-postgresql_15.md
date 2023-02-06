@@ -362,10 +362,10 @@ hide_author_in_slide: true
 
 # Réplication logique
 
-## Une publication peut contenir toutes les tables d'un schéma
+## Nouvelle option `TABLES IN SCHEMA`
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/166 -->
+!include include/166_une_publication_peut_contenir_toutes_les_tables_d_un_schema.md
 
 ---
 
