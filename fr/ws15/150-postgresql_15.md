@@ -229,7 +229,7 @@ hide_author_in_slide: true
 
 ---
 
-### Ajout des variables serveur shared_memory_size et shared_memory_size_in_huge_pages
+### Ajout de nouvelles variables serveur _shared_memory_size_ et _shared_memory_size_in_huge_pages_
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/145 -->
 !include include/160_guc_shared_memory_size_and_shared_memory_size_in_huge_pages.md
