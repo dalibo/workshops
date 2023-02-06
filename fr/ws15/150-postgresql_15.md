@@ -439,17 +439,10 @@ hide_author_in_slide: true
 
 ---
 
-## psql en version 15 ne supporte plus les versions 9.2 et antérieures
+## Retrait du support des instances de versions 9.1 et antérieures
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
-## PostgreSQL 15 ou ultérieur ne supporte plus le dump de données depuis les versions 9.2 ou antérieures. La restauration de vieilles archives n'est pas garantie.
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/186 -->
+!include include/186-psql-ne-supporte-plus-9-1-et-versions-anterieures.md
 
 ---
 
