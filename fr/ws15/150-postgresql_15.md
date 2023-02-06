@@ -340,8 +340,8 @@ hide_author_in_slide: true
 
 ## Exécution en parallèle des requêtes SELECT DISTINCT
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/182 -->
+!include include/182-execution-en-parallele-des-requetes-select-distinct.md
 
 ---
 
