@@ -366,10 +366,10 @@ hide_author_in_slide: true
 
 ---
 
-## Les données publiées peuvent être filtrées avec une clause WHERE
+## Les données publiées peuvent être filtrées
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/168 -->
+!include include/168_les_donnees_publiees_peuvent_etre_filtrees_avec_une_clause_where.md
 
 ---
 
