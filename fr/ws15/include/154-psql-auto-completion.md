@@ -129,7 +129,7 @@ Idem pour l'option `NOWAIT`, à préciser après le nom de la table :
 postgres=# LOCK TABLE t1 
 IN      NOWAIT
 ```
-</div>
+
 
 **`CREATE`, `ALTER`, `DROP`**
 
@@ -140,4 +140,4 @@ plusieurs commandes `CREATE`, `ALTER` et `DROP` :
 * `ALTER DEFAULT PRIVILEGES`,`ALTER FOREIGN DATA WRAPPER`, `ALTER SEQUENCE`, `ALTER VIEW`
 * `DROP MATERIALIZED VIEW`, `DROP OWNED BY`, `DROP POLICY`, `DROP TRANSFORM`
 
-
+</div>
