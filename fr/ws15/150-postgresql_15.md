@@ -268,8 +268,8 @@ hide_author_in_slide: true
 
 ### Format de sortie JSON pour les traces
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/157 -->
+!include include/157-traces-au-format-json.md
 
 ---
 
