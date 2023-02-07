@@ -184,32 +184,8 @@ Le service PostgreSQL doit être **désactivé** pour ne pas se lancer au démar
 
 ```Bash
  $ for node in pg-1 pg-2 pg-3; do
-  sudo systemctl disable --now postgresql
-  sudo systemctl status postgresql
+  sudo ssh $node systemctl disable --now postgresql
 done
-```
-```console
-Synchronizing state of postgresql.service with SysV service script with /lib/
-systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install disable postgresql
-· postgresql.service - PostgreSQL RDBMS
-   Loaded: loaded (/lib/systemd/system/postgresql.service; disabled; vendor 
-   preset: enabled)
-   Active: inactive (dead)
-Synchronizing state of postgresql.service with SysV service script with /lib/
-systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install disable postgresql
-· postgresql.service - PostgreSQL RDBMS
-   Loaded: loaded (/lib/systemd/system/postgresql.service; disabled; vendor 
-   preset: enabled)
-   Active: inactive (dead)
-Synchronizing state of postgresql.service with SysV service script with /lib/
-systemd/systemd-sysv-install.
-Executing: /lib/systemd/systemd-sysv-install disable postgresql
-· postgresql.service - PostgreSQL RDBMS
-   Loaded: loaded (/lib/systemd/system/postgresql.service; disabled; vendor 
-   preset: enabled)
-   Active: inactive (dead)
 ```
 
 </div>
