@@ -43,11 +43,10 @@ discussion : https://www.postgresql.org/message-id/flat/0fafb73f3a0c6bcec817a25c
 * Recherche insensible à la casse
 * Affichage des noms complets des commandes plutôt que leurs abréviations
 * Amélioration de l'auto-complétion de différentes commandes _SQL_ :
-
-  - `EXPLAIN EXECUTE`
-  - `LOCK TABLE ONLY | NOWAIT`
-  - `ALTER TABLE ... ADD`
-  - `CREATE`, `ALTER`, `DROP`
+  + `EXPLAIN EXECUTE`
+  + `LOCK TABLE ONLY | NOWAIT`
+  + `ALTER TABLE ... ADD`
+  + `CREATE`, `ALTER`, `DROP`
 
 </div>
 

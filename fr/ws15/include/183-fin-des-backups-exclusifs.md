@@ -14,8 +14,8 @@ Les sources pour ce sujet sont :
     + supprimé depuis la version 15
 
   * renommage des fonctions de _backup_ :
-    + `pg_start_backup` devient `pg_backup_start()`
-    + `pg_stop_backup` devient `pg_backup_stop()`
+    + `pg_start_backup()` devient `pg_backup_start()`
+    + `pg_stop_backup()` devient `pg_backup_stop()`
 
 </div>
 
