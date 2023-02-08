@@ -1,6 +1,6 @@
 ---
 subtitle : 'Workshop Patroni'
-title : 'Haute disponibilité de service - Patroni'
+title : 'Haute disponibilité avec Patroni'
 keywords:
 - postgres
 - postgresql
@@ -14,17 +14,17 @@ linkcolor:
 
 licence : PostgreSQL                                                            
 author: Dalibo & Contributors                                                   
-revision: 18.06
+revision: 19.02
 url : http://dalibo.com/formations
 
 #
 # PDF Options
 #
 
-#toc: true
+toc: true
 
 ## Limiter la profondeur de la table des matières
-toc-depth: 4
+toc-depth: 3
 
 ## Mettre les lien http en pieds de page
 links-as-notes: true
@@ -168,29 +168,7 @@ Pour ce rôle, nous utiliserons Etcd.
 
 ---
 
-### Service PostgreSQL et Patroni
 
-<div class="slide-content">
-
-  * Service PostgreSQL désactivé
-
-</div>
-
-<div class="notes">
-
-
-Le service PostgreSQL doit être **désactivé** pour ne pas se lancer au démarrage, le contrôle total de l'instance est délégué à Patroni :
-
-
-```Bash
- $ for node in pg-1 pg-2 pg-3; do
-  sudo ssh $node systemctl disable --now postgresql
-done
-```
-
-</div>
-
----
 
 ## Mise en place de l'infrastructure
 
@@ -267,16 +245,18 @@ dalibo@vm38:~$
 | :------------- | :------------- |
 | inventory.yml      | inventaire des machines    |
 | setup.yml       | _playbook_ principal    |
-| warmup.sh       | script d'amorçage    |
 |        |     |
 | exchange_ssh_keys.yml       | _playbook_ d'échange de clés _ssh_    |
+| teardown.yml       | _playbook_ de destruction massive    |
+| demarre_tout.sh      | démarre tous les conteneurs    |
+| stoppe_tout.sh      | arrête tous les conteneurs    |
 | teardown.yml       | _playbook_ de destruction massive    |
 
 </div>
 
 <div class="notes">
 
-Quatre fichiers Yaml, un script shell :
+Quatre fichiers Yaml, deux scripts shell :
 
 
 Le script `warmup.sh` permet de précharger une image debian pour accélérer la création des autres conteneurs :
@@ -339,7 +319,7 @@ L'état final de chaque conteneur étant *RUNNING* avec une adresse *IPV4* attri
 
 ```
 
-Sur tous les conteneurs, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
+Sur tous la machine hôte, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
 
 ```ini
 10.0.3.101 e1
@@ -667,7 +647,7 @@ Le service PostgreSQL doit êtrre désactivé car la gestion totale de l'instanc
 
 ```Bash
 $ for node in pg-1 pg-2 pg-3; do 
-sudo ssh $node "systemctl disable --now postgresql@14-main"
+sudo ssh $node "systemctl disable --now postgresql@15-main"
 done
 ```
 
@@ -679,12 +659,12 @@ done
 
 <div class="slide-content">
 
-Sur tous les nœuds
+Sur tous les nœuds PostgreSQL/Patroni
 
   * Configuration du DCS
     * `/etc/patroni/dcs.yml`
   * Génération de la configuration
-    * `pg_createconfig_patroni 14 main`
+    * `pg_createconfig_patroni 15 main`
 
 
 </div>
@@ -693,19 +673,32 @@ Sur tous les nœuds
 
 La configuration sous Debian se fait d'abord en renseignant comment contacter le DCS, puis en lançant le script de génération automatique de la configuration de Patroni.
 
+Le port par défaut du service Etcd est le `2379`.
+
+
+```Bash
+$ sudo ssh pg-1
+root@pg-1:~# vim /etc/patroni/dcs.yml
+```
+
 ```yaml
 # /etc/patroni/dcs.yml
 etcd:
-  hosts: e1:2379, e2:2379, e3:2379
+  hosts: 
+  - 10.0.3.101:2379
+  - 10.0.3.102:2379
+  - 10.0.3.103:2379
 ```
 
 ```Bash
- $ sudo ssh pg-1 "pg_createconfig_patroni 14 main"
+ root@pg-1:~# pg_createconfig_patroni 15 main"
 ```
 
-La configuration `/etc/patroni/14-main.yml` est générée.
+La configuration `/etc/patroni/15-main.yml` est générée.
 
 </div>
+
+Ces opérations doivent être répétées sur tous nœuds PostgreSQL/Patroni.
 
 ---
 
@@ -727,33 +720,37 @@ La configuration `/etc/patroni/14-main.yml` est générée.
 
 La création de l'agrégat commence par la mise en route du primaire sur le nœud `pg-1`, c'est lui qui sera la référence pour les secondaires.
 
-L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :
+**L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :**
+
 
 ```Bash
- $ sudo ssh pg-1 "sudo systemctl enable --now patroni@14-main"
+root@pg-1:~# systemctl enable --now patroni@15-main"
 ```
 
 ##### Création de l'utilisateur de réplication
 
 ```Bash
- $ sudo ssh pg-1 "sudo -iu postgres psql -c \"create user replicator replication 
- password 'rep-pass'\" "
+root@pg-1:~# sudo -iu postgres psql -c \"create user replicator replication 
+ password 'rep-pass'\" 
 ```
 
 ##### Suppression des instances secondaires
 
-Les instances secondaires ont été initialisées lors de l'installation du paquet Debian, il faut donc vider leur répertoire de données :.
+Les instances secondaires ont été initialisées lors de l'installation du paquet Debian, 
+il faut donc vider leur répertoire de données car Patroni refusera d'écraser des 
+données existantes.
 
 
 `pg-1` étant notre primaire :
 
 ```Bash
  $ for node in pg-2 pg-3; do
-  sudo ssh  $node "rm -rf /var/lib/postgresql/14/main/*"
+  sudo ssh  $node "rm -rf /var/lib/postgresql/15/main/*"
 done
 ```
 
-Les secondaires seront recréés automatiquement depuis le primaire par Patroni.
+Les secondaires seront recréés automatiquement par Patroni, depuis le primaire 
+répliqué.
 
 ##### Démarrage des instances secondaires
 
@@ -761,7 +758,7 @@ Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 
 ```Bash
  $ for node in pg-2 pg-3; do
-  sudo ssh $node "systemctl start patroni@14-main"
+  sudo ssh $node "systemctl start patroni@15-main"
   done
 ```
 
@@ -785,7 +782,7 @@ Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 Sur chaque nœud Patroni, modifier le `.profile` de l'utilisateur `postgres` en ajoutant :
 
 ```Bash
-export PATRONICTL_CONFIG_FILE=/etc/patroni/14-main.yml
+export PATRONICTL_CONFIG_FILE=/etc/patroni/15-main.yml
 ```
 
 
@@ -793,7 +790,7 @@ export PATRONICTL_CONFIG_FILE=/etc/patroni/14-main.yml
  $ sudo ssh pg-1 sudo -iu postgres patronictl list
 ```
 ```console
- + Cluster: 14-main (7029596050496494965) -+----+-----------+
+ + Cluster: 15-main (7029596050496494965) -+----+-----------+
  | Member | Host       | Role    | State   | TL | Lag in MB |
  +--------+------------+---------+---------+----+-----------+
  | pg-1   | 10.0.3.201 | Leader  | running |  3 |           |
@@ -811,17 +808,17 @@ Master [pg-1]:
 Candidate ['pg-2', 'pg-3'] []: pg-2
 When should the switchover take place (e.g. 2021-11-12T12:21 )  [now]:                          
 Current cluster topology
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+                                    
++ Cluster: 15-main (7029596050496494965) -+----+-----------+                                    
 | Member | Host       | Role    | State   | TL | Lag in MB |                                    
 +--------+------------+---------+---------+----+-----------+                                    
 | pg-1   | 10.0.3.201 | Leader  | running |  3 |           |                                    
 | pg-2   | 10.0.3.202 | Replica | running |  3 |         0 |                                    
 | pg-3   | 10.0.3.203 | Replica | running |  3 |         0 |                                    
 +--------+------------+---------+---------+----+-----------+                                    
-Are you sure you want to switchover cluster 14-main, demoting current master 
+Are you sure you want to switchover cluster 15-main, demoting current master 
 pg-1? [y/N]: y     
 2021-11-12 11:21:20.08091 Successfully switched over to "pg-2"                                  
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+                                    
++ Cluster: 15-main (7029596050496494965) -+----+-----------+                                    
 | Member | Host       | Role    | State   | TL | Lag in MB |                                    
 +--------+------------+---------+---------+----+-----------+                                    
 | pg-1   | 10.0.3.201 | Replica | stopped |    |   unknown |                                    
@@ -943,10 +940,11 @@ Nous simulons une perte du primaire `pg-1` :
  $ sudo lxc-freeze pg-1
 ```
 
-Nous observons la disparition de `pg-1` de la liste des nœuds et une bascule automatique se déclenche vers un des nœuds secondaires disponibles :
+Nous observons la disparition de `pg-1` de la liste des nœuds et une bascule 
+automatique se déclenche vers un des nœuds secondaires disponibles :
 
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
 | Member | Host       | Role    | State   | TL | Lag in MB |
 +--------+------------+---------+---------+----+-----------+
 | pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
@@ -962,7 +960,7 @@ $ sudo lxc-unfreeze pg-1
 ```
 
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
 | Member | Host       | Role    | State   | TL | Lag in MB |
 +--------+------------+---------+---------+----+-----------+
 | pg-1   | 10.0.3.201 | Replica | running |  6 |         0 |
@@ -978,7 +976,7 @@ postgres@pg-1:~$ patronictl switchover --master pg-3 --candidate pg-1 --force
 ```
 ```console
 Current cluster topology
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
 | Member | Host       | Role    | State   | TL | Lag in MB |
 +--------+------------+---------+---------+----+-----------+
 | pg-1   | 10.0.3.201 | Replica | running |  7 |         0 |
@@ -986,7 +984,7 @@ Current cluster topology
 | pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
 +--------+------------+---------+---------+----+-----------+
 2021-11-12 13:18:36.05884 Successfully switched over to "pg-1"
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
 | Member | Host       | Role    | State   | TL | Lag in MB |
 +--------+------------+---------+---------+----+-----------+
 | pg-1   | 10.0.3.201 | Leader  | running |  7 |           |
@@ -1068,7 +1066,7 @@ Après modification, il convient de regarder si notre modification ne nécessite
 postgres@pg-2:~$ patronictl list -e
 ```
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+-----------------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
 | Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
 +--------+------------+---------+---------+----+-----------+-----------------+
 | pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
@@ -1080,10 +1078,10 @@ postgres@pg-2:~$ patronictl list -e
 Dans notre cas, un redémarrage de toutes les instances est nécessaire :
 
 ```Bash
-postgres@pg-2:~$ patronictl restart 14-main
+postgres@pg-2:~$ patronictl restart 15-main
 ```
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+-----------------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
 | Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
 +--------+------------+---------+---------+----+-----------+-----------------+
 | pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
@@ -1104,7 +1102,7 @@ Success: restart on member pg-1
 postgres@pg-2:~$ patronictl list -e
 ```
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+-----------------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
 | Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
 +--------+------------+---------+---------+----+-----------+-----------------+
 | pg-1   | 10.0.3.201 | Leader  | running |  8 |           |                 |
@@ -1169,7 +1167,7 @@ Le script suivant est une solution permettant de récupérer le primaire de notr
 
 ```Bash
 #! /bin/bash
-SCOPE=$(grep -i scope: /etc/patroni/14-main.yml | cut -d '"' -f 2)
+SCOPE=$(grep -i scope: /etc/patroni/15-main.yml | cut -d '"' -f 2)
 curl -s http://e1:2379/v2/keys/postgresql-common/"$SCOPE"/leader | jq -r .node.value
 ```
 
@@ -1227,7 +1225,7 @@ Notre configuration n'a pas encore été appliquée sur les instances car un red
 postgres@pg-1:~$ patronictl list -e
 ```
 ```console
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+-----------------+
++ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
 | Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
 +--------+------------+---------+---------+----+-----------+-----------------+
 | pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
@@ -1237,8 +1235,8 @@ postgres@pg-1:~$ patronictl list -e
 ```
 
 ```Bash
-postgres@pg-1:~$ patronictl restart 14-main --force
-+ Cluster: 14-main (7029596050496494965) -+----+-----------+-----------------+
+postgres@pg-1:~$ patronictl restart 15-main --force
++ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
 | Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
 +--------+------------+---------+---------+----+-----------+-----------------+
 | pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
@@ -1281,7 +1279,7 @@ postgres@backup:~$ vim ~/leader.sh && chmod +x leader.sh
 
 ```Bash
 #! /bin/bash
-SCOPE='14-main'
+SCOPE='15-main'
 curl -s http://e1:2379/v2/keys/postgresql-common/"$SCOPE"/leader | jq -r .node.value
 ```
 
@@ -1378,6 +1376,7 @@ stanza: main
 
   * Etcd : <https://etcd.io/docs/>
   * Patroni : <https://patroni.readthedocs.io/en/latest/>
+  * Formation HAPAT : <https://dalibo.com/formation-postgresql-haute-disponibilite>
   * Dalibo : <https://dalibo.com>
   
 </div>
