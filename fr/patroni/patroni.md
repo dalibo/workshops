@@ -459,6 +459,8 @@ ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
 ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379'
+
+ETCD_ENABLE_V2=true
 ```
 
 **Sur le nœud e2 :**
@@ -479,6 +481,8 @@ ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
 ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.102:2379'
+
+ETCD_ENABLE_V2=true
 ```
 
 **Sur le nœud e3 :**
@@ -498,6 +502,8 @@ ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
 ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.103:2379'
+
+ETCD_ENABLE_V2=true
 ```
 
 </div>
