@@ -10,6 +10,14 @@ Discussion dans les commits
 -->
 
 <div class="slide-content">
+
+  * Nouveau paramètre `-t/--target` pour `pg_basebackup`
+    + `client`, `server` ou `blackhole`
+  * Sauvegarde sur le serveur seulement accessible aux membres 
+  du groupe `pg_write_server_files`
+  * Possibilité d'ajouter des cibles via des modules additionnels
+    + module `basebackup_to_shell` fourni en exemple
+
 </div>
 
 <div class="notes">
