@@ -13,7 +13,8 @@ keywords:
 linkcolor:
 
 licence : PostgreSQL                                                            
-author: Dalibo & Contributors                                                   
+author: Dalibo & Contributors
+date: février 2023                                                  
 revision: 19.02
 url : http://dalibo.com/formations
 
