@@ -380,4 +380,12 @@
       name: "{{ inventory_hostname }}"
       state: restarted
 
+  - name: add all the hosts to /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      line: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      state: present
+      backup: no
+    loop: "{{ groups['all'] }}"
 
