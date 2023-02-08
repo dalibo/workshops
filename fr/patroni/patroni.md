@@ -245,10 +245,8 @@ dalibo@vm38:~$
 | Fichier     | Description     |
 | :------------- | :------------- |
 | inventory.yml      | inventaire des machines    |
-| setup.yml       | _playbook_ principal    |
+| **setup.yml**       | **_playbook_ principal**    |
 |        |     |
-| exchange_ssh_keys.yml       | _playbook_ d'échange de clés _ssh_    |
-| teardown.yml       | _playbook_ de destruction massive    |
 | demarre_tout.sh      | démarre tous les conteneurs    |
 | stoppe_tout.sh      | arrête tous les conteneurs    |
 | teardown.yml       | _playbook_ de destruction massive    |
@@ -257,14 +255,8 @@ dalibo@vm38:~$
 
 <div class="notes">
 
-Quatre fichiers Yaml, deux scripts shell :
+Quatre fichiers Yaml, deux scripts shell.
 
-
-Le script `warmup.sh` permet de précharger une image debian pour accélérer la création des autres conteneurs :
-
-```Bash
- $ sudo ./warmup.sh
-```
 
 </div>
 
@@ -274,7 +266,7 @@ Le script `warmup.sh` permet de précharger une image debian pour accélérer la
 
 L'infrastructure complète peut être créée à l'aide des commandes :
 
-```
+```Bash
  $ sudo apt install -y ansible
  $ sudo ansible-playbook -f 7 -i inventory.yml setup.yml
 ...
@@ -290,7 +282,7 @@ Cette opération peut durer jusqu'à une vingtaine de minutes.
 Vous pouvez suivre l'évolution de la création des conteneurs dans un autre terminal :
 
 ```Bash
- $ watch -n 1 sudo lxc-ls -f
+ $ watch -n 1 -d sudo lxc-ls -f
 ```
 
 ```console
@@ -320,7 +312,7 @@ L'état final de chaque conteneur étant *RUNNING* avec une adresse *IPV4* attri
 
 ```
 
-Sur tous la machine hôte, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
+Sur toutes les machines, y compris l'hôte, le fichier `/etc/hosts` est automatiquement renseigné par le _playbook_ et devrait contenir au moins :
 
 ```ini
 10.0.3.101 e1
@@ -375,11 +367,12 @@ Sur tous la machine hôte, le fichier `/etc/hosts` est automatiquement renseign�
 
 ```Bash
  $ for node in e1 e2 e3; do 
- sudo ssh $node sudo apt install etcd curl iputils-ping jq
+ sudo ssh $node sudo apt-get install -y etcd curl iputils-ping jq
  done
 ```
 
 Le démarrage du service est automatique sous Debian.
+
 ```Bash
  $ for node in e1 e2 e3; do
  sudo ssh $node  "systemctl status etcd | grep -i active"
@@ -463,13 +456,9 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.101:2380'
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 
-ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
-ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
-ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379'
 ```
 
 **Sur le nœud e2 :**
@@ -487,13 +476,9 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.102:2380'
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 
-ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
-ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
-ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.102:2379'
 ```
 
 **Sur le nœud e3 :**
@@ -510,13 +495,9 @@ ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.103:2380'
 ETCD_INITIAL_CLUSTER_STATE='new'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
 
-ETCD_INITIAL_CLUSTER+='e1=http://10.0.3.101:2380'
-ETCD_INITIAL_CLUSTER+='e2=http://10.0.3.102:2380'
-ETCD_INITIAL_CLUSTER+='e3=http://10.0.3.103:2380'
+ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.101:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.102:2379'
-ETCD_ADVERTISE_CLIENT_URLS+='http://10.0.3.103:2379'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.103:2379'
 ```
 
 </div>
@@ -549,7 +530,7 @@ Le nœud `e1`, que nous considérons comme premier _leader_ sera démarré en pr
 
 ```Bash
  $ for node in e1 e2 e3; do 
- sudo ssh -o StrictHostKeyChecking=no $node "systemctl start etcd" &
+ sudo ssh $node "systemctl start etcd" &
  sleep 1
  done
 ```
