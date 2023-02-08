@@ -180,13 +180,6 @@ hide_author_in_slide: true
 
 ---
 
-### Permettre aux membres du role pg_write_server_files d'effectuer des sauvegardes server-side
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
 ### pg_basebackup `--target`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/152 -->
