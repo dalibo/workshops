@@ -25,7 +25,7 @@ url : http://dalibo.com/formations
 toc: true
 
 ## Limiter la profondeur de la table des matières
-toc-depth: 3
+toc-depth: 4
 
 ## Mettre les lien http en pieds de page
 links-as-notes: true
