@@ -12,8 +12,8 @@
 
   tasks:
 
-# EXIT IF DISTRO AND RELEASE ARE NOT SUPPORTED
-  - name: 'check distro and release'
+# CHECK IF DISTRO AND RELEASE
+  - name: 'check distro and release' 
     fail: msg="Only Buster and Bullseye releases of Debian are supported here"
     when: ansible_distribution != "Debian" and ( ansible_distribution_release != "bullseye" or ansible_distribution != "buster" )
 
@@ -100,14 +100,14 @@
   connection: local
   become: true
   become_user: root
-  gather_facts: false
+  gather_facts: true
 
   vars:
   - interface: lxcbr0
 
   tasks:
 
-  - name: Create a stopped container
+  - name: Create a stopped container (Buster)
     delegate_to: localhost
     lxc_container:
       name: "{{ inventory_hostname }}"
@@ -121,6 +121,23 @@
         - lxc.net.0.link = {{ interface }}
         - lxc.net.0.ipv4.address = {{ ansible_host }}/24
         - lxc.net.0.ipv4.gateway = auto
+    when: ansible_distribution_release == "buster"
+
+  - name: Create a stopped container (Bullseye)
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      container_log: true
+      template: debian
+      state: started
+      template_options: --release bullseye
+      container_config:
+        - lxc.net.0.type = veth
+        - lxc.net.0.flags = up
+        - lxc.net.0.link = {{ interface }}
+        - lxc.net.0.ipv4.address = {{ ansible_host }}/24
+        - lxc.net.0.ipv4.gateway = auto
+    when: ansible_distribution_release == "bullseye"
 
 # File /etc/hosts
 
@@ -174,7 +191,7 @@
     become_user: root
     shell:
       cmd: ssh-keyscan {{ ansible_host }} >> ~root/.ssh/known_hosts
-
+ 
  # known_hosts contains all names for root
   - name: container key is up-to-date locally by name for root (know_hosts)
     delegate_to: localhost
@@ -335,6 +352,7 @@
       name:
         - pgbackrest
       state: present
+
 
 
 # # ---------------
