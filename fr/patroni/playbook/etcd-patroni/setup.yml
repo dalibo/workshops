@@ -354,6 +354,30 @@
       state: present
 
 
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_user: root
 
-# # ---------------
-# # EOF
+  tasks:
+
+  - name: setup network interfaces
+    copy:
+      dest: /etc/network/interfaces
+      content: |
+        auto lo
+        iface lop inet loopback
+        auto eth0
+        iface eth0 inet static
+        address {{ ansible_host }}/24 
+        gateway  10.0.3.1
+
+  - name: restart a container
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: restarted
+
+
