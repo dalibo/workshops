@@ -569,21 +569,16 @@ sur e2 :
 736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380
 clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
 7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 sur e3 :
 736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=true
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
 7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 ```
 
 </div>
@@ -712,7 +707,7 @@ La création de l'agrégat commence par la mise en route du primaire sur le nœu
 
 
 ```Bash
-root@pg-1:~# systemctl enable --now patroni@15-main"
+root@pg-1:~# systemctl enable --now patroni@15-main
 ```
 
 ##### Création de l'utilisateur de réplication
