@@ -529,7 +529,7 @@ Le nœud `e1`, que nous considérons comme premier _leader_ sera démarré en pr
 
 ```Bash
  $ for node in e1 e2 e3; do 
- echo "$node :" ; sudo ssh $node "rm -rf ~etcd/default/member"
+ echo "$node :" ; sudo ssh $node "rm -rf ~etcd/default/*"
  done
 ```
 
