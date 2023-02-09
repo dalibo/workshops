@@ -615,7 +615,7 @@ done
 ```
 
 
-Vérification :
+**Vérification :**
 
 ```Bash
  $ for node in pg-1 pg-2 pg-3; do sudo ssh $node "dpkg -l postgresql patroni 
