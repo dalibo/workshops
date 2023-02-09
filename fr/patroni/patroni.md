@@ -1230,6 +1230,9 @@ postgres@pg-1:/var/lib/pgbackrest$ pgbackrest --stanza  main check
 ERROR: [087]: archive_mode must be enabled
 ```
 
+L'archivage est en erreur puisque non configuré.
+
+
 #### Configuration de l'archivage
 
 Toutes les instances doivent être en mesure d'archiver leurs journaux de transactions au moyen de pgBackrest :
@@ -1277,7 +1280,7 @@ Success: restart on member pg-2
 Test de la configuration de l'archivage sur le nœud `pg-1` :
 
 ```Bash
-postgres@pg-1:~$ pgbackrest --stanza main --log-level-console detail  check
+postgres@pg-1:~$ pgbackrest --stanza main check
 ```
 ```console
 2021-11-12 15:57:04.000 P00   INFO: check command begin 2.35: --exec-id=13216-
@@ -1318,7 +1321,8 @@ La configuration se fait dans le fichier `/etc/pgbackrest.conf` :
 repo1-path=/var/lib/pgbackrest
 repo1-retention-full=2
 start-fast=y
-log-level-console=detail
+log-level-console=info
+log-level-file=info
 
 [main]
 pg1-path=/var/lib/postgresql/15/main
