@@ -713,9 +713,53 @@ root@pg-1:~# systemctl enable --now patroni@15-main
 ##### Création de l'utilisateur de réplication
 
 ```Bash
-root@pg-1:~# sudo -iu postgres psql -c \"create user replicator replication 
- password 'rep-pass'\" 
+root@pg-1:~# sudo -iu postgres psql -c \"create user replicator replication password 'rep-pass'\" 
 ```
+
+
+##### Création du superuser d'administration
+
+Chaque nœud doit pouvoir récupérer la _timeline_ et le _LSN_ courants, il doit 
+donc pouvoir se connecter sur le primaire :
+
+
+```Bash
+root@pg-1:~# sudo -iu postgres psql -c \"create user dba superuser password 'admin'\" 
+```
+
+La configuration de chaque nœud doit être modifiée :
+
+```yaml
+# /etc/patroni/15-main.yaml
+...
+# A superuser role is required in order for Patroni to manage the local
+ # Postgres instance.  If the option `use_unix_socket' is set to `true',
+ # then specifying an empty password results in no md5 password for the
+ # superuser being set and sockets being used for authentication. The
+ # `password:' line is nevertheless required.  Note that pg_rewind will not
+ # work if no md5 password is set unless a rewind user is configured, see
+ # below.
+    superuser:
+      username: "dba"
+      password: "admin"
+...
+```
+
+Tous les nœuds doivent être redémarrés.
+
+```Bash
+postgres@pg-1:~ $ patronictl restart 15-main --force
+```
+
+La vérification se fait dans les traces de Patroni d'un nœud secondaire :
+
+```
+Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,984 INFO: Lock owner: pg-1; I am pg-3
+Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,986 INFO: Local timeline=7 lsn=0/5000148
+Feb 09 17:12:39 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:39,037 INFO: master_timeline=7
+```
+
+
 
 ##### Suppression des instances secondaires
 
