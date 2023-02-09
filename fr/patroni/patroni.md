@@ -1433,6 +1433,100 @@ Quelques secondes plus tard :
 +--------+------------+--------------+---------+----+-----------+
 ```
 
+## Mise à jour mineure sans interruption de service
+
+La mise à jour mineure peut être faite nœud par nœud en commençant par les 
+secondaires asynchrones, puis par les secondaires synchrones (qui donneront ce 
+ role à un autre secondaire).
+
+Enfin, une fois tous les secondaires mis à jour, une bascule sur un secondaire 
+à jour pourra être faites et l'ancien primaire alors mis à jour de la même façon 
+puis redémarré :
+
+
+**État de départ :**
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
+| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Sync Standby | running |  7 |         0 |
++--------+------------+--------------+---------+----+-----------+
+
+```
+
+Mise à jour jour et redémarrage du premier secondaire asynchrone `pg-2` :
+
+```Bash
+...
+$ patronictl restart 15-main pg-2
+```
+
+
+
+Mise à jour du nœud synchrone `pg-3` :
+
+```Bash
+...
+$ patronictl restart 15-main pg-2
+```
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+--------------+
+| Member | Host       | Role         | State   | TL | Lag in MB | Tags         |
++--------+------------+--------------+---------+----+-----------+--------------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |              |
+| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |              |
+| pg-3   | 10.0.3.203 | Sync Standby | running |    |   unknown | nosync: true |
++--------+------------+--------------+---------+----+-----------+--------------+
+```
+
+Passation de pouvoir du nœud synchrone vers le secondaire mis à jour :
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
+| pg-2   | 10.0.3.202 | Sync Standby | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Replica      | running |  7 |         0 |
++--------+------------+--------------+---------+----+-----------+
+```
+
+Mise à jour du primaire :
+
+
+Bascule vers le secondaire synchrone :
+
+```Bash
+$ patronictl switchover --candidate pg-3 --master pg-1 --force
+```
+```
+Current cluster topology
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
+| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Sync Standby | running |  7 |         0 |
++--------+------------+--------------+---------+----+-----------+
+2023-02-09 20:26:07.13366 Successfully switched over to "pg-3"
++ Cluster: 15-main (7198182122558146054) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Replica | stopped |    |   unknown |
+| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
++--------+------------+---------+---------+----+-----------+
+```
+
+Mise à jour et redémarrage de l'ancien primaire :
+
+```Bash
+$ patronictl restart 15-main pg-1 --force
+```
 
 ---
 
