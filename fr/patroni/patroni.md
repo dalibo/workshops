@@ -1381,6 +1381,61 @@ stanza: main
 
 ---
 
+## Réplication synchrone
+
+La réplication synchrone permet de garantir que les données sont 
+écrites sur un ou plusieurs secondaires lors des validations de 
+transaction.
+
+Elle permet de réduire quasi-totalement la perte de donnée lors d'un incident 
+(RPO).
+
+Il faut un minimum de trois paramètres ajouté à la configuration dynamique pour 
+décrire la réplicaiton synchrone : 
+
+```
+synchronous_mode: true
+synchronous_node_count: 1
+synchronous_standby_names: '*'
+```
+
+Après quelques secondes, l'un des réplica passe en mode synchrone :
+
+
+```
+postgres@pg-1:~$ patronictl list
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
+| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Sync Standby | running |  7 |         0 |
++--------+------------+--------------+---------+----+-----------+
+```
+
+  * La prochaine bascule ne sera possible que sur le nœud synchrone.
+  * Si le nœud synchrone est défaillant, le secondaire restant passera en mode 
+synchrone (`synchronous_standby_names` et `synchronous_node_count` l'autorisent)
+
+
+```Bash
+$ sudo lxc-freeze pg-3
+```
+
+Quelques secondes plus tard :
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
+| pg-2   | 10.0.3.202 | Sync Standby | running |  7 |         0 |
++--------+------------+--------------+---------+----+-----------+
+```
+
+
+---
+
 ## Références
 
 <div class="slide-content">
