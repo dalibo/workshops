@@ -745,7 +745,7 @@ La configuration de chaque nœud doit être modifiée :
 ...
 ```
 
-Tous les nœuds doivent être redémarrés.
+Tous les nœuds doivent être redémarrés :
 
 ```Bash
 postgres@pg-1:~ $ patronictl restart 15-main --force
