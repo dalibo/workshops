@@ -19,7 +19,7 @@ include:
 ##
 
 variables:
-  BRANCH_TARGET: ws14
+  BRANCH_TARGET: patroni
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/*'
