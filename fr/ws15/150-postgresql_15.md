@@ -196,11 +196,8 @@ hide_author_in_slide: true
 
 ### pg_dump
 
-[pg_dump] Amélioration des performances d'export de bases de données avec de nombreux objets
-[pg_dump] Amélioration des performances d'export parallélisé de tables TOAST
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/188 -->
+!include include/188-pg_dump-amelioration-des-performances-avec-de-nombreux-objets.md
 
 ---
 
