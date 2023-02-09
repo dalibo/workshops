@@ -681,7 +681,7 @@ La configuration `/etc/patroni/15-main.yml` est générée.
 
 </div>
 
-Ces opérations doivent être répétées sur tous nœuds PostgreSQL/Patroni.
+Ces opérations doivent être répétées sur tous les nœuds PostgreSQL/Patroni.
 
 ---
 
@@ -998,12 +998,11 @@ Si le paramètre nécessite un rechargement de la configuration, elle sera lanc�
 
 Si la modification nécessite un redémarrage, l' drapeau _pending restart_ sera positionné sur toutes les instances et attendrons une action de votre part pour l'effectuer.
 
-L'installation de la commande `less` est un pré-requis :
-
-```Bash
- $ for i in pg-1 pg-2 pg-3; do apt install less done
- ...
-```
+> L'installation de la commande `less` est un pré-requis :
+> ```Bash
+>  $ for i in pg-1 pg-2 pg-3; do apt install less done
+> ...
+> ```
 
 La modification peut se faire sur n'importe quel nœud :
 
@@ -1024,8 +1023,9 @@ postgresql:
 
 Une confirmation est demandée après la sortie de l'éditeur :
 
-```console
-patronictl edit-config
+` ``console
+pa
+tronictl edit-config
 --- 
 +++ 
 @@ -1,7 +1,8 @@
