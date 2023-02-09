@@ -1023,9 +1023,8 @@ postgresql:
 
 Une confirmation est demandée après la sortie de l'éditeur :
 
-` ``console
-pa
-tronictl edit-config
+```console
+patronictl edit-config
 --- 
 +++ 
 @@ -1,7 +1,8 @@
