@@ -1331,49 +1331,30 @@ pg1-user=postgres
 pg1-port=5432
 ```
 
-##### test d'une sauvegarde
+**Test d'une sauvegarde**
 
 ```Bash
 postgres@backup:~$ pgbackrest --stanza main --pg1-host=$(./leader.sh) backup 
 --type=full
 ```
 ```console
-2021-11-12 16:32:32.128 P00   INFO: backup command begin 2.35: --exec-id=6717-
-e7512f6c --log-level-console=detail --pg1-host=pg-1 --pg1-host-user=postgres --
-pg1-path=/var/lib/postgresql/15/main --pg1-port=5432 --pg1-user=postgres --
-repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-
-fast --type=full
-2021-11-12 16:32:33.114 P00   INFO: execute non-exclusive pg_start_backup(): 
-backup begins after the requested immediate checkpoint completes
-2021-11-12 16:32:34.129 P00   INFO: backup start archive = 
-00000008000000000000000B, lsn = 0/B000028
-2021-11-12 16:32:36.709 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
-main/base/13707/1255 (752KB, 2%) checksum 
-2bac9bc6e62f6059736f9152a045bb43c0832231
-2021-11-12 16:32:37.119 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
-main/base/13706/1255 (752KB, 5%) checksum 
-2bac9bc6e62f6059736f9152a045bb43c0832231 
-...
-...
-2021-11-12 16:32:45.786 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
-main/base/1/13528 (0B, 100%)
-2021-11-12 16:32:45.791 P00   INFO: execute non-exclusive pg_stop_backup() and 
-wait for all WAL segments to archive
-2021-11-12 16:32:46.095 P00   INFO: backup stop archive = 
-00000008000000000000000B, lsn = 0/B000138
-2021-11-12 16:32:46.101 P00 DETAIL: wrote 'backup_label' file returned from 
-pg_stop_backup()
-2021-11-12 16:32:46.103 P00   INFO: check archive for segment(s) 
-00000008000000000000000B:00000008000000000000000B
-2021-11-12 16:32:49.611 P00   INFO: new backup label = 20211112-163233F
-2021-11-12 16:32:49.673 P00   INFO: full backup size = 25.1MB, file total = 952
-2021-11-12 16:32:49.674 P00   INFO: backup command end: completed successfully 
-(17556ms)
-2021-11-12 16:32:49.675 P00   INFO: expire command begin 2.35: --exec-id=6717-
-e7512f6c --log-level-console=detail --repo1-path=/var/lib/pgbackrest --repo1-
-retention-full=2 --stanza=main
-2021-11-12 16:32:49.686 P00   INFO: expire command end: completed successfully 
-(11ms)
+
+2023-02-09 18:43:38.424 P00   INFO: backup command begin 2.44: --exec-id=1116-00f26290 --log-level-console=info --log-level-file=info --pg1-host=pg-1 --pg1-host-user=postgres --pg1-path=/var/lib/postgresql/15/main --pg1-port=5432 --pg1-user=postgres --repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-fast --type=full
+2023-02-09 18:43:39.363 P00   INFO: execute non-exclusive backup start: backup begins after the requested immediate checkpoint completes
+2023-02-09 18:43:40.475 P00   INFO: backup start archive = 000000070000000000000013, lsn = 0/13000028
+2023-02-09 18:43:40.475 P00   INFO: check archive for prior segment 000000070000000000000012
+2023-02-09 18:44:06.600 P00   INFO: execute non-exclusive backup stop and wait for all WAL segments to archive
+2023-02-09 18:44:06.905 P00   INFO: backup stop archive = 000000070000000000000013, lsn = 0/13000138
+2023-02-09 18:44:06.955 P00   INFO: check archive for segment(s) 000000070000000000000013:000000070000000000000013
+2023-02-09 18:44:07.533 P00   INFO: new backup label = 20230209-184339F
+2023-02-09 18:44:07.798 P00   INFO: full backup size = 29.2MB, file total = 1261
+2023-02-09 18:44:07.819 P00   INFO: backup command end: completed successfully (29396ms)
+2023-02-09 18:44:07.819 P00   INFO: expire command begin 2.44: --exec-id=1116-00f26290 --log-level-console=info --log-level-file=info --repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main
+2023-02-09 18:44:07.822 P00   INFO: repo1: expire full backup 20230209-183850F
+2023-02-09 18:44:07.892 P00   INFO: repo1: remove expired backup 20230209-183850F
+2023-02-09 18:44:07.971 P00   INFO: repo1: 15-1 remove archive, start = 000000070000000000000008, stop = 00000007000000000000000A
+2023-02-09 18:44:07.971 P00   INFO: expire command end: completed successfully (152ms)
+
 ```
 
 Vérification de l'état de la sauvegarde :
