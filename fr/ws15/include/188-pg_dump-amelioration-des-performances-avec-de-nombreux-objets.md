@@ -15,7 +15,7 @@ et
   * Amélioration des performances d'export de bases avec de nombreux objets
     + désormais une seule requête pour toutes les tables à exporter
     + élimination de sous-requêtes non nécessaires
-    + utilisation de PREPARE/EXECUTE pour les requêtes répétitives
+    + utilisation de `PREPARE`/`EXECUTE` pour les requêtes répétitives
   * Amélioration des performances d'export parallélisé de tables TOAST
     + données TOAST désormais comptabilisées dans la planification d'un export
     parallélisé
