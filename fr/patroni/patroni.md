@@ -1528,6 +1528,75 @@ Mise à jour et redémarrage de l'ancien primaire :
 $ patronictl restart 15-main pg-1 --force
 ```
 
+Pour un retour à la normal avec `pg-1` étant primaire, il faut faire en sorte 
+que celui-ci soit synchrone.
+
+Le plus sûr est de déclarer le nœud `pg-1` synchrone :
+
+```Bash
+$ patronictl edit-config
+
+```
+```yaml
+...
+synchronous_node_count: 2
+...
+
+```
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Sync Standby | running | 10 |         0 |
+| pg-2   | 10.0.3.202 | Sync Standby | running | 10 |         0 |
+| pg-3   | 10.0.3.203 | Leader       | running | 10 |           |
++--------+------------+--------------+---------+----+-----------+
+```
+
+Effectuer la promotion et remettre le nombre de nœuds synchrone à `1` :
+
+```Bash
+$ patronictl switchover --candidate pg-1 --master pg-3 --force
+```
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running | 11 |           |
+| pg-2   | 10.0.3.202 | Sync Standby | running | 11 |         0 |
+| pg-3   | 10.0.3.203 | Sync Standby | running | 11 |         0 |
++--------+------------+--------------+---------+----+-----------+
+```
+
+```Bash
+$ patronictl edit-config
+
+```
+```yaml
+...
+synchronous_node_count: 1
+...
+
+```
+
+Après quelques secondes :
+
+```
++ Cluster: 15-main (7198182122558146054) ------+----+-----------+
+| Member | Host       | Role         | State   | TL | Lag in MB |
++--------+------------+--------------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader       | running | 11 |           |
+| pg-2   | 10.0.3.202 | Sync Standby | running | 11 |         0 |
+| pg-3   | 10.0.3.203 | Replica      | running | 11 |         0 |
++--------+------------+--------------+---------+----+-----------+
+```
+
+Aucun arrêt de service et aucune perte de données due à l'opération.
+
+
+
 ---
 
 ## Références
