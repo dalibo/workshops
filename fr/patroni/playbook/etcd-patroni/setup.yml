@@ -289,20 +289,40 @@
       state: present
       update_cache: false
 
-  - name: Configure pgdg repository
-    become: true
-    become_user: root
-    copy:
-      dest: /etc/apt/sources.list.d/pgdg.list
-      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+#-   - name: Import pgdg gnupg key
+#-     become: true
+#-     become_user: root
+#-     shell:
+#-       warn: false
+#-       cmd:
+#-         curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 
-  - name: Import pgdg gnupg key
-    become: true
-    become_user: root
-    shell:
-      warn: false
-      cmd:
-        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+  - name: "Adding postgres key"
+    apt_key:
+      url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+      state: "present"
+
+  - name: "Adding postgres repo"
+    apt_repository:
+      filename: "pgdg"
+      repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+      state: "present"
+
+
+        # -------------
+#-   - name: Configure pgdg repository
+#-     become: true
+#-     become_user: root
+#-     copy:
+#-       dest: /etc/apt/sources.list.d/pgdg.list
+#-       content: 'deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main'
+#- 
+
+        #------------------
+        
+
+
+
 
   - name: apt update
     become: yes
