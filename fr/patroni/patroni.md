@@ -721,14 +721,14 @@ root@pg-1:~# sudo -iu postgres psql -c \"create user replicator replication
 
 Les instances secondaires ont été initialisées lors de l'installation du paquet Debian, 
 il faut donc vider leur répertoire de données car Patroni refusera d'écraser des 
-données existantes.
+données existantes. Nous utilisons le _wrapper_ Debian :
 
 
 `pg-1` étant notre primaire :
 
 ```Bash
  $ for node in pg-2 pg-3; do
-  sudo ssh  $node "rm -rf /var/lib/postgresql/15/main/*"
+  sudo ssh  $node "pg_dropcluster 15 main"
 done
 ```
 
@@ -1146,7 +1146,7 @@ L'application d'un paramètre qui ne nécessite pas de redémarrage est transpar
 
 Nous proposons de déclencher la sauvegarde sur le primaire courant, il faut donc d'abord l'identifier.
  
-Le script suivant est une solution permettant de récupérer le primaire de notre agrégat à partir d'un nœud Etcd ezt de l'API mise à disposition :
+Le script suivant est une solution permettant de récupérer le primaire de notre agrégat à partir d'un nœud Etcd et de l'API mise à disposition :
 
 ```Bash
 #! /bin/bash
@@ -1161,7 +1161,7 @@ Sur chacun des nœuds, il faut configurer le _stanza_ et l'initialiser :
 ```ini
 # /etc/pgbackrest.conf
 [main]
-pg1-path=/var/lib/postgresql/14/main
+pg1-path=/var/lib/postgresql/15/main
 pg1-socket-path=/var/run/postgresql
 pg1-port=5432
 
@@ -1239,12 +1239,12 @@ postgres@pg-1:~$ pgbackrest --stanza main --log-level-console detail  check
 ```console
 2021-11-12 15:57:04.000 P00   INFO: check command begin 2.35: --exec-id=13216-
 4a7c4a92 --log-level-console=detail --log-level-file=detail --pg1-path=/var/lib/
-postgresql/14/main --pg1-port=5432 --pg1-socket-path=/var/run/postgresql --
+postgresql/15/main --pg1-port=5432 --pg1-socket-path=/var/run/postgresql --
 repo1-host=backup --repo1-host-user=postgres --stanza=main
 2021-11-12 15:57:04.616 P00   INFO: check repo1 configuration (primary)
 2021-11-12 15:57:05.083 P00   INFO: check repo1 archive for WAL (primary)
 2021-11-12 15:57:08.425 P00   INFO: WAL segment 000000080000000000000005 
-successfully archived to '/var/lib/pgbackrest/archive/main/14-1/
+successfully archived to '/var/lib/pgbackrest/archive/main/15-1/
 0000000800000000/000000080000000000000005-
 b0929d740c7996974992ecd7b9b189b37d06a896.gz' on repo1
 2021-11-12 15:57:08.528 P00   INFO: check command end: completed successfully 
@@ -1278,7 +1278,7 @@ start-fast=y
 log-level-console=detail
 
 [main]
-pg1-path=/var/lib/postgresql/14/main
+pg1-path=/var/lib/postgresql/15/main
 pg1-host-user=postgres
 pg1-user=postgres
 pg1-port=5432
@@ -1293,22 +1293,22 @@ postgres@backup:~$ pgbackrest --stanza main --pg1-host=$(./leader.sh) backup
 ```console
 2021-11-12 16:32:32.128 P00   INFO: backup command begin 2.35: --exec-id=6717-
 e7512f6c --log-level-console=detail --pg1-host=pg-1 --pg1-host-user=postgres --
-pg1-path=/var/lib/postgresql/14/main --pg1-port=5432 --pg1-user=postgres --
+pg1-path=/var/lib/postgresql/15/main --pg1-port=5432 --pg1-user=postgres --
 repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-
 fast --type=full
 2021-11-12 16:32:33.114 P00   INFO: execute non-exclusive pg_start_backup(): 
 backup begins after the requested immediate checkpoint completes
 2021-11-12 16:32:34.129 P00   INFO: backup start archive = 
 00000008000000000000000B, lsn = 0/B000028
-2021-11-12 16:32:36.709 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+2021-11-12 16:32:36.709 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
 main/base/13707/1255 (752KB, 2%) checksum 
 2bac9bc6e62f6059736f9152a045bb43c0832231
-2021-11-12 16:32:37.119 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+2021-11-12 16:32:37.119 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
 main/base/13706/1255 (752KB, 5%) checksum 
 2bac9bc6e62f6059736f9152a045bb43c0832231 
 ...
 ...
-2021-11-12 16:32:45.786 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+2021-11-12 16:32:45.786 P01 DETAIL: backup file pg-1:/var/lib/postgresql/15/
 main/base/1/13528 (0B, 100%)
 2021-11-12 16:32:45.791 P00   INFO: execute non-exclusive pg_stop_backup() and 
 wait for all WAL segments to archive
