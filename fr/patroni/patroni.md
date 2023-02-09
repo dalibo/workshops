@@ -525,7 +525,8 @@ ETCD_ENABLE_V2=true
 
 Avant de démarrer le service sur chaque nœud, il faut réinitialiser les répertoires de données des nœuds, afin qu'ils reparte sur un répertoire neuf.
 
-Le nœud `e1`, que nous considérons comme premier _leader_ sera démarré en premier :
+Le nœud `e1`, que nous considérons comme premier _leader_ sera démarré en premier mais il est possible qu'un autre nœud prenne le dessus s'il arrive à 
+démarrer plus vite :
 
 ```Bash
  $ for node in e1 e2 e3; do 
@@ -547,7 +548,7 @@ En cas d'échec de démarrage, utilisez la commande _Systemd_ pour en diagnosti
  e1:~$ sudo journalctl -xfu etcd
 ```
 
-**Vérification que le nœud `e1` ayant démarré en premier, est bien le _leader_ :**
+**Vérification :**
 
 ```Bash
  $ for node in e1 e2 e3; do 
@@ -559,18 +560,14 @@ done
 ```console
 sur e1 :
 736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379
-isLeader=true
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
 7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=false
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
 sur e2 :
 736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380
-clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
-isLeader=true
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
 7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
 clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
 isLeader=false
@@ -590,6 +587,9 @@ isLeader=false
 ```
 
 </div>
+
+> Le _leader_ doit être identique sur les trois nœuds, 
+> les trois nœuds doivent retourner la même liste de membres.
 
 ---
 
