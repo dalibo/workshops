@@ -49,7 +49,7 @@ des `CHECKPOINT` et sur les écritures effectuées :
 
 Le paramètre `log_autovacuum_min_duration` est désormais configuré à 10 minutes.
 Cela signifie que chaque opération d'_autovacuum_ qui dépasse ce délai sera 
-tracé.
+tracée.
 
 Les traces générées par ce paramètre permettent d'obtenir un rapport détaillé 
 sur les opérations de `VACUUM` et `ANALYZE` exécutées par l'_autovacuum_ :
