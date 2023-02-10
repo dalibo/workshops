@@ -100,7 +100,11 @@ hide_author_in_slide: true
 
 # Administration
 
+---
+
 ## Fonctionnement interne
+
+---
 
 ### Lancement du background writer et du checkpointer lors d'une récupération suite à un crash
 
@@ -134,6 +138,8 @@ hide_author_in_slide: true
 
 ## psql
 
+---
+
 ### Optimisation des performances de la commande `\copy`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/151 -->
@@ -158,6 +164,8 @@ hide_author_in_slide: true
 \newpage
 
 ## Sauvegarde et restauration
+
+---
 
 ### Fin des backups exclusifs
 
@@ -205,6 +213,8 @@ hide_author_in_slide: true
 
 ## Nouvelles vues et paramètres
 
+---
+
 ### Ajout de la vue système pg_ident_file_mappings pour reporter les informations du fichier pg_ident.conf
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/159 -->
@@ -230,6 +240,8 @@ hide_author_in_slide: true
 
 ## Partitionnement
 
+---
+
 ### Les triggers pour les clés étrangères sont maintenant créés sur les tables partitionnées et sur les partitions
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
@@ -248,6 +260,8 @@ hide_author_in_slide: true
 
 
 ## Traces
+
+---
 
 ### Activation de la journalisation des CHECKPOINT et opérations de VACUUM lentes
 
@@ -274,6 +288,8 @@ hide_author_in_slide: true
 
 
 ## Divers
+
+---
 
 ### Possibilité de donner/restreindre les droits aux commandes SET / ALTER SYSTEM pour les utilisateurs non privilégiés
 
@@ -321,10 +337,10 @@ hide_author_in_slide: true
 
 # Performances
 
-## Permettre les statistiques étendues d'enregistrer des informations pour la table parente et ses partitions filles
+<!--## Permettre les statistiques étendues d'enregistrer des informations pour la table parente et ses partitions filles
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+ https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE 
+!include include/EXEMPLE.md-->
 
 ---
 
@@ -351,6 +367,8 @@ hide_author_in_slide: true
 
 # Réplication logique
 
+---
+
 ## Nouvelle option `TABLES IN SCHEMA`
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/166 -->
@@ -375,6 +393,8 @@ hide_author_in_slide: true
 \newpage
 
 # Développement + Changement syntaxe SQL
+
+---
 
 ## Ajout de la commande SQL MERGE
 
@@ -422,6 +442,8 @@ hide_author_in_slide: true
 
 # Régressions
 
+---
+
 ## Retrait du support des instances de versions 9.1 et antérieures
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/186 -->
@@ -439,6 +461,8 @@ hide_author_in_slide: true
 \newpage
 
 # Ateliers
+
+---
 
 <!-- lister les tp ici, un include par tp -->
 
