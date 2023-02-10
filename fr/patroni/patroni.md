@@ -246,6 +246,7 @@ dalibo@vm38:~$
 | :------------- | :------------- |
 | inventory.yml      | inventaire des machines    |
 | **setup.yml**       | **_playbook_ principal**    |
+| exchange_ssh_keys.yml | échange des clefs ssh |
 |        |     |
 | demarre_tout.sh      | démarre tous les conteneurs    |
 | stoppe_tout.sh      | arrête tous les conteneurs    |
@@ -349,7 +350,7 @@ Sur toutes les machines, y compris l'hôte, le fichier `/etc/hosts` est automati
 
 ---
 
-#### Installation des paquets
+#### **Installation des paquets**
 
 <div class="slide-content">
 
@@ -367,7 +368,7 @@ Sur toutes les machines, y compris l'hôte, le fichier `/etc/hosts` est automati
 
 ```Bash
  $ for node in e1 e2 e3; do 
- sudo ssh $node sudo apt-get install -y etcd curl iputils-ping jq
+ sudo ssh $node sudo apt-get install -qqy etcd curl iputils-ping jq
  done
 ```
 
@@ -386,7 +387,7 @@ Le démarrage du service est automatique sous Debian.
    Active: active (running) since Wed 2021-11-10 17:48:46 UTC; 3min 8s ago
 ```
 
-##### Vérification
+**Vérification de l'état des nœuds**
 
 ```Bash
 $ for node in e1 e2 e3; do  
@@ -403,7 +404,8 @@ clientURLs=http://localhost:2379 isLeader=true
 clientURLs=http://localhost:2379 isLeader=true
 ```
 
-Les nœuds sont tous des _leaders_ indépendants, ce qui ne nous intéresse pas. Il faut donc les configurer pour qu'ils fonctionnent en agrégat.
+Les nœuds sont tous des _leaders_ indépendants, ce qui ne nous intéresse pas. 
+Il faut donc les configurer pour qu'ils fonctionnent en collaboration.
 
 Nous arrêtons donc les services :
 
@@ -422,7 +424,7 @@ done
 
 ---
 
-#### Configuration du service Etcd
+#### **Configuration du service Etcd**
 
 <div class="slide-content">
 
@@ -433,13 +435,14 @@ done
 <div class="notes">
 
 
-La configuration du service Etcd se trouve dans le fichier `/etc/default/etcd`, elle doit décrire notre agrégat sur chaque nœud :
+La configuration du service Etcd se trouve dans le fichier `/etc/default/etcd`, 
+elle doit décrire notre agrégat sur chaque nœud :
 
 <!-- **Attention aux espaces insécables dans la chaîne ETCD_INITIAL_CLUSTER -->
 
 <div class="box warning">
 
-Attention aux caractères invisibles ou aux sauts de ligne 
+> Attention aux caractères invisibles ou aux sauts de ligne 
 </div>
 
 **Sur le nœud e1 :**
@@ -510,13 +513,12 @@ ETCD_ENABLE_V2=true
 
 ---
 
-#### Démarrage du service
+#### **Démarrage du service**
 
 <div class="slide-content">
 
   * Réinitialisation des bases Etcd
-  * Démarrage du service `etcd`
-    * `systemctl  start etcd`
+  * Démarrage du service `etcd` : `systemctl  start etcd`
 
 </div>
 
@@ -605,7 +607,7 @@ Le dépôt _pgdg_ est déjà préconfiguré dans les conteneurs pg-1, pg-2 et pg
 
 ```Bash
  $ for node in pg-1 pg-2 pg-3; do
-sudo ssh $node "apt-get update && apt-get install -y postgresql patroni pgbackrest"
+sudo ssh $node "apt-get update && apt-get install -qqy postgresql patroni pgbackrest" &
 done
 ```
 
@@ -698,51 +700,60 @@ Ces opérations doivent être répétées sur tous les nœuds PostgreSQL/Patroni
 
 <div class="notes">
 
-##### Démarrage du primaire
+##### **Démarrage du primaire**
 
 
 La création de l'agrégat commence par la mise en route du primaire sur le nœud `pg-1`, c'est lui qui sera la référence pour les secondaires.
-
-**L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :**
-
 
 ```Bash
 root@pg-1:~# systemctl enable --now patroni@15-main
 ```
 
-##### Création de l'utilisateur de réplication
+L'instance doit être promue pour pouvoir être accessible écriture :
 
 ```Bash
-root@pg-1:~# sudo -iu postgres psql -c \"create user replicator replication password 'rep-pass'\" 
+root@pg-1:~# sudo -iu postgres psql -c 'select pg_promote();'' 
+```
+
+**L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :**
+
+```Bash
+root@pg-1:~# sudo -iu postgres psql -c "create user replicator replication password 'rep-pass';" 
 ```
 
 
-##### Création du superuser d'administration
+##### **Superuser d'administration locale**
 
-Chaque nœud doit pouvoir récupérer la _timeline_ et le _LSN_ courants, il doit 
-donc pouvoir se connecter sur le primaire :
-
+Chaque nœud doit pouvoir récupérer la _timeline_ et le _LSN_ courants
 
 ```Bash
-root@pg-1:~# sudo -iu postgres psql -c \"create user dba superuser password 'admin'\" 
+root@pg-1:~# sudo -iu postgres psql -c "create user dba superuser password 'admin'" 
 ```
+
+Si l'utilisateur est différent de `postgres`, il faudra désactiver le socket unix 
+sinon Patroni essaiera la connexion locale authentifiée par la méthode `peer`.
+L'utilisateur `dba` n'existant pas au niveau système, il y aurait échec.
+
 
 La configuration de chaque nœud doit être modifiée :
 
+
 ```yaml
-# /etc/patroni/15-main.yaml
-...
-# A superuser role is required in order for Patroni to manage the local
- # Postgres instance.  If the option `use_unix_socket' is set to `true',
- # then specifying an empty password results in no md5 password for the
- # superuser being set and sockets being used for authentication. The
- # `password:' line is nevertheless required.  Note that pg_rewind will not
- # work if no md5 password is set unless a rewind user is configured, see
- # below.
+#/etc/patroni/15-main.yaml
+
+postgresql:
+
+    #...
+
+ use_unix_socket: false
+
+ #...
+
     superuser:
       username: "dba"
       password: "admin"
-...
+      #...
+
 ```
 
 Tous les nœuds doivent être redémarrés :
@@ -752,12 +763,14 @@ postgres@pg-1:~ $ patronictl restart 15-main --force
 ```
 
 La vérification se fait dans les traces de Patroni d'un nœud secondaire :
-
+\small
 ```
 Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,984 INFO: Lock owner: pg-1; I am pg-3
 Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,986 INFO: Local timeline=7 lsn=0/5000148
 Feb 09 17:12:39 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:39,037 INFO: master_timeline=7
+
 ```
+\normalsize
 
 
 
@@ -771,9 +784,7 @@ données existantes. Nous utilisons le _wrapper_ Debian :
 `pg-1` étant notre primaire :
 
 ```Bash
- $ for node in pg-2 pg-3; do
-  sudo ssh  $node "pg_dropcluster 15 main"
-done
+ $ for node in pg-2 pg-3; do sudo ssh  $node "pg_dropcluster 15 main"; done
 ```
 
 Les secondaires seront recréés automatiquement par Patroni, depuis le primaire 
@@ -784,16 +795,14 @@ répliqué.
 Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 
 ```Bash
- $ for node in pg-2 pg-3; do
-  sudo ssh $node "systemctl start patroni@15-main"
-  done
+ $ for node in pg-2 pg-3; do sudo ssh $node "systemctl start patroni@15-main"; done
 ```
 
 </div>
 
 ---
 
-##### Vérifications
+##### **Vérifications**
 
 <div class="slide-content">
 
@@ -804,7 +813,7 @@ Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
 
 <div class="notes">
 
-###### Liste des nœuds Patroni
+###### **Liste des nœuds Patroni**
 
 Sur chaque nœud Patroni, modifier le `.profile` de l'utilisateur `postgres` en ajoutant :
 
@@ -825,7 +834,7 @@ export PATRONICTL_CONFIG_FILE=/etc/patroni/15-main.yml
  | pg-3   | 10.0.3.203 | Replica | running |  3 |         0 |
 ```
 
-###### Test de bascule manuelle vers chaque nœud
+###### **Test de bascule manuelle vers chaque nœud**
 
 ```Bash
  $ sudo ssh pg-1 sudo -iu postgres patronictl switchover
@@ -1068,7 +1077,7 @@ postgresql:
 
 Une confirmation est demandée après la sortie de l'éditeur :
 
-```console
+```diff
 patronictl edit-config
 --- 
 +++ 
@@ -1223,6 +1232,17 @@ Tous les nœuds doivent permettre la connexion _ssh_ sans mot de passe, le _play
  $ sudo ansible-playbook -i inventory.yml exchange_ssh_keys.yml  -f 7
 ```
 
+La première connexion ssh entre `backup` et les nœuds PostgreSQL demande une 
+confirmation. Il faut donc lancer les trois commandes :
+
+``` Bash
+postgres@backup:~ $ ssh pg-1
+
+postgres@backup:~ $ ssh pg-2
+
+postgres@backup:~ $ ssh pg-3
+```
+
 Nous pouvons alors tenter de créer le _stanza_ sur le primaire :
 
 ```Bash
@@ -1234,7 +1254,7 @@ ERROR: [087]: archive_mode must be enabled
 L'archivage est en erreur puisque non configuré.
 
 
-#### Configuration de l'archivage
+#### **Configuration de l'archivage**
 
 Toutes les instances doivent être en mesure d'archiver leurs journaux de transactions au moyen de pgBackrest :
 
@@ -1298,7 +1318,7 @@ b0929d740c7996974992ecd7b9b189b37d06a896.gz' on repo1
 (4531ms)
 ```
 
-#### Configuration sur la machine hébergeant les sauvegardes
+#### **Configuration sur la machine hébergeant les sauvegardes**
 
 Sur la machine `backup`, créer le script de détermination du _leader_ (le rendre exécutable) :
 
@@ -1313,7 +1333,7 @@ SCOPE='15-main'
 curl -s http://e1:2379/v2/keys/postgresql-common/"$SCOPE"/leader | jq -r .node.value
 ```
 
-##### Configuration de pgBackrest
+##### **Configuration de pgBackrest**
 
 Nous avons choisit d'opérer en mode _pull_, les sauvegardes seront exécutées 
 sur la machine `backup` et récupérées depuis le primaire courant.
@@ -1391,14 +1411,14 @@ stanza: main
 ## Réplication synchrone
 
 La réplication synchrone permet de garantir que les données sont 
-écrites sur un ou plusieurs secondaires lors des validations de 
-transaction.
+écrites sur un ou plusieurs secondaires lors de la validation des 
+transactions.
 
 Elle permet de réduire quasi-totalement la perte de donnée lors d'un incident 
 (RPO).
 
-Il faut un minimum de trois paramètres ajouté à la configuration dynamique pour 
-décrire la réplicaiton synchrone : 
+Il faut un minimum de trois paramètres ajoutés à la configuration dynamique pour 
+décrire la réplication synchrone : 
 
 ```
 synchronous_mode: true
@@ -1406,7 +1426,7 @@ synchronous_node_count: 1
 synchronous_standby_names: '*'
 ```
 
-Après quelques secondes, l'un des réplica passe en mode synchrone :
+Après quelques secondes, l'un des réplicas passe en mode synchrone :
 
 
 ```
@@ -1421,15 +1441,16 @@ postgres@pg-1:~$ patronictl list
 ```
 
   * La prochaine bascule ne sera possible que sur le nœud synchrone.
-  * Si le nœud synchrone est défaillant, le secondaire restant passera en mode 
-synchrone (`synchronous_standby_names` et `synchronous_node_count` l'autorisent)
+  * Si le nœud synchrone est défaillant, un des secondaires restant passera en 
+  mode synchrone (`synchronous_standby_names` et `synchronous_node_count` l'autorisent)
 
+**Perte du secondaire synchrone :**
 
 ```Bash
 $ sudo lxc-freeze pg-3
 ```
 
-Quelques secondes plus tard :
+**Quelques secondes plus tard :**
 
 ```
 + Cluster: 15-main (7198182122558146054) ------+----+-----------+
@@ -1440,15 +1461,23 @@ Quelques secondes plus tard :
 +--------+------------+--------------+---------+----+-----------+
 ```
 
+---
+
+
 ## Mise à jour mineure sans interruption de service
 
+Rappel : la réplication physique peut être mise en œuvre entre deux instances de 
+versions mineures différentes. (ex: 15.1 vers 15.2)
+ 
 La mise à jour mineure peut être faite nœud par nœud en commençant par les 
-secondaires asynchrones, puis par les secondaires synchrones (qui donneront ce 
- role à un autre secondaire).
+secondaires asynchrones, puis par les secondaires synchrones.
 
-Enfin, une fois tous les secondaires mis à jour, une bascule sur un secondaire 
-à jour pourra être faites et l'ancien primaire alors mis à jour de la même façon 
-puis redémarré :
+Dès qu'un deuxième secondaire synchrone est présent, le mise peut être faite sur 
+le premier secondaire synchrone.
+
+Une fois tous les secondaires mis à jour, une bascule sur un des secondaires 
+synchrone à jour pourra être faite et l'ancien primaire sera alors mis à jour 
+de la même manière, puis redémarré :
 
 
 **État de départ :**
@@ -1461,84 +1490,17 @@ puis redémarré :
 | pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |
 | pg-3   | 10.0.3.203 | Sync Standby | running |  7 |         0 |
 +--------+------------+--------------+---------+----+-----------+
-
 ```
 
-Mise à jour jour et redémarrage du premier secondaire asynchrone `pg-2` :
+
+**Mise à jour jour et redémarrage du premier secondaire asynchrone `pg-2` :**
 
 ```Bash
 ...
 $ patronictl restart 15-main pg-2
 ```
 
-
-
-Mise à jour du nœud synchrone `pg-3` :
-
-```Bash
-...
-$ patronictl restart 15-main pg-2
-```
-
-```
-+ Cluster: 15-main (7198182122558146054) ------+----+-----------+--------------+
-| Member | Host       | Role         | State   | TL | Lag in MB | Tags         |
-+--------+------------+--------------+---------+----+-----------+--------------+
-| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |              |
-| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |              |
-| pg-3   | 10.0.3.203 | Sync Standby | running |    |   unknown | nosync: true |
-+--------+------------+--------------+---------+----+-----------+--------------+
-```
-
-Passation de pouvoir du nœud synchrone vers le secondaire mis à jour :
-
-```
-+ Cluster: 15-main (7198182122558146054) ------+----+-----------+
-| Member | Host       | Role         | State   | TL | Lag in MB |
-+--------+------------+--------------+---------+----+-----------+
-| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
-| pg-2   | 10.0.3.202 | Sync Standby | running |  7 |         0 |
-| pg-3   | 10.0.3.203 | Replica      | running |  7 |         0 |
-+--------+------------+--------------+---------+----+-----------+
-```
-
-Mise à jour du primaire :
-
-
-Bascule vers le secondaire synchrone :
-
-```Bash
-$ patronictl switchover --candidate pg-3 --master pg-1 --force
-```
-```
-Current cluster topology
-+ Cluster: 15-main (7198182122558146054) ------+----+-----------+
-| Member | Host       | Role         | State   | TL | Lag in MB |
-+--------+------------+--------------+---------+----+-----------+
-| pg-1   | 10.0.3.201 | Leader       | running |  7 |           |
-| pg-2   | 10.0.3.202 | Replica      | running |  7 |         0 |
-| pg-3   | 10.0.3.203 | Sync Standby | running |  7 |         0 |
-+--------+------------+--------------+---------+----+-----------+
-2023-02-09 20:26:07.13366 Successfully switched over to "pg-3"
-+ Cluster: 15-main (7198182122558146054) -+----+-----------+
-| Member | Host       | Role    | State   | TL | Lag in MB |
-+--------+------------+---------+---------+----+-----------+
-| pg-1   | 10.0.3.201 | Replica | stopped |    |   unknown |
-| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
-| pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
-+--------+------------+---------+---------+----+-----------+
-```
-
-Mise à jour et redémarrage de l'ancien primaire :
-
-```Bash
-$ patronictl restart 15-main pg-1 --force
-```
-
-Pour un retour à la normal avec `pg-1` étant primaire, il faut faire en sorte 
-que celui-ci soit synchrone.
-
-Le plus sûr est de déclarer le nœud `pg-1` synchrone :
+**Passage à 2 nœuds synchrones :**
 
 ```Bash
 $ patronictl edit-config
@@ -1555,13 +1517,31 @@ synchronous_node_count: 2
 + Cluster: 15-main (7198182122558146054) ------+----+-----------+
 | Member | Host       | Role         | State   | TL | Lag in MB |
 +--------+------------+--------------+---------+----+-----------+
-| pg-1   | 10.0.3.201 | Sync Standby | running | 10 |         0 |
+| pg-1   | 10.0.3.201 | Leader       | running | 10 |           |
 | pg-2   | 10.0.3.202 | Sync Standby | running | 10 |         0 |
-| pg-3   | 10.0.3.203 | Leader       | running | 10 |           |
+| pg-3   | 10.0.3.203 | Sync Standby | running | 10 |         0 |
 +--------+------------+--------------+---------+----+-----------+
 ```
 
-Effectuer la promotion et remettre le nombre de nœuds synchrone à `1` :
+**Mise à jour du nœud synchrone `pg-3` :**
+
+```Bash
+...
+$ patronictl restart 15-main pg-2
+```
+
+**Bascule vers le secondaire synchrone :**
+
+
+**Mise à jour du primaire :**
+
+```Bash
+...
+$ patronictl restart 15-main pg-1 --force
+```
+
+**Effectuer la promotion et remettre le nombre de nœuds synchrone à `1` :**
+
 
 ```Bash
 $ patronictl switchover --candidate pg-1 --master pg-3 --force
@@ -1588,7 +1568,7 @@ synchronous_node_count: 1
 
 ```
 
-Après quelques secondes :
+**Après quelques secondes :**
 
 ```
 + Cluster: 15-main (7198182122558146054) ------+----+-----------+
