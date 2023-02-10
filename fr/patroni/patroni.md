@@ -1044,8 +1044,9 @@ Si la modification nécessite un redémarrage, l' drapeau _pending restart_ sera
 
 > L'installation de la commande `less` est un pré-requis :
 > ```Bash
->  $ for i in pg-1 pg-2 pg-3; do apt install less done
-> ...
+>  $ for node in pg-1 pg-2 pg-3; do
+>      ssh $node apt install less
+>    done
 > ```
 
 La modification peut se faire sur n'importe quel nœud :
