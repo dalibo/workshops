@@ -420,16 +420,16 @@ hide_author_in_slide: true
 <!-- ## [MINEUR] Possibilité de mettre une échelle négative ou supérieure à précision pour le type NUMERIC
 
 https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE 
-!include include/EXEMPLE.md-->
+!include include/EXEMPLE.md
 
----
+--- -->
 
 <!-- ## [MINEUR] Ajout des fonctions min() et max() pour le type xid8
 
 https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE 
-!include include/EXEMPLE.md-->
+!include include/EXEMPLE.md
 
----
+--- -->
 
 <!--## [MINEUR] Égalité des valeurs NULL dans les contraintes uniques configurable via UNIQUE [ NULLS [ NOT ] DISTINCT ]
 
