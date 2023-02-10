@@ -422,13 +422,6 @@ hide_author_in_slide: true
 
 # Régressions
 
-## Option du postmaster --forkboot renommée en --forkaux
-
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
-
----
-
 ## Retrait du support des instances de versions 9.1 et antérieures
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/186 -->
