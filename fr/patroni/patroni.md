@@ -1200,7 +1200,7 @@ curl -s http://e1:2379/v2/keys/postgresql-common/"$SCOPE"/leader | jq -r .node.v
 
 ### Configuration de pgBackrest
 
-Sur chacun des nœuds, il faut configurer le _stanza_ et l'initialiser :
+**Sur chacun des nœuds**, il faut configurer le _stanza_ et l'initialiser :
 
 ```ini
 # /etc/pgbackrest.conf
@@ -1315,6 +1315,9 @@ curl -s http://e1:2379/v2/keys/postgresql-common/"$SCOPE"/leader | jq -r .node.v
 
 ##### Configuration de pgBackrest
 
+Nous avons choisit d'opérer en mode _pull_, les sauvegardes seront exécutées 
+sur la machine `backup` et récupérées depuis le primaire courant.
+ 
 La configuration se fait dans le fichier `/etc/pgbackrest.conf` :
 
 ```ini
@@ -1331,6 +1334,9 @@ pg1-host-user=postgres
 pg1-user=postgres
 pg1-port=5432
 ```
+
+On déterminera l'instance qui sera utilisée pour récupérer la sauvegarde, au 
+moment de la sauvegarde. 
 
 **Test d'une sauvegarde**
 
