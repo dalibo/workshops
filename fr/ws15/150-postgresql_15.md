@@ -429,10 +429,10 @@ hide_author_in_slide: true
 
 ---
 
-## Python2 dépréciée : plus de build possible en python2, retrait des langages plpython2u et plpythonu
+## Python2 déprécié : Retrait des langages plpython2u et plpythonu
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
-!include include/EXEMPLE.md
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/190 -->
+!include include/190-python2-deprecie.md
 
 ---
 
