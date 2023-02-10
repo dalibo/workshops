@@ -242,12 +242,12 @@ hide_author_in_slide: true
 
 ---
 
-### Les triggers pour les clés étrangères sont maintenant créés sur les tables partitionnées et sur les partitions
+<!-- ### Les triggers pour les clés étrangères sont maintenant créés sur les tables partitionnées et sur les partitions
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE -->
+https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE 
 !include include/EXEMPLE.md
 
----
+--- -->
 
 ### Amélioration du comportement des clés étrangère lors de mises à jour qui déplacent des lignes entres les partitions
 
