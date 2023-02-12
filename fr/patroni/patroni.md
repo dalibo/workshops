@@ -129,7 +129,6 @@ hide_author_in_slide: true
 
 ---
 
-\newpage 
 
 ## Principes
 
@@ -238,6 +237,7 @@ dalibo@vm38:~$
 <div class="slide-content">
 
   Récupération du _playbook_ _Ansible_ à cette adresse :
+
 
 <https://github.com/dalibo/workshops/tree/workshop_patroni/fr/patroni/playbook/etcd-patroni>
 
@@ -628,7 +628,7 @@ ii pgbackrest
 ii postgresql
 ```
 
-Le service PostgreSQL doit êtrre désactivé car la gestion totale de l'instance sera déléguée à Patroni :
+Le service PostgreSQL doit être désactivé car la gestion totale de l'instance sera déléguée à Patroni :
 
 ```Bash
 $ for node in pg-1 pg-2 pg-3; do 
@@ -640,7 +640,7 @@ done
 
 ---
 
-#### Configuration de Patroni
+#### **Configuration de Patroni**
 
 <div class="slide-content">
 
@@ -687,7 +687,7 @@ Ces opérations doivent être répétées sur tous les nœuds PostgreSQL/Patroni
 
 ---
 
-#### Création de l'agrégat
+#### **Création de l'agrégat**
 
 <div class="slide-content">
 
@@ -756,23 +756,6 @@ postgresql:
 
 ```
 
-Tous les nœuds doivent être redémarrés :
-
-```Bash
-postgres@pg-1:~ $ patronictl restart 15-main --force
-```
-
-La vérification se fait dans les traces de Patroni d'un nœud secondaire :
-\small
-```
-Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,984 INFO: Lock owner: pg-1; I am pg-3
-Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,986 INFO: Local timeline=7 lsn=0/5000148
-Feb 09 17:12:39 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:39,037 INFO: master_timeline=7
-
-```
-\normalsize
-
-
 
 ##### Suppression des instances secondaires
 
@@ -788,15 +771,34 @@ données existantes. Nous utilisons le _wrapper_ Debian :
 ```
 
 Les secondaires seront recréés automatiquement par Patroni, depuis le primaire 
-répliqué.
+par réplication.
 
-##### Démarrage des instances secondaires
 
-Nous pouvons raccrocher nos secondaires en démarrant les deux instances :
+Le primaire doit être redémarré : 
 
 ```Bash
- $ for node in pg-2 pg-3; do sudo ssh $node "systemctl start patroni@15-main"; done
+postgres@pg-1:~ $ patronictl restart 15-main pg-1 --force
 ```
+
+les nœuds secondaires doivent être démarrés :
+
+```Bash
+$ for node in pg-2 pg-3; do sudo ssh $node "systemctl start patroni@15-main"; done
+```
+
+
+
+La vérification se fait dans les traces de Patroni des nœuds secondaires :
+\small
+```
+Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,984 INFO: Lock owner: pg-1; I am pg-3
+Feb 09 17:12:38 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:38,986 INFO: Local timeline=7 lsn=0/5000148
+Feb 09 17:12:39 pg-3 patroni@15-main[1029]: 2023-02-09 17:12:39,037 INFO: master_timeline=7
+
+```
+\normalsize
+
+
 
 </div>
 
@@ -1472,7 +1474,7 @@ versions mineures différentes. (ex: 15.1 vers 15.2)
 La mise à jour mineure peut être faite nœud par nœud en commençant par les 
 secondaires asynchrones, puis par les secondaires synchrones.
 
-Dès qu'un deuxième secondaire synchrone est présent, le mise peut être faite sur 
+Dès qu'un deuxième secondaire synchrone est présent, le mise peut être faîte sur 
 le premier secondaire synchrone.
 
 Une fois tous les secondaires mis à jour, une bascule sur un des secondaires 
