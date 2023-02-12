@@ -1527,11 +1527,15 @@ synchronous_node_count: 2
 
 ```Bash
 ...
-$ patronictl restart 15-main pg-2
+$ patronictl restart 15-main pg-3
 ```
 
-**Bascule vers le secondaire synchrone :**
+**Bascule vers le secondaire synchrone mis à jour :**
 
+```Bash
+...
+$ patronictl switchover --master pg-1 --candidate pg-3 --force
+```
 
 **Mise à jour du primaire :**
 
