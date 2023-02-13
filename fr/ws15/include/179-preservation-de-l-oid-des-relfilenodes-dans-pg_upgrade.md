@@ -73,6 +73,8 @@ permet de spécifier manuellement un oid. Cet ajout est principalement destiné 
 l'usage de `pg_upgrade` qui est par ailleurs le seul à pouvoir assigner des oid
 inférieurs à `16384`.
 
+</div>
+
 <!-- Note
 
 pg_largeobject voit aussi son oid fixé, cela peut provoquer l’apparition de
@@ -83,4 +85,4 @@ référencé ce qui est le principal.
 ça ne me semble pas indispensable donc je le squeeze pour plus d'info voir le
 patch dont le lien est la haut.
 
-</div>
+-->
