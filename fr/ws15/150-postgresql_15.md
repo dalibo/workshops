@@ -184,7 +184,7 @@ hide_author_in_slide: true
 ### Permettre le pre-fetch du contenu des fichiers WAL pendant le recovery
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/180 -->
-!include include/180-ws15-permettre-le-pre-fetch-du-contenu-des-fichiers-wal-pendant-le-recovery
+!include include/180-permettre-le-pre-fetch-du-contenu-des-fichiers-wal-pendant-le-recovery
 
 ---
 
