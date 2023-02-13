@@ -239,7 +239,7 @@ dalibo@vm38:~$
   Récupération du _playbook_ _Ansible_ à cette adresse :
 
 
-<https://github.com/dalibo/workshops/tree/workshop_patroni/fr/patroni/playbook/etcd-patroni>
+<https://github.com/dalibo/workshops/tree/ws15_patroni/fr/patroni/playbook/etcd-patroni>
 
 
 | Fichier     | Description     |
