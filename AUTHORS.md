@@ -15,4 +15,5 @@ order:
 * Thomas Reiss <thomas.reiss@dalibo.com>
 * Benoit Lobréau <benoit.lobreau@dalibo.com>
 * Christophe Courtois <christophe.courtois@dalibo.com>
-
+* Thibaud Walkowiak
+* Franck Boudehen
