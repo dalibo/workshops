@@ -458,14 +458,14 @@ https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE
 
 ---
 
-\newpage
+<!--\newpage
 
 # Ateliers
 
----
+--- -->
 
 <!-- lister les tp ici, un include par tp -->
-
+<!--
 <div class="slide-content">
   * TP 1
   * ..
@@ -479,4 +479,4 @@ https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE
 
 !include include/tp-EXEMPLE.md
 
-----
+----  -->
