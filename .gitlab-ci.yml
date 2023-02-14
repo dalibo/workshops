@@ -1,17 +1,8 @@
-## PRO TIP : Test your changes locally with :
-## gitlab-ci-multi-runner exec docker {name_of_the_job}
-
-##
-## I N C L U D E S
-##
-
 include:
-  # Export artefacts to the private environment
   - project: 'dalibo/gitlab-templates'
-    file: 'artifacts_private_env.yml'
-  # Export artefacts to the public environment  
-  - project: 'dalibo/gitlab-templates'
-    file: 'artifacts_public_env.yml'
+    file: 
+      - 'artifacts_public_env.yml'
+      - 'artifacts/base.yml'
 
 
 ##
@@ -19,77 +10,65 @@ include:
 ##
 
 variables:
-  BRANCH_TARGET: ws14
-  MASTER_TARGET: all
-  # $ARTIFACTS is required by artefacts_private_env.yml
-  ARTIFACTS: '_build/* _archives'
-  # THEMES_BRANCH is usually 'stable' or 'master'
-  THEMES_BRANCH: master
 
+  # $ARTIFACTS is required by artefacts_private_env.yml
+  ARTIFACTS: '*'  
+
+stages:
+  - build
+  - deploy
 
 before_script:
-  # Prepare for Deploy Keys
-  # see https://docs.gitlab.com/ee/ci/ssh_keys/README.html#ssh-keys-when-using-the-docker-executor
+  ## Prepare for Deploy Keys
+  ## see https://docs.gitlab.com/ee/ci/ssh_keys/README.html#ssh-keys-when-using-the-docker-executor
   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
   - mkdir -p ~/.ssh
   - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
 
-#
-# We use the same image for all jobs
-#
 image:
-  name: dalibo/pandocker:20.02 # usually 'stable' or 'latest' (=master)
-  entrypoint: [""]  # we need to override the image entrypoint
+  # full version required for SVG conversion
+  name: dalibo/pandocker:stable 
+  entrypoint: [""] # we need to override the image entrypoint
 
 
 ##
-##  B U I L D
+## B U I L D
 ##
-
-pandoc:
+pandocker:
   stage: build
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      variables:
-        TARGET: $MASTER_TARGET
-        ACTION: archives
-        MESSAGE: "All archived and active workshops will be published."
-    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
-      variables:
-        TARGET: $BRANCH_TARGET
-        ACTION: deploy
-        MESSAGE: "Only $BRANCH_TARGET will be published."
-
   script:
     #
     # The dalibo themes are not mandatory
     # CI should be able to run without it
+    # You can comment the lines below to build without it
     #
-    - > 
-        if [[ $GITLAB_DEPLOY_PRIVATE_KEY ]] ; then 
-          ssh-add <(echo "$GITLAB_DEPLOY_PRIVATE_KEY")
-          git clone -b $THEMES_BRANCH git@gitlab.dalibo.info:marketing/themes.git
-          make --directory=themes install
-        fi
+    - git clone --depth 1 --branch master https://${THEMES_GIT_TOKEN}@gitlab.dalibo.info/marketing/themes.git themes/ || true
+    - make -C themes install
+    #
     # pandoc
-    - echo $MESSAGE
-    - make $TARGET
-    - echo "Move html and pdf files to root directories"
-    - make $ACTION
-
+    #
+    - make all
   artifacts:
     paths:
-      - _build/fr/
-      - _build/en/
-    expire_in: 1 day
+      - "*"
+    expire_in: '1 day'
+
 
 ##
-## D E P L O Y
+## DEPLOY
 ##
 
-# overiding the job template because we need to force GIT_STRATEGY 
-# for this pipeline in order to deploy `_archives`
-public_env:
-  variables:
-    GIT_STRATEGY: fetch
+deploy:private_env:
+  extends: .artifacts:deploy_private_env
+
+# This clean up job is mandatory if you extend .artifacts:deploy_private_env
+deploy:clean_up_private_env:
+  extends: .artifacts:clean_up_private_env
+
+# Override the public deploy job to limit the artifacts
+#public_env:
+#  variables:
+#    ARTEFACTS: "*/*.doc */*.epub */*.html */*.odt */*.pdf"
+  # Uncomment to force the job on this branch (for testing purpose)
+  #only: null
