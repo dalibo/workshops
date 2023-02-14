@@ -1383,7 +1383,18 @@ nacl=# \z workshop.credit_cards|encrypted_credit_cards
           |                        |       | cashier=arwdDxt/postgres
  workshop | encrypted_credit_cards | table |
 (2 rows)
+~~~
 
+Piochez une valeur et sa clef au hasard dans votre table :
+
+~~~console
+nacl=# SELECT decode(cryptogram, 'base64'), cc.nonce, k.key_id
+         FROM encrypted_credit_cards cc join pgsodium.key k ON (cc.key_id = k.id) limit 1;
+~~~
+
+... et tentez de la déchiffrer avec l'utilisateur `cashier` :
+
+~~~console
 nacl=# SET SESSION AUTHORIZATION cashier;
 
 nacl=> SELECT convert_from(pgsodium.crypto_aead_det_decrypt(
