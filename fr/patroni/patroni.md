@@ -756,6 +756,12 @@ postgresql:
 
 ```
 
+On redémarre patroni:
+
+```Bash
+systemctl restart patroni@15-main
+```
+
 
 ##### Suppression des instances secondaires
 
