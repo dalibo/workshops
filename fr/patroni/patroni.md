@@ -615,7 +615,7 @@ done
 **Vérification :**
 
 ```Bash
- $ for node in pg-1 pg-2 pg-3; do sudo ssh $node "dpkg -l postgresql patroni 
+ $ for node in pg-1 pg-2 pg-3; do sudo ssh $node "dpkg -l postgresql patroni \ 
 pgbackrest | grep ^ii | cut -d ' ' -f 1,3"; done
 ii patroni
 ii pgbackrest
@@ -712,7 +712,7 @@ root@pg-1:~# systemctl enable --now patroni@15-main
 L'instance doit être promue pour pouvoir être accessible écriture :
 
 ```Bash
-root@pg-1:~# sudo -iu postgres psql -c 'select pg_promote();'' 
+root@pg-1:~# sudo -iu postgres psql -c 'select pg_promote();'
 ```
 
 **L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :**
