@@ -74,3 +74,10 @@ Workshop Haute disponibilité : Patroni
 * Slides : [HTML](patroni.slides.html)
 * Handout : [HTML](patroni.handout.html) [PDF](patroni.pdf)
 * Modile : [EPUB](patroni.epub)
+
+Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](pgsodium.slides.html)
+* Handout : [HTML](pgsodium.handout.html) [PDF](pgsodium.pdf)
+* Modile : [EPUB](pgsodium.epub)
