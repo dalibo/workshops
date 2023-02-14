@@ -11,14 +11,7 @@ include:
     file: 'artifacts_private_env.yml'
   # Export artefacts to the public environment  
   - project: 'dalibo/gitlab-templates'
-    file: 'artifacts/base.yml'
-
-deploy:private_env:
-  extends: .artifacts:deploy_private_env
-
-# This clean up job is mandatory if you extend .artifacts:deploy_private_env
-deploy:clean_up_private_env:
-  extends: .artifacts:clean_up_private_env
+    file: 'artifacts_public_env.yml'
 
 
 ##
@@ -31,7 +24,7 @@ variables:
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/* _archives'
   # THEMES_BRANCH is usually 'stable' or 'master'
-  THEMES_BRANCH: stable
+  THEMES_BRANCH: master
 
 
 before_script:
