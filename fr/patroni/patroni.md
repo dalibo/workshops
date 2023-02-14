@@ -739,7 +739,7 @@ La configuration de chaque nœud doit être modifiée :
 
 
 ```yaml
-#/etc/patroni/15-main.yaml
+#/etc/patroni/15-main.yml
 
 postgresql:
 
