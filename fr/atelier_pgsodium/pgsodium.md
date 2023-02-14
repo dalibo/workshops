@@ -288,6 +288,8 @@ disponible pour les versions 13 à 15 de PostgreSQL[^pkgerr].
 Installez le dépôt PGDG, puis PostgreSQL et pgsodium.
 
 ~~~bash
+# prérequis : dépot EPEL
+dnf install epel-release
 dnf install https://download.postgresql.org/pub/repos/yum/\
   reporpms/EL-8-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 dnf -qy module disable postgresql
@@ -352,6 +354,7 @@ cd pgsodium-3.1.5/
 make install
 ~~~
 
+
 À titre d'information, les paquets nécessaires sur Entreprise Linux 8 et dérivés
 sont: `libsodium-devel`, `postgresql-server-devel` et `libpq-devel`. Attention
 à bien choisir la version 13 ou supérieur de PostgreSQL. Voici une procédure
@@ -359,8 +362,13 @@ minimale:
 
 ~~~bash
 dnf module enable -y postgresql:13
+# activation redhat-rpm-config ( si "gcc: error: /usr/lib/rpm/redhat/redhat-hardened-cc1: No such file or directory" ):
+dnf install dnf-plugins-core
+dnf config-manager --set-enabled powertools
+
 dnf install postgresql-server postgresql-server-devel libpq-devel \
   libsodium-devel redhat-rpm-config
+
 cd /usr/local/src
 wget https://github.com/michelp/pgsodium/archive/refs/tags/v3.1.5.tar.gz
 tar zxf v3.1.5.tar.gz
@@ -512,7 +520,7 @@ nacl=# SELECT convert_from(pgsodium.crypto_aead_ietf_decrypt(
         :'encrypted_msg'::bytea,
         NULL,
         :'msg_nonce',
-        :'privk
+        :'privk'
     ),
 'utf-8') AS "decrypted message";
  decrypted message
