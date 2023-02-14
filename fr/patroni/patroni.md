@@ -615,7 +615,7 @@ done
 **Vérification :**
 
 ```Bash
- $ for node in pg-1 pg-2 pg-3; do sudo ssh $node "dpkg -l postgresql patroni 
+ $ for node in pg-1 pg-2 pg-3; do sudo ssh $node "dpkg -l postgresql patroni \ 
 pgbackrest | grep ^ii | cut -d ' ' -f 1,3"; done
 ii patroni
 ii pgbackrest
@@ -712,7 +712,7 @@ root@pg-1:~# systemctl enable --now patroni@15-main
 L'instance doit être promue pour pouvoir être accessible écriture :
 
 ```Bash
-root@pg-1:~# sudo -iu postgres psql -c 'select pg_promote();'' 
+root@pg-1:~# sudo -iu postgres psql -c 'select pg_promote();'
 ```
 
 **L'utilisateur permettant la mise en réplication doit être créé sur ce nœud, avec le mot de passe renseigné dans la configuration de Patroni :**
@@ -739,7 +739,7 @@ La configuration de chaque nœud doit être modifiée :
 
 
 ```yaml
-#/etc/patroni/15-main.yaml
+#/etc/patroni/15-main.yml
 
 postgresql:
 
@@ -754,6 +754,12 @@ postgresql:
       password: "admin"
       #...
 
+```
+
+On redémarre patroni:
+
+```Bash
+systemctl restart patroni@15-main
 ```
 
 
@@ -1056,7 +1062,7 @@ Si la modification nécessite un redémarrage, l' drapeau _pending restart_ sera
 > L'installation de la commande `less` est un pré-requis :
 > ```Bash
 >  $ for node in pg-1 pg-2 pg-3; do
->      ssh $node apt install less
+>      sudo ssh $node apt install less
 >    done
 > ```
 
