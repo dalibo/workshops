@@ -1278,11 +1278,24 @@ ERROR:  permission denied for table encrypted_credit_cards
 
 nacl=> SELECT * FROM workshop.credit_cards LIMIT 0;
 ERROR:  permission denied for view credit_cards
+~~~
+
+Piochez une valeur et sa clef au hasard dans la table `workshop.encrypted_credit_cards`
+et tentez de la déchiffrer avec l'utilisateur `anonymous` :
+
+~~~console
+nacl=# SELECT decode(cryptogram, 'base64') AS enc_crypto,
+    cc.nonce AS nonce, k.key_id AS key_id
+FROM workshop.encrypted_credit_cards cc
+JOIN pgsodium.key k ON (cc.key_id = k.id)
+LIMIT 1 \gset
+
+nacl=# SET SESSION AUTHORIZATION anonymous;
 
 nacl=> SELECT pgsodium.crypto_aead_det_decrypt(
-        '\x4e6c9033a07a25fa74847ea9c9c7f1bd88a733a9b32108ba3bc9f22e142730be0add3d'::bytea,
+        :'enc_crypto'::bytea,
         ''::bytea,
-        1, 'pgsodium'::bytea, '\x299055c96de6ba2422061db9bbd87f1b'::bytea
+        :key_id, 'pgsodium'::bytea, :'nonce'::bytea
       );
 ERROR:  permission denied for function crypto_aead_det_decrypt
 ~~~
@@ -1370,6 +1383,35 @@ nacl=> \du
 
 \normalsize
 
+Re-piochez une valeur et sa clef au hasard dans votre table et tentez de la
+déchiffrer:
+
+\small
+
+~~~console
+nacl=# SELECT decode(cryptogram, 'base64') AS enc_crypto,
+    cc.nonce AS nonce, k.key_id AS key_id
+FROM workshop.encrypted_credit_cards cc
+JOIN pgsodium.key k ON (cc.key_id = k.id)
+LIMIT 1 \gset
+
+nacl=# SET SESSION AUTHORIZATION cashier;
+
+nacl=> SELECT convert_from(pgsodium.crypto_aead_det_decrypt(
+        :'enc_crypto'::bytea,
+        ''::bytea,
+        :key_id, 'pgsodium'::bytea, :'nonce'::bytea
+      ), 'utf-8') AS crypto;
+ crypto 
+--------
+ 710
+
+~~~
+
+\normalsize
+
+L'utilisateur `cashier` est bien capable de déchiffrer la donnée.
+
 Testez désormais les droits en lecture et écriture du rôle `cashier`.
 
 \small
@@ -1383,28 +1425,6 @@ nacl=# \z workshop.credit_cards|encrypted_credit_cards
           |                        |       | cashier=arwdDxt/postgres
  workshop | encrypted_credit_cards | table |
 (2 rows)
-~~~
-
-Piochez une valeur et sa clef au hasard dans votre table :
-
-~~~console
-nacl=# SELECT decode(cryptogram, 'base64'), cc.nonce, k.key_id
-         FROM encrypted_credit_cards cc join pgsodium.key k ON (cc.key_id = k.id) limit 1;
-~~~
-
-... et tentez de la déchiffrer avec l'utilisateur `cashier` :
-
-~~~console
-nacl=# SET SESSION AUTHORIZATION cashier;
-
-nacl=> SELECT convert_from(pgsodium.crypto_aead_det_decrypt(
-        '\x4e6c9033a07a25fa74847ea9c9c7f1bd88a733a9b32108ba3bc9f22e142730be0add3d'::bytea,
-        ''::bytea,
-        1, 'pgsodium'::bytea, '\x299055c96de6ba2422061db9bbd87f1b'::bytea
-      ), 'utf-8') AS crypto;
- crypto
---------
- 753
 
 nacl=> SELECT * FROM workshop.encrypted_credit_cards LIMIT 1;
 ERROR:  permission denied for table encrypted_credit_cards
