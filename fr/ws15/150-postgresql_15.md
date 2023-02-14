@@ -458,6 +458,12 @@ https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE
 
 ---
 
+## Questions ?
+
+<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/193 -->
+!include include/193-questions.md
+
+
 <!--\newpage
 
 # Ateliers
