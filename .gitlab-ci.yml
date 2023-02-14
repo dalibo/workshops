@@ -19,12 +19,12 @@ include:
 ##
 
 variables:
-  BRANCH_TARGET: ws14
+  BRANCH_TARGET: atelier_pgsodium
   MASTER_TARGET: all
   # $ARTIFACTS is required by artefacts_private_env.yml
   ARTIFACTS: '_build/* _archives'
   # THEMES_BRANCH is usually 'stable' or 'master'
-  THEMES_BRANCH: master
+  THEMES_BRANCH: stable
 
 
 before_script:
