@@ -5,12 +5,19 @@ css: "https://public.dalibo.com/fancy-index/style.css"
 # all generated files are moved to root directory, aside index.html
 ---
 
+Nouveautés de PostgreSQL 15
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](ws15/150-postgresql_15.slides.html) [PGSession 15](ws15/pgsession15.slides.html)
+* Handout : [HTML](ws15/150-postgresql_15.handout.html) [PDF](ws15/150-postgresql_15.pdf) 
+* Mobile : [EPUB](ws15/150-postgresql_15.epub)
+
 Nouveautés de PostgreSQL 14
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](140-postgresql_14.slides.html) [PGSession 14](pgsession14.slides.html)
-* Handout : [HTML](140-postgresql_14.handout.html) [PDF](140-postgresql_14.pdf) 
-* Mobile : [EPUB](140-postgresql_14.epub)
+* Slides : [HTML](ws14/140-postgresql_14.slides.html) [PGSession 14](ws14/pgsession14.slides.html)
+* Handout : [HTML](ws14/140-postgresql_14.handout.html) [PDF](ws14/140-postgresql_14.pdf) 
+* Mobile : [EPUB](ws14/140-postgresql_14.epub)
 
 Nouveautés de PostgreSQL 13
 --------------------------------------------------------------------------------
