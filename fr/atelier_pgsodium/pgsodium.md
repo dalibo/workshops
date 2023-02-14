@@ -12,7 +12,7 @@ keywords:
 licence : PostgreSQL
 author: Dalibo & Contributors
 revision: 23.02
-url : https://www.dalibo.com/
+url : https://dali.bo/workshops
 
 #
 # PDF Options
