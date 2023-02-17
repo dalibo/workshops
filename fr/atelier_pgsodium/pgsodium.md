@@ -596,7 +596,7 @@ la conserve dans un fichier non chiffré à l'intérieur du PGDATA. Il est **tr�
 déconseillé de l'utiliser en production.
 
 Pour plus de facilité, placez ce script à l'emplacement par défaut pointé par
-`pgsodum.getkey_script`.
+`pgsodium.getkey_script`.
 
 ~~~bash
 cd $(pg_config --sharedir)/extension/
@@ -1185,7 +1185,7 @@ Nous observons:
 * l'utilisation de la vue pour déchiffrer en masse est lente !
 
 Cette lenteur est due à l'appel de fonction qui va rechercher la clé
-correspondante et ses méta données individuellement pour chacune ligne,
+correspondante et ses méta données individuellement pour chaque ligne,
 comportement similaire à une jointure _Nested Loop_ sur 300 000 lignes.
 Attardons-nous sur cette mauvaise performance:
 
@@ -1288,7 +1288,7 @@ nacl=> SELECT * FROM workshop.credit_cards LIMIT 0;
 ERROR:  permission denied for view credit_cards
 ~~~
 
-Piochez une valeur et sa clef au hasard dans la table `workshop.encrypted_credit_cards`
+Piochez une valeur et sa clé au hasard dans la table `workshop.encrypted_credit_cards`
 et tentez de la déchiffrer avec l'utilisateur `anonymous` :
 
 ~~~console
@@ -1391,7 +1391,7 @@ nacl=> \du
 
 \normalsize
 
-Re-piochez une valeur et sa clef au hasard dans votre table et tentez de la
+Re-piochez une valeur et sa clé au hasard dans votre table et tentez de la
 déchiffrer:
 
 \small
@@ -1467,7 +1467,7 @@ nonce                | \x299055c96de6ba2422061db9bbd87f1b
 Nous observons que `cashier` a bien le droit d'exécuter les fonctions de
 chiffrement, mais n'a aucun droit sur la table, ni en lecture ni
 en écriture, seulement sur la vue. Or, notez que PostgreSQL accepte les
-écritures sur les vues simple (sans agrégats, jointures, etc). Testez donc une
+écritures sur les vues simples (sans agrégats, jointures, etc). Testez donc une
 écriture au travers de la vue.
 
 \small
@@ -1696,7 +1696,7 @@ Le projet pgsodium est déjà recommandé en remplacement de pgcrypto:
 * couvre le spectre des fonctionnalités (et leurs problèmes) de pgcrypto
 * plus de fonctionnalités modernes
 * des algorithmes de chiffrement modernes
-* libsodium et pgcrypto sont maintenus contrairement à pgcrypto
+* libsodium et pgsodium sont maintenus contrairement à pgcrypto
 
 Concernant sa fonctionnalité TCE, cette dernière reste très récente et quelques
 aspérités restent à corriger pour la rendre un peu plus robuste et propre.
