@@ -5,6 +5,35 @@ css: "https://public.dalibo.com/fancy-index/style.css"
 # all generated files are moved to root directory, aside index.html
 ---
 
+Workshop supervision : outils graphiques
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](supervision.slides.html)
+* Handout : [HTML](supervision/supervision.handout.html) [PDF](supervision/supervision.pdf)
+* Mobile : [EPUB](supervision/supervision.epub)
+
+Workshop réplication logique
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](replication-logique/replication-logique.slides.html)
+* Handout : [HTML](replication-logique/replication-logique.handout.html) [PDF](replication-logique/replication-logique.pdf)
+* Mobile : [EPUB](replication-logique/replication-logique.epub)
+
+Workshop Haute disponibilité : Patroni
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](patroni/patroni.slides.html)
+* Handout : [HTML](patroni/patroni.handout.html) [PDF](patroni/patroni.pdf)
+* Mobile : [EPUB](patroni/patroni.epub)
+
+Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](atelier_pgsodium/pgsodium.slides.html)
+* Handout : [HTML](atelier_pgsodium/pgsodium.handout.html) [PDF](atelier_pgsodium/pgsodium.pdf)
+* Mobile : [EPUB](atelier_pgsodium/pgsodium.epub)
+
+
 Nouveautés de PostgreSQL 15
 --------------------------------------------------------------------------------
 
@@ -22,62 +51,36 @@ Nouveautés de PostgreSQL 14
 Nouveautés de PostgreSQL 13
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](130-postgresql_13.slides.html) [PGSession 13](pgsession13.slides.html)
-* Handout : [HTML](130-postgresql_13.handout.html) [PDF](130-postgresql_13.pdf)
-* Mobile : [EPUB](130-postgresql_13.epub)
+* Slides : [HTML](ws13/130-postgresql_13.slides.html) [PGSession 13](ws13/pgsession13.slides.html)
+* Handout : [HTML](ws13/130-postgresql_13.handout.html) [PDF](ws13/130-postgresql_13.pdf)
+* Mobile : [EPUB](ws13/130-postgresql_13.epub)
 
 Nouveautés de PostgreSQL 12
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](120-postgresql_12.slides.html) [PGSession 12](pgsession12.slides.html)
-* Handout : [HTML](120-postgresql_12.handout.html) [PDF](120-postgresql_12.pdf)
-* Mobile : [EPUB](120-postgresql_12.epub)
+* Slides : [HTML](ws12/120-postgresql_12.slides.html) [PGSession 12](ws12/pgsession12.slides.html)
+* Handout : [HTML](ws12/120-postgresql_12.handout.html) [PDF](ws12/120-postgresql_12.pdf)
+* Mobile : [EPUB](ws12/120-postgresql_12.epub)
 
 Nouveautés de PostgreSQL 11
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](110-postgresql_11.slides.html)
-* Handout : [HTML](110-postgresql_11.handout.html) [PDF](110-postgresql_11.pdf)
-* Mobile : [EPUB](110-postgresql_11.epub)
+* Slides : [HTML](ws11/110-postgresql_11.slides.html)
+* Handout : [HTML](ws11/110-postgresql_11.handout.html) [PDF](ws11/110-postgresql_11.pdf)
+* Mobile : [EPUB](ws11/110-postgresql_11.epub)
 
 Nouveautés de PostgreSQL 10
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](100-postgresql_10.slides.html)
-* Handout : [HTML](100-postgresql_10.handout.html) [PDF](100-postgresql_10.pdf)
-* Mobile : [EPUB](100-postgresql_10.epub)
+* Slides : [HTML](ws10/100-postgresql_10.slides.html)
+* Handout : [HTML](ws10/100-postgresql_10.handout.html) [PDF](ws10/100-postgresql_10.pdf)
+* Mobile : [EPUB](ws10/100-postgresql_10.epub)
   
 Nouveautés de PostgreSQL 9.6
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](096-postgresql_9.6.slides.html)
-* Handout : [HTML](096-postgresql_9.6.handout.html) [PDF](096-postgresql_9.6.pdf)
-* Mobile : [EPUB](096-postgresql_9.6.epub)
+* Slides : [HTML](ws9.6/096-postgresql_9.6.slides.html)
+* Handout : [HTML](ws9.6/096-postgresql_9.6.handout.html) [PDF](ws9.6/096-postgresql_9.6.pdf)
+* Mobile : [EPUB](ws9.6/096-postgresql_9.6.epub)
 
-Workshop supervision : outils graphiques
---------------------------------------------------------------------------------
 
-* Slides : [HTML](supervision.slides.html)
-* Handout : [HTML](supervision.handout.html) [PDF](supervision.pdf)
-* Mobile : [EPUB](supervision.epub)
-
-Workshop réplication logique
---------------------------------------------------------------------------------
-
-* Slides : [HTML](replication-logique.slides.html)
-* Handout : [HTML](replication-logique.handout.html) [PDF](replication-logique.pdf)
-* Mobile : [EPUB](replication-logique.epub)
-
-Workshop Haute disponibilité : Patroni
---------------------------------------------------------------------------------
-
-* Slides : [HTML](patroni.slides.html)
-* Handout : [HTML](patroni.handout.html) [PDF](patroni.pdf)
-* Modile : [EPUB](patroni.epub)
-
-Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
---------------------------------------------------------------------------------
-
-* Slides : [HTML](pgsodium.slides.html)
-* Handout : [HTML](pgsodium.handout.html) [PDF](pgsodium.pdf)
-* Modile : [EPUB](pgsodium.epub)
