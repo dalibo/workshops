@@ -49,6 +49,8 @@ pandocker:
     # pandoc
     #
     - make all
+    # FIX #197: publish the old artefacts alongside the new ones 
+    - rsync --archive _archives/fr/* fr
   artifacts:
     paths:
       - "*"
