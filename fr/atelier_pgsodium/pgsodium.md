@@ -609,11 +609,12 @@ Pour rappel, en production, il est recommandé de ne **PAS** stocker cette clé
 localement et d'utiliser un script capable de la récupérer depuis
 (par exemple) un KMS.
 
-Pensez à faire charger le module au démarrage et à redémarrer l'instance.
+Pensez à faire charger le module au démarrage et à redémarrer l'instance. Par
+exemple, avec une installation sous Rocky 8:
 
 ~~~bash
 sudo -iu postgres psql -c 'ALTER SYSTEM SET shared_preload_libraries TO pgsodium'
-systemctl restart postgresql
+systemctl restart postgresql-13
 ~~~
 
 Si l'ensemble est configuré correctement vous devriez trouver le fichier
@@ -782,6 +783,14 @@ Nous laissons à l'importation d'une clé externe à l'exercice du lecteur.
 </div>
 
 <div class="notes">
+
+::: tip
+
+Lisez attentivement ce chapitre avant de le mettre en application, plusieurs
+commandes ne sont utiles qu'aux explications et ne doivent pas être
+reproduites !
+
+:::
 
 Afin de chiffrer le numéro de la carte bancaire, pgsodium nécessite de marquer
 la colonne `number` avec un label de sécurité, par exemple comme ceci :
@@ -1000,10 +1009,10 @@ Observez le code de la vue générée (ici modifié pour notre exemple):
 ```sql
 CREATE OR REPLACE VIEW workshop.credit_cards AS
 SELECT id, name, phone_number, number, cryptogram, expiration_date, key_id,
-
+  -- [...]
   CASE WHEN [...]
   END AS decrypted_number,
-
+  -- [...]
   CASE WHEN cryptogram IS NULL THEN NULL::text
   ELSE
     CASE WHEN key_id IS NULL THEN NULL::text
@@ -1018,7 +1027,7 @@ SELECT id, name, phone_number, number, cryptogram, expiration_date, key_id,
     )
     END
   END AS decrypted_cryptogram,
-
+  -- [...]
 FROM encrypted_credit_cards
 ```
 \normalsize
@@ -1546,9 +1555,12 @@ Mettez en œuvre cette procédure.
     expires => date_trunc('month', now()) + '3 months'
   ) \gset
   ~~~
-2. mise à jour de la clé par défaut utilisée dans la table
+2. mise à jour de la clé par défaut utilisée dans la table et la vue
   ~~~sql
   ALTER TABLE workshop.encrypted_credit_cards
+    ALTER COLUMN key_id SET DEFAULT :'latest_key_id';
+
+  ALTER VIEW workshop.credit_cards
     ALTER COLUMN key_id SET DEFAULT :'latest_key_id';
   ~~~
 3. rotation des clés expirées:
@@ -1557,8 +1569,8 @@ Mettez en œuvre cette procédure.
   SET
     number = c.decrypted_number,
     cryptogram = c.decrypted_cryptogram,
-    key_id = :'latest_key_id'
-  FROM pgsodium.key k, pgsodium.create_key() nk
+    key_id = DEFAULT
+  FROM pgsodium.key k
   WHERE k.expires IS NOT NULL
     AND k.expires < current_timestamp
     AND k.id = c.key_id;
