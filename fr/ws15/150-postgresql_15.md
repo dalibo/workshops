@@ -113,7 +113,7 @@ hide_author_in_slide: true
 
 ---
 
-### Plus de checkpoint lors de la création d'une database
+### Plus de checkpoint lors de la création d'une base
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/177 -->
 !include include/177-plus-de-checkpoint-lors-de-la-creation-d-une-database.md
@@ -403,14 +403,14 @@ https://gitlab.dalibo.info/formation/workshops/-/issues/NUMERO_ISSUE
 
 ---
 
-## Permettre l'usage d'index pour les condition basées sur ^@ et starts_with()
+## Permettre l'usage d'index pour les conditions basées sur ^@ et starts_with()
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/173 -->
 !include include/173-w15-permettre-l-usage-d-index-pour-les-condition-basees-sur-et-starts_with.md
 
 ---
 
-## Ajout de fonctions d'expression régulières pour la compatibilité avec d'autres SGBD
+## Ajout de fonctions d'expressions régulières pour la compatibilité avec d'autres SGBD
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/175 -->
 !include include/175-ajout-de-fonctions-d-expression-regulieres-pour-la-compatibilite-avec-d-autres-sgbd.md

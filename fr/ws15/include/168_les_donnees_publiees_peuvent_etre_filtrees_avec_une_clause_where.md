@@ -38,7 +38,7 @@ sont également inutilisables.
 Si une publication ne publie que des ordres INSERT, il n'y a pas de limitation sur les colonnes
 utilisées dans le filtre. En revanche, si la publication concerne les ordres UPDATE et DELETE,
 il faut que les colonnes du filtre fassent partie de l'identité de réplica. Cela signifie que
-ces colonnes doivent faire partie de la clé primaire si `` [`REPLICA IDENTITY`](https://www.postgresql.org/docs/current/logical-replication-publication.html) ``
+ces colonnes doivent faire partie de la clé primaire si [REPLICA IDENTITY](https://www.postgresql.org/docs/current/logical-replication-publication.html) ``
 est laissé à sa valeur par défaut. Si un index unique est créé et utilisé pour la clause
 `REPLICA IDENTITY USING INDEX`, ces colonnes doivent en faire partie. Enfin, si 
 `REPLICA IDENTITY` est valorisé à `FULL`, n'importe quelle colonne peut faire partie du filtre.
@@ -65,7 +65,7 @@ Voici comment est mis en place le filtre :
   et sont répliqués depuis PostgreSQL 11 ;
 - les `INSERT` et les `DELETE` sont répliqués normalement du moment que 
   le filtre est validé ;
-- les UPDATE sont plus compliqué. Les exemples suivant décrivent les
+- les UPDATE sont plus compliqués. Les exemples suivant décrivent les
   trois cas de figure et la façon dont PostgreSQL les gère. 
 
   ```sql

@@ -16,7 +16,7 @@ Les commits sur ce sujet sont :
 
 <div class="notes">
 
-Le checkpointer et le bgwriter son désormais lancés pendant la phase de _crash
+Le checkpointer et le bgwriter sont désormais lancés pendant la phase de _crash
 recovery_ de la même manière qu'on le fait pour la réplication. L'objectif est
 de limiter la duplication de code en supprimant ce cas particulier.
 Il est possible que, dans certains cas, cela améliore les performances. Par

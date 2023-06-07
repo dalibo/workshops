@@ -313,7 +313,7 @@ La commande `MERGE` fonctionne également avec les _triggers_ :
 **INSERT ON CONFLICT vs MERGE**
 
 La version 9.5 a vu l'arrivée de la commande `INSERT ON CONFLICT` qui permet
-d'exécuter une action lorsque une erreur de violation de contrainte d'unicité
+d'exécuter une action lorsqu'une erreur de violation de contrainte d'unicité
 ou d'exécution est détectée. Le cas d'utilisation le plus fréquent est la
 réalisation d'un `UPSERT` (`INSERT` ou `UPDATE` atomique). On remarque ici que
 les fonctionnalités couvertes par la commande `MERGE` se recoupe en partie mais

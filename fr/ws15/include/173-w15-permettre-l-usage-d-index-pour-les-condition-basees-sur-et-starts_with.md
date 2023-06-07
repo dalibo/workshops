@@ -18,7 +18,7 @@ Les commits sur ce sujet sont :
 
 <div class="notes">
 
-Le planificateur est désormais capable de traiter la fonction `stars_with()` et
+Le planificateur est désormais capable de traiter la fonction `starts_with()` et
 l'opérateur équivalent `^@` de la même manière que l'expression `chaine LIKE
 'foo%'`. Le prédicat est transformé en deux conditions `>=` et `<` qui sont
 indexables si la collation est `C`.

@@ -42,7 +42,7 @@ Thu 18 Aug 2022 02:12:00 PM CEST (every 1s)
 Afin de faciliter la lecture du résultat des requêtes exécutées de cette manière, il 
 est maintenant possible de définir un _pager_ via la variable d'environnement `PSQL_WATCH_PAGER`.
 
-N'importe quel _pager_ peut-être utilisé. Cependant, seul _pspg_ semble pour le moment réussir à interpréter correctement 
+N'importe quel _pager_ peut être utilisé. Cependant, seul _pspg_ semble pour le moment réussir à interpréter correctement 
 le flux renvoyé par la commande `\watch`. Des _pager_ traditionnels peuvent être utilisés (`less` par exemple), 
 mais le résultat n'est pas particulièrement pratique à analyser et il finit généralement par être inutilisable.
 

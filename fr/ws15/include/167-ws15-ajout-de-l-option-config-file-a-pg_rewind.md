@@ -19,11 +19,11 @@ Discussion
 <div class="notes">
 
 L'option `-c/--restore-target-wal` ajoutée en version 13 permet d'utiliser la
-commande de restauration des archives (`restore_command`) stockées dans le
+commande de restauration des archives (`restore_command`) stockée dans le
 fichier de configuration de l'instance pour récupérer les WAL nécessaires à
 l'opération de _rewind_, s'ils ne sont plus dans le répertoire `pg_wal`.
 
-Ce mode de fonctionnement pose problème pour les installations ou les fichiers
+Ce mode de fonctionnement pose problème pour les installations où les fichiers
 de configuration de PostgreSQL ne sont pas stockés dans le répertoire de
 données de l'instance. C'est par exemple le cas par défaut sur les
 installations DEBIAN. Sur ce genre d'installation, le fichier de

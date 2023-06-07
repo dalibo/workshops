@@ -18,7 +18,7 @@ Les commits sur ce sujet sont :
 
 <div class="notes">
 
-La vue [`pg_stat_statement`], fournie avec l'extension éponyme, s'est vue
+La vue [pg_stat_statement], fournie avec l'extension éponyme, s'est vue
 ajouter une série de compteurs permettant de suivre l'activité du compilateur à la volée (JIT) sur un
 serveur. Ces informations sont très intéressantes car jusqu'à maintenant, il n'y
 avait aucun moyen de superviser l'utilisation de JIT. Bien souvent, les seules
@@ -58,6 +58,6 @@ Des informations concernant les temps d'accès aux fichiers temporaires ont
 
 Suite à l'ajout de ces fonctionnalités, l'extension passe en version 1.10.
 
-[`pg_stat_statements`]: https://www.postgresql.org/docs/15/pgstatstatements.html
+[pg_stat_statements]: https://www.postgresql.org/docs/15/pgstatstatements.html
 
 </div>

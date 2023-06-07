@@ -77,6 +77,6 @@ postgres -C shared_memory_size_in_huge_pages -D $PGDATA
 ```
 
 On peut donc dorénavant savoir combien de mémoire partagée et de _Huge Pages_
-le système à besoin avant de démarrer une instance PostgreSQL.
+le système a besoin avant de démarrer une instance PostgreSQL.
 
 </div> 

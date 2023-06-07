@@ -17,7 +17,7 @@ Les sources pour ce sujet sont :
 <div class="notes">
 
 Cette version contient des modifications de catalogue qui impactent la 
-compatibilité avec d'anciennes version. Le client `psql` ne supporte
+compatibilité avec d'anciennes versions. Le client `psql` ne supporte
 ainsi plus d'accéder à des serveurs de versions 9.1 ou antérieures.
 
 Les outils `pg_dump` et `pg_dumpall` ne supportent plus d'effectuer des exports de

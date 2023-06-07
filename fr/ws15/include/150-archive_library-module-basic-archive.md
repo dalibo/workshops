@@ -36,9 +36,9 @@ l'établissement d'une connexion à un serveur distant. Il pourrait également
 accumulation de WAL en attente d'archivage.
 
 L'écriture d'un module d'archivage est décrite dans la documentation. Il faut
-pour cela écrire un programme en C, en plus de requérir des compétences
+pour cela écrire un programme en C. En plus de nécessiter des compétences
 particulières, les chances de planter le serveur sont grandes en cas de bug. Il
-semble donc plus raisonnable de s'appuyer et participer à des projets
+semble donc plus raisonnable de s'appuyer et de participer à des projets
 communautaires. Les outils de sauvegardes comme pgBackRest ou Barman vont sans
 doute également s'emparer du sujet.
 

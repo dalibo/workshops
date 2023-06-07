@@ -12,7 +12,7 @@ Discussion
 <div class="slide-content">
 
 * Apparition de deux nouveaux privilèges :
-  + `SET` : permet de modifier les paramètres avec le context `superuser`
+  + `SET` : permet de modifier les paramètres avec le contexte `superuser`
   + `ALTER SYSTEM` : permet à un utilisateur non `superuser` de modifier des paramètres avec `ALTER SYSTEM SET ...`
 * Donne des droits par rôle et par paramètre
 * Nouvelle table système `pg_parameter_acl` qui stocke la configuration 

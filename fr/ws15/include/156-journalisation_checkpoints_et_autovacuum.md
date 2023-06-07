@@ -22,8 +22,8 @@ https://www.postgresql.org/message-id/flat/CALj2ACX-rW_OeDcp4gqrFUAkf1f50Fnh138d
 
 **`log_checkpoints`**
 
-Le paramètre `log_checkpoints` est désormais à `on` par défaut, chaque 
-`CHECKPOINT` sera par conséquent journalisé dans les traces de l'instance.
+Le paramètre `log_checkpoints` est désormais à `on` par défaut. Chaque 
+`CHECKPOINT` sera par conséquent rapporté dans les traces de l'instance.
 
 Les traces générées par  ce paramètre contiennent des informations sur la durée
 des `CHECKPOINT` et sur les écritures effectuées :

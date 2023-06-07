@@ -35,8 +35,8 @@ blocs.
 Cette nouvelle fonctionnalité devrait accélérer grandement la recovery suite à
 un crash, une restauration ou lorsque la réplication utilise le _log shipping_.
 
-Précédemment, pour réaliser ce genre d'optimisation, il fallait passer des
-outils externes comme [pg_prefaulter] qui a servi d'inspiration à cette
+Précédemment, pour réaliser ce genre d'optimisation, il fallait passer par des
+outils externes comme [pg_prefaulter] qui a servi d'inspiration pour cette
 fonctionnalité.
 
 [pg_prefaulter]: https://github.com/TritonDataCenter/pg_prefaulter
@@ -169,7 +169,7 @@ LOG:  checkpoint complete:
 LOG:  database system is ready to accept connections
 ```
 
-On voit que le _redo_ a duré 11.46s au lieu de 1min 8s du test lors du
+On voit que le _redo_ a duré 11.46s au lieu de 1min 8s lors du test
 précédent.
 
 Des statistiques peuvent être lues dans la nouvelle vue
@@ -193,22 +193,21 @@ io_depth       | 0
 
 La signification des colonnes est la suivante :
 
-* prefetch : Nombre de blocs récupérés avec le prefetch parce que le les blocs
-  ne sont pas le buffer pool ;
+* prefetch : Nombre de blocs récupérés avec le prefetch parce que les blocs
+  ne sont pas dans le buffer pool ;
 * hit : Nombre de blocs qui n'ont pas été récupérés avec le prefetch car ils
   étaient déjà dans le buffer pool ;
 * skip_init : Nombre de blocs qui n'ont pas été récupérés avec le prefetch car
-  ils auraient été initialisé à zéro ;
+  ils auraient été initialisés à zéro ;
 * skip_init : Nombre de blocs qui n'ont pas été récupérés avec le prefetch car
   ils n'existaient pas encore ;
 * skip_fpw : Nombre de blocs qui n'ont pas été récupérés avec le prefetch car
-  une lecture de page complête était incluse dans le WAL ;
+  une lecture de page complète était incluse dans le WAL ;
 * skip_rep : Nombre de blocs qui n'ont pas été récupérés avec le prefetch car
-  elles ont déjà été préfetchées récemment ;
-* wal_distance : De combien de bytes le prefetcher est entrain de lire en
-  avance ; block_distance : De combien de blocs le prefetcher est en train de
+  ils ont déjà été préfetchés récemment ;
+* wal_distance : nombre d'octets en cours de lecture par le prefetcher ;
+* block_distance : nombre de blocs en cours de lecture par le prefetcher ;
   lire en avance ;
-* io_depth : Combien de prefetch ont été initialisés mais ne sont pas encore
-  terminés.
+* io_depth : nombre de prefetchs initialisés mais non terminés.
 
 </div>

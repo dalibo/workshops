@@ -20,7 +20,7 @@ Discussion
 
 De façon similaire à la vue `pg_hba_file_rules`, la nouvelle vue système `pg_ident_file_mappings` donne 
 un résumé du fichier de configuration `pg_ident.conf`. En plus des informations contenues dans le fichier 
-`pg_ident.conf`, elle va fournir une colonne `error` qui va permettre de vérifier le fonctionnement de la 
+`pg_ident.conf`, elle fournit une colonne `error` qui va permettre de vérifier le fonctionnement de la 
 configuration avant application ou de diagnostiquer un éventuel problème.
 
 Cette vue n'intervient que sur le contenu actuel du fichier, et non pas sur ce qui a pu être chargé par 

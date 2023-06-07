@@ -70,7 +70,7 @@ et `--target=server` sont spécifiés, l'erreur suivante est affichée.
 pg_basebackup: error: cannot specify both format and backup target
 ```
 
-Il est prévu de pouvoir étendre le fonctionnement `pg_basebackup` en ajoutant
+Il est prévu de pouvoir étendre le fonctionnement de `pg_basebackup` en ajoutant
 de nouveaux types de cibles. Le module de test `basebackup_to_shell` est fourni
 à titre d'exemple. Il permet d'exécuter une commande qui prend en entrée
 standard un fichier généré par la sauvegarde.

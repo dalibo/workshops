@@ -89,7 +89,7 @@ spécifiques dans les traces, par exemple pour n'afficher que les erreurs :
 ```
 
 Les données peuvent également être chargées dans une table. Il n'est pas possible
-d'utiliser `COPY` directement pour cela car les caractère d'échappement disparaissent.
+d'utiliser `COPY` directement pour cela car les caractères d'échappement disparaissent.
 
 ```
 postgres=# CREATE TABLE pglog( data jsonb);

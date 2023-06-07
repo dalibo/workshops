@@ -28,8 +28,8 @@ réaliser un checkpoint, copier les fichiers de la base de référence, puis fai
 un nouveau checkpoint.
 
 Le premier checkpoint permet de s'assurer que les données des buffers sales
-sont sur écrits sur disque, y compris ceux des tables _UNLOGGED_. Il permet
-aussi de s'assurer que les commandes de suppressions de fichiers ont été
+sont écrits sur disque, y compris ceux des tables _UNLOGGED_. Il permet
+aussi de s'assurer que les commandes de suppression de fichiers ont été
 traitées, ce qui évite la disparition d'un fichier pendant sa copie. 
 
 La copie des fichiers de la base de référence est tracée dans les WAL sous forme

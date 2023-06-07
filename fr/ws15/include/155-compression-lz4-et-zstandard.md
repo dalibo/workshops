@@ -41,7 +41,7 @@ Les commits sur ce sujet sont :
 
 <div class="notes">
 
-PostgreSQL permet désormais d'utiliser les algorithmes de compressions _LZ4_,
+PostgreSQL permet désormais d'utiliser les algorithmes de compression _LZ4_,
 _Zstandard_ en plus de  _gzip_ pour la compression des sauvegardes, des WAL et
 des écritures de page complètes.
 
@@ -214,7 +214,7 @@ Si le format `tar` est spécifié (`--format=t` / `Ft`) avec `gzip`, `lz4` et
 ou `.zst`.
 
 Dans cet exemple d'une compression avec `gzip`, on voit que `pg_wal.tar` est
-compressé et que l'extension des fichiers compressé est `.gz`.
+compressé et que l'extension des fichiers compressés est `.gz`.
 
 ```bash
 $ pg_basebackup -Ft --compress=gzip --pgdata tgzip
@@ -225,7 +225,7 @@ backup_manifest base.tar.gz pg_wal.tar.gz
 ```
 
 Exemple d'une compression avec `lz4`, on voit que `pg_wal.tar` n'est pas
-compressé et que l'extension des fichiers compressé est `.lz4`.
+compressé et que l'extension des fichiers compressés est `.lz4`.
 
 ```bash
 $ pg_basebackup -Ft --compress=lz4 --pgdata tlz4 --progress
@@ -236,7 +236,7 @@ backup_manifest base.tar.lz4 pg_wal.tar
 ```
 
 Exemple d'une compression avec `zstd`, on voit que `pg_wal.tar` n'est pas
-compressé et que l'extension des fichiers compressé est `.zst`.
+compressé et que l'extension des fichiers compressés est `.zst`.
 
 ```bash
 $ pg_basebackup -Ft --compress=zstd --pgdata tzstd --progress
@@ -351,12 +351,12 @@ supportés par PostgreSQL est `pg_receivewal`. Là aussi, l'option
 Le principe est le même que pour `pg_basebackup` à quelques différences près :
 
 * `pg_receivewal` compresse forcément les WAL côté client ;
-* les algorithmes de compression disponible sont `gzip` et `lz4`. Cette
+* les algorithmes de compression disponibles sont `gzip` et `lz4`. Cette
   évolution permettra donc d'avoir le choix entre taux de compression (`gzip`)
   et vitesse de compression (`lz4`).
 
 La compression par défaut est `gzip`, les fichiers produits se terminent donc
-pas l'extension `.gz`. Le niveau de compression peut être ajouté après la
+par l'extension `.gz`. Le niveau de compression peut être ajouté après la
 méthode de compression sous forme d'un entier ou avec l'ensemble clé valeur
 `level=nombre entier`.
 

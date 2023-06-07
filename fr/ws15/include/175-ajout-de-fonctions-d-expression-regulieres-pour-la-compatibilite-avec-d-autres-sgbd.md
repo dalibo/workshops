@@ -7,12 +7,12 @@ Les commits sur ce sujet sont :
 
 <div class="slide-content">
 
- * nouvelles fonctions :
+ * Nouvelles fonctions :
    + `regexp_count()`
    + `regexp_instr()`
    + `regexp_like()`
    + `regexp_substr()`
- * fonction améliorée :
+ * Fonction améliorée :
    + `regexp_replace()`
 
 </div>
@@ -20,7 +20,7 @@ Les commits sur ce sujet sont :
 <div class="notes">
 
 Les [fonctions] `regexp_count()`, `regexp_instr()`, `regexp_like()` et `regexp_substr()`
-ont été ajouté à PostgreSQL afin d'augmenter la compatibilité avec les autres
+ont été ajoutées à PostgreSQL afin d'augmenter la compatibilité avec les autres
 SGBD et de faciliter la réalisation de certaines tâches. La fonction
 `regexp_replace()` a également été étendue.
 

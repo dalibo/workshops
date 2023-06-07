@@ -33,9 +33,9 @@ En version 15, le trigger posé par la contrainte de clé étrangère ne se
 déclenche plus sur le `DELETE` exécuté sur la partition, mais sur un `UPDATE`
 exécuté sur la table mère. Cela permet d'obtenir le comportement attendu.
 
-L'implémentation choisie à une limitation : elle ne fonctionne que si la
+L'implémentation choisie a une limitation : elle ne fonctionne que si la
 contrainte de clé étrangère concerne la table partitionnée. Cela ne devrait pas
-être un facteur limitant, en effet, il est rare d'avoir des clés étrangères
+être un facteur limitant. En effet, il est rare d'avoir des clés étrangères
 différentes qui pointent vers les différentes partitions. On trouve
 généralement plutôt une clé étrangère qui pointe vers une ou plusieurs
 colonnes de la table partitionnée dans son ensemble.

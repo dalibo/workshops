@@ -41,7 +41,7 @@ Le _database oid_ est l'identifiant unique d'une base de données. Il est
 utilisé pour nommer le répertoire qui regroupe toutes les données d'une base
 de données dans un tablespace.
 
-Ce changement permet donc limiter les changements de noms de fichiers,
+Ce changement permet donc de limiter les changements de noms de fichiers,
 répertoires et lien symboliques suite à une montée de version avec
 `pg_upgrade`. Les bénéfices sont multiples :
 
