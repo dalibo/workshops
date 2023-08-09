@@ -1,0 +1,50 @@
+body:after {
+  content: url(images/logo_dalibo_landscape_blue_tagline.186x50.png);
+  position: fixed;
+  bottom: 1em;
+  left: 1em;
+}
+
+/* Reduire la taille de la police */
+:root {
+  --r-main-font-size: 36px;
+  /* https://gitlab.dalibo.info/formation/manuels/-/issues/665 */
+  --r-heading-text-transform: none; /* */
+}
+
+h1 {
+  font-weight: bolder;
+  /* background: #f8f8f8; */
+  color: #318ce7;      /* bleu dalibo */
+}
+
+/* passer outre à un défaut de reveal qui écrase config ci-dessus */
+.reveal h1 {
+  font-weight: bolder;
+  color: #318ce7;      /* bleu dalibo */
+}
+
+/*
+ * Style des mots-clés
+ * /!\ A garder en cohérence avec revealjs
+ * https://gitlab.dalibo.info/formation/manuels/-/issues/665
+ */
+code {
+  color: var(--r-main-color)  /* noir du texte par défaut */
+  /* NB: overridé par span kw, par exe^mple */
+}
+
+/* Grossir le code dans les slide pour être presque aussi gros que le textes simple */
+.sourceCode {
+  font-size: 25px;
+}
+
+/* inhiber la couleur dans les italiques */
+em {
+  color: var(--r-main-color)
+}
+
+/* Caches les notes de bas de pages */
+section#footnotes {
+  display: none !important;
+}

@@ -34,18 +34,25 @@ Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
 * Mobile : [EPUB](atelier_pgsodium/pgsodium.epub)
 
 
+Nouveautés de PostgreSQL 16
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](ws16/160-postgresql_16.slides.html)
+* Handout : [HTML](ws16/160-postgresql_16.handout.html) [PDF](ws16/160-postgresql_16.pdf)
+* Mobile : [EPUB](ws16/160-postgresql_16.epub)
+
 Nouveautés de PostgreSQL 15
 --------------------------------------------------------------------------------
 
 * Slides : [HTML](ws15/150-postgresql_15.slides.html) [PGSession 15](ws15/pgsession15.slides.html)
-* Handout : [HTML](ws15/150-postgresql_15.handout.html) [PDF](ws15/150-postgresql_15.pdf) 
+* Handout : [HTML](ws15/150-postgresql_15.handout.html) [PDF](ws15/150-postgresql_15.pdf)
 * Mobile : [EPUB](ws15/150-postgresql_15.epub)
 
 Nouveautés de PostgreSQL 14
 --------------------------------------------------------------------------------
 
 * Slides : [HTML](ws14/140-postgresql_14.slides.html) [PGSession 14](ws14/pgsession14.slides.html)
-* Handout : [HTML](ws14/140-postgresql_14.handout.html) [PDF](ws14/140-postgresql_14.pdf) 
+* Handout : [HTML](ws14/140-postgresql_14.handout.html) [PDF](ws14/140-postgresql_14.pdf)
 * Mobile : [EPUB](ws14/140-postgresql_14.epub)
 
 Nouveautés de PostgreSQL 13
@@ -75,7 +82,7 @@ Nouveautés de PostgreSQL 10
 * Slides : [HTML](ws10/100-postgresql_10.slides.html)
 * Handout : [HTML](ws10/100-postgresql_10.handout.html) [PDF](ws10/100-postgresql_10.pdf)
 * Mobile : [EPUB](ws10/100-postgresql_10.epub)
-  
+
 Nouveautés de PostgreSQL 9.6
 --------------------------------------------------------------------------------
 

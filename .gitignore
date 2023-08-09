@@ -2,6 +2,7 @@ _build/*
 exports/*
 *.sw?
 .~lock.*
+*.pgdump
 
 fr/**/*.json
 fr/**/*.html

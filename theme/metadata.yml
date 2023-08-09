@@ -1,0 +1,82 @@
+---
+#
+# PDF Options
+#
+papersize: a4
+book: true
+header-left: "\\\ "
+header-center: "DALIBO Workshops"
+header-right: "\\\ "
+footer-left: "\\thetitle"
+footer-center: " "
+footer-right: "\\thepage"
+toc-depth: 3
+toc-own-page: true
+listings-disable-line-numbers: true
+table-use-row-colors: true
+urlcolor: blue
+linkcolor: blue
+links-as-notes: true
+colorlinks: true
+monofont: 'Liberation Mono'
+monofontoptions: 'Scale=0.8'
+code-block-font-size: \footnotesize
+
+pandoc-cover:
+  front: 'theme/cover_front.j2.svg'
+  back: 'theme/cover_back.j2.svg'
+
+include-before:
+- |
+  ```{=latex}
+  %% couleurs pour les citations
+  %% NE PAS mettre cette config dans header-includes
+  \definecolor{blockquote-border}{RGB}{65,105,225}
+  \definecolor{blockquote-text}{RGB}{65,105,225}
+  \let\labelitemi\labelitemii
+  ```
+
+header-includes:
+- |
+  ```{=latex}
+  %% Saut de page avant un titre H1
+  \usepackage{sectsty}
+  \sectionfont{\clearpage}
+  %% ajouter 2 espaces entre le numéro et le texte dans les H1
+  \renewcommand{\thechapter}{\arabic{chapter}/\ }
+  \renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+  %% Voir la config de pandoc-latex-environment
+  \usepackage{awesomebox}
+  %% Dans les listes, remplacer les tirets par des points
+  \let\labelitemi\labelitemii
+
+  %% Reprise de couleur bleue des titres de dalidoc
+  \definecolor{astral}{RGB}{46,116,181}
+  %% Titres H1 : saut de page, bleu et majuscules
+  \sectionfont{\clearpage\color{astral}\MakeUppercase}
+  %% Titres H2 : en bleu
+  \subsectionfont{\color{astral}}
+  ```
+
+pandoc-latex-environment:
+  noteblock: [slide-content]
+  tipblock: [tip]
+  warningblock: [warning]
+  cautionblock: [caution]
+  importantblock: [important]
+
+#
+# Reveal Options
+#
+width: 1200
+height: 768
+theme: white
+transition: none
+transition-speed: fast
+progress: true
+slideNumber: true
+history: true
+mouseWheel: true
+title-transform : none
+hide_author_in_slide: true
+navigationMode: linear

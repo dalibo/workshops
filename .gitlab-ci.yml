@@ -38,16 +38,6 @@ image:
 pandocker:
   stage: build
   script:
-    #
-    # The dalibo themes are not mandatory
-    # CI should be able to run without it
-    # You can comment the lines below to build without it
-    #
-    - git clone --depth 1 --branch master https://${THEMES_GIT_TOKEN}@gitlab.dalibo.info/marketing/themes.git themes/ || true
-    - make -C themes install
-    #
-    # pandoc
-    #
     - make all
     # FIX #197: publish the old artefacts alongside the new ones 
     - rsync --archive _archives/fr/* fr
