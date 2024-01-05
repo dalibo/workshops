@@ -248,7 +248,7 @@ dans le monde.
 ## Parallélisation des FULL OUTER JOIN
 
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/234 -->
-!include include/234_allow_parallelization_full_outer_join
+!include include/234_allow_parallelization_full_outer_join.md
 
 ---
 
