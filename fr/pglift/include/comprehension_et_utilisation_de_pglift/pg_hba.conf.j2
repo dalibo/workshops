@@ -1,0 +1,7 @@
+local   all             {surole}                        {auth.local}
+local   all             {backuprole}                    {auth.local} map=backupmap
+local   all             prometheus                      {auth.local} map=supervisionmap
+local   temboard        temboard                        {auth.local}
+local   all             temboardagent                   {auth.local} map=temboardmap
+local   all             bob                             scram-sha-256
+host    all             all                0.0.0.0/0    {auth.host}

@@ -1,0 +1,8 @@
+---
+
+postgresql_user: postgres
+
+temboard_agent_ca_cert: "{{ cert_dir }}/temboard-agent_ca_cert.pem"
+temboard_agent_cert: "{{ cert_dir }}/temboard-agent_cert.pem"
+temboard_agent_key: "{{ key_dir }}/temboard-agent.key"
+

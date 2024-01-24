@@ -1,0 +1,49 @@
+---
+
+- name: Install PostgreSQL
+  hosts: database, helper
+  become: true
+  tasks:
+    - name: Create the postgres system group
+      ansible.builtin.group:
+        name: postgres
+        gid: 26
+    - name: Create the postgres system user
+      ansible.builtin.user:
+        name: "{{ postgresql_sys_user }}"
+        group: "{{ postgresql_sys_group }}"
+        uid: 26
+        comment: PostgreSQL Server
+        shell: /bin/bash
+    - name: Disable the default PostgreSQL module
+      copy:
+        dest: /etc/dnf/modules.d/postgresql.module
+        content: |
+          [postgresql]
+          name=postgresql
+          stream=
+          profiles=
+          state=disabled
+    - name: Install PostgreSQL RPM packages
+      ansible.builtin.package:
+        name: "{{ item }}"
+      loop:
+        - "postgresql{{ postgresql_version }}"
+        - "postgresql{{ postgresql_version }}-server"
+        - "postgresql{{ postgresql_version }}-contrib"
+    - name: Create the data root directory
+      ansible.builtin.file:
+        name: /pgdata
+        state: directory
+        owner: "{{ postgresql_sys_user }}"
+        group: "{{ postgresql_sys_group }}"
+        mode: 0750
+
+- name: Exchange postgres user's ssh keys between PostgreSQL nodes
+  hosts: database
+  become: true
+  roles:
+    - ssh-exchange
+  vars:
+    username: "{{ postgresql_user }}"
+    target_group: database

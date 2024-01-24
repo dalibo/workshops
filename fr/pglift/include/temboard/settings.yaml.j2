@@ -1,0 +1,36 @@
+---
+systemd: {}
+postgresql:
+  default_version: '15'
+  auth:
+    local: 'peer'
+    host: 'scram-sha-256'
+  surole:
+    name: 'postgres'
+  backuprole:
+    name: 'backup'
+  datadir: '/pgdata/{version}/{name}/data'
+  logpath: '/pgdata/log/postgresql'
+  dumps_directory: '/pgdata/backup/dumps/{version}-{name}'
+  socket_directory: '/var/run/postgresql/'
+pgbackrest:
+  repository:
+    path: '/pgdata/backup/pgbackrest'
+    mode: 'path'
+prometheus:
+  execpath: '/usr/bin/postgres_exporter'
+temboard:
+  ui_url: https://srv-helper:8888
+  plugins:
+  - monitoring
+  - dashboard
+  - activity
+  - administration
+  - pgconf
+  - maintenance
+  - statements
+  signing_key: /etc/pki/tls/certs/temboard_signing-public.pem
+  certificate:
+      ca_cert: /etc/pki/tls/certs/temboard-agent_ca_cert.pem
+      cert: /etc/pki/tls/certs/temboard-agent_cert.pem
+      key: /etc/pki/tls/private/temboard-agent.key
