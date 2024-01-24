@@ -1,0 +1,25 @@
+---
+
+- name: Create SSH directory if it does not exist
+  file:
+    path: "~{{ username }}/.ssh"
+    state: directory
+    owner: "{{ username }}"
+    group: "{{ username }}"
+    mode: '0700'
+- name: SSH KeyGen command
+  become_user: "{{ username }}"
+  shell: >
+    ssh-keygen -N "" -m PEM -f ~/.ssh/id_rsa <<< n ; /bin/true
+- name: Fetch the public key files
+  fetch:
+    src: "~{{ username }}/.ssh/id_rsa.pub"
+    dest: "/tmp/{{ansible_hostname}}-id_rsa.pub"
+    flat: yes
+- name: Add the keys to authorized_keys
+  ansible.posix.authorized_key:
+    user: "{{ username }}"
+    key: "{{ lookup('file','/tmp/{{item}}-id_rsa.pub')}}"
+  when: "item != ansible_hostname"
+  with_items:
+    - "{{ groups[target_group] }}"

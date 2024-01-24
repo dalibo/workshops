@@ -1,0 +1,26 @@
+---
+
+- hosts: helper
+  become: true
+  tasks:
+    - name: Install temboard server RPM package
+      ansible.builtin.package:
+        name: temboard
+    - name: Check if cert and keys directory exists
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ cert_dir }}"
+        - "{{ key_dir }}"
+    - name: Deploy certificates and keys
+      ansible.builtin.copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      loop:
+        - src: "{{ ca_cert }}"
+          dest: "{{ temboard_ui_ca_cert }}"
+        - src: "{{ ca_path }}/{{ ansible_hostname }}.pem"
+          dest: "{{ temboard_ui_cert }}"
+        - src: "{{ ca_path }}/{{ ansible_hostname }}.key"
+          dest: "{{ temboard_ui_key }}"

@@ -1,0 +1,13 @@
+listen_addresses = '*'
+port = 5432
+shared_buffers = 25%
+effective_cache_size = 66%
+random_page_cost = 1.5
+wal_buffers = '8MB'
+checkpoint_completion_target = 0.9
+timezone = 'Europe/Paris'
+cluster_name = {name}
+unix_socket_directories = {settings.socket_directory}
+logging_collector = true
+log_directory = {settings.logpath}
+shared_preload_libraries = 'pg_stat_statements'
