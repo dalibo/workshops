@@ -101,10 +101,25 @@ hide_author_in_slide: true
 
 # Introduction
 
+<div class="notes">
+
 Ce workshop a pour but de détailler le déploiement et l'administration
 d'instances PostgreSQL avec _pglift_.
 
+</div>
+
+---
+
 # Présentation de pglift
+
+<div class="slide-content">
+- Permet de déployer et gérer des instances PostgreSQL uniformisées
+- Instances prêtes pour la production dès leur déploiement
+- Capable de déployer des instances en réplication avec _patroni_
+- Prend en charge _pgBackRest_ en mode local ou distant
+</div>
+
+<div class="notes">
 
 _pglift_ est un outil qui permet de déployer et gérer des instances PostgreSQL
 uniformisées. Les instances peuvent être prêtes pour la production dès leur
@@ -120,7 +135,17 @@ mode local ou distant.
 Par défaut, _pglift_ se contente de déployer et de gérer PostgreSQL, les composants
 pris en charge sont optionnels, à activer dans sa configuration.
 
+</div>
+
+---
+
 ## CLI
+
+<div class="slide-content">
+- L'ensemble de ses fonctionnalités exposées dans une interface en ligne de commande
+</div>
+
+<div class="notes">
 
 _pglift_ expose l'ensemble de ses fonctionnalités dans une interface en ligne de
 commande.
@@ -250,16 +275,41 @@ Options:
   --help                          Show this message and exit.
 ```
 
+</div>
+
+---
+
 ## Ansible (Collection dalibo.pglift)
+
+<div class="slide-content">
+- Fonctionnalités de _pglift_ accessibles depuis la collection `dalibo.pglift`
+- Permet d'intégrer _pglift_ dans un processus de déploiement automatisé _ansible_
+</div>
+
+<div class="notes">
 
 Les fonctionnalités de _pglift_ sont également accessibles depuis la collection
 `dalibo.pglift`. Celle-ci fourni les modules _ansible_ permettant d'intégrer les
 opérations de _pglift_ dans un processus de déploiement automatisé déclaratif
 à l'aide d'_ansible_ (_infrastructure as code_).
 
+</div>
+
+---
+
 # Installation
 
+---
+
 ## Pré-requis
+
+<div class="slide-content">
+- Dépôts Powertools, epel, PGDG et Dalibo Labs
+- Utilisateur système `postgres`
+- Activer le **lingering**
+</div>
+
+<div class="notes">
 
 Les machines suivantes sont utilisées pour réaliser les procédures techniques
 des workshops _pglift_ :
@@ -280,13 +330,17 @@ Activer le dépôt additionnel `PowerTools` :
 
 ```shell
 [root@srv-pg1 ~]# dnf config-manager -y --set-enabled powertools
+```
 
+Installer le dépôt _EPEL_ :
+```shell
+[root@srv-pg1 ~]# dnf install -y epel-release
 ```
 
 Installer le dépôt _PGDG_ de la communauté PostgreSQL :
 
 ```shell
-dnf install -y \
+[root@srv-pg1 ~]# dnf install -y \
 https://download.postgresql.org/pub/repos/yum/reporpms/EL-8-x86_64/\
 pgdg-redhat-repo-latest.noarch.rpm
 ```
@@ -345,6 +399,10 @@ faire fonctionner des services système, au même titre que `root` :
 [root@srv-pg1 ~]# loginctl enable-linger postgres
 ```
 
+</div>
+
+---
+
 ## Installation de PostgreSQL
 
 Installer PostgreSQL 15 :
@@ -352,6 +410,8 @@ Installer PostgreSQL 15 :
 ```shell
 [root@srv-pg1 ~]# dnf install -y postgresql15 postgresql15-server postgresql15-contrib
 ```
+
+---
 
 ## Installation des composants satellite
 
@@ -361,7 +421,11 @@ Installer les paquets `pgbackrest` et `prometheus-postgres-exporter` :
 [root@srv-pg1 ~]# dnf install -y pgbackrest prometheus-postgres-exporter
 ```
 
+---
+
 ## Installation de pglift
+
+---
 
 ### pipx
 
@@ -380,7 +444,19 @@ Ouvrir une nouvelle session est nécessaire pour que le binaire `pglift` soit da
 le `${PATH}` de l'utilisateur `postgres`
 :::
 
+---
+
 ## Configuration initiale
+
+<div class="slide-content">
+- Fichier de configuration _pglift_ :
+  - `~/.config/pglift/settings.yaml`
+  - `/etc/pglift/settings.yaml`
+- Template de configuration PostgreSQL et pgBackRest
+- Installer la configuration de site : `pglift site-configure install`
+</div>
+
+<div class="notes">
 
 Le fichier de configuration principal de _pglift_ déclare le fonctionnement de
 ses opérations. C'est un fichier au format _YAML_.
@@ -460,8 +536,19 @@ INFO     creating common pgbackrest directories
 INFO     creating postgresql log directory
 ```
 
+</div>
+
+---
+
 # Déploiement d'une instance (CLI)
 
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift instance create main --pgbackrest-stanza=main
+```
+</div>
+
+<div class="notes">
 Déployer une instance à l'aide de la ligne de commande `pglift` :
 
 ```shell
@@ -530,19 +617,37 @@ Type "help" for help.
 ```
 
 :::tip
-Certaines commandes utlisées dans la suite de cet atelier nécessiteront que
+Certaines commandes utilisées dans la suite de cet atelier nécessiteront que
 l'environnement de l'instance `main` soit chargé dans la session.
 :::
 
+</div>
+
+---
+
 # Déploiement d'une instance (Ansible)
 
+<div class="slide-content">
+- Module `dalibo.pglift.instance`
+</div>
+
+<div class="notes">
 L'instance peut également être déployée par _ansible_, via le module
 `dalibo.pglift.instance`. Pour cela, les serveurs doivent être accessibles
 depuis le poste local sur un compte utilisateur `sudoer`. Le compte utilisateur
 `ansible` est utilisé à cet effet sur les machines du workshop.
+</div>
+
+---
 
 ## Inventaire
 
+<div class="slide-content">
+- Inventaire comprenant hôtes et groupes d'hôtes
+</div>
+
+
+<div class="notes">
 Sur le poste local, faisant office de nœud de contrôle _ansible_, créer un répertoire
 pour les ressources _ansible_ dans le `$HOME` de l'utilisateur.
 
@@ -556,8 +661,19 @@ les serveurs du workshop :
 ```ini
 !include include/ansible/inventory
 ```
+</div>
+
+---
 
 ## Collection
+
+<div class="slide-content">
+```shell
+[user@desktop1 ~]$ ansible-galaxy collection install dalibo.pglift
+```
+</div>
+
+<div class="notes">
 
 Installer la collection `dalibo.pglift`, permettant de manipuler les opérations
 de _pglift_ à travers _ansible_, avec `ansible-galaxy` :
@@ -565,9 +681,36 @@ de _pglift_ à travers _ansible_, avec `ansible-galaxy` :
 ```shell
 [user@desktop1 ~]$ ansible-galaxy collection install dalibo.pglift
 ```
+</div>
+
 \newpage
 
+---
+
 ## Playbook
+
+<div class="slide-content">
+```yaml
+---
+- hosts: "srv-pg1"
+  become: "yes"
+  become_user: "postgres"
+  tasks:
+    - name: Créer une instance
+      dalibo.pglift.instance:
+        name: "main"
+        state: started
+        version: 15
+        port: 5432
+        pgbackrest:
+          stanza: main-app
+        replrole_password: secret
+        prometheus:
+          port: 9187
+```
+</div>
+
+<div class="notes">
 
 Créer le _playbook_ `~/ansible/instance_main.yml` qui appelle le module
 `dalibo.pglift.instance` dans une tâche à destination de `srv-pg1` :
@@ -597,7 +740,22 @@ Exécuter le _playbook_ sur l'inventaire établi :
 ansible-playbook -u ansible instance_main.yml
 ```
 
+</div>
+
+---
+
 # Gestion d'une instance
+
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift instance status main
+[postgres@srv-pg1 ~]$ pglift instance stop main
+[postgres@srv-pg1 ~]$ pglift instance start main
+[postgres@srv-pg1 ~]$ pglift instance restart main
+```
+</div>
+
+<div class="notes">
 
 L'instance créée avec _pglift_ peut être gérée depuis l'interface de ligne de
 commande :
@@ -622,9 +780,24 @@ INFO     restarting instance 15/main
 PostgreSQL: running
 ```
 
+</div>
+
+---
+
 # Gestion des bases de données et rôles PostgreSQL
 
+---
+
 ## Rôles
+
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift role create bob --password secret --login
+[postgres@srv-pg1 ~]$ pglift role list
+```
+</div>
+
+<div class="notes">
 
 Créer un rôle dans l'instance :
 
@@ -646,19 +819,33 @@ Afficher la liste des rôles présents dans l'instance :
 | postgres | False        | True    | True  | True      | True     | True       | True        |
 +----------+--------------+---------+-------+-----------+----------+------------+-------------+
 ```
+</div>
+
 \normalsize
 
 \newpage
+
+---
+
 ## Bases de données
 
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift database create ws1
+[postgres@srv-pg1 ~]$ pglift database create ws2 --owner bob --schema s1 --schema s2
+[postgres@srv-pg1 ~]$ pglift database list
+```
+</div>
+
+<div class="notes">
 _pglift_ permet d'interagir avec les bases de données d'une instance. Il est ainsi
-possible de créer, alterer, lister ou supprimer des bases de données depuis la
+possible de créer, altérer, lister ou supprimer des bases de données depuis la
 ligne de commande.
 
 Créer une base de données `ws1` :
 
 ```shell
-[postgres@srv-pg1 pg_back]$ pglift database create ws1
+[postgres@srv-pg1 ~]$ pglift database create ws1
 INFO     creating 'ws1' database in 15/main
 ```
 
@@ -705,27 +892,52 @@ Lister les bases de données :
 |           |          |        |     |       |                       |        |                           | size: 37.9 MB    |
 +-----------+----------+--------+-----+-------+-----------------------+--------+---------------------------+------------------+
 ```
+</div>
 \normalsize
+
+---
 
 # Gestion des sauvegardes
 
+---
+
 ## Sauvegardes Physiques (PITR)
+
+<div class="slide-content">
+- Sauvegarde PITR assurée par _pgBackRest_
+- Dépôt de sauvegarde local ou distant
+- Commande d'archivage des WAL configurée par _pglift_
+</div>
+
+<div class="notes">
 
 Les instances déployées par _pglift_ ont une sauvegarde _pgBackRest_ configurée dès
 leur création. Dans la configuration basique de ce premier atelier, la sauvegarde
-est réalisée localement mais il est aussi possible d'interfaçer _pglift_ avec un
+est réalisée localement mais il est aussi possible d’interfacer _pglift_ avec un
 serveur de sauvegarde centralisé, comme cela sera abordé dans un prochain workshop.
 
 L'archivage des journaux de transactions, qui assurent le _recover_ des données à
 un état cohérent à la suite d'une restauration, est automatiquement configuré
 et actif dès l'initialisation de l'instance.
+</div>
+
+---
 
 ### Sauvegarde pgBackRest
+
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift instance backup main
+[postgres@srv-pg1 ~]$ pglift instance backups
+```
+</div>
+
+<div class="notes">
 
 Effectuer une sauvegarde de l'instance `main` avec _pglift_.
 
 ```shell
-pglift instance backup main
+[postgres@srv-pg1 ~]$ pglift instance backup main
 ```
 
 Lister les sauvegardes présentes :
@@ -740,21 +952,35 @@ Lister les sauvegardes présentes :
 │ 20231110-230314F │ 38.0 MB │ 5.1 MB    │ 2023-11-10 23:03:14+00:00 │ full │ postgres, ws1, ws2 │
 +------------------+---------+-----------+---------------------------+------+--------------------+
 ```
+</div>
+
 \normalsize
 
+---
+
 ### Restauration pgBackRest
+
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift instance stop
+[postgres@srv-pg1 ~]$ pglift instance restore
+[postgres@srv-pg1 ~]$ pglift instance start main
+```
+</div>
+
+<div class="notes">
 
 Pour restaurer l'instance depuis la sauvegarde, l'arrêter :
 
 ```shell
-[postgres@srv-pg1 pglift]$ pglift instance stop
+[postgres@srv-pg1 ~]$ pglift instance stop
 INFO     stopping PostgreSQL 15-main
 ```
 
 Effectuer le restore avec _pglift_ :
 
 ```shell
-[postgres@srv-pg1 pglift]$ pglift instance restore
+[postgres@srv-pg1 ~]$ pglift instance restore
 INFO     restoring instance 15/main with pgBackRest
 ```
 
@@ -764,9 +990,20 @@ Enfin, démarrer l'instance :
 [postgres@srv-pg1 ~]$ pglift instance start main
 INFO     starting PostgreSQL 15-main
 ```
+</div>
+
+---
 
 ## Sauvegardes Logiques
 
+<div class="slide-content">
+- Utilisation de `pg_dump` par défaut
+```bash
+[postgres@srv-pg1 ~]$ pglift database dump ws1
+```
+</div>
+
+<div class="notes">
 La sauvegarde logique est prise en charge par _pglift_ via la commande
 `pglift database dump`. Celle-ci exécute l'export des données selon la
 configuration de site qui est active. Par défaut, l'outil standard `pg_dump` est
@@ -775,7 +1012,7 @@ utilisé :
 Sauvegarder la base de données `ws1` :
 
 ```bash
-[postgres@srv-pg1 pglift]$ pglift database dump ws1
+[postgres@srv-pg1 ~]$ pglift database dump ws1
 INFO     backing up database 'ws1' on instance 15/main
 
 ```
@@ -787,9 +1024,21 @@ Vérifier la présence du _dump_ dans le répertoire de sauvegarde :
 total 8
 -rw-rw-r--. 1 postgres postgres 794 Nov 20 11:18 ws1_2023-11-20T11:18:50+00:00.dump
 ```
+</div>
+
+---
 
 ## Restauration d'une base de données
 
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift database drop ws1
+[postgres@srv-pg1 ~]$ pg_restore -d postgres --create --verbose \
+/pgdata/backup/dumps/15-main/ws1_2023-11-20T11:18:50+00:00.dump
+```
+</div>
+
+<div class="notes">
 Supprimer la base de données `ws1` :
 
 ```shell
@@ -806,8 +1055,21 @@ pg_restore: connecting to database for restore
 pg_restore: creating DATABASE "ws1"
 pg_restore: connecting to new database "ws1"
 ```
+</div>
+
+---
 
 # Supervision avec l'exporter prometheus-postgres-exporter
+
+<div class="slide-content">
+- Supervision assurée par l'exporter _postgres-exporter_
+- Actif dès le déploiement de l'instance
+```shell
+curl http://localhost:9187/metrics | grep -v ^#
+```
+</div>
+
+<div class="notes">
 
 Les instances sont déployées avec l'exporter _prometheus_ du fait de son activation
 dans la configuration de _pglift_. Par défaut, ce dernier fonctionne sur le port `9187`.
@@ -820,8 +1082,20 @@ curl http://localhost:9187/metrics | grep -v ^#
 
 L'exploitation de ces métriques de supervision sera abordé dans un autre
 workshop.
+</div>
+
+---
 
 # Nettoyage
+
+<div class="slide-content">
+```shell
+[postgres@srv-pg1 ~]$ pglift instance drop
+[postgres@srv-pg1 ~]$ pglift site-configure uninstall
+```
+</div>
+
+<div class="notes">
 
 Afin de poursuivre sur les workshops suivants sans conflit de port ou
 de configuration, il est nécessaire de supprimer toute instance existante
@@ -857,3 +1131,4 @@ INFO     deleting pgbackrest repository path
 INFO     deleting common pgbackrest directories
 INFO     deleting postgresql log directory
 ```
+</div>
