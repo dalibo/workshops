@@ -33,6 +33,12 @@ Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
 * Handout : [HTML](atelier_pgsodium/pgsodium.handout.html) [PDF](atelier_pgsodium/pgsodium.pdf)
 * Mobile : [EPUB](atelier_pgsodium/pgsodium.epub)
 
+Workshop Migration : Migrer avec les Foreign Data Wrappers
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](migration_fdw/migration_fdw.slides.html)
+* Handout : [HTML](migration_fdw/migration_fdw.handout.html) [PDF](migration_fdw/migration_fdw.pdf)
+* Mobile : [EPUB](migration_fdw/migration_fdw.epub)
 
 Nouveautés de PostgreSQL 16
 --------------------------------------------------------------------------------
@@ -89,5 +95,3 @@ Nouveautés de PostgreSQL 9.6
 * Slides : [HTML](ws9.6/096-postgresql_9.6.slides.html)
 * Handout : [HTML](ws9.6/096-postgresql_9.6.handout.html) [PDF](ws9.6/096-postgresql_9.6.pdf)
 * Mobile : [EPUB](ws9.6/096-postgresql_9.6.epub)
-
-
