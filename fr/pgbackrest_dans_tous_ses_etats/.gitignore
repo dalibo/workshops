@@ -1,0 +1,14 @@
+.vagrant/*
+.vagrant/machines/pg1/libvirt/action_provision
+.vagrant/machines/pg1/libvirt/action_provision
+.vagrant/machines/pg1/libvirt/box_meta
+.vagrant/machines/pg1/libvirt/action_provision
+.vagrant/machines/pg1/libvirt/box_meta
+.vagrant/machines/pg1/libvirt/created_networks
+.vagrant/machines/pg1/libvirt/id
+.vagrant/machines/pg1/libvirt/index_uuid
+.vagrant/machines/pgbackrest1/libvirt/action_provision
+.vagrant/machines/pgbackrest1/libvirt/box_meta
+.vagrant/machines/pgbackrest1/libvirt/created_networks
+.vagrant/machines/pgbackrest1/libvirt/id
+.vagrant/machines/pgbackrest1/libvirt/index_uuid
