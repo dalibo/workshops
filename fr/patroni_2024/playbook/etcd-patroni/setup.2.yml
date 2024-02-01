@@ -1,0 +1,152 @@
+- name: "Setup all containers"
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: "Apt update allow-releaseinfo-change"
+      ansible.builtin.shell:
+        cmd:
+          'apt-get update --allow-releaseinfo-change'
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name:
+          - "vim"
+          - "less"
+          - "jq"
+          - "curl"
+          - "wget"
+          - "iputils-ping"
+
+    - name: "Add IP address of all hosts to all hosts"
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$'
+        line: "{{ hostvars[item].ansible_host }} {{item}}"
+        state: present
+      when: hostvars[item].ansible_host is defined
+      with_items: "{{ groups.all }}"
+
+# ETCD SERVERS SETUP
+# --------------------------
+
+- name: "Setup etcd servers"
+  hosts: etcd_servers
+  gather_facts: true
+  tasks:
+
+    - name: "Install etcd_servers packages"
+      ansible.builtin.apt:
+        name:
+          - "etcd-server"
+          - "etcd-client"
+        state: latest
+        update_cache: false
+
+# --------------------------
+# PATRONI SERVERS SETUP
+
+- name: "Setup patroni servers"
+  hosts: patroni_servers
+  gather_facts: true
+
+  tasks:
+
+    - name: "Install packages to import the repository key"
+      become: true
+      become_user: root
+      ansible.builtin.package:
+        name:
+          - ca-certificates
+          - gnupg
+          - curl
+        state: latest
+
+    - name: "Configure pgdg repository"
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        dest: "/etc/apt/sources.list.d/pgdg.list"
+        content: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+        mode: "0600"
+
+    - name: "Import pgdg gnupg key"
+      become: true
+      become_user: root
+      ansible.builtin.apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+    - name: Apt update
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: "Install postgres and patroni"
+      become: true
+      become_user: root
+      ansible.builtin.package:
+        name:
+          - patroni
+          - postgresql-{{ postgresql_version }}
+          - curl
+        state: present
+
+# BACKUP SERVERS SETUP
+
+- name: "Setup backup servers"
+  hosts: backup_servers
+  gather_facts: true
+
+  tasks:
+
+    - name: "Install packages to import the repository key"
+      become: true
+      become_user: root
+      ansible.builtin.package:
+        name:
+          - ca-certificates
+          - gnupg
+          - curl
+        state: latest
+
+    - name: "Configure pgdg repository"
+      become: true
+      become_user: root
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/pgdg.list
+        content: 'deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main'
+        mode: "0600"
+
+    - name: "Import pgdg gnupg key"
+      become: true
+      become_user: root
+      ansible.builtin.apt_key:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        state: present
+
+    - name: "Install backup_server packages"
+      become: true
+      ansible.builtin.package:
+        name:
+          - pgbackrest
+        state: latest
+
+- name: "Finalize network setup"
+  hosts: all
+  gather_facts: true
+  become: true
+  become_user: root
+
+  tasks:
+    - name: "Setup network interfaces"
+      ansible.builtin.copy:
+        dest: /etc/network/interfaces
+        content: |
+          auto lo
+          iface lop inet loopback
+          auto eth0
+          iface eth0 inet static
+          address {{ ansible_host }}/24
+          gateway  10.0.3.1
+        mode: "0600"

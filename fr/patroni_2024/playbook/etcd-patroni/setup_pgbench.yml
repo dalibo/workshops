@@ -1,0 +1,17 @@
+---
+
+- name: "Init pgbench on primary"
+  hosts: primary
+  become: true
+  become_user: postgres
+
+  tasks:
+
+    - name: "create database pgbench"
+      command: "createdb pgbench"
+   
+    - name: "init pgbench"
+      command: "pgbench -i -s 10 pgbench"
+
+
+ 

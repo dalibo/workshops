@@ -1,0 +1,51 @@
+---
+
+- hosts: backup_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: install packages to import the repository key
+    become: true
+    become_user: root
+    apt:
+      name:
+        - ca-certificates
+        - gnupg
+        - curl
+        - etcdctl-client
+      state: latest
+      update_cache: false
+
+  - name: Configure pgdg repository
+    become: true
+    become_user: root
+    copy:
+      dest: /etc/apt/sources.list.d/pgdg.list
+      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+
+  - name: Import pgdg gnupg key
+    become: true
+    become_user: root
+    shell:
+      warn: false
+      cmd:
+        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+
+  - name: apt update
+    become: yes
+    apt: update_cache=yes
+
+  - name: install backup_server packages
+    become: yes
+    apt:
+      name:
+        - pgbackrest
+      state: latest
+
+  - name: "Adding ETCDCTL_ENDPOINTS into postgres's .profile"
+    become: yes
+    become_user: postgres
+    shell: echo ' export ETCDCTL_ENDPOINTS=e1:2379,e2:2379,e3:2379' >> ~/.profile
+
+# EOF

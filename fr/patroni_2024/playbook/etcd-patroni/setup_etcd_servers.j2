@@ -1,0 +1,10 @@
+ETCD_NAME='{{ inventory_hostname }}'
+ETCD_DATADIR='/var/lib/etcd/default'
+ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://{{ ansible_host }}:2380'
+ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://{{ ansible_host }}:2379'
+ETCD_INITIAL_ADVERTISE_PEER_URLS='http://{{ ansible_host }}:2380'
+ETCD_INITIAL_CLUSTER_STATE='new'
+ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
+ETCD_INITIAL_CLUSTER='{% for item in groups['etcd_servers'] %}{{ item }}=http://{{ hostvars[item]['ansible_host'] }}:2380{% if not loop.last %},{% endif %}{% endfor %}'
+ETCD_ADVERTISE_CLIENT_URLS='http://{{ ansible_host }}:2379'
+#ETCD_ENABLE_V2=true
