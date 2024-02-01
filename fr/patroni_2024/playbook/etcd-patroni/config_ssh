@@ -1,0 +1,29 @@
+# Pour que bash_completion retrouve les hosts
+# dans .ssh/known_hosts
+HashKnownHosts no
+
+# eFormation
+# Renseigner l'adress ip dans /etc/hosts
+
+Host vm1
+Hostname eformation
+port 2201
+User formateur
+
+
+Host vm2
+Hostname eformation
+port 2202
+User formateur
+
+Host vm3
+Hostname eformation
+port 2203
+User formateur
+
+Host vm4
+Hostname eformation
+port 2204
+User formateur
+
+# etc

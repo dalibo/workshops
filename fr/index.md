@@ -22,9 +22,9 @@ Workshop réplication logique
 Workshop Haute disponibilité : Patroni
 --------------------------------------------------------------------------------
 
-* Slides : [HTML](patroni/patroni.slides.html)
-* Handout : [HTML](patroni/patroni.handout.html) [PDF](patroni/patroni.pdf)
-* Mobile : [EPUB](patroni/patroni.epub)
+* Slides : [HTML](patroni_2024/patroni.slides.html)
+* Handout : [HTML](patroni_2024/patroni.handout.html) [PDF](patroni_2024/patroni.pdf)
+* Mobile : [EPUB](patroni_2024/patroni.epub)
 
 Workshop pgsodium: Chiffrer vos données dans PostgreSQL avec pgsodium
 --------------------------------------------------------------------------------

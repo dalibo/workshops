@@ -38,6 +38,7 @@ image:
 pandocker:
   stage: build
   script:
+    # Limitation à faire sauter avant fusion avec la branche "master"
     - make all
     # FIX #197: publish the old artefacts alongside the new ones 
     - rsync --archive _archives/fr/* fr
