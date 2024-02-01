@@ -1,3 +1,105 @@
+---
+subtitle : 'PgBackrest dans tous ses états'
+title : 'Quelques cas pratiques de PgBackrest'
+keywords:
+- postgres
+- postgresql
+- workshop
+- pgbackrest
+- sauvegarde
+- pitr
+
+
+linkcolor:
+
+licence : PostgreSQL
+author: Dalibo & Contributors
+revision: 23.08
+url : http://dalibo.com/formations
+
+#
+# PDF Options
+#
+
+#toc: true
+
+## Limiter la profondeur de la table des matières
+toc-depth: 4
+
+## Mettre les lien http en pieds de page
+links-as-notes: true
+
+## Police plus petite dans un bloc de code
+
+code-blocks-fontsize: small
+
+## Filtre : pandoc-latex-env = cadres de couleurs
+## OBSOLETE voir pandoc-latex-admonition
+latex-environment:
+  importantframe: [important]
+  warningframe: [warning]
+  tipframe: [tip]
+  noteframe: [note]
+  frshaded: [slide-content]
+
+## Filtre : pandoc-latex-admonition
+## order of definition is important
+pandoc-latex-admonition:
+  - color: LightPink
+    classes: [important]
+    linewidth: 4
+  - color: Khaki
+    classes: [warning]
+    linewidth: 4
+  - color: DarkSeaGreen
+    classes: [tip]
+    linewidth: 4
+  - color: Ivory
+    classes: [note]
+    linewidth: 4
+  - color: DodgerBlue
+    classes: [slide-content]
+    linewidth: 4
+
+#
+# Reveal Options
+#
+
+# Taille affichage
+width: 1200
+height: 768
+
+## beige/blood/moon/simple/solarized/black/league/night/serif/sky/white
+theme: white
+
+## None - Fade - Slide - Convex - Concave - Zoom
+transition: None
+
+transition-speed: fast
+
+# Barre de progression
+progress: true
+
+# Affiche N° de slide
+slideNumber: true
+
+# Le numero de slide apparait dans la barre d'adresse
+history: true
+
+# Defilement des slides avec la roulette
+mouseWheel: false
+
+# Annule la transformation uppercase de certains themes
+title-transform : none
+
+# Cache l'auteur sur la première slide
+# Mettre en commentaire pour désactiver
+hide_author_in_slide: true
+
+
+---
+
+
 # pgBackrest dans tous ses états
 
 ## Objectif
@@ -235,6 +337,8 @@ Dans l'exemple de ce TP nous pouvons voir 3 backups présents dans le dossier de
 pgbackrest info
 ```
 
+\newpage
+
 ```text
 stanza: main
     status: ok
@@ -305,6 +409,8 @@ Dans ce TP nous nous connecterons tous à la même machine FIXME.
 
 Comme précédemment les paramètres spécifiques à votre stanza devront se retrouver dans un fichier spécifique `/etc/pgbackrest/conf.d/main.conf`
 où `main` sera le nom de votre stanza.
+
+\newpage
 
 Par exemple pour la configuration de l'instance `main` j'aurai dans le fichier uniquement les paramètres associés
 à la stanza `main` ainsi que les paramètres de connexion en SSH à la machine sur laquelle est présente votre instance :
@@ -523,6 +629,8 @@ psql -c "SELECT pg_create_physical_replication_slot('secondaire');"
 
 3. Création de l'utilisateur `replication_user` avec son mot de passe :
 
+\newpage
+
 Pour le TP nous prendrons le mot de passe `replication_user`. Ceci n'est pas à faire en production.
 
 ```sql
@@ -577,19 +685,21 @@ Sur le primaire :
 psql -p 5432 -c 'CREATE DATABASE workshop16;'
 ```
 
+\newpage
+
 Sur le secondaire :
 
 ```bash
 psql -p 5433 -l
-                                                        List of databases
-    Name    |  Owner   | Encoding | Locale Provider |   Collate   |    Ctype    | ICU Locale | ICU Rules |   Access privileges   
-------------+----------+----------+-----------------+-------------+-------------+------------+-----------+-----------------------
- postgres   | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | 
- template0  | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres          +
-            |          |          |                 |             |             |            |           | postgres=CTc/postgres
- template1  | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | =c/postgres          +
-            |          |          |                 |             |             |            |           | postgres=CTc/postgres
- workshop16 | postgres | UTF8     | libc            | en_US.UTF-8 | en_US.UTF-8 |            |           | 
+```
+
+```text
+|    Name    |
++------------+
+| postgres   |
+| template0  |
+| template1  |
+| workshop16 |
 (4 rows)
 ```
 
@@ -688,7 +798,12 @@ Dont la sortie est :
 Dans la sortie de la sous-commande `repo-ls` nous pouvons voir les différents WAL archivés que nous pouvons
 récupérer avec la sous-commande `repo-get`.
 
-Les WALs que je souhaite récupérer ici sont `000000010000000000000007` et `000000010000000000000008`:
+Les WALs que je souhaite récupérer ici sont les suivants :
+ 
+ * `000000010000000000000007` ;
+ * `000000010000000000000008`.
+
+\newpage
 
 ```bash
 pgbackrest --stanza=main repo-get archive/main/16-1/0000000100000000/000000010000000000000007-4066ff0c07f1814fd2019b4de6bb495b4465eae5.gz > 000000010000000000000007.gz
@@ -862,6 +977,8 @@ Faites une sauvegardes `full` avec pgbackrest :
 pgbackrest --stanza=main backup --type=full
 ```
 
+\newpage
+
 Simuler une activité avec  `pgbench` :
 
 ```bash
@@ -920,6 +1037,8 @@ Supprimer la base de données `workshop16` :
 psql -c "DROP DATABASE workshop16;"
 ```
 
+\newpage
+
 Ajouter les deux nouveaux paramètres dans `/etc/pgbackrest/pgbackrest.conf` des deux serveurs :
 
 ```ini
@@ -970,6 +1089,8 @@ stanza: main
 | Sans | 85.8MB                           | 81.9MB                           |
 | Avec | 86.7MB                           | 66.9MB                           |
 
+\newpage
+
 Nous constatons donc qu'avec ces paramètres :
 
  - le backup complet de l'instance est plus gros ;
@@ -978,6 +1099,8 @@ Nous constatons donc qu'avec ces paramètres :
 Ceci s'explique par la création de fichiers représentant la cartographie des blocs lors de la sauvegarde complète.
 
 Lors de la sauvegarde différentielle pgbackrest prendra connaissance de cette cartographie et ne sauvegardera que les blocs modifiés.
+
+\newpage
 
 ### Le multi-repo dans pgBackrest
 
@@ -1015,6 +1138,8 @@ A l'heure d'écrire ce document, il n'y a pas de solutions viables dans pgBackre
 
 Les développeurs sont au courant de cette limitation et prévoient un développement: https://github.com/pgbackrest/pgbackrest/issues/1406#issuecomment-1875756724
 
+\newpage
+
 #### Dépôt S3
 
 Dans ce workshop nous allons utiliser un S3 public avec `minio`.
@@ -1041,14 +1166,22 @@ repo2-retention-diff=7
 
 En plus de la configuration vers le `repo1` qui est notre VM nous avons en plus le `repo2` pointant vers un S3.
 
- - `repo2-type` : FIXME
- - `repo2-s3-uri-style` : FIXME
- - `repo2-s3-endpoint` : FIXME
- - `repo2-s3-region` : FIXME
- - `repo2-s3-bucket` : FIXME
- - `repo2-path` : FIXME
- - `repo2-s3-key` : FIXME
- - `repo2-s3-key-secret` : FIXME
+ * `repo2-type` : Indique le type de dépôt de sauvegarde. Pour utiliser S3, vous devriez définir ceci à `s3`.
+
+ * `repo2-s3-uri-style` : Détermine le style d'URI utilisé pour accéder à S3. Les valeurs possibles sont `path` ou `host`.
+
+ * `repo2-s3-endpoint` : L'endpoint pour le service S3. Si vous utilisez Amazon S3, il s'agira de quelque chose comme `s3.amazonaws.com`. Pour d'autres
+    services S3, spécifiez leur endpoint.
+
+ * `repo2-s3-region` : La région où votre seau (bucket) S3 est hébergé.
+
+ * `repo2-s3-bucket` : Le nom de votre seau S3 où les sauvegardes seront stockées.
+
+ * `repo2-path` : Le chemin dans le seau S3 où les sauvegardes seront stockées. C'est souvent un chemin de sous-dossier dans le seau.
+
+ * `repo2-s3-key` : La clé d'accès AWS (ou d'un autre fournisseur S3) pour l'authentification.
+
+ * `repo2-s3-key-secret` : Le secret d'accès AWS (ou d'un autre fournisseur S3) correspondant à la clé d'accès.
 
 Ensuite il faudra créer la stanza sur le S3 en lançant `stanza-create` sur le primaire ou le `repo1` :
 
@@ -1079,40 +1212,17 @@ Puis en précisant le repo vous pourrez voir les backups qui y ont été dépos�
 pgbackrest --stanza=main --repo=2 info
 ```
 
+\newpage
+
 #### Dépôt S3 - Aller plus loin
 
 Lorsque l'on compare l'arborecensce des dossiers `/etc/pgbackrest` sur le primaire et le repo1 ainsi que leur contenu,
 nous voyons beaucoup de duplication de configuration.
 
-Sur le primaire nous la configuration suivante :
-
-```ini
-# /etc/pgbackrest/pgbackrest.conf
-[global]
-repo1-host-config-path=/etc/pgbackrest
-repo1-host=pgbackrest1
-repo1-host-user=postgres
-process-max=2
-log-level-console=info
-log-level-file=debug
-# compression extrême et lente
-compress-type=gz   
-compress-level=9   
-
-[global:archive-push]
-# archivage uniquement : compression la plus rapide possible
-compress-type=gz
-compress-level=9
-```
-
-```ini
-# /etc/pgbackrest/conf.d/main.conf
-[main]
-pg1-path=/var/lib/pgsql/16/data/
-```
-
 Grâce à l'option `repo1-host-config-path` nous pouvons ommettre les informations du S3 dans le fichier de configuration de notre primaire.
 Cela aura pour conséquence de dire à pgbackrest récupère les informations du `repo2` en SSH
+
+\newpage
 
 Sur notre repo nous aurons la configuration suivante :
 
@@ -1153,6 +1263,35 @@ pg1-host=pg1
 pg1-host-user=postgres
 ```
 
+\newpage
+
+Sur le primaire nous avons la configuration suivante :
+
+```ini
+# /etc/pgbackrest/pgbackrest.conf
+[global]
+repo1-host-config-path=/etc/pgbackrest
+repo1-host=pgbackrest1
+repo1-host-user=postgres
+process-max=2
+log-level-console=info
+log-level-file=debug
+# compression extrême et lente
+compress-type=gz   
+compress-level=9   
+
+[global:archive-push]
+# archivage uniquement : compression la plus rapide possible
+compress-type=gz
+compress-level=9
+```
+
+```ini
+# /etc/pgbackrest/conf.d/main.conf
+[main]
+pg1-path=/var/lib/pgsql/16/data/
+```
+
 #### Dépot S3 - Aller "encore" plus loin ?
 
 Des solutions comme `s3fs-fuse` existe pour créer un point de montage vers un S3.
@@ -1172,8 +1311,14 @@ Par conséquent, nous vous recommandons d'opter pour une solution native à pgBa
 # Remerciements
 
 - Benoit Lobréau
-- PgStef
+- Bertrand Painchaud
+- Florent Jardin
+- Laura	Ricci
+- Luc Amarle
 - Mathieu Ribes
 - Nicolas Gollet
-- Luc Amarle
+- Pauline Montpied
+- PgStef : https://pgstef.github.io/
+- Pierrick Chovelon
+- Stéphane Carton
 - Thibaud Walkowiak
