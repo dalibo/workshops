@@ -1220,7 +1220,7 @@ Lorsque l'on compare l'arborecensce des dossiers `/etc/pgbackrest` sur le primai
 nous voyons beaucoup de duplication de configuration.
 
 Grâce à l'option `repo1-host-config-path` nous pouvons ommettre les informations du S3 dans le fichier de configuration de notre primaire.
-Cela aura pour conséquence de dire à pgbackrest récupère les informations du `repo2` en SSH
+Cela aura pour conséquence de dire à pgbackrest  de récupèrer les informations du `repo2` en SSH depuis le `repo1`.
 
 \newpage
 
