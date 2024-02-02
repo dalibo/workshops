@@ -102,8 +102,6 @@ hide_author_in_slide: true
 
 # pgBackrest dans tous ses états
 
-## Objectif
-
 L'objectif de ce TP est de vous familiariser avec pgBackRest, un outil de sauvegarde et de restauration pour les bases de données PostgreSQL. Nous allons couvrir les aspects suivants :
 
 Essentiel :
@@ -147,6 +145,7 @@ de l'autre avec l'utilisateur **postgres**.
 
 ## Rappels
 
+<div class="slide-content">
 Petit tour de table pour savoir si tout le monde connaît les termes suivants:
 
 1. Qu'est ce qu'une sauvegarde PITR ?
@@ -158,6 +157,7 @@ Petit tour de table pour savoir si tout le monde connaît les termes suivants:
 4. Streaming replication ?
 
 5. Qu'est-ce que pgbackrest ?
+</div>
 
 ## Workshop
 
@@ -260,7 +260,11 @@ sudo systemctl restart postgresql-16
 
 ### Utilisation de pgBackRest pour effectuer des sauvegardes sur un primaire
 
+<div class="slide-content">
+
 ![Schéma d'une sauvegarde depuis un primaire avec pgBackrest](./medias/pgbackrest-simple.png)
+
+</div>
 
 Attention à bien changer le nom de la stanza `main` par le `hostname` de votre VMs.
 
@@ -399,7 +403,11 @@ pgbackrest --stanza=main expire --repo1-retention-full=1
 
 ### Effectuer ses sauvegardes depuis un repo distant
 
+<div class="slide-content">
+
 ![Schéma d'une sauvegarde intermédiaire d'un primaire à partir de son repo](./medias/pgbackrest-intermediaire.png)
+
+</div>
 
 Avec pgBackrest il est possible d'effectuer des sauvegardes depuis un serveur centralisé appelé __repo__ comme repository.
 
@@ -566,7 +574,11 @@ pgbackrest --stanza=main backup --type=full
 
 ### Utilisation de pgBackRest pour créer des instances secondaires (standby) ;
 
-![Utiliser pgBackrest avec un secondaire](./medias/pgbackrest-expert.png)
+<div class="slide-content">
+
+![Créer un secondaire avec pgBackrest](./medias/pgbackrest-expert.png)
+
+</div>
 
 Pour ce TP nous allons créer un secondaire sur le même serveur que le primaire, nous vous déconseillons de le faire en production.
 
@@ -1104,7 +1116,11 @@ Lors de la sauvegarde différentielle pgbackrest prendra connaissance de cette c
 
 ### Le multi-repo dans pgBackrest
 
+<div class="slide-content">
+
 ![Schéma du multi-repo](./medias/pgbackrest-expert-s3.png)
+
+</div>
 
 ##### Création de la stanza
 
