@@ -1,0 +1,19 @@
+[postgres]
+172.16.8.15 ansible_port=2201 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.10 ansible_port=2202 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.4 ansible_port=2203 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.16 ansible_port=2204 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.17 ansible_port=2205 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.14 ansible_port=2206 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.13 ansible_port=2207 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.3 ansible_port=2208 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.6 ansible_port=2209 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.2 ansible_port=2210 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.18 ansible_port=2211 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.8 ansible_port=2212 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.9 ansible_port=2213 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.11 ansible_port=2214 ansible_host=51.15.206.134 ansible_user=formateur
+172.16.8.7 ansible_port=2215 ansible_host=51.15.206.134 ansible_user=formateur
+
+[pgbackrest]
+172.16.8.5 ansible_port=2216 ansible_host=51.15.206.134 ansible_user=formateur

@@ -1344,7 +1344,7 @@ backup-standby=y
 - Bertrand Painchaud
 - Florent Jardin
 - Laura	Ricci
-- Luc Amarle
+- Luc Lamarle
 - Mathieu Ribes
 - Nicolas Gollet
 - Pauline Montpied
