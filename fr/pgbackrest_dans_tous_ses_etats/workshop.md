@@ -294,7 +294,7 @@ pgbackrest --stanza=main backup --type=full
 
 La sous-commande `backup`; associée avec l'argument `--type`; dont les valeurs peuvent être `full`, `diff`, `incr`; permet de lancer une sauvegarde de votre instance.
 
-- `full` : sauvegarde complète de l'instance ;
+- `full` : sauvegarde complète de l'instance depuis le dernier backup `full`;
 - `diff` : sauvegarde différentielle de l'instance, toutes les modifications faites depuis la dernière sauvegarde complète sont sauvegardées ;
 - `incr` : sauvegarde incrémentale de l'instance, permet de sauvegarder uniquement les modifications depuis la dernière sauvegarde.
    Nous ne préconisons pas cette méthode car le risque de perdre un fichier est trop grand et pourrait compromettre la dernière sauvegarde.
@@ -413,7 +413,7 @@ Avec pgBackrest il est possible d'effectuer des sauvegardes depuis un serveur ce
 
 Le but de ce serveur est de réceptionner les différents WAL envoyés par chaque primaire de chaque stanza. Mais aussi de lancer les backups.
 
-Dans ce TP nous nous connecterons tous à la même machine FIXME.
+Dans ce TP nous nous connecterons tous à la même machine qui sera donné par le formateur.
 
 Comme précédemment les paramètres spécifiques à votre stanza devront se retrouver dans un fichier spécifique `/etc/pgbackrest/conf.d/main.conf`
 où `main` sera le nom de votre stanza.
@@ -422,6 +422,8 @@ où `main` sera le nom de votre stanza.
 
 Par exemple pour la configuration de l'instance `main` j'aurai dans le fichier uniquement les paramètres associés
 à la stanza `main` ainsi que les paramètres de connexion en SSH à la machine sur laquelle est présente votre instance :
+
+Sur le repo :
 
 ```ini
 cat<<EOF | tee "/etc/pgbackrest/conf.d/main.conf"
@@ -582,11 +584,13 @@ pgbackrest --stanza=main backup --type=full
 
 Pour ce TP nous allons créer un secondaire sur le même serveur que le primaire, nous vous déconseillons de le faire en production.
 
-1. Création du dossier data de destination :
+1. Création du dossier data de destination sur le primaire :
 
 ```bash
 mkdir /var/lib/pgsql/16/secondaire
 ```
+
+\newpage
 
 2. Restauration dans le dossier data de l'instance secondaire :
 
@@ -628,20 +632,24 @@ Cette commande créera un fichier `standby.signal` et mettra à jour le fichier 
   grâce à ce paramètre. Sinon il effacera le contenu de votre dossier `pg1-path` puis effectura
   la restauration. Ce paramètre devient très utile pour les grosses instances.
 
+\newpage
+
 Des modifications sont à effectuer avant de lancer l'instance secondaire :
 
 1. Modifier la valeur du paramètre `port` de l'instance du secondaire pour
-   qu'elle écoute sur le port `5433`. Vous pouvez changer cette valeur en modifiant le fichier
-   `/var/lib/pgsql/16/secondaire/postgresql.conf`.
-2. Créer un slot de réplication appelé `secondaire` sur le primaire avec la fonction `pg_create_physical_replication_slot` :
+   qu'elle écoute sur le port `5433`. Vous pouvez changer cette valeur en modifiant le fichier :
+  
+* `/var/lib/pgsql/16/secondaire/postgresql.conf`.
+
+2. Créer un slot de réplication appelé `secondaire` sur le primaire avec la fonction :
+
+ * `pg_create_physical_replication_slot` ;
 
 ```bash
 psql -c "SELECT pg_create_physical_replication_slot('secondaire');"
 ```
 
 3. Création de l'utilisateur `replication_user` avec son mot de passe :
-
-\newpage
 
 Pour le TP nous prendrons le mot de passe `replication_user`. Ceci n'est pas à faire en production.
 
@@ -697,8 +705,6 @@ Sur le primaire :
 psql -p 5432 -c 'CREATE DATABASE workshop16;'
 ```
 
-\newpage
-
 Sur le secondaire :
 
 ```bash
@@ -750,22 +756,7 @@ Dans cette partie nous allons simuler une suppressions de données et revenir à
 
 ##### Suppression des données
 
-Avant de commencer la suite du TP nous allons supprimer les lignes présentes dans la table `t1`.
-
-Nous allons créer un point de restauration, ce point de restauration nous permettra d'y voir plus clair dans les fichiers de WAL que nous analyserons par la suite:
-
-```bash
-psql -c "SELECT pg_create_restore_point('test_restore_point');"
-```
-
-Dans le résultat de la commande précédente nous avons le segment du WAL dans lequel est notre `RESTORE POINT` :
-
-```bash
- pg_create_restore_point 
--------------------------
- 0/8440710
-(1 row)
-```
+Avant de commencer la suite du TP nous allons récupérer quelques informations intéressantes à propos de nos WALs.
 
 Puis avec `pg_walfile_name(pg_current_wal_lsn())` nous pouvons connaitre le nom du WAL associé :
 
@@ -815,8 +806,6 @@ Les WALs que je souhaite récupérer ici sont les suivants :
  * `000000010000000000000007` ;
  * `000000010000000000000008`.
 
-\newpage
-
 ```bash
 pgbackrest --stanza=main repo-get archive/main/16-1/0000000100000000/000000010000000000000007-4066ff0c07f1814fd2019b4de6bb495b4465eae5.gz > 000000010000000000000007.gz
 pgbackrest --stanza=main repo-get archive/main/16-1/0000000100000000/000000010000000000000008-f2670b1e691dcadd53f1c93ba7292180153c2cfe.gz > 000000010000000000000008.gz
@@ -841,6 +830,8 @@ rmgr: Heap        len (rec/tot):     59/   119, tx:        746, lsn: 0/08440830,
 ```
 
 On peut alors noter le numéro de la transaction de notre `DELETE`, ici `746`.
+
+\newpage
 
 #### Restauration
 
@@ -989,8 +980,6 @@ Faites une sauvegardes `full` avec pgbackrest :
 pgbackrest --stanza=main backup --type=full
 ```
 
-\newpage
-
 Simuler une activité avec  `pgbench` :
 
 ```bash
@@ -1002,6 +991,8 @@ Faites une sauvegarde `diff` :
 ```bash
 pgbackrest --stanza=main backup --type=diff
 ```
+
+\newpage 
 
 Puis récupérer les informations des backups dans un fichier texte, avec la sous-commande `info`.
 Vous devrez garder ces informations, dans un fichier texte, pour les comparer plus tard.
@@ -1112,17 +1103,11 @@ Ceci s'explique par la création de fichiers représentant la cartographie des b
 
 Lors de la sauvegarde différentielle pgbackrest prendra connaissance de cette cartographie et ne sauvegardera que les blocs modifiés.
 
-\newpage
-
 ### Le multi-repo dans pgBackrest
-
-<div class="slide-content">
 
 ![Schéma du multi-repo](./medias/pgbackrest-expert-s3.png)
 
-</div>
-
-##### Création de la stanza
+#### Création de la stanza
 
 La création de la stanza avec la commande `stanza-create` s'assure de créer les stanzas sur tous les repos.
 
@@ -1132,7 +1117,7 @@ Lorsqu'un repo est ajouté, il faudra de nouveau lancer la commande `stanza-crea
 pgbackrest --stanza=main stanza-create
 ```
 
-##### Archivage
+#### Archivage
 
 L'archivage des journaux est assurée par la commande renseignée dans le paramètre `archive_command` :
 
@@ -1142,7 +1127,7 @@ L'archivage des journaux est assurée par la commande renseignée dans le param�
 
 Elle assurera un archivage sur tous les repos renseignés dans la configuration de pgbackrest.
 
-##### Sauvegardes
+#### Sauvegardes
 
 Malheureusement la sauvegarde ne fonctionne pas comme la commande d'archivage.
 
@@ -1227,8 +1212,6 @@ Puis en précisant le repo vous pourrez voir les backups qui y ont été dépos�
 ```bash
 pgbackrest --stanza=main --repo=2 info
 ```
-
-\newpage
 
 #### Dépôt S3 - Aller plus loin
 
@@ -1323,6 +1306,51 @@ Pgbackrest étant testé avec des solutions complètement compatible POSIX, ceci
 il n'y a aucune garantie de compatibilité.
 
 Par conséquent, nous vous recommandons d'opter pour une solution native à pgBackrest.
+
+### Archivage asynchrone
+
+Par défaut pgBackrest archive (ou restaure) les WAL de manière synchrone.
+
+Avec l'activation des paramètre `spool-path` et `archive-async` pgBackrest archive (ou restaure) les WAL de manière asynchrone, 
+sans suivre l'enchaînement des archive/`restore_command` rythmé par PostgreSQL.
+
+Quand PostgreSQL veut archiver un WAL, pgBackrest place les WALs dans le `spool-path` et notifie l'instance
+que le WAL est archivé.
+
+L'activation de l'archivage asynchrone est utile lorsque vous avez une instance très utilisée.
+
+Cependant le fait que PostgreSQL soit notifier que le WAL est archivé sans vraiment l'être peut être problématique
+en cas de sinistre.
+
+L'activation du `spool-path` lors de l'archivage n'est pas à activer automatiquement et pour tout le monde.
+
+Par contre l'activation du `spool-path` lors de la restauration est bénéfique et permet de récupérer plus rapidement
+des WALs car la récupération est paralélisée. Assez utile lorsque le repo est situé dans un endroit géographique
+différent du serveur sur lequel nous voulons restaurer.
+
+### Sauvegarde depuis un secondaire
+
+L'activation d'une sauvegarde à partir d'un secondaire est possible dans pgBackrest 
+
+Ajout du paramètre `backup-standby` sur la configuration de la stanza sur votre repo:
+
+```ini
+# /etc/pgbackrest/conf.d/main.conf
+[main]
+pg1-path=/var/lib/pgsql/16/secondaire
+pg1-host=192.168.90.11
+pg1-port=5433
+pg1-host-user=postgres
+pg2-path=/var/lib/pgsql/16/data
+pg2-host=192.168.90.11
+pg2-port=5432
+pg2-host-user=postgres
+backup-standby=y
+```
+
+ - `pg1-*` : en premier nous mettons les informations du secondaire qui se chargera de la sauvegarde ;
+ - `pg2-*` : ensuite en dernier les informations de connexions au secondaire ;
+
 
 # Remerciements
 
