@@ -333,12 +333,40 @@ Enfin, la réplication logique a un coût en CPU (sur les deux instances concern
 ---
 
 <div class="slide-content">
-| Outil                | Coupure production                        | Retour arrière | Fragmentation |
-| ---------------------- | ------------------------------------------- | ----------------- | --------------- |
-| pg_dump / pg_restore | Elevé = sauvegarde + restauration        | OUI             | NON           |
-| pg_upgrade           | Moyen = copie physique des données       | OUI             | OUI           |
-| pg_upgrade           | Court = mise à jour directe des fichiers | NON             | OUI           |
-| réplication logique | Très Court = mais préparation en amont  | OUI             | OUI           |
+
+<table>
+  <tr>
+    <th>Outil</th>
+    <th>Coupure production</th>
+    <th>Retour arrière</th>
+    <th>Fragmentation</th>
+  </tr>
+  <tr>
+    <td>pg_dump / pg_restore</td>
+    <td>Élevé = sauvegarde + restauration</td>
+    <td>OUI</td>
+    <td>NON</td>
+  </tr>
+  <tr>
+    <td>pg_upgrade</td>
+    <td>Moyen = copie physique des données</td>
+    <td>OUI</td>
+    <td>OUI</td>
+  </tr>
+  <tr>
+    <td>pg_upgrade</td>
+    <td>Court = mise à jour directe des fichiers</td>
+    <td>NON</td>
+    <td>OUI</td>
+  </tr>
+  <tr>
+    <td>réplication logique</td>
+    <td>Très Court = mais préparation en amont</td>
+    <td>OUI</td>
+    <td>OUI</td>
+  </tr>
+</table>
+
 </div>
 
 <div class="notes">
