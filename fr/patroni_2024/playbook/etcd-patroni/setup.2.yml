@@ -125,6 +125,11 @@
         url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
         state: present
 
+    - name: Apt update
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+
     - name: "Install backup_server packages"
       become: true
       ansible.builtin.package:

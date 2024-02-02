@@ -33,8 +33,9 @@
         curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 
   - name: apt update
-    become: yes
-    apt: update_cache=yes
+    become: true
+    ansible.builtin.apt:
+      update_cache: true
 
   - name: install backup_server packages
     become: yes
