@@ -188,12 +188,12 @@ Jan 31 11:05:26 pg3 systemd[1]: Stopped postgresql.service - PostgreSQL RDBMS.
 ## Infrastructure
 
 * Connexion à la VM
-* 7 Containers
+* 7 Conteneurs
 
 ---
 
 Vous disposez d'une machine virtuelle dédiée dans laquelle nous avons construit
-7 conteneurs _lxc_ :
+7 conteneurs _LXC_ :
 
   * 3 nœuds etcd
   * 3 nœuds Patroni
@@ -353,14 +353,14 @@ Le démarrage du service est automatique sous Debian.
 dalibo@vm:~$
 for node in e1 e2 e3; do
   echo -n "${node} :"
-  sudo ssh ${node} "systemctl status etcd | grep -i active"
+  sudo ssh ${node} "systemctl is-active etcd"
 done
 
 ```
 ```console
-e1 :     Active: active (running) since Wed 2024-01-31 16:16:39 CET; 1min 7s ago
-e2 :     Active: active (running) since Wed 2024-01-31 16:16:41 CET; 1min 6s ago
-e3 :     Active: active (running) since Wed 2024-01-31 16:16:43 CET; 1min 3s ago
+e1 : active
+e2 : active
+e3 : active
 ```
 
 #### Vérification
@@ -380,7 +380,7 @@ e3 :8e9e05c52164694d, started, e3, http://localhost:2380, http://localhost:2379
 ```
 \normalsize
 
-Les nœuds sont tous des nœuds indépendants, ce qui ne nous intéresse pas.
+Les nœuds sont tous indépendants, ce qui ne nous intéresse pas.
 Il faut donc les configurer pour qu'ils fonctionnent en agrégat.
 
 Nous arrêtons donc les services :
@@ -389,13 +389,13 @@ Nous arrêtons donc les services :
 dalibo@vm:~$
 for node in e1 e2 e3; do
   echo -n "${node} :"
-  sudo ssh ${node} "systemctl stop etcd && systemctl status etcd | grep -i active"
+  sudo ssh ${node} "systemctl is-active etcd"
 done
 ```
 ```console
-e1 :     Active: inactive (dead) since Wed 2024-01-31 16:20:51 CET; 16s ago
-e2 :     Active: inactive (dead) since Wed 2024-01-31 16:20:52 CET; 16s ago
-e3 :     Active: inactive (dead) since Wed 2024-01-31 16:20:52 CET; 16s ago
+e1 : inactive
+e2 : inactive
+e3 : inactive
 ```
 
 </div>
@@ -563,7 +563,7 @@ dalibo@vm:~$ sudo ssh e1 "etcdctl endpoint status -w table --cluster"
 
 <div class="notes">
 
-Le dépôt _pgdg_ est déjà préconfiguré dans les conteneurs pg1, pg2 et pg3,
+Le dépôt _pgdg_ est déjà pré-configuré dans les conteneurs pg1, pg2 et pg3,
 l'installation est donc triviale :
 
 ```Bash
@@ -779,7 +779,7 @@ pg1? [y/N]: y
 
 ## SUPERUSER dédié
 
-Par défaut, le superuser utilisé par patroni est `postgres`.
+Par défaut, le superuser utilisé par Patroni est `postgres`.
 Il est possible de remplacer cet utilisateur.
 
 ### Après la configuration du premier nœud
@@ -820,7 +820,7 @@ superuser:
 [...]
 ```
 
-**Redémarrer à les nœuds :**
+**Redémarrer les nœuds :**
 
 ```Bash
 postgres@pg1:~$ patronictl restart {{pg_version}}-main --force
@@ -911,7 +911,7 @@ done
 
 La commande classique `patronictl list` échoue faute de _DCS_ pour la renseigner.
 
-Nous interrogeons directement depuis les instances :
+Nous interrogeons directement les instances :
 
 ```Bash
 dalibo@vm:~$
@@ -1056,7 +1056,7 @@ Si le paramètre nécessite un rechargement de la configuration,
 elle sera lancée sur chaque nœud.
 
 Si la modification nécessite un redémarrage, le drapeau _pending restart_ sera
-positionné sur toutes les instances et attendrons une action de votre part
+positionné sur toutes les instances, qui attendrons une action de votre part
 pour l'effectuer.
 
 L'installation de la commande `less` est un pré-requis :
@@ -1200,7 +1200,7 @@ pg3 :
 
 L'application d'un paramètre qui ne nécessite pas de redémarrage est transparente,
 le rechargement de la configuration sur tous les nœuds est automatiquement
-déclenchée par Patroni.
+déclenché par Patroni.
 
 </div>
 
@@ -1274,7 +1274,7 @@ dalibo@vm:~$ sudo ansible-playbook -i inventory.yml exchange_ssh_keys.yml -f 7
 
 ### Création d'une stanza
 
-Nous pouvons alors tenter de créer le _stanza_ sur le primaire :
+Nous pouvons alors tenter de créer la _stanza_ sur le primaire :
 
 ```Bash
 postgres@pg1:~$ pgbackrest --stanza {{pg_version}}-main stanza-create
@@ -1295,7 +1295,7 @@ ERROR: [087]: archive_mode must be enabled
 ### Configuration de l'archivage
 
 Toutes les instances doivent être en mesure d'archiver leurs journaux
-de transactions au moyen de pgBackRest :
+de transactions au moyen de pgBackRest en cas de promotion:
 
 ```Bash
 postgres@pg1:~$ patronictl edit-config
