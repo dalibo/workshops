@@ -267,22 +267,16 @@ L'infrastructure complète est déjà créée.
 La commande pour recréer l'infrastructure sur votre VM est :
 
 ```Bash
-ansible-playbook -i inventory.yml -f 7 setup.2.yml
+ansible-playbook -i inventory.yml  setup.2.yml
 ```
 </div>
 
 <div class="notes">
 
-La création des containeurs a été faite ainsi :
-
-<!--
-
-TODO: renseigner l'arbo du répertoire contenant les playbooks
-
--->
+La création des conteneurs a été faite ainsi :
 
 ```Bash
-dalibo@vm:~$ sudo ansible-playbook -i inventory.yml -f 7 setup.2.yml 
+root@vm:~# ansible-playbook -i inventory.yml -f 7 setup.2.yml
 ```
 
 ```Bash
@@ -389,6 +383,7 @@ Nous arrêtons donc les services :
 dalibo@vm:~$
 for node in e1 e2 e3; do
   echo -n "${node} :"
+  sudo ssh ${node} "systemctl stop etcd"
   sudo ssh ${node} "systemctl is-active etcd"
 done
 ```
@@ -409,6 +404,9 @@ e3 : inactive
 La configuration du service etcd se trouve dans le fichier `/etc/default/etcd`,
 elle doit décrire notre agrégat sur chaque nœud :
 
+  * spécifique décrivant le nœud
+  * une partie commune à tous les nœuds décrivant l'agrégat
+
 <!-- **Attention aux espaces insécables dans la chaîne ETCD_INITIAL_CLUSTER -->
 
 <div class="box warning">
@@ -422,20 +420,18 @@ Attention aux caractères invisibles ou aux sauts de ligne.
 \scriptsize
 ```
 # /etc/default/etcd
+
 ETCD_NAME='e1'
-
-ETCD_DATA_DIR='/var/lib/etcd/default'
-
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.101:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.101:2379'
 ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.101:2380'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379'
 ```
 \normalsize
 
@@ -444,20 +440,18 @@ ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.101:2379'
 \scriptsize
 ```
 # /etc/default/etcd
+
 ETCD_NAME='e2'
-
-ETCD_DATA_DIR='/var/lib/etcd/default'
-
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.102:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.102:2379'
 ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.102:2380'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.102:2379'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.102:2379'
 ```
 \normalsize
 
@@ -466,20 +460,18 @@ ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.102:2379'
 \scriptsize
 ```
 # /etc/default/etcd
+
 ETCD_NAME='e3'
-
-ETCD_DATA_DIR='/var/lib/etcd/default'
-
 ETCD_LISTEN_PEER_URLS='http://127.0.0.1:2380,http://10.0.3.103:2380'
 ETCD_LISTEN_CLIENT_URLS='http://127.0.0.1:2379,http://10.0.3.103:2379'
 ETCD_INITIAL_ADVERTISE_PEER_URLS='http://10.0.3.103:2380'
+ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.103:2379'
 
 ETCD_INITIAL_CLUSTER_STATE='new'
+ETCD_DATA_DIR='/var/lib/etcd/default'
 ETCD_INITIAL_CLUSTER_TOKEN='etcd-cluster'
-
 ETCD_INITIAL_CLUSTER='e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380'
 
-ETCD_ADVERTISE_CLIENT_URLS='http://10.0.3.103:2379'
 ```
 \normalsize
 
@@ -604,7 +596,8 @@ sera déléguée à Patroni :
 ```Bash
 dalibo@vm:~$
 for node in pg1 pg2 pg3; do
-  echo "${node} :"
+  echo -n "${node} :"
+  sudo ssh ${node} "systemctl is-active postgresql@{{pg_version}}-main"
   sudo ssh ${node} "systemctl disable --now postgresql@{{pg_version}}-main"
 done
 ```
@@ -661,22 +654,102 @@ La configuration `/etc/patroni/`{{pg_version}}`-main.yml` est générée.
 La création de l'agrégat commence par la mise en route du primaire sur le
 nœud `pg1`, c'est lui qui sera la référence pour les secondaires.
 
-L'utilisateur permettant la mise en réplication doit être créé sur ce nœud,
-avec le mot de passe renseigné dans la configuration de Patroni :
-
 ```Bash
 dalibo@vm:~$ sudo ssh pg1 "systemctl enable --now patroni@{{pg_version}}-main"
 ```
 
-<!--
+
+### Liste des nœuds Patroni
+
+Sur chaque nœud Patroni, modifier le fichier `.profile` de l'utilisateur
+`postgres` en ajoutant :
+
+```Bash
+export PATRONICTL_CONFIG_FILE=/etc/patroni/{{pg_version}}-main.yml
+```
+
+Lister les nœuds :
+
+```Bash
+postgres@pg1:~$ patronictl list
+```
+```console
+Current cluster topology
++ Cluster: 16-main (7330941500757972192) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg1    | 10.0.3.201 | Replica | running |    |         0 |
++--------+------------+---------+---------+----+-----------+
+```
+
+### Première bascule
+
+Au premier démarrage de Patroni, nous constatons que le nœud `pg1` est en lecture
+seule, il attend une promotion initiale manuelle qui fixera l'état de notre primaire.
+
+```Bash
+postgres@pg1:~$ patronictl failover --candidate pg1 --force
+```
+```console
+Current cluster topology
++ Cluster: 16-main (7330941500757972192) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg1    | 10.0.3.201 | Replica | running |    |         0 |
++--------+------------+---------+---------+----+-----------+
+2024-02-02 15:06:39.21288 Successfully failed over to "pg1"
++ Cluster: 16-main (7330941500757972192) +----+-----------+
+| Member | Host       | Role   | State   | TL | Lag in MB |
++--------+------------+--------+---------+----+-----------+
+| pg1    | 10.0.3.201 | Leader | running |    |           |
++--------+------------+--------+---------+----+-----------+
+```
+
+Après quelques secondes, la promotion est terminée, la _time line_ est renseignée.
+
+```Bash
+postgres@pg1:~$ patronictl list
+```
+```console
++ Cluster: 16-main (7330941500757972192) +----+-----------+
+| Member | Host       | Role   | State   | TL | Lag in MB |
++--------+------------+--------+---------+----+-----------+
+| pg1    | 10.0.3.201 | Leader | running |  2 |           |
++--------+------------+--------+---------+----+-----------+
+```
+
+
+<div class="box tip">
+
+En partant d'une instance déjà peuplée, les spécificités de la section _bootstrap_
+de la configuration de Patroni n'ont pas été appliquées.
+
+</div><!-- box-tip -->
+
+
+```Bash
+postgres@pg1:~$ psql
+psql (16.1 (Debian 16.1-1.pgdg120+1))
+Type "help" for help.
+
+postgres=# \du
+```
+```console
+                             List of roles
+ Role name |                         Attributes
+-----------+------------------------------------------------------------
+ postgres  | Superuser, Create role, Create DB, Replication, Bypass RLS
+```
+
+L'utilisateur permettant la mise en réplication doit être créé sur ce nœud,
+avec le mot de passe renseigné dans la configuration de Patroni.
+
 
 #### Création de l'utilisateur de réplication
-
 
 ```Bash
 $ sudo ssh pg1 "sudo -iu postgres psql -c \"CREATE ROLE replicator REPLICATION PASSWORD 'rep-pass'\" "
 ```
--->
 
 ### Suppression des instances secondaires
 
@@ -706,42 +779,45 @@ for node in pg2 pg3; do
   sudo ssh ${node} "systemctl enable --now patroni@{{pg_version}}-main"
 done
 ```
+```Bash
+postgres@pg1:~$ patronictl list
+```
+```console
++ Cluster: 16-main (7330941500757972192) ----------+----+-----------+
+| Member | Host       | Role    | State            | TL | Lag in MB |
++--------+------------+---------+------------------+----+-----------+
+| pg1    | 10.0.3.201 | Leader  | running          |  2 |           |
+| pg2    | 10.0.3.202 | Replica | creating replica |    |   unknown |
+| pg3    | 10.0.3.203 | Replica | creating replica |    |   unknown |
++--------+------------+---------+------------------+----+-----------+
+```
 
+Après quelques secondes les secondaires sont reconstruits :
+
+```Bash
+postgres@pg1:~$ patronictl list
+```
+```console
++ Cluster: 16-main (7330941500757972192) ---+----+-----------+
+| Member | Host       | Role    | State     | TL | Lag in MB |
++--------+------------+---------+-----------+----+-----------+
+| pg1    | 10.0.3.201 | Leader  | running   |  2 |           |
+| pg2    | 10.0.3.202 | Replica | streaming |  2 |         0 |
+| pg3    | 10.0.3.203 | Replica | streaming |  2 |         0 |
++--------+------------+---------+-----------+----+-----------+
+```
 </div>
 
 ---
 
 ### Vérifications
 
-* Liste des nœuds Patroni
 * Test de bascule manuelle vers chaque nœud
 
 
 <div class="notes">
 
-#### Liste des nœuds Patroni
 
-Sur chaque nœud Patroni, modifier le fichier `.profile` de l'utilisateur
-`postgres` en ajoutant :
-
-```Bash
-export PATRONICTL_CONFIG_FILE=/etc/patroni/{{pg_version}}-main.yml
-```
-
-Lister les nœuds :
-
-```Bash
-dalibo@vm:~$ sudo ssh pg1 "sudo -iu postgres patronictl list"
-```
-```console
-+ Cluster: 16-main (7330283094014338096) ---+----+-----------+
-| Member | Host       | Role    | State     | TL | Lag in MB |
-+--------+------------+---------+-----------+----+-----------+
-| pg1    | 10.0.3.201 | Leader  | running   |  1 |           |
-| pg2    | 10.0.3.202 | Replica | streaming |  1 |         0 |
-| pg3    | 10.0.3.203 | Replica | streaming |  1 |         0 |
-+--------+------------+---------+-----------+----+-----------+
-```
 
 #### Test de bascule manuelle vers chaque nœud
 
@@ -1208,7 +1284,6 @@ déclenché par Patroni.
 
 # Sauvegardes
 
-* Installation de pgBackRest
 * Configuration
 * Détermination du primaire (facultatif)
   * Installation d'`etcd-client`
@@ -1217,7 +1292,7 @@ déclenché par Patroni.
 
 <div class="notes">
 
-### Configuration Serveur de pgBackRest
+## Configuration Serveur de pgBackRest
 
 La configuration se fait dans le fichier `/etc/pgbackrest.conf` :
 
@@ -1364,12 +1439,12 @@ postgres@pg1:~$ pgbackrest --stanza {{pg_version}}-main --log-level-console deta
 ```
 \normalsize
 
-### Test d'une sauvegarde
+## Test d'une sauvegarde
 
 Nous proposons de déclencher la sauvegarde sur le primaire, en déterminant
 le leader Patroni via l'interrogation de l'API etcd.
 
-#### Détermination de l'instance primaire
+### Détermination de l'instance primaire
 
 Installer le paquet client etcd :
 
