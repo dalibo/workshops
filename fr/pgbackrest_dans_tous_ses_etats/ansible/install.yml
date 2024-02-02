@@ -1,7 +1,7 @@
 # provisionning/all.yml
 - name: "Install"
   hosts: "postgres"
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: "Copy file with owner and permissions"
       ansible.builtin.copy:
