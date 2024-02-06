@@ -5,6 +5,12 @@ css: "https://public.dalibo.com/fancy-index/style.css"
 # all generated files are moved to root directory, aside index.html
 ---
 
+pgBackrest dans tous ses états
+--------------------------------------------------------------------------------
+
+* Handout : [HTML](pgbackrest_dans_tous_ses_etats/workshop.handout.html)
+* [PDF](pgbackrest_dans_tous_ses_etats/workshop.pdf)
+
 Workshop supervision : outils graphiques
 --------------------------------------------------------------------------------
 
