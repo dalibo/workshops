@@ -11,6 +11,13 @@ pgBackrest dans tous ses états
 * Handout : [HTML](pgbackrest_dans_tous_ses_etats/workshop.handout.html)
 * [PDF](pgbackrest_dans_tous_ses_etats/workshop.pdf)
 
+Workshop Mise à jour majeure par réplication logique
+--------------------------------------------------------------------------------
+
+* Slides : [HTML](atelier_maj_repli_logique/maj_replication_logique.slides.html)
+* Handout : [HTML](atelier_maj_repli_logique/maj_replication_logique.handout.html) [PDF](atelier_maj_repli_logique/maj_replication_logique.pdf)
+* Mobile : [EPUB](atelier_maj_repli_logique/maj_replication_logique.epub)
+
 Workshop supervision : outils graphiques
 --------------------------------------------------------------------------------
 
