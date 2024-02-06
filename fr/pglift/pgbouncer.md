@@ -103,6 +103,8 @@ hide_author_in_slide: true
 
 Ce module aborde le déploiement, la configuration et l'exploitation de _PgBouncer_.
 
+L'ensemble de ce Workshop sera réalisé sur la machine `srv-pg1`.
+
 # Présentation de PgBouncer
 
 _PgBouncer_ est un outil spécialisé conçu avec des objectifs clairs et précis.
@@ -285,6 +287,7 @@ WHERE backend_type='client backend' AND usename='pooler' ;
 ```
 
 _PgBouncer_ a donc bien ouvert autant de connexions côté serveur que côté _pooler_.
+Ce mode supporte toutes les fonctionnalités de PostgreSQL.
 
 ## Par transaction
 
@@ -376,6 +379,10 @@ Commiter les transactions sur chaque session :
 db1=*> COMMIT;
 ```
 
+Ce mode permet de remettre une connexion dans le pool de connexions à chaque fin de transaction. 
+Certaines fonctionnalités tel que l'appel à `SET/RESET` ou `LISTEN` ne sont pas compatible avec ce mode. 
+Un tableau de compatibilité est disponible dans la documentation de [pgbouncer](https://www.pgbouncer.org/features.html).
+
 ## Par requête
 
 Dans le fichier `pgbouncer.ini`, modifier le paramètre `pool_mode` à `statement`:
@@ -406,3 +413,47 @@ The connection to the server was lost. Attempting reset: Succeeded.
 ```
 
 Le _pooling_ par requête empêche l’utilisation de transactions.
+
+Avec ce mode, les requêtes des clients PostgreSQL sont multiplexées vers différentes connexions disponible
+dans le pool. 
+En revanche, il dispose des mêmes restrictions que le mode de pooling par transaction et empêche 
+l'utilisation de transactions en plus des requêtes préparées. 
+
+# Nettoyage
+
+Afin de poursuivre sur les workshops suivants sans conflit de port ou
+de configuration, il est nécessaire de supprimer toute instance existante
+et désinstaller la configuration de site de _pglift_.
+
+Supprimer l'instance `main` sur `srv-pg1` :
+\scriptsize
+```
+[postgres@srv-pg1 ~]$ pglift instance drop
+INFO     dropping instance 15/main
+> Confirm complete deletion of instance 15/main? [y/n] (y): y
+INFO     stopping PostgreSQL 15-main
+INFO     stopping Prometheus postgres_exporter 15-main
+INFO     deconfiguring Prometheus postgres_exporter 15-main
+> Confirm deletion of 1 backup(s) for stanza main-app? [y/n] (n): y
+INFO     deconfiguring pgBackRest
+> Confirm deletion of database dump(s) for instance 15/main? [y/n] (y): y
+INFO     deleting PostgreSQL cluster
+```
+\normalsize
+Désinstaller la configuration de site de _pglift_ :
+\scriptsize
+```
+[postgres@srv-pg1 ~]$ pglift site-configure uninstall
+INFO     removing pglift-postgres_exporter@.service systemd unit
+         (/home/postgres/.local/share/systemd/user/pglift-postgres_exporter@.service)
+INFO     removing pglift-backup@.service systemd unit (/home/postgres/.local/share/systemd/user/pglift-backup@.service)
+INFO     removing pglift-backup@.timer systemd unit (/home/postgres/.local/share/systemd/user/pglift-backup@.timer)
+INFO     removing pglift-postgresql@.service systemd unit (/home/postgres/.local/share/systemd/user/pglift-postgresql@.service)
+INFO     deleting pgbackrest include directory
+INFO     uninstalling base pgbackrest configuration
+> Delete pgbackrest repository path /pgdata/backup/pgbackrest? [y/n] (n): y
+INFO     deleting pgbackrest repository path
+INFO     deleting common pgbackrest directories
+INFO     deleting postgresql log directory
+```
+\normalsize
