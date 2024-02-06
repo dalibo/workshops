@@ -101,13 +101,12 @@ hide_author_in_slide: true
 
 # Introduction
 
-Ce module aborde le déploiement d' une instance PostgreSQL avec l'extension `pgaudit`
-depuis `pglift`.  
-
 Ce module aborde le déploiement d'une instance PostgreSQL avec l'extension _pgAudit_
 depuis _pglift_.  
 
 Il sera également évoqué la configuration et l'exploitation des traces de _pgAudit_.
+
+L'ensemble de ce Workshop sera réalisé sur la machine `srv-pg1`.
 
 # Présentation de pgaudit
 
@@ -350,4 +349,43 @@ AUDIT: OBJECT,1,1,READ,SELECT,TABLE,public.account,select password from account;
 AUDIT: OBJECT,2,1,WRITE,UPDATE,TABLE,public.account,update account set password = 'HASH2';,<not logged>
 ```
 
+\normalsize
+
+# Nettoyage
+
+Afin de poursuivre sur les workshops suivants sans conflit de port ou
+de configuration, il est nécessaire de supprimer toute instance existante
+et désinstaller la configuration de site de _pglift_.
+
+Supprimer l'instance `main` sur `srv-pg1` :
+\scriptsize
+```
+[postgres@srv-pg1 ~]$ pglift instance drop
+INFO     dropping instance 15/main
+> Confirm complete deletion of instance 15/main? [y/n] (y): y
+INFO     stopping PostgreSQL 15-main
+INFO     stopping Prometheus postgres_exporter 15-main
+INFO     deconfiguring Prometheus postgres_exporter 15-main
+> Confirm deletion of 1 backup(s) for stanza main-app? [y/n] (n): y
+INFO     deconfiguring pgBackRest
+> Confirm deletion of database dump(s) for instance 15/main? [y/n] (y): y
+INFO     deleting PostgreSQL cluster
+```
+\normalsize
+Désinstaller la configuration de site de _pglift_ :
+\scriptsize
+```
+[postgres@srv-pg1 ~]$ pglift site-configure uninstall
+INFO     removing pglift-postgres_exporter@.service systemd unit
+         (/home/postgres/.local/share/systemd/user/pglift-postgres_exporter@.service)
+INFO     removing pglift-backup@.service systemd unit (/home/postgres/.local/share/systemd/user/pglift-backup@.service)
+INFO     removing pglift-backup@.timer systemd unit (/home/postgres/.local/share/systemd/user/pglift-backup@.timer)
+INFO     removing pglift-postgresql@.service systemd unit (/home/postgres/.local/share/systemd/user/pglift-postgresql@.service)
+INFO     deleting pgbackrest include directory
+INFO     uninstalling base pgbackrest configuration
+> Delete pgbackrest repository path /pgdata/backup/pgbackrest? [y/n] (n): y
+INFO     deleting pgbackrest repository path
+INFO     deleting common pgbackrest directories
+INFO     deleting postgresql log directory
+```
 \normalsize
