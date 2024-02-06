@@ -621,6 +621,8 @@ La configuration sous Debian se fait d'abord en renseignant comment contacter
 le DCS, puis en lançant le script de génération automatique de la configuration
 de Patroni.
 
+Le fichier est à modifier sur chaque nœud : 
+
 ```yaml
 # /etc/patroni/dcs.yml
 etcd3:
@@ -630,9 +632,17 @@ etcd3:
     - 10.0.3.103:2379
 ```
 
+Une fois le fichier modifié, la configuration peut être générée pour chacun des nœuds :
+
+
 ```Bash
-dalibo@vm:~$ sudo ssh pg1 "pg_createconfig_patroni {{pg_version}} main"
+dalibo@vm:~$
+for node in pg1 pg2 pg3; do
+  echo -n "${node} :"
+  sudo ssh ${node} "pg_createconfig_patroni 16 main"
+done
 ```
+
 
 La configuration `/etc/patroni/`{{pg_version}}`-main.yml` est générée.
 
@@ -748,7 +758,7 @@ avec le mot de passe renseigné dans la configuration de Patroni.
 #### Création de l'utilisateur de réplication
 
 ```Bash
-$ sudo ssh pg1 "sudo -iu postgres psql -c \"CREATE ROLE replicator REPLICATION PASSWORD 'rep-pass'\" "
+$ sudo ssh pg1 "sudo -iu postgres psql -c \"CREATE ROLE replicator LOGIN REPLICATION PASSWORD 'rep-pass'\" "
 ```
 
 ### Suppression des instances secondaires
@@ -1316,7 +1326,7 @@ pg1-port=5432
 Rendre possible l'écriture des sauvegardes et des logs :
 
 ```Bash
-root@backup:~# chown postgres: /var/{lib,log}/pgbackrest
+root@backup:~# chown postgres: /var/log/pgbackrest
 ```
 
 ## Configuration Client de pgBackRest
