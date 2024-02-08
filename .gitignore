@@ -2,7 +2,8 @@ _build/*
 exports/*
 *.sw?
 .~lock.*
-
+*.pgdump
+*.pdf
 fr/**/*.json
 fr/**/*.html
 fr/**/*.tex

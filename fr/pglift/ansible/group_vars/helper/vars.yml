@@ -1,0 +1,6 @@
+---
+
+temboard_ui_ca_cert: "{{ cert_dir }}/temboard-ca_cert.pem"
+temboard_ui_cert: "{{ cert_dir }}/temboard-cert.pem"
+temboard_ui_key: "{{ key_dir }}/temboard.key"
+

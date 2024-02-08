@@ -1,0 +1,121 @@
+---
+# SETUP backup
+- name: "Install pgbackrest"
+  hosts:
+    - backup_servers
+    - patroni_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: install pgbackrest
+      apt:
+        name: pgbackrest
+        state: latest
+        update_cache: true
+
+
+- name: "SETUP pgbackrest on patroni_servers"
+  hosts: patroni_servers
+  become: true
+  gather_facts: true
+
+  tasks:
+
+    - name: "First ssh connection"
+      become: yes
+      become_user: postgres
+      command:
+        "ssh -o StrictHostKeyChecking=no backup /bin/true"
+
+    - name: "Write the stanza in /etc/pgbackrest.conf"
+      template:
+        src: "stanza_pg.j2"
+        dest: "/etc/pgbackrest.conf"
+        owner: "postgres"
+        group: "postgres"
+        mode: "0640"
+
+- name: "Setup primary"
+  hosts: "primary"
+  become: "true"
+  become_user: "postgres"
+  gather_facts: "false"
+  tasks:
+
+  - name: "Activate archive_mode on primary"
+    command:
+      patronictl -c /etc/patroni/"{{ postgresql_version }}-main.yml" edit-config  --force -p 'archive_mode=on'
+
+  - name: "Setting up archive_commande on primary"
+    command:
+      patronictl -c /etc/patroni/"{{ postgresql_version }}-main.yml" edit-config  --force -p 'archive_command=pgbackrest --stanza "{{ postgresql_version }}-main" archive-push %p'
+
+
+- name: "Wait until pending_restart"
+  hosts: "primary"
+
+  tasks:
+
+    - name: "Curling the api"
+      ansible.builtin.shell: 'curl -s http://"{{ inventory_hostname }}":8008/cluster'
+      register: result
+      until: result.stdout.find("pending_restart") != -1
+      retries: 5
+      delay: 5
+
+- name: "Restart patronis"
+  hosts: "patroni_servers"
+  become: "true"
+  become_user: "postgres"
+  gather_facts: "false"
+  tasks:
+
+  - name: "Restarting to apply archiving"
+    command:
+      patronictl -c /etc/patroni/"{{ postgresql_version }}-main.yml" restart --force "{{ postgresql_version }}-main" "{{ inventory_hostname }}"
+
+- name: "Setup pg1"
+  hosts: "pg1"
+  become: "true"
+  become_user: "postgres"
+  gather_facts: "false"
+  tasks:
+
+  - name: "Create stanza on pg1"
+    command:
+      pgbackrest --stanza "{{ postgresql_version }}-main" stanza-create
+
+- name: "Setting up backup servers"
+  hosts:
+  - backup_servers
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: "First ssh connection"
+    become: yes
+    become_user: postgres
+    command:
+      "ssh -o StrictHostKeyChecking=no {{ item }} /bin/true"
+    with_items: "{{ groups['patroni_servers'] }}"
+
+
+  - name: "Create configuration"
+    template:
+      src: "stanza_backup.j2"
+      dest: "/etc/pgbackrest.conf"
+      owner: "postgres"
+      group: "postgres"
+      mode: "0640"
+
+  - name: "Init stanza on backup server"
+    become: true
+    become_user: "postgres"
+    command:
+      'pgbackrest --stanza "{{ postgresql_version }}-main" stanza-create --pg1-host=pg1 --pg1-path=/var/lib/postgresql/{{ postgresql_version }}/main'
+
+  - name: "Check stanza"
+    become_user: "postgres"
+    command:
+      'pgbackrest --stanza "{{ postgresql_version }}-main" --pg1-host=pg1 --pg1-path=/var/lib/postgresql/{{ postgresql_version }}/main check'

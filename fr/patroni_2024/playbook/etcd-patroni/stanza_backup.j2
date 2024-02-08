@@ -1,0 +1,14 @@
+# stanza_backup
+[global]
+repo1-path=/var/lib/pgbackrest
+repo1-retention-full=2
+start-fast=y
+log-level-console=info
+log-level-file=info
+
+[15-main]
+pg1-path=/var/lib/postgresql/{{ postgresql_version }}/main
+pg1-host-user=postgres
+pg1-user=postgres
+pg1-port=5432
+

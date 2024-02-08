@@ -1,0 +1,358 @@
+---
+- name: "Create containers"
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    - containers:
+      - name: "e1"
+        ip: "10.0.3.101"
+      - name: "e2"
+        ip: "10.0.3.102"
+      - name: "e3"
+        ip: "10.0.3.103"
+      - name: "pg1"
+        ip: "10.0.3.201"
+      - name: "pg2"
+        ip: "10.0.3.202"
+      - name: "pg3"
+        ip: "10.0.3.203"
+      - name: "backup"
+        ip: "10.0.3.204"
+    - interface: lxcbr0
+
+  tasks:
+    - name: Update cache
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Install lxc packages are installed on host Debian
+      ansible.builtin.package:
+        name:
+          - lxc
+          - lxc-dev
+          - python3-pip
+          - python3-lxc
+          - sudo
+          - acl
+        state: latest
+
+    - name: "Generate local root ssh-key if not there"
+      ansible.builtin.shell:
+        cmd: " cat /dev/zero | ssh-keygen -q -N '' || /bin/true "
+      register: output_keygen
+      changed_when: output_keygen.rc != 0
+
+    - name: "Cleanup known_host for root"
+      become: true
+      become_user: root
+      ansible.builtin.shell:
+        cmd: echo "" >  ~root/.ssh/known_hosts
+      register: output_cleanup_host
+      changed_when: output_cleanup_host.rc != 0
+
+    - name: "Config lxc-net"
+      ansible.builtin.copy:
+        dest: /etc/default/lxc-net
+        mode: "0600"
+        content: |
+          USE_LXC_BRIDGE="true"
+
+    - name: "Config dnsmasq"
+      ansible.builtin.copy:
+        dest: "/etc/dnsmasq.conf"
+        mode: "0600"
+        content: |
+          dhcp-host=e1,10.0.3.101
+          dhcp-host=e2,10.0.3.102
+          dhcp-host=e3,10.0.3.103
+          dhcp-host=pg-1,10.0.3.201
+          dhcp-host=pg-2,10.0.3.202
+          dhcp-host=pg-3,10.0.3.203
+          dhcp-host=backup,10.0.3.204
+
+    - name: "Config lxc default"
+      ansible.builtin.copy:
+        dest: /etc/lxc/default.conf
+        mode: "0600"
+        content: |
+          lxc.net.0.type = veth
+          lxc.net.0.link = {{ interface }}
+          lxc.net.0.flags = up
+          lxc.net.0.hwaddr = 00:16:3e:xx:xx:xx
+
+    - name: "Cleanup dhcp leases"
+      ansible.builtin.copy:
+        content: ""
+        dest: /var/lib/misc/dnsmasq.lxcbr0.leases
+        force: true
+        group: root
+        owner: root
+        mode: "0644"
+
+    - name: "Create a stopped container Debian"
+      community.general.lxc_container:
+        name: "{{ current_container.name }}"
+        container_log: false
+        backing_store: "dir"
+        template: "debian"
+        state: "started"
+        container_config:
+          - "lxc.net.0.type = veth"
+          - "lxc.net.0.flags = up"
+          - "lxc.net.0.link = {{ interface }}"
+          - "lxc.net.0.ipv4.address = {{ current_container.ip }}/24"
+          - "lxc.net.0.ipv4.gateway = auto"
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+# File /etc/host
+
+    - name: "Add all the hosts to /etc/hosts"
+      ansible.builtin.lineinfile:
+        path: "/etc/hosts"
+        regexp: "{{ current_container.ip }}  {{ current_container.name }}"
+        line: "{{ current_container.ip }}  {{ current_container.name }}"
+        state: present
+        backup: false
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+# SETUP CONTAINERS
+
+    - name: "Load in local SSH key path for root"
+      ansible.builtin.set_fact:
+        my_ssh_key: "~root/.ssh/id_rsa.pub"
+
+    - name: "Cleanup local know_hosts by name for root"
+      ansible.builtin.command:
+        ssh-keygen -f "~root/.ssh/known_hosts" -R {{ current_container.name }}
+      register: output_cleanup_know_hosts
+      changed_when: output_cleanup_know_hosts.rc != 0
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Cleanup local know_hosts by ip for root"
+      ansible.builtin.command:
+        ssh-keygen -f "~root/.ssh/known_hosts" -R {{ current_container.ip }}
+      register: output_cleanup_know_hosts_by_ip
+      changed_when: output_cleanup_know_hosts_by_ip.rc != 0
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+
+    - name: "Container key is up-to-date locally by ip for root (know_hosts)"
+      ansible.builtin.shell:
+        cmd: ssh-keyscan {{ current_container.ip }} >> ~root/.ssh/known_hosts
+      register: output_update_container_key_by_ip
+      changed_when: output_update_container_key_by_ip.rc != 0
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Container key is up-to-date locally by name for root (know_hosts)"
+      ansible.builtin.shell:
+        cmd: ssh-keyscan {{ current_container.name }} >> ~root/.ssh/known_hosts
+      register: output_update_container_key_by_name
+      changed_when: output_update_container_key_by_name.rc != 0
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Generate root ssh-key if not there in containers"
+      community.general.lxc_container:
+        name: "{{ current_container.name }}"
+        state: started
+        container_command: |
+          cat /dev/zero | ssh-keygen -q -N '' || /bin/true
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Get ssh key"
+      ansible.builtin.shell:
+        cmd: "cat {{ my_ssh_key }}"
+      register: my_ssh_key_content
+
+    - name: "Copy ssh key into root authorized_keys for root"
+      community.general.lxc_container:
+        name: "{{ current_container.name }}"
+        state: started
+        container_command: |
+          echo "" | tee ~root/.ssh/authorized_keys
+          echo "{{ my_ssh_key_content.stdout }}" | tee -a ~root/.ssh/authorized_keys
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Install ansible prerequisites"
+      community.general.lxc_container:
+        name: "{{ current_container.name }}"
+        state: started
+        container_command: |
+          apt install -y sudo python3 python3-apt
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+### A partir de là on lance le playbook
+
+
+    - name: "Install Ansible"
+      ansible.builtin.package:
+        name: ansible
+
+    - name: "Copy the secondary inventory (inventory.yml)"
+      ansible.builtin.copy:
+        src: "inventory.yml"  # Chemin local vers le fichier
+        dest: "~root/inventory.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the secondary playbook (setup.2.yml)"
+      ansible.builtin.copy:
+        src: "setup.2.yml"  # Chemin local vers le fichier
+        dest: "~root/setup.2.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Execute the secondary playbook"
+      ansible.builtin.shell:
+        cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/setup.2.yml"
+
+
+    - name: "Restart all the containers"
+      community.general.lxc_container:
+        name: "{{ current_container.name }}"
+        container_log: false
+        state: "restarted"
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+    - name: "Copy the setup_backup playbook (setup_backup.yml)"
+      ansible.builtin.copy:
+        src: "setup_backup.yml"  # Chemin local vers le fichier
+        dest: "~root/setup_backup.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy stanza_backup.j2"
+      ansible.builtin.copy:
+        src: "stanza_backup.j2"  # Chemin local vers le fichier
+        dest: "~root/stanza_backup.j2"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy stanza_pg.j2"
+      ansible.builtin.copy:
+        src: "stanza_pg.j2"  # Chemin local vers le fichier
+        dest: "~root/stanza_pg.j2"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy exchange_ssh_keys.yml"
+      ansible.builtin.copy:
+        src: "exchange_ssh_keys.yml"  # Chemin local vers le fichier
+        dest: "~root/exchange_ssh_keys.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the setup_etcd_servers.yml playbook"
+      ansible.builtin.copy:
+        src: "setup_etcd_servers.yml"  # Chemin local vers le fichier
+        dest: "~root/setup_etcd_servers.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the setup_etcd_servers.j2 template"
+      ansible.builtin.copy:
+        src: "setup_etcd_servers.j2"  # Chemin local vers le fichier
+        dest: "~root/setup_etcd_servers.j2"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the setup_patroni_servers.yml playbook"
+      ansible.builtin.copy:
+        src: "setup_patroni_servers.yml"  # Chemin local vers le fichier
+        dest: "~root/setup_patroni_servers.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the setup_patroni_servers.j2 template"
+      ansible.builtin.copy:
+        src: "setup_patroni_servers.j2"  # Chemin local vers le fichier
+        dest: "~root/setup_patroni_servers.j2"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the setup_pgbench.yml playbook"
+      ansible.builtin.copy:
+        src: "setup_pgbench.yml"  # Chemin local vers le fichier
+        dest: "~root/setup_pgbench.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    - name: "Copy the teardown.yml playbook"
+      ansible.builtin.copy:
+        src: "teardown.yml"  # Chemin local vers le fichier
+        dest: "~root/teardown.yml"  # Chemin de destination sur la machine cible
+        owner: root  # Propriétaire du fichier (optionnel)
+        group: root  # Groupe du fichier (optionnel)
+        mode: '0644'  # Permissions du fichier (optionnel)
+
+    # - name: "Execute the secondary setup_etcd_servers.yml playbook"
+    #   ansible.builtin.shell:
+    #     cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/setup_etcd_servers.yml"
+    #
+    # - name: "Execute the secondary setup_patroni_servers.yml playbook"
+    #   ansible.builtin.shell:
+    #     cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/setup_patroni_servers.yml"
+    #
+    - name: "Execute the secondary exchange_ssh_keys.yml playbook"
+      ansible.builtin.shell:
+        cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/exchange_ssh_keys.yml"
+
+    # - name: "Execute the secondary setup_backup.yml playbook"
+    #   ansible.builtin.shell:
+    #     cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/setup_backup.yml"
+    #
+    # - name: "Execute the secondary setup_pgbench.yml playbook"
+    #   ansible.builtin.shell:
+    #     cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/setup_pgbench.yml"

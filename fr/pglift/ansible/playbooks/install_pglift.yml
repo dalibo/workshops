@@ -1,0 +1,30 @@
+---
+
+- hosts: database, helper
+  become: true
+  become_user: postgres
+  tasks:
+    - name: Install pipx with pip
+      ansible.builtin.pip:
+        name: pipx
+        executable: pip3.9
+    - name: "Install pglift {{ pglift_version }}"
+      community.general.pipx:
+        name: pglift
+        source: "pglift=={{ pglift_version }}"
+        executable: ~/.local/bin/pipx
+    - name: Enable linger for user {{ pglift_sys_user }}
+      ansible.builtin.command: "loginctl enable-linger {{ pglift_sys_user }}"
+    - name: Create directories for components configuration
+      ansible.builtin.file:
+        name: "{{ item }}"
+        state: directory
+        owner: "{{ postgresql_sys_user }}"
+        group: "{{ postgresql_sys_group }}"
+        mode: 0750
+      loop:
+        - "{{ pglift_config_root }}/postgresql"
+        - "{{ pglift_config_root }}/pgbackrest"
+        - "{{ pglift_config_root }}/pg_back"
+
+

@@ -1,0 +1,44 @@
+# provisionning/all.yml
+- name: "Install"
+  hosts: "postgres"
+  gather_facts: true
+  tasks:
+    - name: "Copy file with owner and permissions"
+      ansible.builtin.copy:
+        src: install_pg.sh
+        dest: /tmp/install.sh
+        owner: formateur
+        group: formateur
+        mode: "0777"
+
+- name: "Install"
+  hosts: "pgbackrest"
+  gather_facts: false
+  tasks:
+    - name: "Copy file with owner and permissions"
+      ansible.builtin.copy:
+        src: install_pgbackrest.sh
+        dest: /tmp/install.sh
+        owner: formateur
+        group: formateur
+        mode: "0777"
+
+- name: "Install"
+  hosts: "all"
+  gather_facts: false
+  tasks:
+    - name: "Execute install.sh"
+      ansible.builtin.shell: "/tmp/install.sh"
+
+
+- name: "Install"
+  hosts: "all"
+  gather_facts: false
+  become: "yes"
+  tasks:
+    - name: Replace a localhost entry with our own
+      ansible.builtin.lineinfile:
+        path: /home/dalibo/.bashrc
+        line: '[ -z "$TMUX" ] && command -v tmux > /dev/null && TERM=xterm-256color && exec tmux'
+        state: "absent"
+

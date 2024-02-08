@@ -1,0 +1,176 @@
+---
+
+- hosts: patroni_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: install packages to import the repository key
+    become: true
+    become_user: root
+    apt:
+      name:
+        - ca-certificates
+        - gnupg
+        - curl
+      state: present
+      update_cache: false
+
+  - name: Configure pgdg repository
+    become: true
+    become_user: root
+    copy:
+      dest: /etc/apt/sources.list.d/pgdg.list
+      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+
+  - name: Import pgdg gnupg key
+    become: true
+    become_user: root
+    shell:
+      cmd:
+        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+
+  - name: apt update
+    become: yes
+    apt: update_cache=yes
+
+  - name: install patroni_servers packages
+    become: yes
+    apt:
+      name:
+        - postgresql-{{ postgresql_version }}
+        - patroni
+        - pgbackrest
+      state: latest
+
+  - name: Disable default Postgresql cluster
+    become: yes
+    become_user: root
+    systemd:
+      name: postgresql
+      state: stopped
+      enabled: no
+
+  - name: Configure patroni dcs.yml
+    become: yes
+    template:
+      src: setup_patroni_servers.j2
+      dest: /etc/patroni/dcs.yml
+
+  - name: Clear existing patroni configuration
+    file:
+      path: /etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml
+      state: absent
+    register: patroniconf_absent
+
+  - name: Generate patroni configuration
+    become: yes
+    shell: pg_createconfig_patroni {{ postgresql_version }} {{ postgresql_instance }}
+    when: patroniconf_absent
+
+
+- hosts: primary
+  gather_facts: true
+  tasks:
+
+  - name: "chown /var/run/postgresql"
+    become: true
+    shell: 'chown postgres: /var/run/postgresql'
+
+  - name: Start Patroni
+    become: yes
+    become_user: root
+    service:
+      name: patroni@{{ postgresql_version }}-{{ postgresql_instance }}
+      state: started
+      enabled: yes
+    register: myserviceDetails
+    until: myserviceDetails.status.ActiveState == "active"
+    retries: 3
+    delay: 2
+
+- hosts: secondary
+  gather_facts: false
+
+  tasks:
+
+  - name: Cleanup PGDATA
+    become: yes
+    become_user: postgres
+    shell: rm -rf /var/lib/postgresql/{{ postgresql_version }}/{{ postgresql_instance }}/*
+
+  - name: "chown /var/run/postgresql"
+    become: true
+    shell: 'chown postgres: /var/run/postgresql'
+
+  - name: Start Patroni
+    become: yes
+    systemd:
+      name: patroni@{{ postgresql_version }}-{{ postgresql_instance }}
+      state: started
+      enabled: yes
+
+- hosts: patroni_servers
+  gather_facts: false
+
+  tasks:
+  - name: replace postgres's .profile
+    become: yes
+    become_user: postgres
+    shell: echo ' export PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml' > ~/.profile
+
+
+- hosts: secondary
+  gather_facts: false
+  become: yes
+  run_once: yes
+  tasks:
+
+  - name: Testing fail-over secondaries
+    shell: PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml /usr/bin/patronictl failover --candidate {{ item }} --force {{ postgresql_version }}-{{ postgresql_instance }} && PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml /usr/bin/patronictl topology && sleep 5
+    poll: 1000
+    with_items: "{{ groups['secondary'] }}"
+
+- hosts: primary
+  gather_facts: false
+  become: yes
+  run_once: yes
+  tasks:
+  - name: Failing back to primary
+    shell: PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml /usr/bin/patronictl failover --candidate {{ item }} --force {{ postgresql_version }}-{{ postgresql_instance }} && PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml /usr/bin/patronictl topology
+    with_items: "{{ groups['primary'] }}"
+    poll: 1000
+
+  - name: drop the user replicator
+    become: yes
+    become_user: postgres
+    shell:
+      psql -c "drop user if exists replicator"
+
+  - name: create the user replicator
+    become: yes
+    become_user: postgres
+    shell:
+      psql -c "create user replicator replication password 'rep-pass'"
+
+
+  - name: set sync mode on
+    become: yes
+    become_user: postgres
+    shell:
+      PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml patronictl edit-config -s 'synchronous_mode=false' --force
+
+  - name: set sync standby names to '*'
+    become: yes
+    become_user: postgres
+    shell:
+      PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml patronictl edit-config -s synchronous_standby_names=\'*\' --force
+
+  - name: set sync node count to 1
+    become: yes
+    become_user: postgres
+    shell:
+      PATRONICTL_CONFIG_FILE=/etc/patroni/{{ postgresql_version }}-{{ postgresql_instance }}.yml patronictl edit-config -s 'synchronous_node_count=0' --force
+
+
+# EOF

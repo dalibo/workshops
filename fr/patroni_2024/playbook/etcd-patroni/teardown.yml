@@ -1,0 +1,38 @@
+- hosts: all
+  connection: local
+  become: true
+  become_user: root
+  gather_facts: no
+  
+  tasks:
+  - name: Containers do not exist
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: absent
+
+  - name: Remove nodes from /etc/hosts 
+    delegate_to: localhost
+    tags: etchostsupdate
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ ansible_host }}\t{{ inventory_hostname }}\t{{ inventory_hostname }}" 
+      line: "{{ ansible_host }}\t{{ inventory_hostname }}\t{{ inventory_hostname }}"
+      state: absent
+      backup: no
+
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+
+  - name: remove all the hosts from /etc/hosts
+    tags: delete, debug
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      state: absent
+      backup: no
+    loop: "{{ groups['all'] }}"
+
+

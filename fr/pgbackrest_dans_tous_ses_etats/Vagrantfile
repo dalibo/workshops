@@ -1,0 +1,101 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+require 'getoptlong'
+
+opts = GetoptLong.new(
+  [ '--env', GetoptLong::OPTIONAL_ARGUMENT ],
+  [ '--shell', GetoptLong::OPTIONAL_ARGUMENT ]
+)
+
+customParameter=''
+
+opts.ordering=(GetoptLong::REQUIRE_ORDER)   ### this line.
+
+SHELL = false
+
+opts.each do |opt, arg|
+  case opt
+    when '--env'
+      SOCLE_VERSION=arg
+    when '--shell'
+      SHELL=arg
+  end
+end
+
+#BOX_BASE = "generic/rocky8"
+#BOX_BASE = "generic/rocky8"
+#BOX_BASE = "almalinux/8"
+BOX_BASE = "generic/rocky8"
+#BOX_BASE = "generic/debian11"
+#BOX_BASE = "generic/ubuntu2204"
+#SOCLE_VERSION = "advanced"
+LIMIT = "all"
+#if BOX_BASE == "generic/rocky8" or BOX_BASE == "generic/centos8" then
+#  SHELL = true
+#else
+#  SHELL = false
+#end
+n=1
+Vagrant.configure("2") do |config|
+    # Configuration du primary
+    #config.ssh.private_key_path = "~/.ssh/id_rsa"
+    config.ssh.forward_agent = true
+    config.ssh.insert_key = false
+    config.vm.box = BOX_BASE
+
+    if BOX_BASE == "generic/ubuntu2204" then
+        config.vm.box_version = "4.1.20"
+    end
+    if BOX_BASE == "generic/rocky9" or BOX_BASE == "generic/rocky8" or BOX_BASE == "generic/centos8" or BOX_BASE == "almalinux/8" then
+        config.vm.provision "shell",
+        inline: "sudo yum install python3.9 nano git -y && sudo systemctl stop firewalld && sudo systemctl disable firewalld && sudo yum update -y"
+    end
+
+    (1..n).each do |pg_host_cpt|
+        pg_hostname="pg#{pg_host_cpt}"
+            config.vm.define pg_hostname do |host_config|
+            host_config.vm.hostname = pg_hostname
+            host_config.vm.network :private_network, ip: "192.168.90.1#{pg_host_cpt}"
+
+
+            #if SOCLE_VERSION == "essential" then
+            #  host_config.vm.synced_folder "/tmp/share/essential", "/pgbackups",
+            #    type: "nfs",
+            #    nfs_version: 4,
+            #    nfs_udp: false  #
+            #end
+            # Libvirt settings
+            host_config.vm.provider "libvirt" do |hv|
+                # VM Shape
+                hv.cpus = "1"
+                hv.memory = "1024"
+            end
+        end
+    end
+    
+    
+  pgbackrest_repo_hostname="pgbackrest1"
+    config.vm.define pgbackrest_repo_hostname do |host_config|
+        host_config.vm.hostname = pgbackrest_repo_hostname
+        host_config.vm.network :private_network, ip: "192.168.90.32"
+
+        # Libvirt settings
+        host_config.vm.provider "libvirt" do |hv|
+        # VM Shape
+        hv.cpus = "1"
+        hv.memory = "1024"
+        end
+        # host_config.vm.provision "ansible" do |ansible|
+        #   ansible.limit = LIMIT
+        #   ansible.playbook = "../ansible.d/playbooks/#{SOCLE_VERSION}.yml"
+        #   ansible.inventory_path = "../ansible.d/environments/#{SOCLE_VERSION}/inventory"
+        #   ansible.compatibility_mode = "2.0"
+        # end
+  end
+end # Vagrant.configure("2") do |config|

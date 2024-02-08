@@ -1,0 +1,65 @@
+---
+
+- hosts: patroni_servers backup_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: ssh-keygen for user postgres
+    become: true
+    become_user: postgres
+    shell: cat /dev/zero | ssh-keygen -q -N '' || /bin/true
+
+  - name: Get ssh keys from servers
+    become: true
+    become_user: postgres
+    fetch:
+      src: "~/.ssh/id_rsa.pub"
+      dest: "buffer/{{ inventory_hostname }}-id_rsa.pub"
+      flat: yes
+
+  - name: Copy the ssh-keys to each server
+    become: true
+    become_user: postgres
+    copy:
+      src: "buffer/"
+      dest: "/tmp"
+
+  - name: Copy the key add to authorized_keys to patroni_servers
+    authorized_key:
+      user: postgres
+      state: present
+      key: "{{ lookup('file','buffer/{{item}}-id_rsa.pub') }}"
+    when: "item != inventory_hostname"
+    with_items:
+      - "{{ groups['patroni_servers'] }}"
+
+  - name: Copy the key add to authorized_keys to backup_servers
+    authorized_key:
+      user: postgres
+      state: present
+      key: "{{ lookup('file','buffer/{{item}}-id_rsa.pub') }}"
+    when: "item != inventory_hostname"
+    with_items:
+      - "{{ groups['backup_servers'] }}"
+
+- hosts: backup_servers
+  gather_facts: false
+
+  tasks:
+
+  - name: "First ssh connection"
+    become: yes
+    become_user: postgres
+    command:
+      "ssh -o StrictHostKeyChecking=no {{ item }} /bin/true"
+    with_items: "{{ groups['patroni_servers'] }}"
+
+
+- hosts: localhost
+  tasks:
+  - name: cleanup local buffer/
+    become: true
+    file:
+      path: buffer
+      state: absent

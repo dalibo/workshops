@@ -17,13 +17,6 @@
 #    see https://github.com/dalibo/pandocker/
 #  - use `DOCKER=latest make all` to force make to use docker 
 #
-# Dalibo Themes or not ?
-#-------------------------------------------------------------------------------
-#
-#   - dalibo themes are not open source but they're optionnal
-#   - you can compile the docs without them
-#   - use `LOCAL_DLB=/tmp/dalibo make all` to change the dalibo themes location
-#
 ###############################################################################
 
 
@@ -37,13 +30,12 @@ PATHS := $(shell find $(SOURCES) -maxdepth 1 -mindepth 1 -type d)
 PATHS := $(filter-out %/include %/medias, $(PATHS))
 WORKSHOPS := $(notdir $(PATHS))
 INDEX := $(shell find $(SOURCES) -type f -name index.md)
+THEME := $(realpath theme/)
 
 ###############################################################################
 # Functions
 
 ECHO=$(info Compiling $^ into $@)
-IN=`basename $^`
-OUT=`basename $@`
 DIR=`dirname $^`
 
 ###############################################################################
@@ -74,116 +66,109 @@ SRC_FORMATS+= FILE.slides.html
 # Pandoc
 #
 
-# LOCAL_DLB is a directory containing dalibo themes
-# dalibo themes are not open source but they're optionnal
-ifeq ($(LOCAL_DLB),)
-    LOCAL_DLB=$(HOME)/.dalibo/themes/
-endif
-
-# Normally DLB == LOCAL_DLB, but this will change when we'll use docker
-DLB=$(LOCAL_DLB)
-
 # Parameters common to pandoc when called directly and through docker
-PANDOC_PARAMS?=--filter pandoc-include
+PANDOC_HEADERS=theme/metadata.yml
+PANDOC_PARAMS?=--filter=pandoc-jinja --filter=pandoc-include
 
-# By default we use the local pandoc (if installed)
+# PANDOC_MARKDOWN_FLAVOR=markdown-smart
+PANDOC_MARKDOWN_FLAVOR=markdown-escaped_line_breaks
+
+# Common arguments
+PANDOC_ARGS?=--from=$(PANDOC_MARKDOWN_FLAVOR) \
+             --metadata-file=$(PANDOC_HEADERS) \
+             --strip-comments \
+             --resource-path=.:theme
+
+# by default we use the local pandoc (if installed)
 PANDOC_BIN?=pandoc
-PANDOC=$(PANDOC_BIN) $(PANDOC_PARAMS) --metadata=dlb:$(LOCAL_DLB)
+PANDOC:=$(PANDOC_BIN) $(PANDOC_PARAMS) $(PANDOC_ARGS)
 
-# If pandoc is not installed, force docker use
-ifeq (, $(shell which $(PANDOC_BIN) 2>/dev/null))
-    DOCKER?=latest
-    # do not forget to update .gitlab-ci.yml too
+# if pandoc is not installed, force docker use
+ifeq (, $(shell which $(PANDOC_BIN)))
+  # do not forget to update .gitlab-ci.yml too
+  PANDOCKER_TAG?=latest
+  # PANDOCKER_TAG?=23.03
+
+  # --privileged is necessary for people using SELinux
+  # --rm removes the container after execution
+  PANDOC:=docker run \
+    --privileged --rm -it \
+    --volume `pwd`:/pandoc --volume $(THEME):/pandoc/theme \
+    dalibo/pandocker:$(PANDOCKER_TAG) $(PANDOC_PARAMS) $(PANDOC_ARGS)   
 endif
 
-# Even if pandoc is installed, we can use docker with `DOCKER=latest make`
-ifneq ($(DOCKER),)
-    DOCKER_DLB=/root/.dalibo/themes
+# Default templates
+PANDOC_PDF_TEMPLATE?=eisvogel
+PANDOC_HTML_TEMPLATE?=uikit
 
-    # --privileged is necessary for people using SELinux
-    # --rm removes the container after execution
-    PANDOC=docker run --privileged --rm -it \
-      --volume `pwd`:/pandoc --volume $(LOCAL_DLB):$(DOCKER_DLB) \
-      dalibo/pandocker:$(DOCKER) --metadata=dlb:$(DOCKER_DLB) $(PANDOC_PARAMS)
-    DLB=$(DOCKER_DLB)
-endif
+# Relative path to resources
+PANDOC_RESOURCES=--resource-path=$(DIR) --metadata=include-entry:$(DIR)
 
 ##########################
 # Pandoc Compilation Flags
 
-ifeq ("$(wildcard $(LOCAL_DLB))","")
-    # dalibo themes are not available, use default compilation flags
-    BEAMER_FLAGS= -st beamer 
-    DOCX_FLAGS=-t doc --toc
-    EPUB_FLAGS=-t epub --toc
-    HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2
-    HTML_FLAGS=-t html5 --self-contained --standalone
-    MARKDOWN_FLAGS=-t markdown
-    ODT_FLAGS=-t odt --toc
-    PDF_FLAGS=--toc --pdf-engine=xelatex
-    REVEAL_FLAGS=-t revealjs --standalone -V revealjs-url:http://lab.hakim.se/reveal-js/
-    S5_FLAGS=-t s5 --self-contained --standalone
-    TEX_FLAGS= -st beamer 
-else
-# Dalibo's compilation flags
-    BEAMER_FLAGS= -st beamer -V theme=Dalibo
-    DOCX_FLAGS=--reference-doc=$(DLB)/doc/template_conference.dokuwiki.doc
-    EPUB_FLAGS=
-    HANDOUT_HTML_FLAGS=-t html5 --self-contained --standalone --toc --toc-depth=2 \
-      --template=$(DLB)/html/uikit/dalibo.html 
-    HTML_FLAGS=-t html5 --self-contained --standalone \
-      --template=$(DLB)/html/uikit/dalibo.html
-    MARKDOWN_FLAGS=-t markdown
-    ODT_FLAGS=--reference-doc=$(DLB)/odt/template_conference.dokuwiki.odt
-    # PDF_FLAGS=--pdf-engine=xelatex --toc --filter pandoc-latex-admonition \
-    #   --template=$(DLB)/tex/book1/template.tex
-    PDF_FLAGS=--pdf-engine=xelatex --toc -N --from=markdown-smart \
-      --filter pandoc-latex-environment --filter pandoc-latex-admonition \
-      --template=$(DLB)/tex/book1/template.tex
-    REVEAL_FLAGS=-t revealjs --self-contained --standalone \
-       -V revealjs-url="$(DLB)/reveal.js/" \
-       --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs"
-    REVEAL_LOCAL_FLAGS=-t revealjs --standalone \
-       -V revealjs-url="$(DLB)/reveal.js/" \
-       --template="$(DLB)/reveal.js/pandoc/templates/dalibo.revealjs"
-    S5_FLAGS=-t s5 --self-contained --standalone -V s5-url:$(DLB)/s5/
-    TEX_FLAGS= -st beamer -V theme=Dalibo
-endif
+MARKDOWN_FLAGS=--to markdown
+# Included in make all
+HTML_FLAGS=--to html --template=$(PANDOC_HTML_TEMPLATE) \
+           --embed-resources --standalone --toc --toc-depth=2 \
+		   --css theme/dalibo.uikit.css \
+		   $(PANDOC_RESOURCES)
+PDF_FLAGS=--template=$(PANDOC_PDF_TEMPLATE) \
+          --pdf-engine=xelatex \
+          --pdf-engine-opt=-shell-escape \
+          --toc --number-sections \
+          --top-level-division=chapter \
+          --filter=pandoc-cover \
+          --filter=pandoc-latex-environment \
+		  $(PANDOC_RESOURCES) 
+EPUB_FLAGS=$(PANDOC_RESOURCES)
+# Force the use of the revealjs cache inside pandocker
+REVEAL_FLAGS=--to revealjs --standalone --variable=revealjs-url:file:/// \
+             --css theme/dalibo.reveal.css --embed-resources \
+		     $(PANDOC_RESOURCES)
+# NOT included in make All
+S5_FLAGS=--to s5 --embed-resources --standalone $(PANDOC_RESOURCES)
+# NOT supported
+BEAMER_FLAGS= -st beamer $(PANDOC_RESOURCES)
+ODT_FLAGS=$(PANDOC_RESOURCES)
+DOC_FLAGS=$(PANDOC_RESOURCES)
 
 ###############################################################################
 # HTML handout
 
-HANDOUT_HTML_OBJS=$(SRC:.md=.handout.html)
-OBJS += $(HANDOUT_HTML_OBJS)
+HTML_OJBS=$(SRC:.md=.handout.html)
+OBJS += $(HTML_OJBS)
 
 %.handout.html: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(HANDOUT_HTML_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(HTML_FLAGS) $^ -o $@
 
 ###############################################################################
-# PDF and Peecho handouts
+# Marketing markdown
+
+%.pdf.md: %.md
+	$(ECHO)
+	cat $^ \
+	  $(THEME)/marketing/notes.md \
+	  $(THEME)/marketing/publications.md \
+	  $(THEME)/marketing/backcover.md > $@
+
+###############################################################################
+# Peecho and Nocover PDF handouts
+
+PEECHO_OBJS=$(SRC:.md=.pdf)
+OBJS += $(PEECHO_OBJS)
+
+%.pdf: %.pdf.md
+	$(ECHO)
+	$(PANDOC) $(PDF_FLAGS) $^ -o $@
 
 PDF_OBJS=$(SRC:.md=.nocover.pdf)
 OBJS += $(PDF_OBJS)
 
 %.nocover.pdf: %.md
 	$(ECHO)	
-	cd $(DIR) && $(PANDOC) $(PDF_FLAGS) $(IN) -o $(OUT)
-
-PEECHO_OBJS=$(SRC:.md=.pdf)
-OBJS += $(PEECHO_OBJS)
-
-%.peecho.pdf: %.nocover.pdf
-	$(ECHO)
-	cd $(DIR) && \
-	$(LOCAL_DLB)/tex/book1/postprod.peecho.py \
-	  -b $(LOCAL_DLB)/tex/book1/backcover.pdf \
-	  -n $(LOCAL_DLB)/tex/book1/note.pdf \
-	  -p $(LOCAL_DLB)/tex/book1/publications.pdf $(IN) -o $(OUT) 
-
-%.pdf: %.peecho.pdf
-	$(ECHO)
-	cd $(DIR) && mv $(IN) $(OUT)
+	$(PANDOC) $(PDF_FLAGS) $^ -o $@
 
 ###############################################################################
 # Reveal Slides
@@ -193,14 +178,14 @@ OBJS += $(REVEAL_OBJS)
 
 %.slides.html: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(REVEAL_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(REVEAL_FLAGS) $^ -o $@
 
 REVEAL_LOCAL_OBJS=$(SRC:.md=.slides.local.html)
 OBJS += $(REVEAL_LOCAL_OBJS)
 
 %.slides.local.html: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(REVEAL_LOCAL_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(REVEAL_LOCAL_FLAGS) $^ -o $@
 
 ###############################################################################
 # Epub handout
@@ -210,7 +195,7 @@ OBJS += $(EPUB_OBJS)
 
 %.epub: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(EPUB_FLAGS) $(IN) -o  $(OUT)
+	$(PANDOC) $(EPUB_FLAGS) $^ -o $@
 
 ###############################################################################
 # DOCX and ODT handouts
@@ -220,14 +205,14 @@ OBJS += $(DOCX_OBJS)
 
 %.docx: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(DOCX_FLAGS) $(IN) -o  $(OUT)
+	$(PANDOC) $(DOCX_FLAGS) $^ -o $@
 
 ODT_OBJS=$(SRC:.md=.odt)
 OBJS += $(ODT_OBJS)
 
 %.odt: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(ODT_FLAGS) $(IN) -o  $(OUT)
+	$(PANDOC) $(ODT_FLAGS) $^ -o $@
 
 ###############################################################################
 # Others slides
@@ -237,14 +222,14 @@ OBJS += $(BEAMER_OBJS)
 
 %.beamer.pdf: %.md
 	$(ECHO)
-	TEXMFHOME=$(DLB)/beamer	cd $(DIR) && $(PANDOC) $(BEAMER_FLAGS) $(IN) -o $(OUT)
+	TEXMFHOME=$(DLB)/beamer	$(PANDOC) $(BEAMER_FLAGS) $^ -o $@
 
 S5_OJBS=$(SRC:.md=.slides.s5.html)
 OBJS += $(S5_OJBS)
 
 %.slides.s5.html: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(S5_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(S5_FLAGS) $^ -o $@
 
 ###############################################################################
 # Others formats rules
@@ -254,14 +239,14 @@ OBJS += $(JSON_OBJS)
 
 %.json: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(JSON_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(JSON_FLAGS) $^ -o $@
 
 TEX_OBJS=$(SRC:.md=.tex)
 OBJS += $(TEX_OBJS)
 
 %.tex: %.md
 	$(ECHO)
-	cd $(DIR) && $(PANDOC) $(TEX_FLAGS) $(IN) -o $(OUT)
+	$(PANDOC) $(TEX_FLAGS) $^ -o $@
 
 %.all:  %.html %.tex %.beamer.pdf %.pdf %.odt %.docx %.epub
 	$(ECHO)
@@ -272,12 +257,12 @@ INDEX_OJBS=$(INDEX:.md=.html)
 OBJS += $(INDEX_OJBS)
 
 %/index.html: %/index.md
-	$(PANDOC) -t html5 --self-contained --standalone $^ -o $@
+	$(PANDOC) -t html5 --embed-resources --standalone $^ -o $@
 
 ###############################################################################
 # Global Targets
 
-all: reveal handout_html pdf epub index
+all: reveal html pdf epub index
 
 # Dynamic target definition
 define workshop_target =
@@ -291,7 +276,7 @@ $(foreach src, $(SRC), $(eval $(call workshop_target,$(src))))
 beamer: $(BEAMER_OBJS)
 docx: $(DOCX_OBJS)
 epub: $(EPUB_OBJS)
-handout_html: $(HANDOUT_HTML_OBJS)
+html: $(HTML_OJBS)
 json: $(JSON_OBJS)
 nocover_pdf: $(PDF_OBJS)
 odt: $(ODT_OBJS)
@@ -322,9 +307,3 @@ archives: deploy
 	  find _archives/$$LANG \( -name "*.html" -or -name "*.pdf" -or -name "*.epub" \) \
 	    -print -exec cp {} $(DEST)/$$LANG \; ;\
 	done
-
-install:
-	ln -s $(HOME)/.dalibo/themes/ 
-
-uninstall:
-	rm themes
