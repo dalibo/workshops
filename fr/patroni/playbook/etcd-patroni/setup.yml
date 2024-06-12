@@ -1,29 +1,43 @@
 ---
-
 #  CREATE STOPPED CONTAINERS
 
 - hosts: localhost
   connection: local
   become: true
   become_user: root
-  gather_facts: false
+  gather_facts: true
 
   vars:
   - interface: lxcbr0
 
   tasks:
 
+# CHECK IF DISTRO AND RELEASE
+  - name: 'check distro and release' 
+    fail: msg="Only Buster and Bullseye releases of Debian are supported here"
+    when: ansible_distribution != "Debian" and ( ansible_distribution_release != "bullseye" or ansible_distribution != "buster" )
 
 
-  - name: apt lxc packages are installed on host
+  - name: apt lxc packages are installed on host (Debian Bullseye)
     apt:
       name:
       - lxc
       - lxc-dev
       - python3-pip
       - python3-lxc
-      - python-lxc
       - sudo
+    when: ansible_distribution_release == "bullseye"
+
+  - name: apt lxc packages are installed on host (Debian Buster)
+    apt:
+      name:
+      - lxc
+      - lxc-dev
+      - python-lxc
+      - python3-pip
+      - python3-lxc
+      - sudo
+    when: ansible_distribution_release == "buster"
 
   - name: generate local root ssh-key if not there
     shell:
@@ -86,14 +100,14 @@
   connection: local
   become: true
   become_user: root
-  gather_facts: false
+  gather_facts: true
 
   vars:
   - interface: lxcbr0
 
   tasks:
 
-  - name: Create a stopped container
+  - name: Create a stopped container (Buster)
     delegate_to: localhost
     lxc_container:
       name: "{{ inventory_hostname }}"
@@ -107,6 +121,38 @@
         - lxc.net.0.link = {{ interface }}
         - lxc.net.0.ipv4.address = {{ ansible_host }}/24
         - lxc.net.0.ipv4.gateway = auto
+    when: ansible_distribution_release == "buster"
+
+  - name: Create a stopped container (Bullseye)
+    delegate_to: localhost
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      container_log: true
+      template: debian
+      state: started
+      template_options: --release bullseye
+      container_config:
+        - lxc.net.0.type = veth
+        - lxc.net.0.flags = up
+        - lxc.net.0.link = {{ interface }}
+        - lxc.net.0.ipv4.address = {{ ansible_host }}/24
+        - lxc.net.0.ipv4.gateway = auto
+    when: ansible_distribution_release == "bullseye"
+
+# File /etc/hosts
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+
+  - name: add all the hosts to /etc/hosts
+    lineinfile:
+      path: "/etc/hosts"
+      regexp: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      line: "{{ hostvars[item].ansible_host }}  {{ item }}"
+      state: present
+      backup: no
+    loop: "{{ groups['all'] }}"
 
 # SETUP CONTAINERS
 
@@ -120,7 +166,6 @@
     become_user: root
     set_fact:
       my_ssh_key: "~root/.ssh/id_rsa.pub"
-
 
 
 # CLEANUP known_hosts root
@@ -244,20 +289,40 @@
       state: present
       update_cache: false
 
-  - name: Configure pgdg repository
-    become: true
-    become_user: root
-    copy:
-      dest: /etc/apt/sources.list.d/pgdg.list
-      content: 'deb http://apt.postgresql.org/pub/repos/apt {{ debian_codename }}-pgdg main'
+#-   - name: Import pgdg gnupg key
+#-     become: true
+#-     become_user: root
+#-     shell:
+#-       warn: false
+#-       cmd:
+#-         curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
 
-  - name: Import pgdg gnupg key
-    become: true
-    become_user: root
-    shell:
-      warn: false
-      cmd:
-        curl -s https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg >/dev/null
+  - name: "Adding postgres key"
+    apt_key:
+      url: "https://www.postgresql.org/media/keys/ACCC4CF8.asc"
+      state: "present"
+
+  - name: "Adding postgres repo"
+    apt_repository:
+      filename: "pgdg"
+      repo: "deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main"
+      state: "present"
+
+
+        # -------------
+#-   - name: Configure pgdg repository
+#-     become: true
+#-     become_user: root
+#-     copy:
+#-       dest: /etc/apt/sources.list.d/pgdg.list
+#-       content: 'deb http://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release }}-pgdg main'
+#- 
+
+        #------------------
+        
+
+
+
 
   - name: apt update
     become: yes
@@ -308,11 +373,32 @@
         - pgbackrest
       state: present
 
-# File /etc/hosts
 
-- hosts: localhost
-  gather_facts: false
+- hosts: all
+  gather_facts: no
+  become: yes
+  become_user: root
+
   tasks:
+
+  - name: setup network interfaces
+    copy:
+      dest: /etc/network/interfaces
+      content: |
+        auto lo
+        iface lop inet loopback
+        auto eth0
+        iface eth0 inet static
+        address {{ ansible_host }}/24 
+        gateway  10.0.3.1
+
+  - name: restart a container
+    delegate_to: localhost
+    become: yes
+    become_user: root
+    lxc_container:
+      name: "{{ inventory_hostname }}"
+      state: restarted
 
   - name: add all the hosts to /etc/hosts
     lineinfile:
@@ -323,5 +409,3 @@
       backup: no
     loop: "{{ groups['all'] }}"
 
-# # ---------------
-# # EOF

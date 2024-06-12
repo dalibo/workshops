@@ -8,7 +8,15 @@ Discussion
 
 * https://gitlab.dalibo.info/formation/workshops/-/issues/110
 
+REVERT !   -> suppression du slide
+
+
 -->
+
+
+https://www.postgresql.org/message-id/E1mFkCk-0001UK-F7%40gemulon.postgresql.org
+
+
 
 <div class="slide-content">
 

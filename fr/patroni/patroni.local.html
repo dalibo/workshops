@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="author" content="Dalibo &amp; Contributors">
+  <meta name="keywords" content="postgres, postgresql, workshop, patroni, etcd, ha, haute
+disponibilité">
+  <title>Haute disponibilité avec Patroni</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="/home/frbn/.dalibo/themes//reveal.js//css/reveal.css">
+  <style type="text/css">code{white-space: pre;}</style>
+  <style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  { color: #93a1a1; background-color: #001120; }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.fu { color: #bc6ec5; } /* Function */
+code span.kw { color: #4f97d7; font-weight: bold; } /* Keyword */
+code span.st { color: #2d9574; } /* String */
+  </style>
+  <link rel="stylesheet" href="/home/frbn/.dalibo/themes//reveal.js//css/theme/white.css" id="theme">
+<!-- dalibo FTW -->
+<link rel="stylesheet" href="/home/frbn/.dalibo/themes//reveal.js//dalibo/dalibo.css" id="dalibo">
+<link rel="stylesheet" href="/home/frbn/.dalibo/themes//reveal.js//dalibo/title-transform/none.css" id="title-transform">
+  <!-- Printing and PDF exports -->
+  <script>
+    var link = document.createElement( 'link' );
+    link.rel = 'stylesheet';
+    link.type = 'text/css';
+    link.href = window.location.search.match( /print-pdf/gi ) ? '/home/frbn/.dalibo/themes//reveal.js//css/print/pdf.css' : '/home/frbn/.dalibo/themes//reveal.js//css/print/paper.css';
+    document.getElementsByTagName( 'head' )[0].appendChild( link );
+  </script>
+
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+<section>
+  <h1 class="title">Haute disponibilité avec Patroni</h1>
+  <p class="subtitle">Workshop Patroni</p>
+  <p class="author">Dalibo &amp; Contributors</p>
+  <p class="date">
+   v 19.02  (février 2023)
+  </p>
+</section>
+<section id="TOC">
+true
+</section>
+
+
+<section id="haute-disponibilité-de-service-avec-patroni"
+class="slide level1">
+<h1>Haute disponibilité de service avec Patroni</h1>
+<figure>
+<img data-src="medias/etcd-patroni.png" alt="PostgreSQL" />
+<figcaption aria-hidden="true">PostgreSQL</figcaption>
+</figure>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="introduction">Introduction</h2>
+<div class="slide-content">
+<ul>
+<li>Principes</li>
+<li>Mise en place</li>
+<li>Installation et configuration des services</li>
+<li>Construction d’un agrégat à bascule automatique</li>
+<li>Création d’incidents</li>
+</ul>
+</div>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="principes">Principes</h2>
+<div class="slide-content">
+<ul>
+<li>Arbitrage par un quorum : <em>DCS</em> Etcd</li>
+<li>Service PostgreSQL : désactivé</li>
+<li>Contrôle complet par Patroni</li>
+</ul>
+</div>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="dcs-etcd">DCS : Etcd</h3>
+<div class="slide-content">
+<ul>
+<li>Arbitre en cas de bascules</li>
+<li>Stockage distribué de la configuration</li>
+<li>Jeton <em>leader</em> (Etcd)</li>
+<li>Instance primaire PostgreSQL</li>
+</ul>
+</div>
+<aside class="notes">
+<p>Pour arbitrer les bascules automatiques, confirmer le primaire
+PostgreSQL ou distribuer la configuration, Patroni utilise un
+<em>DCS</em> (<em>distributed configuration system</em>).</p>
+<p>Pour ce rôle, nous utiliserons Etcd.</p>
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="mise-en-place-de-linfrastructure">Mise en place de
+l’infrastructure</h2>
+<div class="slide-content">
+<ul>
+<li>Connexion à la VM</li>
+<li>Récupération du <em>playbook</em> <em>Ansible</em></li>
+</ul>
+</div>
+<aside class="notes">
+<p>Vous disposez d’une machine virtuelle dédiée dans laquelle nous
+construirons 7 conteneurs <em>lxc</em> :</p>
+<ul>
+<li>3 Etcd</li>
+<li>3 Patroni</li>
+<li>1 backup optionnel : (sauvegardes, archivage)</li>
+</ul>
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="connexion-à-votre-machine-virtuelle">Connexion à votre machine
+virtuelle</h3>
+<div class="slide-content">
+<p>un seul point d’entrée : <code>eformation.dalibo.com</code> un port
+attribué : 22XX</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a> <span class="ex"> $</span> ssh <span class="at">-p</span> 22XX dalibo@eformation.dalibo.com</span></code></pre></div>
+</div>
+<aside class="notes">
+<p>Exemple de configuration pour une connexion simplifiée :</p>
+<pre class="console"><code>
+# .ssh/config
+
+Host vm38
+Hostname eformation.dalibo.com
+User dalibo
+port 2238
+</code></pre>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> ssh vm38</span></code></pre></div>
+<pre class="console"><code>Last login: Wed Nov 10 13:23:26 2021 from 78.213.160.12
+dalibo@vm38:~$ </code></pre>
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="playbook-ansible">Playbook Ansible</h3>
+<div class="slide-content">
+<p>Récupération du <em>playbook</em> <em>Ansible</em> à cette
+adresse :</p>
+<p><a
+href="https://github.com/dalibo/workshops/tree/workshop_patroni/fr/patroni/playbook/etcd-patroni"
+class="uri">https://github.com/dalibo/workshops/tree/workshop_patroni/fr/patroni/playbook/etcd-patroni</a></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Fichier</th>
+<th style="text-align: left;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">inventory.yml</td>
+<td style="text-align: left;">inventaire des machines</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>setup.yml</strong></td>
+<td style="text-align: left;"><strong><em>playbook</em>
+principal</strong></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"></td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">demarre_tout.sh</td>
+<td style="text-align: left;">démarre tous les conteneurs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">stoppe_tout.sh</td>
+<td style="text-align: left;">arrête tous les conteneurs</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">teardown.yml</td>
+<td style="text-align: left;"><em>playbook</em> de destruction
+massive</td>
+</tr>
+</tbody>
+</table>
+</div>
+<aside class="notes">
+<p>Quatre fichiers Yaml, deux scripts shell.</p>
+</aside>
+</section>
+<section class="slide level1">
+
+<div class="slide-content">
+<p>L’infrastructure complète peut être créée à l’aide des
+commandes :</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo apt install <span class="at">-y</span> ansible</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo ansible-playbook <span class="at">-f</span> 7 <span class="at">-i</span> inventory.yml setup.yml</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">...</span></span></code></pre></div>
+<p>Cette opération peut durer jusqu’à une vingtaine de minutes.</p>
+</div>
+<aside class="notes">
+<p>Vous pouvez suivre l’évolution de la création des conteneurs dans un
+autre terminal :</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> watch <span class="at">-n</span> 1 <span class="at">-d</span> sudo lxc-ls <span class="at">-f</span></span></code></pre></div>
+<pre class="console"><code> $ sudo lxc-ls -f
+ NAME   STATE   AUTOSTART GROUPS IPV4 IPV6 UNPRIVILEGED 
+ backup STOPPED 0         -      -    -    false        
+ e1     STOPPED 0         -      -    -    false        
+ e2     STOPPED 0         -      -    -    false        
+ e3     STOPPED 0         -      -    -    false        
+ pg-1   STOPPED 0         -      -    -    false        
+ pg-2   STOPPED 0         -      -    -    false        
+ pg-3   STOPPED 0         -      -    -    false</code></pre>
+<p>L’état final de chaque conteneur étant <em>RUNNING</em> avec une
+adresse <em>IPV4</em> attribuée :</p>
+<pre class="console"><code> $ sudo lxc-ls -f
+ NAME   STATE   AUTOSTART GROUPS IPV4       IPV6 UNPRIVILEGED
+ backup RUNNING 0         -      10.0.3.204 -    false
+ e1     RUNNING 0         -      10.0.3.101 -    false
+ e2     RUNNING 0         -      10.0.3.102 -    false
+ e3     RUNNING 0         -      10.0.3.103 -    false
+ pg-1   RUNNING 0         -      10.0.3.201 -    false
+ pg-2   RUNNING 0         -      10.0.3.202 -    false
+ pg-3   RUNNING 0         -      10.0.3.203 -    false
+</code></pre>
+<p>Sur toutes les machines, y compris l’hôte, le fichier
+<code>/etc/hosts</code> est automatiquement renseigné par le
+<em>playbook</em> et devrait contenir au moins :</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.101 e1</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.102 e2</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.103 e3</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.201 pg-1</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.202 pg-2</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.203 pg-3</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="dt">10.0.3.204 backup </span></span></code></pre></div>
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="installation-detcd">Installation d’Etcd</h3>
+<div class="slide-content">
+<ul>
+<li>Installation des paquets</li>
+<li>Configuration</li>
+<li>Démarrage du service</li>
+<li>Vérification</li>
+</ul>
+</div>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+<h4 id="installation-des-paquets">Installation des paquets</h4>
+<div class="slide-content">
+<ul>
+<li>Paquets essentiels :
+<ul>
+<li>etcd</li>
+<li>curl</li>
+<li>jq</li>
+<li>iputils-ping</li>
+</ul></li>
+</ul>
+</div>
+<aside class="notes">
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">sudo</span> ssh <span class="va">$node</span> sudo apt-get install <span class="at">-y</span> etcd curl iputils-ping jq</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a> <span class="cf">done</span></span></code></pre></div>
+<p>Le démarrage du service est automatique sous Debian.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">sudo</span> ssh <span class="va">$node</span>  <span class="st">&quot;systemctl status etcd | grep -i active&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a> <span class="cf">done</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a> </span></code></pre></div>
+<pre class="console"><code>   Active: active (running) since Wed 2021-11-10 17:48:26 UTC; 3min 28s ago
+   Active: active (running) since Wed 2021-11-10 17:48:36 UTC; 3min 18s ago
+   Active: active (running) since Wed 2021-11-10 17:48:46 UTC; 3min 8s ago</code></pre>
+<h5 id="vérification">Vérification</h5>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span>  </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh <span class="va">$node</span> etcdctl member list</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<pre class="console"><code>8e9e05c52164694d: name=e1 peerURLs=http://localhost:2380 
+clientURLs=http://localhost:2379 isLeader=true
+8e9e05c52164694d: name=e2 peerURLs=http://localhost:2380 
+clientURLs=http://localhost:2379 isLeader=true
+8e9e05c52164694d: name=e3 peerURLs=http://localhost:2380 
+clientURLs=http://localhost:2379 isLeader=true</code></pre>
+<p>Les nœuds sont tous des <em>leaders</em> indépendants, ce qui ne nous
+intéresse pas. Il faut donc les configurer pour qu’ils fonctionnent en
+agrégat.</p>
+<p>Nous arrêtons donc les services :</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;systemctl stop etcd &amp;&amp; systemctl status etcd | grep -i active&quot;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<pre class="console"><code> Active: inactive (dead) since Wed 2021-11-10 17:59:35 UTC; 2min 46s ago
+ Active: inactive (dead) since Wed 2021-11-10 17:59:35 UTC; 2min 46s ago
+ Active: inactive (dead) since Wed 2021-11-10 17:59:35 UTC; 2min 46s ago</code></pre>
+</aside>
+</section>
+<section class="slide level1">
+
+<h4 id="configuration-du-service-etcd">Configuration du service
+Etcd</h4>
+<div class="slide-content">
+<ul>
+<li>Fichier : <code>/etc/default/etcd</code></li>
+</ul>
+</div>
+<aside class="notes">
+<p>La configuration du service Etcd se trouve dans le fichier
+<code>/etc/default/etcd</code>, elle doit décrire notre agrégat sur
+chaque nœud :</p>
+<!-- **Attention aux espaces insécables dans la chaîne ETCD_INITIAL_CLUSTER -->
+<div class="box warning">
+<p>Attention aux caractères invisibles ou aux sauts de ligne</p>
+</div>
+<p><strong>Sur le nœud e1 :</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_NAME</span><span class="op">=</span><span class="st">&#39;e1&#39;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_DATA_DIR</span><span class="op">=</span><span class="st">&#39;/var/lib/etcd/default&#39;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2380,http://10.0.3.101:2380&#39;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2379,http://10.0.3.101:2379&#39;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.101:2380&#39;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_STATE</span><span class="op">=</span><span class="st">&#39;new&#39;</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_TOKEN</span><span class="op">=</span><span class="st">&#39;etcd-cluster&#39;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER</span><span class="op">=</span><span class="st">&#39;e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380&#39;</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ADVERTISE_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.101:2379&#39;</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ENABLE_V2</span><span class="op">=</span>true</span></code></pre></div>
+<p><strong>Sur le nœud e2 :</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_NAME</span><span class="op">=</span><span class="st">&#39;e2&#39;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_DATA_DIR</span><span class="op">=</span><span class="st">&#39;/var/lib/etcd/default&#39;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2380,http://10.0.3.102:2380&#39;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2379,http://10.0.3.102:2379&#39;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.102:2380&#39;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_STATE</span><span class="op">=</span><span class="st">&#39;new&#39;</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_TOKEN</span><span class="op">=</span><span class="st">&#39;etcd-cluster&#39;</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER</span><span class="op">=</span><span class="st">&#39;e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380&#39;</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ADVERTISE_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.102:2379&#39;</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ENABLE_V2</span><span class="op">=</span>true</span></code></pre></div>
+<p><strong>Sur le nœud e3 :</strong></p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode sh"><code class="sourceCode bash"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_NAME</span><span class="op">=</span><span class="st">&#39;e3&#39;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_DATA_DIR</span><span class="op">=</span><span class="st">&#39;/var/lib/etcd/default&#39;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2380,http://10.0.3.103:2380&#39;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_LISTEN_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://127.0.0.1:2379,http://10.0.3.103:2379&#39;</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_ADVERTISE_PEER_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.103:2380&#39;</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_STATE</span><span class="op">=</span><span class="st">&#39;new&#39;</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER_TOKEN</span><span class="op">=</span><span class="st">&#39;etcd-cluster&#39;</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_INITIAL_CLUSTER</span><span class="op">=</span><span class="st">&#39;e1=http://10.0.3.101:2380,e2=http://10.0.3.102:2380,e3=http://10.0.3.103:2380&#39;</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ADVERTISE_CLIENT_URLS</span><span class="op">=</span><span class="st">&#39;http://10.0.3.103:2379&#39;</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a><span class="va">ETCD_ENABLE_V2</span><span class="op">=</span>true</span></code></pre></div>
+</aside>
+</section>
+<section class="slide level1">
+
+<h4 id="démarrage-du-service">Démarrage du service</h4>
+<div class="slide-content">
+<ul>
+<li>Réinitialisation des bases Etcd</li>
+<li>Démarrage du service <code>etcd</code>
+<ul>
+<li><code>systemctl  start etcd</code></li>
+</ul></li>
+</ul>
+</div>
+<aside class="notes">
+<p>Avant de démarrer le service sur chaque nœud, il faut réinitialiser
+les répertoires de données des nœuds, afin qu’ils reparte sur un
+répertoire neuf.</p>
+<p>Le nœud <code>e1</code>, que nous considérons comme premier
+<em>leader</em> sera démarré en premier mais il est possible qu’un autre
+nœud prenne le dessus s’il arrive à démarrer plus vite :</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="ex"> echo</span> <span class="st">&quot;</span><span class="va">$node</span><span class="st"> :&quot;</span> <span class="kw">;</span> <span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;rm -rf ~etcd/default/*&quot;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a> <span class="cf">done</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="ex"> sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;systemctl start etcd&quot;</span> <span class="kw">&amp;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="ex"> sleep</span> 1</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="ex"> done</span></span></code></pre></div>
+<p>En cas d’échec de démarrage, utilisez la commande <em>Systemd</em>
+pour en diagnostiquer la cause :</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> e1:~$</span> sudo journalctl <span class="at">-xfu</span> etcd</span></code></pre></div>
+<p><strong>Vérification :</strong></p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex"> echo</span> <span class="st">&quot;sur </span><span class="va">$node</span><span class="st"> :&quot;</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="ex"> sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;etcdctl member list&quot;</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<pre class="console"><code>sur e1 :
+736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
+7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
+97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=false
+sur e2 :
+736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 isLeader=true
+7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
+isLeader=false
+97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
+isLeader=false
+sur e3 :
+736293150f1cffb7: name=e1 peerURLs=http://10.0.3.101:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
+isLeader=true
+7ef9d5bb55cefbcc: name=e3 peerURLs=http://10.0.3.103:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
+isLeader=false
+97463691c7858a7b: name=e2 peerURLs=http://10.0.3.102:2380 
+clientURLs=http://10.0.3.101:2379,http://10.0.3.102:2379,http://10.0.3.103:2379 
+isLeader=false</code></pre>
+</aside>
+<blockquote>
+<p>Le <em>leader</em> doit être identique sur les trois nœuds, les trois
+nœuds doivent retourner la même liste de membres.</p>
+</blockquote>
+</section>
+<section class="slide level1">
+
+<h3 id="installation-de-postgresql-patroni">Installation de PostgreSQL /
+Patroni</h3>
+<div class="slide-content">
+<ul>
+<li>Installation
+<ul>
+<li>PostgreSQL</li>
+<li>Patroni</li>
+<li>pgBackrest</li>
+</ul></li>
+</ul>
+</div>
+<aside class="notes">
+<p>Le dépôt <em>pgdg</em> est déjà préconfiguré dans les conteneurs
+pg-1, pg-2 et pg-3, l’installation est donc triviale :</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;apt-get update &amp;&amp; apt-get install -y postgresql patroni pgbackrest&quot;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p><strong>Vérification :</strong></p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span> <span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;dpkg -l postgresql patroni </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="st">pgbackrest | grep ^ii | cut -d &#39; &#39; -f 1,3&quot;</span><span class="kw">;</span> <span class="cf">done</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> patroni</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> pgbackrest</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> postgresql</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> patroni</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> pgbackrest</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> postgresql</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> patroni</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> pgbackrest</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="ex">ii</span> postgresql</span></code></pre></div>
+<p>Le service PostgreSQL doit êtrre désactivé car la gestion totale de
+l’instance sera déléguée à Patroni :</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> for node in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;systemctl disable --now postgresql@15-main&quot;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+</aside>
+</section>
+<section class="slide level1">
+
+<h4 id="configuration-de-patroni">Configuration de Patroni</h4>
+<div class="slide-content">
+<p>Sur tous les nœuds PostgreSQL/Patroni</p>
+<ul>
+<li>Configuration du DCS
+<ul>
+<li><code>/etc/patroni/dcs.yml</code></li>
+</ul></li>
+<li>Génération de la configuration
+<ul>
+<li><code>pg_createconfig_patroni 15 main</code></li>
+</ul></li>
+</ul>
+</div>
+<aside class="notes">
+<p>La configuration sous Debian se fait d’abord en renseignant comment
+contacter le DCS, puis en lançant le script de génération automatique de
+la configuration de Patroni.</p>
+<p>Le port par défaut du service Etcd est le <code>2379</code>.</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> sudo ssh pg-1</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="ex">root@pg-1:~#</span> vim /etc/patroni/dcs.yml</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /etc/patroni/dcs.yml</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">etcd</span><span class="kw">:</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">hosts</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> 10.0.3.101:2379</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> 10.0.3.102:2379</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="kw">-</span><span class="at"> 10.0.3.103:2379</span></span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> root@pg-1:~#</span> pg_createconfig_patroni 15 main<span class="st">&quot;</span></span></code></pre></div>
+<p>La configuration <code>/etc/patroni/15-main.yml</code> est
+générée.</p>
+</aside>
+<p>Ces opérations doivent être répétées sur tous nœuds
+PostgreSQL/Patroni.</p>
+</section>
+<section class="slide level1">
+
+<h4 id="création-de-lagrégat">Création de l’agrégat</h4>
+<div class="slide-content">
+<ul>
+<li>Démarrage du primaire</li>
+<li>Création de l’utilisateur de réplication</li>
+<li>Suppression des instances secondaires</li>
+<li>Démarrage des instances secondaires</li>
+</ul>
+</div>
+<aside class="notes">
+<h5 id="démarrage-du-primaire">Démarrage du primaire</h5>
+<p>La création de l’agrégat commence par la mise en route du primaire
+sur le nœud <code>pg-1</code>, c’est lui qui sera la référence pour les
+secondaires.</p>
+<p><strong>L’utilisateur permettant la mise en réplication doit être
+créé sur ce nœud, avec le mot de passe renseigné dans la configuration
+de Patroni :</strong></p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="ex">root@pg-1:~#</span> systemctl enable <span class="at">--now</span> patroni@15-main</span></code></pre></div>
+<h5 id="création-de-lutilisateur-de-réplication">Création de
+l’utilisateur de réplication</h5>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="ex">root@pg-1:~#</span> sudo <span class="at">-iu</span> postgres psql <span class="at">-c</span> <span class="dt">\&quot;</span>create user replicator replication </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a> <span class="ex">password</span> <span class="st">&#39;rep-pass&#39;</span><span class="dt">\&quot;</span> </span></code></pre></div>
+<h5 id="suppression-des-instances-secondaires">Suppression des instances
+secondaires</h5>
+<p>Les instances secondaires ont été initialisées lors de l’installation
+du paquet Debian, il faut donc vider leur répertoire de données car
+Patroni refusera d’écraser des données existantes.</p>
+<p><code>pg-1</code> étant notre primaire :</p>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> ssh  <span class="va">$node</span> <span class="st">&quot;rm -rf /var/lib/postgresql/15/main/*&quot;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Les secondaires seront recréés automatiquement par Patroni, depuis le
+primaire répliqué.</p>
+<h5 id="démarrage-des-instances-secondaires">Démarrage des instances
+secondaires</h5>
+<p>Nous pouvons raccrocher nos secondaires en démarrant les deux
+instances :</p>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;systemctl start patroni@15-main&quot;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span></code></pre></div>
+</aside>
+</section>
+<section class="slide level1">
+
+<h5 id="vérifications">Vérifications</h5>
+<div class="slide-content">
+<ul>
+<li>Liste des nœuds Patroni</li>
+<li>Test de bascule manuelle vers chaque nœud</li>
+</ul>
+</div>
+<aside class="notes">
+<h6 id="liste-des-nœuds-patroni">Liste des nœuds Patroni</h6>
+<p>Sur chaque nœud Patroni, modifier le <code>.profile</code> de
+l’utilisateur <code>postgres</code> en ajoutant :</p>
+<div class="sourceCode" id="cb35"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATRONICTL_CONFIG_FILE</span><span class="op">=</span>/etc/patroni/15-main.yml</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo ssh pg-1 sudo <span class="at">-iu</span> postgres patronictl list</span></code></pre></div>
+<pre class="console"><code> + Cluster: 15-main (7029596050496494965) -+----+-----------+
+ | Member | Host       | Role    | State   | TL | Lag in MB |
+ +--------+------------+---------+---------+----+-----------+
+ | pg-1   | 10.0.3.201 | Leader  | running |  3 |           |
+ | pg-2   | 10.0.3.202 | Replica | running |  3 |         0 |
+ | pg-3   | 10.0.3.203 | Replica | running |  3 |         0 |</code></pre>
+<h6 id="test-de-bascule-manuelle-vers-chaque-nœud">Test de bascule
+manuelle vers chaque nœud</h6>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo ssh pg-1 sudo <span class="at">-iu</span> postgres patronictl switchover</span></code></pre></div>
+<pre class="console"><code>Master [pg-1]:
+Candidate [&#39;pg-2&#39;, &#39;pg-3&#39;] []: pg-2
+When should the switchover take place (e.g. 2021-11-12T12:21 )  [now]:                          
+Current cluster topology
++ Cluster: 15-main (7029596050496494965) -+----+-----------+                                    
+| Member | Host       | Role    | State   | TL | Lag in MB |                                    
++--------+------------+---------+---------+----+-----------+                                    
+| pg-1   | 10.0.3.201 | Leader  | running |  3 |           |                                    
+| pg-2   | 10.0.3.202 | Replica | running |  3 |         0 |                                    
+| pg-3   | 10.0.3.203 | Replica | running |  3 |         0 |                                    
++--------+------------+---------+---------+----+-----------+                                    
+Are you sure you want to switchover cluster 15-main, demoting current master 
+pg-1? [y/N]: y     
+2021-11-12 11:21:20.08091 Successfully switched over to &quot;pg-2&quot;                                  
++ Cluster: 15-main (7029596050496494965) -+----+-----------+                                    
+| Member | Host       | Role    | State   | TL | Lag in MB |                                    
++--------+------------+---------+---------+----+-----------+                                    
+| pg-1   | 10.0.3.201 | Replica | stopped |    |   unknown |                                    
+| pg-2   | 10.0.3.202 | Leader  | running |  3 |           |                                    
+| pg-3   | 10.0.3.203 | Replica | running |  3 |         0 |                                    
++--------+------------+---------+---------+----+-----------+</code></pre>
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="création-dincidents">Création d’incidents</h2>
+<div class="slide-content">
+<ul>
+<li>Perte totale du DCS</li>
+<li>Freeze du nœud primaire Patroni</li>
+<li>Bascule manuelle</li>
+</ul>
+</div>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="perte-totale-du-dcs">Perte totale du DCS</h3>
+<div class="slide-content">
+<ul>
+<li>Perte de tous les nœuds Etcd</li>
+</ul>
+</div>
+<aside class="notes">
+<p>Nous simulons un incident majeur au niveau du <em>DCS</em> :</p>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> lxc-freeze <span class="va">$node</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>La commande classique <code>patronictl list</code> échoue faute de
+<em>DCS</em> pour la renseigner.</p>
+<p>Nous interrogeons directement sur les instances :</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$node</span><span class="st"> :&quot;</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;sudo -iu postgres psql -c &#39;select pg_is_in_recovery()&#39;&quot;</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<pre class="console"><code>pg-1 :
+ pg_is_in_recovery 
+-------------------
+ t
+(1 ligne)
+
+pg-2 :
+ pg_is_in_recovery 
+-------------------
+ t
+(1 ligne)
+
+pg-3 :
+ pg_is_in_recovery 
+-------------------
+ t
+(1 ligne)</code></pre>
+<p>Nous constatons que l’intégralité des nœuds est passée en lecture
+seule (<em>stand-by</em>).</p>
+<p>Nous débloquons la situation :</p>
+<div class="sourceCode" id="cb43"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in e1 e2 e3<span class="kw">;</span> <span class="cf">do</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$node</span><span class="st"> :&quot;</span></span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sudo</span> lxc-unfreeze <span class="va">$node</span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a><span class="cf">done</span></span></code></pre></div>
+<p>Nous pouvons observer le retour à la normale :</p>
+<div class="sourceCode" id="cb44"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> postgres@pg-1:~$</span> patronictl list <span class="at">-ew</span> 1</span></code></pre></div>
+</aside>
+</section>
+<section class="slide level1">
+
+<h3 id="perte-du-nœud-primaire-patroni">Perte du nœud primaire
+Patroni</h3>
+<div class="slide-content">
+<ul>
+<li>Perte du primaire courant</li>
+</ul>
+</div>
+<aside class="notes">
+<p>Dans un autre terminal, nous observons l’état de l’agrégat sur le
+nœud <code>pg-2</code> :</p>
+<div class="sourceCode" id="cb45"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> postgres@pg-2:~$</span> patronictl list <span class="at">-ew</span> 1</span></code></pre></div>
+<p>Nous simulons une perte du primaire <code>pg-1</code> :</p>
+<div class="sourceCode" id="cb46"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo lxc-freeze pg-1</span></code></pre></div>
+<p>Nous observons la disparition de <code>pg-1</code> de la liste des
+nœuds et une bascule automatique se déclenche vers un des nœuds
+secondaires disponibles :</p>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
++--------+------------+---------+---------+----+-----------+</code></pre>
+<p>Nous rétablissons la situation :</p>
+<div class="sourceCode" id="cb48"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> sudo lxc-unfreeze pg-1</span></code></pre></div>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Replica | running |  6 |         0 |
+| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
++--------+------------+---------+---------+----+-----------+</code></pre>
+<p>Pour un retour à l’état nominal, il suffit de procéder à une bascule
+manuelle (adapter la commande si votre primaire n’est pas
+<code>pg-3</code>) :</p>
+<div class="sourceCode" id="cb50"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> patronictl switchover <span class="at">--master</span> pg-3 <span class="at">--candidate</span> pg-1 <span class="at">--force</span></span></code></pre></div>
+<pre class="console"><code>Current cluster topology
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Replica | running |  7 |         0 |
+| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Leader  | running |  7 |           |
++--------+------------+---------+---------+----+-----------+
+2021-11-12 13:18:36.05884 Successfully switched over to &quot;pg-1&quot;
++ Cluster: 15-main (7029596050496494965) -+----+-----------+
+| Member | Host       | Role    | State   | TL | Lag in MB |
++--------+------------+---------+---------+----+-----------+
+| pg-1   | 10.0.3.201 | Leader  | running |  7 |           |
+| pg-2   | 10.0.3.202 | Replica | running |  7 |         0 |
+| pg-3   | 10.0.3.203 | Replica | stopped |    |   unknown |
++--------+------------+---------+---------+----+-----------+</code></pre>
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="modification-de-la-configuration">Modification de la
+configuration</h2>
+<div class="slide-content">
+<ul>
+<li>patronictl edit-config</li>
+</ul>
+</div>
+<aside class="notes">
+<p>L’un des avantages de bénéficier d’une configuration distribuée est
+qu’il est possible de modifier cette configuration pour tous les nœuds
+en une seule opération.</p>
+<p>Si le paramètre nécessite un rechargement de la configuration, elle
+sera lancée sur chaque nœud.</p>
+<p>Si la modification nécessite un redémarrage, l’ drapeau <em>pending
+restart</em> sera positionné sur toutes les instances et attendrons une
+action de votre part pour l’effectuer.</p>
+<p>L’installation de la commande <code>less</code> est un
+pré-requis :</p>
+<div class="sourceCode" id="cb52"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for i in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span> <span class="ex">apt</span> install less done</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a><span class="ex"> ...</span></span></code></pre></div>
+<p>La modification peut se faire sur n’importe quel nœud :</p>
+<div class="sourceCode" id="cb53"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-2:~$</span> patronictl edit-config</span></code></pre></div>
+<p>Nous ajoutons une ligne fille de la ligne
+<code> parameters:</code></p>
+<div class="sourceCode" id="cb54"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">loop_wait</span><span class="kw">:</span><span class="at"> </span><span class="dv">10</span></span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a><span class="fu">maximum_lag_on_failover</span><span class="kw">:</span><span class="at"> </span><span class="dv">1048576</span></span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a><span class="fu">postgresql</span><span class="kw">:</span></span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">parameters</span><span class="kw">:</span><span class="at"> </span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_connections</span><span class="kw">:</span><span class="at"> </span><span class="dv">123</span></span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a><span class="at"> ...</span></span></code></pre></div>
+<p>Une confirmation est demandée après la sortie de l’éditeur :</p>
+<pre class="console"><code>patronictl edit-config
+--- 
++++ 
+@@ -1,7 +1,8 @@
+ loop_wait: 10
+ maximum_lag_on_failover: 1048576
+ postgresql:
+-  parameters: null
++  parameters: 
++    max_connections: 123
+   pg_hba:
+   - local   all             all                                     peer
+   - host    all             all             127.0.0.1/32            md5
+
+Apply these changes? [y/N]: y
+Configuration changed</code></pre>
+<p>Après modification, il convient de regarder si notre modification ne
+nécessite pas de redémarrage :</p>
+<div class="sourceCode" id="cb56"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-2:~$</span> patronictl list <span class="at">-e</span></span></code></pre></div>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
+| Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
++--------+------------+---------+---------+----+-----------+-----------------+
+| pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
+| pg-2   | 10.0.3.202 | Replica | running |  8 |         0 | *               | 
+| pg-3   | 10.0.3.203 | Replica | running |  8 |         0 | *               |
++--------+------------+---------+---------+----+-----------+-----------------+</code></pre>
+<p>Dans notre cas, un redémarrage de toutes les instances est
+nécessaire :</p>
+<div class="sourceCode" id="cb58"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-2:~$</span> patronictl restart 15-main</span></code></pre></div>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
+| Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
++--------+------------+---------+---------+----+-----------+-----------------+
+| pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
+| pg-2   | 10.0.3.202 | Replica | running |  8 |         0 | *               |
+| pg-3   | 10.0.3.203 | Replica | running |  8 |         0 | *               |
++--------+------------+---------+---------+----+-----------+-----------------+
+When should the restart take place (e.g. 2021-11-12T14:37)  [now]: 
+Are you sure you want to restart members pg-3, pg-2, pg-1? [y/N]: y
+Restart if the PostgreSQL version is less than provided (e.g. 9.5.2)  []: 
+Success: restart on member pg-3
+Success: restart on member pg-2
+Success: restart on member pg-1</code></pre>
+<div class="sourceCode" id="cb60"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-2:~$</span> patronictl list <span class="at">-e</span></span></code></pre></div>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
+| Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
++--------+------------+---------+---------+----+-----------+-----------------+
+| pg-1   | 10.0.3.201 | Leader  | running |  8 |           |                 |
+| pg-2   | 10.0.3.202 | Replica | running |  8 |         0 |                 |
+| pg-3   | 10.0.3.203 | Replica | running |  8 |         0 |                 |
++--------+------------+---------+---------+----+-----------+-----------------+</code></pre>
+<div class="sourceCode" id="cb62"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> for node in pg-1 pg-2 pg-3<span class="kw">;</span> <span class="cf">do</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">&quot;</span><span class="va">$node</span><span class="st"> :&quot;</span></span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> ssh <span class="va">$node</span> <span class="st">&quot;sudo -iu postgres psql -c &#39;show max_connections&#39;&quot;</span></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">done</span></span></code></pre></div>
+<pre class="console"><code>pg-1 :
+ max_connections 
+-----------------
+ 123
+(1 ligne)
+
+pg-2 :
+ max_connections 
+-----------------
+ 123
+(1 ligne)
+
+pg-3 :
+ max_connections 
+-----------------
+ 123
+(1 ligne)</code></pre>
+<p>L’application d’un paramètre qui ne nécessite pas de redémarrage est
+transparente, le rechargement de la configuration sur tous les nœuds est
+automatiquement déclenchée par Patroni.</p>
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="sauvegardes">Sauvegardes</h2>
+<div class="slide-content">
+<ul>
+<li>Installation pgBackrest</li>
+<li>Configuration</li>
+<li>Détermination du primaire</li>
+<li>Archivage</li>
+<li>Sauvegarde</li>
+</ul>
+</div>
+<aside class="notes">
+<h3 id="détermination-du-primaire">Détermination du primaire</h3>
+<p>Nous proposons de déclencher la sauvegarde sur le primaire courant,
+il faut donc d’abord l’identifier.</p>
+<p>Le script suivant est une solution permettant de récupérer le
+primaire de notre agrégat à partir d’un nœud Etcd ezt de l’API mise à
+disposition :</p>
+<div class="sourceCode" id="cb64"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="co">#! /bin/bash</span></span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a><span class="va">SCOPE</span><span class="op">=</span><span class="va">$(</span><span class="fu">grep</span> <span class="at">-i</span> scope: /etc/patroni/15-main.yml <span class="kw">|</span> <span class="fu">cut</span> <span class="at">-d</span> <span class="st">&#39;&quot;&#39;</span> <span class="at">-f</span> 2<span class="va">)</span></span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://e1:2379/v2/keys/postgresql-common/<span class="st">&quot;</span><span class="va">$SCOPE</span><span class="st">&quot;</span>/leader <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> .node.value</span></code></pre></div>
+<h3 id="configuration-de-pgbackrest">Configuration de pgBackrest</h3>
+<p>Sur chacun des nœuds, il faut configurer le <em>stanza</em> et
+l’initialiser :</p>
+<div class="sourceCode" id="cb65"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="co"># /etc/pgbackrest.conf</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a><span class="kw">[main]</span></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-path</span><span class="ot">=</span><span class="st">/var/lib/postgresql/14/main</span></span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-socket-path</span><span class="ot">=</span><span class="st">/var/run/postgresql</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-port</span><span class="ot">=</span><span class="dv">5432</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[global]</span></span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a><span class="dt">log-level-file</span><span class="ot">=</span><span class="st">detail</span></span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a><span class="dt">log-level-console</span><span class="ot">=</span><span class="st">detail</span></span>
+<span id="cb65-10"><a href="#cb65-10" aria-hidden="true" tabindex="-1"></a><span class="dt">repo1-host</span><span class="ot">=</span><span class="st">backup</span></span>
+<span id="cb65-11"><a href="#cb65-11" aria-hidden="true" tabindex="-1"></a><span class="dt">repo1-host-user</span><span class="ot">=</span><span class="st">postgres</span></span></code></pre></div>
+<p>Tous les nœuds doivent permettre la connexion <em>ssh</em> sans mot
+de passe, le <em>playbook</em> <em>Ansible</em> nommé
+<code>exchange_ssh_keys</code> permet de faire ce travail
+rapidement :</p>
+<div class="sourceCode" id="cb66"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="ex"> $</span> sudo ansible-playbook <span class="at">-i</span> inventory.yml exchange_ssh_keys.yml  <span class="at">-f</span> 7</span></code></pre></div>
+<p>Nous pouvons alors tenter de créer le <em>stanza</em> sur le
+primaire :</p>
+<div class="sourceCode" id="cb67"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> pgbackrest <span class="at">--stanza</span> main stanza-create</span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:/var/lib/pgbackrest$</span> pgbackrest <span class="at">--stanza</span>  main check</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ERROR:</span> [087]: archive_mode must be enabled</span></code></pre></div>
+<h4 id="configuration-de-larchivage">Configuration de l’archivage</h4>
+<p>Toutes les instances doivent être en mesure d’archiver leurs journaux
+de transactions au moyen de pgBackrest :</p>
+<div class="sourceCode" id="cb68"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> patronictl edit-config</span></code></pre></div>
+<div class="sourceCode" id="cb69"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">postgresql</span><span class="kw">:</span></span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">parameters</span><span class="kw">:</span></span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">max_connections</span><span class="kw">:</span><span class="at"> </span><span class="dv">123</span></span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">archive_mode</span><span class="kw">:</span><span class="at"> </span><span class="st">&#39;on&#39;</span></span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">archive_command</span><span class="kw">:</span><span class="at"> pgbackrest --stanza=main archive-push %p</span></span></code></pre></div>
+<p>Notre configuration n’a pas encore été appliquée sur les instances
+car un redémarrage est requis :</p>
+<div class="sourceCode" id="cb70"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> patronictl list <span class="at">-e</span></span></code></pre></div>
+<pre class="console"><code>+ Cluster: 15-main (7029596050496494965) -+----+-----------+-----------------+
+| Member | Host       | Role    | State   | TL | Lag in MB | Pending restart |
++--------+------------+---------+---------+----+-----------+-----------------+
+| pg-1   | 10.0.3.201 | Leader  | running |  8 |           | *               |
+| pg-2   | 10.0.3.202 | Replica | running |  8 |         0 | *               |
+| pg-3   | 10.0.3.203 | Replica | running |  8 |         0 | *               |
++--------+------------+---------+---------+----+-----------+-----------------+</code></pre>
+<div class="sourceCode" id="cb72"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> patronictl restart 15-main <span class="at">--force</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="ex">+</span> Cluster: 15-main <span class="er">(</span><span class="ex">7029596050496494965</span><span class="kw">)</span> <span class="ex">-+----+-----------+-----------------+</span></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">Member</span> <span class="kw">|</span> <span class="ex">Host</span>       <span class="kw">|</span> <span class="ex">Role</span>    <span class="kw">|</span> <span class="ex">State</span>   <span class="kw">|</span> <span class="ex">TL</span> <span class="kw">|</span> <span class="ex">Lag</span> in MB <span class="kw">|</span> <span class="ex">Pending</span> restart <span class="kw">|</span></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="ex">+--------+------------+---------+---------+----+-----------+-----------------+</span></span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">pg-1</span>   <span class="kw">|</span> <span class="ex">10.0.3.201</span> <span class="kw">|</span> <span class="ex">Leader</span>  <span class="kw">|</span> <span class="ex">running</span> <span class="kw">|</span>  <span class="ex">8</span> <span class="kw">|</span>           <span class="kw">|</span> <span class="ex">*</span>               <span class="kw">|</span></span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">pg-2</span>   <span class="kw">|</span> <span class="ex">10.0.3.202</span> <span class="kw">|</span> <span class="ex">Replica</span> <span class="kw">|</span> <span class="ex">running</span> <span class="kw">|</span>  <span class="ex">8</span> <span class="kw">|</span>         <span class="ex">0</span> <span class="kw">|</span> <span class="ex">*</span>               <span class="kw">|</span></span>
+<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a><span class="kw">|</span> <span class="ex">pg-3</span>   <span class="kw">|</span> <span class="ex">10.0.3.203</span> <span class="kw">|</span> <span class="ex">Replica</span> <span class="kw">|</span> <span class="ex">running</span> <span class="kw">|</span>  <span class="ex">8</span> <span class="kw">|</span>         <span class="ex">0</span> <span class="kw">|</span> <span class="ex">*</span>               <span class="kw">|</span></span>
+<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a><span class="ex">+--------+------------+---------+---------+----+-----------+-----------------+</span></span>
+<span id="cb72-9"><a href="#cb72-9" aria-hidden="true" tabindex="-1"></a><span class="ex">Success:</span> restart on member pg-1</span>
+<span id="cb72-10"><a href="#cb72-10" aria-hidden="true" tabindex="-1"></a><span class="ex">Success:</span> restart on member pg-3</span>
+<span id="cb72-11"><a href="#cb72-11" aria-hidden="true" tabindex="-1"></a><span class="ex">Success:</span> restart on member pg-2</span></code></pre></div>
+<p>Test de la configuration de l’archivage sur le nœud
+<code>pg-1</code> :</p>
+<div class="sourceCode" id="cb73"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@pg-1:~$</span> pgbackrest <span class="at">--stanza</span> main <span class="at">--log-level-console</span> detail  check</span></code></pre></div>
+<pre class="console"><code>2021-11-12 15:57:04.000 P00   INFO: check command begin 2.35: --exec-id=13216-
+4a7c4a92 --log-level-console=detail --log-level-file=detail --pg1-path=/var/lib/
+postgresql/14/main --pg1-port=5432 --pg1-socket-path=/var/run/postgresql --
+repo1-host=backup --repo1-host-user=postgres --stanza=main
+2021-11-12 15:57:04.616 P00   INFO: check repo1 configuration (primary)
+2021-11-12 15:57:05.083 P00   INFO: check repo1 archive for WAL (primary)
+2021-11-12 15:57:08.425 P00   INFO: WAL segment 000000080000000000000005 
+successfully archived to &#39;/var/lib/pgbackrest/archive/main/14-1/
+0000000800000000/000000080000000000000005-
+b0929d740c7996974992ecd7b9b189b37d06a896.gz&#39; on repo1
+2021-11-12 15:57:08.528 P00   INFO: check command end: completed successfully 
+(4531ms)</code></pre>
+<h4
+id="configuration-sur-la-machine-hébergeant-les-sauvegardes">Configuration
+sur la machine hébergeant les sauvegardes</h4>
+<p>Sur la machine <code>backup</code>, créer le script de détermination
+du <em>leader</em> (le rendre exécutable) :</p>
+<div class="sourceCode" id="cb75"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@backup:~$</span> vim ~/leader.sh <span class="kw">&amp;&amp;</span> <span class="fu">chmod</span> +x leader.sh</span></code></pre></div>
+<div class="sourceCode" id="cb76"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="co">#! /bin/bash</span></span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a><span class="va">SCOPE</span><span class="op">=</span><span class="st">&#39;15-main&#39;</span></span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-s</span> http://e1:2379/v2/keys/postgresql-common/<span class="st">&quot;</span><span class="va">$SCOPE</span><span class="st">&quot;</span>/leader <span class="kw">|</span> <span class="ex">jq</span> <span class="at">-r</span> .node.value</span></code></pre></div>
+<h5 id="configuration-de-pgbackrest-1">Configuration de pgBackrest</h5>
+<p>La configuration se fait dans le fichier
+<code>/etc/pgbackrest.conf</code> :</p>
+<div class="sourceCode" id="cb77"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[global]</span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a><span class="dt">repo1-path</span><span class="ot">=</span><span class="st">/var/lib/pgbackrest</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a><span class="dt">repo1-retention-full</span><span class="ot">=</span><span class="dv">2</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a><span class="dt">start-fast</span><span class="ot">=</span><span class="st">y</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a><span class="dt">log-level-console</span><span class="ot">=</span><span class="st">detail</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a><span class="kw">[main]</span></span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-path</span><span class="ot">=</span><span class="st">/var/lib/postgresql/14/main</span></span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-host-user</span><span class="ot">=</span><span class="st">postgres</span></span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-user</span><span class="ot">=</span><span class="st">postgres</span></span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a><span class="dt">pg1-port</span><span class="ot">=</span><span class="dv">5432</span></span></code></pre></div>
+<h5 id="test-dune-sauvegarde">test d’une sauvegarde</h5>
+<div class="sourceCode" id="cb78"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@backup:~$</span> pgbackrest <span class="at">--stanza</span> main <span class="at">--pg1-host</span><span class="op">=</span><span class="va">$(</span><span class="ex">./leader.sh</span><span class="va">)</span> backup </span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a><span class="ex">--type=full</span></span></code></pre></div>
+<pre class="console"><code>2021-11-12 16:32:32.128 P00   INFO: backup command begin 2.35: --exec-id=6717-
+e7512f6c --log-level-console=detail --pg1-host=pg-1 --pg1-host-user=postgres --
+pg1-path=/var/lib/postgresql/14/main --pg1-port=5432 --pg1-user=postgres --
+repo1-path=/var/lib/pgbackrest --repo1-retention-full=2 --stanza=main --start-
+fast --type=full
+2021-11-12 16:32:33.114 P00   INFO: execute non-exclusive pg_start_backup(): 
+backup begins after the requested immediate checkpoint completes
+2021-11-12 16:32:34.129 P00   INFO: backup start archive = 
+00000008000000000000000B, lsn = 0/B000028
+2021-11-12 16:32:36.709 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+main/base/13707/1255 (752KB, 2%) checksum 
+2bac9bc6e62f6059736f9152a045bb43c0832231
+2021-11-12 16:32:37.119 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+main/base/13706/1255 (752KB, 5%) checksum 
+2bac9bc6e62f6059736f9152a045bb43c0832231 
+...
+...
+2021-11-12 16:32:45.786 P01 DETAIL: backup file pg-1:/var/lib/postgresql/14/
+main/base/1/13528 (0B, 100%)
+2021-11-12 16:32:45.791 P00   INFO: execute non-exclusive pg_stop_backup() and 
+wait for all WAL segments to archive
+2021-11-12 16:32:46.095 P00   INFO: backup stop archive = 
+00000008000000000000000B, lsn = 0/B000138
+2021-11-12 16:32:46.101 P00 DETAIL: wrote &#39;backup_label&#39; file returned from 
+pg_stop_backup()
+2021-11-12 16:32:46.103 P00   INFO: check archive for segment(s) 
+00000008000000000000000B:00000008000000000000000B
+2021-11-12 16:32:49.611 P00   INFO: new backup label = 20211112-163233F
+2021-11-12 16:32:49.673 P00   INFO: full backup size = 25.1MB, file total = 952
+2021-11-12 16:32:49.674 P00   INFO: backup command end: completed successfully 
+(17556ms)
+2021-11-12 16:32:49.675 P00   INFO: expire command begin 2.35: --exec-id=6717-
+e7512f6c --log-level-console=detail --repo1-path=/var/lib/pgbackrest --repo1-
+retention-full=2 --stanza=main
+2021-11-12 16:32:49.686 P00   INFO: expire command end: completed successfully 
+(11ms)</code></pre>
+<p>Vérification de l’état de la sauvegarde :</p>
+<div class="sourceCode" id="cb80"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="ex">postgres@backup:~$</span> pgbackrest <span class="at">--stanza</span> main info</span></code></pre></div>
+<pre class="console"><code>stanza: main
+    status: ok
+    cipher: none
+
+    db (current)
+        wal archive min/max (14): 000000010000000000000001/00000008000000000000000B
+
+        full backup: 20211112-163233F
+            timestamp start/stop: 2021-11-12 16:32:33 / 2021-11-12 16:32:45
+            wal start/stop: 00000008000000000000000B / 00000008000000000000000B
+            database size: 25.1MB, database backup size: 25.1MB
+            repo1: backup set size: 3.2MB, backup size: 3.2MB</code></pre>
+</aside>
+</section>
+<section class="slide level1">
+
+<h2 id="références">Références</h2>
+<div class="slide-content">
+<ul>
+<li>Etcd : <a href="https://etcd.io/docs/"
+class="uri">https://etcd.io/docs/</a></li>
+<li>Patroni : <a href="https://patroni.readthedocs.io/en/latest/"
+class="uri">https://patroni.readthedocs.io/en/latest/</a></li>
+<li>Formation HAPAT : <a
+href="https://dalibo.com/formation-postgresql-haute-disponibilite"
+class="uri">https://dalibo.com/formation-postgresql-haute-disponibilite</a></li>
+<li>Dalibo : <a href="https://dalibo.com"
+class="uri">https://dalibo.com</a></li>
+</ul>
+</div>
+<aside class="notes">
+
+</aside>
+</section>
+<section class="slide level1">
+
+</section>
+    </div>
+  </div>
+
+<!-- dalibo FTW -->
+  <a href="#/"><img class="logo" style="" src="/home/frbn/.dalibo/themes//reveal.js//dalibo/logo_dalibo_large_blue.png" alt="logo"></a>
+
+  <script src="/home/frbn/.dalibo/themes//reveal.js//lib/js/head.min.js"></script>
+  <script src="/home/frbn/.dalibo/themes//reveal.js//js/reveal.js"></script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://github.com/hakimel/reveal.js#configuration
+      Reveal.initialize({
+        // Display controls in the bottom right corner
+        controls: true,
+        // Display a presentation progress bar
+        progress: true,
+        // Display the page number of the current slide
+        slideNumber: true,
+        // Push each slide change to the browser history
+        history: true,
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+        // Enable the slide overview mode
+        overview: true,
+        // Vertical centering of slides
+        center: true,
+        // Enables touch navigation on devices with touch input
+        touch: true,
+        // Turns fragments on and off globally
+        fragments: true,
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+        // Transition style
+        transition: 'None', // none/fade/slide/convex/concave/zoom
+        // Transition speed
+        transitionSpeed: 'default', // default/fast/slow
+        // Transition style for full page slide backgrounds
+        backgroundTransition: 'fade', // none/fade/slide/convex/concave/zoom
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1200,
+        height: 768,
+
+        // Optional reveal.js plugins
+        dependencies: [
+          { src: '/home/frbn/.dalibo/themes//reveal.js//lib/js/classList.js', condition: function() { return !document.body.classList; } },
+          { src: '/home/frbn/.dalibo/themes//reveal.js//plugin/zoom-js/zoom.js', async: true },
+              { src: '/home/frbn/.dalibo/themes//reveal.js//plugin/notes/notes.js', async: true }
+        ]
+      });
+    </script>
+    </body>
+</html>

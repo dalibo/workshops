@@ -247,7 +247,7 @@ Nous allons décrire ces nouveautés plus en détail.
 
 \newpage
 
-### Partionnement
+### Partitionnement
 
 ----
 
@@ -263,12 +263,15 @@ Nous allons décrire ces nouveautés plus en détail.
 <!-- https://gitlab.dalibo.info/formation/workshops/-/issues/109 -->
 !include include/109_add_support_for_partitioned_tables_and_indexes_in_reindex.md
 
+<!---
 ----
 
 #### Collecte automatique des statistiques de tables partitionnées
 
-<!-- https://gitlab.dalibo.info/formation/workshops/-/issues/110 -->
+ https://gitlab.dalibo.info/formation/workshops/-/issues/110 
 !include include/110_autovacuum_handle_analyze_for_partitioned_tables.md
+REVERT !!
+-->
 
 ----
 
@@ -370,7 +373,6 @@ possible.
 !include include/116_truncate_on_foreign_table.md
 
 ----
-
 
 #### Lecture asynchrone des tables distantes
 

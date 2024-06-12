@@ -53,6 +53,21 @@ make ws14
 Previous workshops generated files are versionned under `_archives_` folder with
 the same logic to preserve templates made in the past.
 
+Refresh the github mirror
+------------------------------------------------------------------------------- 
+
+```
+git clone git@github.com:dalibo/workshops.git
+cd workshops
+git remote add upstream git@gitlab.dalibo.info:formation/workshops.git
+git fetch upstream
+git rebase upstream/master
+git push --force-with-lease
+```
+
+> DO NOT use `git push --force` on the master branch.
+
+
 Contribute
 ------------------------------------------------------------------------------- 
 
