@@ -1,6 +1,6 @@
 # Démarrer un nouveau workshop
 
-  * Créer le sous-répertoire dans le dossier `fr/` ou/et `en/` (ex: `ws14`)
+  * Créer le sous-répertoire dans le dossier `fr/` ou/et `en/` (ex: `ws15`)
   * Créer un fichier `.md` à la racine de ce répertoire
   * Créer une nouvelle branche portant le même nom
   * Modifier la variable `BRANCH_TARGET` dans le fichier `.gitlab-ci.yml`

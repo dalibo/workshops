@@ -1,0 +1,84 @@
+---
+
+- hosts: localhost
+  become: yes
+  connection: local
+  tasks:
+  - name: Create CA directory
+    ansible.builtin.file:
+      path: "{{ ca_path }}"
+      state: directory
+  - name: Generate CA private key
+    community.crypto.openssl_privatekey:
+      path: "{{ ca_key }}"
+  - name: Create CSR for CA certificate
+    community.crypto.openssl_csr_pipe:
+      privatekey_path: "{{ ca_key }}"
+      common_name: Dalibo CA
+      use_common_name_for_san: false
+      basic_constraints:
+        - 'CA:TRUE'
+      basic_constraints_critical: true
+      key_usage:
+        - keyCertSign
+      key_usage_critical: true
+    register: ca_csr
+  - name: Create CA certificate
+    community.crypto.x509_certificate:
+      path: "{{ ca_cert }}"
+      csr_content: "{{ ca_csr.csr }}"
+      privatekey_path: "{{ ca_key }}"
+      provider: selfsigned
+  - name: Generate a private key for each server
+    community.crypto.openssl_privatekey:
+      path: "{{ ca_path }}/{{ item.name }}.key"
+    loop: "{{ ssl_nodes }}"
+  - name: Create a CSR directory
+    ansible.builtin.file:
+      path: "{{ csr_path }}"
+      state: directory
+  - name: Generate CSRs for server certificates
+    community.crypto.openssl_csr_pipe:
+      privatekey_path: "{{ ca_path }}/{{ item.name }}.key"
+      subject_alt_name:
+        - "IP:{{ item.ip }}"
+        - "DNS:localhost"
+        - "DNS:{{ item.name }}"
+        - "DNS:{{ item.name }}.lan"
+        - "DNS:{{ item.name }}.local"
+      key_usage:
+        - "keyEncipherment"
+        - "dataEncipherment"
+        - "nonRepudiation"
+        - "digitalSignature"
+        - "cRLSign"
+        - "keyCertSign"
+      key_usage_critical: true
+      extended_key_usage:
+        - "serverAuth"
+        - "clientAuth"
+    loop: "{{ ssl_nodes }}"
+    register: csr_list
+  - name: Dump CSRs to disk
+    ansible.builtin.copy:
+      dest: "{{ csr_path }}/{{ item['item']['name'] }}.csr"
+      content: "{{ item.csr }}"
+    loop: "{{ csr_list.results }}"
+    no_log: false
+  - name: Generate server certificate from stored CSRs
+    community.crypto.x509_certificate:
+      path: "{{ ca_path }}/{{ item.name }}.pem"
+      csr_path: "{{ csr_path }}/{{ item.name }}.csr"
+      ownca_path: "{{ ca_cert }}"
+      ownca_privatekey_path: "{{ ca_key }}"
+      provider: ownca
+    loop: "{{ ssl_nodes }}"
+  - name: Set current local user as owner of certs and keys
+    ansible.builtin.file:
+      path: "{{ ca_path }}"
+      state: directory
+      recurse: true
+      owner: "{{ local_user}}"
+      group: "{{ local_user}}"
+    vars:
+      local_user: "{{ lookup('ansible.builtin.env', 'USER') }}"

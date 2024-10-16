@@ -1,0 +1,47 @@
+---
+- name: "Destroy containers from remote hosts"
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    - containers:
+      - name: "e1"
+        ip: "10.0.3.101"
+      - name: "e2"
+        ip: "10.0.3.102"
+      - name: "e3"
+        ip: "10.0.3.103"
+      - name: "pg1"
+        ip: "10.0.3.201"
+      - name: "pg2"
+        ip: "10.0.3.202"
+      - name: "pg3"
+        ip: "10.0.3.203"
+      - name: "backup"
+        ip: "10.0.3.204"
+    - interface: lxcbr0
+
+  tasks:
+
+# File /etc/host
+
+    - name: "Add all the hosts to /etc/hosts"
+      ansible.builtin.lineinfile:
+        path: "/etc/hosts"
+        regexp: "{{ current_container.ip }}  {{ current_container.name }}"
+        line: "{{ current_container.ip }}  {{ current_container.name }}"
+        state: present
+        backup: false
+      with_items:
+        - "{{ containers }}"
+      loop_control:
+        loop_var: current_container
+      when: containers is defined
+
+# Execute the teardown.yml 
+
+    - name: "Execute the secondary teardown.yml playbook"
+      ansible.builtin.shell:
+        cmd: "ansible-playbook -i ~root/inventory.yml -f 7 ~root/teardown.yml"
+

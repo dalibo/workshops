@@ -1,0 +1,9 @@
+---
+
+- hosts: "{{ pglift_nodes }}"
+  become: true
+  become_user: postgres
+  tasks:
+    - name: Activate site configuration
+      ansible.builtin.command:
+        cmd: "~/.local/bin/pglift site-configure install"

@@ -1,0 +1,23 @@
+---
+
+# temboard
+- ansible.builtin.import_playbook: playbooks/prerequisites.yml
+- ansible.builtin.import_playbook: playbooks/ssl.yml
+- ansible.builtin.import_playbook: playbooks/setup_repositories.yml
+- ansible.builtin.import_playbook: playbooks/install_postgresql.yml
+- ansible.builtin.import_playbook: playbooks/install_pgbackrest.yml
+- ansible.builtin.import_playbook: playbooks/install_prometheus_postgres_exporter.yml
+- ansible.builtin.import_playbook: playbooks/install_temboard.yml
+- ansible.builtin.import_playbook: playbooks/install_temboard_agent.yml
+- ansible.builtin.import_playbook: playbooks/install_pglift.yml
+- ansible.builtin.import_playbook: playbooks/init_pglift_config.yml
+  vars:
+    pglift_nodes: database
+    ws_pglift_site_settings: "{{ ws_include_root }}/temboard/settings.yaml.j2"
+- ansible.builtin.import_playbook: playbooks/init_pglift_config.yml
+  vars:
+    pglift_nodes: helper
+- ansible.builtin.import_playbook: playbooks/pglift_site_configure.yml
+  vars:
+    pglift_nodes: helper
+

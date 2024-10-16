@@ -1,0 +1,8 @@
+---
+
+- hosts: database, helper
+  become: true
+  tasks:
+    - name: Install prometheus postgres exporter RPM package
+      ansible.builtin.package:
+        name: prometheus-postgres-exporter

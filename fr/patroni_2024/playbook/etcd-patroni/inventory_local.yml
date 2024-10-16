@@ -1,0 +1,12 @@
+---
+
+all:
+  hosts:
+    vm1:
+    vm2:
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+    ansible_python_interpreter: "/usr/bin/python3"
+    postgresql_version: "16"
+    postgresql_instance: "main"

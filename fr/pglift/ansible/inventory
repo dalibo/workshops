@@ -1,0 +1,19 @@
+srv-pg1 ansible_host=192.168.55.11
+srv-pg2 ansible_host=192.168.55.12
+srv-helper ansible_host=192.168.55.21
+srv-etcd1 ansible_host=192.168.55.31
+srv-etcd2 ansible_host=192.168.55.32
+srv-etcd3 ansible_host=192.168.55.33
+
+[database]
+srv-pg1
+srv-pg2
+
+[helper]
+srv-helper
+
+[dcs]
+srv-etcd1
+srv-etcd2
+srv-etcd3
+

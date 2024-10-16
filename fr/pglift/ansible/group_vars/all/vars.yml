@@ -1,0 +1,55 @@
+---
+
+# Nodes
+network: 192.168.55
+pg_nodes:
+  - name: srv-pg1
+    ip: "{{ network }}.11"
+  - name: srv-pg2
+    ip: "{{ network }}.11"
+helper_nodes:
+  - name: srv-helper
+    ip: "{{ network }}.21"
+etcd_nodes:
+  - name: srv-etcd1
+    ip: "{{ network }}.31"
+  - name: srv-etcd2
+    ip: "{{ network }}.32"
+  - name: srv-etcd3
+    ip: "{{ network }}.33"
+ssl_nodes: "{{ pg_nodes + helper_nodes + etcd_nodes }}"
+
+# CA TLS
+ca_name: ca_workshop
+ca_path: "{{ playbook_dir }}/.openssl"
+ca_cert: "{{ ca_path }}/{{ ca_name }}.pem"
+ca_key: "{{ ca_path }}/{{ ca_name }}.key"
+csr_path: "{{ ca_path }}/.csr"
+cert_dir: /etc/pki/tls/certs
+key_dir: /etc/pki/tls/private
+
+# Configs pglift des workshops
+ws: comprehension_et_utilisation_de_pglift
+ws_include_root: "../../include"
+ws_pglift_config_dir: "{{ ws_include_root }}/{{ ws }}"
+ws_pglift_site_settings: "{{ ws_pglift_config_dir }}/settings.yaml.j2"
+ws_pglift_postgresql_template: "{{ ws_pglift_config_dir }}/postgresql.conf.j2"
+ws_pglift_pg_hba_template: "{{ ws_pglift_config_dir }}/pg_hba.conf.j2"
+ws_pglift_pg_ident_template: "{{ ws_pglift_config_dir }}/pg_ident.conf.j2"
+ws_pglift_pgbackrest_template: "{{ ws_pglift_config_dir }}/pgbackrest.conf.j2"
+
+# PostgreSQL
+postgresql_version: 15
+postgresql_sys_user: postgres
+postgresql_sys_group: postgres
+postgresql_data_dir: /pgdata
+
+# pglift
+pglift_version: 1.0.0
+pglift_sys_user: "{{ postgresql_sys_user }}"
+pglift_sys_group: "{{ postgresql_sys_user }}"
+pglift_config_root: "/home/{{ postgresql_sys_user }}/.config/pglift"
+
+# pg_back
+pg_back_version: 2.1.1
+pg_back_rpm_url: https://github.com/orgrim/pg_back/releases/download/v{{ pg_back_version }}/pg-back-{{ pg_back_version }}-x86_64.rpm

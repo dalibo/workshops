@@ -1,0 +1,8 @@
+auto lo
+iface lo inet loopback
+
+auto eth0
+iface eth0 inet static
+  address {{ ansible_host }}/24
+  gateway 10.0.3.1
+

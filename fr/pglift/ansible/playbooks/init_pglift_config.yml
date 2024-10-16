@@ -1,0 +1,31 @@
+---
+
+- hosts: "{{ pglift_nodes }}"
+  become: true
+  become_user: postgres
+  tasks:
+    - name: Deploy pglift settings template
+      ansible.builtin.template:
+        src: "{{ ws_pglift_site_settings }}"
+        dest: "{{ pglift_config_root }}/settings.yaml"
+        mode: '0750'
+    - name: Deploy PostgreSQL configuration template
+      ansible.builtin.template:
+        src: "{{ ws_pglift_postgresql_template }}"
+        dest: "{{ pglift_config_root }}/postgresql/postgresql.conf"
+        mode: '0750'
+    - name: Deploy pg_hba.conf template
+      ansible.builtin.template:
+        src: "{{ ws_pglift_pg_hba_template }}"
+        dest: "{{ pglift_config_root }}/postgresql/pg_hba.conf"
+        mode: '0750'
+    - name: Deploy pg_ident.conf template
+      ansible.builtin.template:
+        src: "{{ ws_pglift_pg_ident_template }}"
+        dest: "{{ pglift_config_root }}/postgresql/pg_ident.conf"
+        mode: '0750'
+    - name: Deploy pgbackrest configuration template
+      ansible.builtin.template:
+        src: "{{ ws_pglift_pgbackrest_template }}"
+        dest: "{{ pglift_config_root }}/pgbackrest/pgbackrest.conf"
+        mode: '0750'

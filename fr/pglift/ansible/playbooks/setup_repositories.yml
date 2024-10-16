@@ -1,0 +1,44 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+    - name: Import PGDG GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: "https://download.postgresql.org/pub/repos/yum/keys/PGDG-RPM-GPG-KEY-RHEL"
+    - name: Add PGDG {{ postgresql_version }} repository
+      ansible.builtin.yum_repository:
+        name: pgdg
+        description: "PostgreSQL {{ postgresql_version }} for RHEL / Rocky $releasever - $basearch"
+        baseurl: "https://download.postgresql.org/pub/repos/yum/{{ postgresql_version }}/redhat/rhel-$releasever-$basearch"
+        enabled: yes
+    - name: Add PGDG common repository
+      ansible.builtin.yum_repository:
+        name: pgdg-common
+        description: "PostgreSQL {{ postgresql_version }} for RHEL / Rocky $releasever - $basearch"
+        baseurl: "https://download.postgresql.org/pub/repos/yum/common/redhat/rhel-$releasever-$basearch"
+        enabled: yes
+    - name: Add EPEL GPG key
+      ansible.builtin.rpm_key:
+          state: present
+          key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+    - name: Add EPEL repository
+      ansible.builtin.yum_repository:
+        name: epel
+        description: Extra Packages for Enterprise Linux (EPEL) repository
+        baseurl: https://download.example/pub/epel/8/Everything/$basearch
+        metalink: https://mirrors.fedoraproject.org/metalink?repo=epel-8&arch=$basearch&infra=$infra&content=$contentdir
+        enabled: yes
+    - name: Add Dalibo Labs GPG key
+      ansible.builtin.rpm_key:
+        state: present
+        key: https://yum.dalibo.org/labs/dalibo-labs.asc
+    - name: Add Dalibo Labs repository
+      ansible.builtin.yum_repository:
+        name: dalibo-labs
+        description: Dalibo Labs RPM Repository
+        baseurl: https://yum.dalibo.org/labs/RHEL$releasever-$basearch
+        enabled: yes
+    - name: "Enable powertools repository"
+      command: "dnf -y config-manager --set-enabled powertools"

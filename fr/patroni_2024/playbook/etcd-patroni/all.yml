@@ -1,0 +1,15 @@
+---
+
+- name: setup
+  import_playbook: setup.yml
+
+- name: etcd
+  import_playbook: setup_etcd_servers.yml
+
+- name: patroni
+  import_playbook: setup_patroni_servers.yml
+
+- name: backup
+  import_playbook: setup_backup_servers.yml
+
+

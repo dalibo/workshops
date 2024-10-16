@@ -1,0 +1,29 @@
+---
+
+- name: Install prerequisites
+  hosts: all
+  become: true
+  tasks:
+    - name: Install acl package for ansible
+      ansible.builtin.package:
+        name: acl
+
+- hosts: all,localhost
+  become: true
+  tasks:
+    - name: Add /etc/hosts entries corresponding to inventory values on both VMs and localhost
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '.*{{ item }}$'
+        line: "{{ hostvars[item].ansible_host }} {{item}}"
+      when: hostvars[item].ansible_host is defined
+      with_items: "{{ groups.all }}"
+
+- name: Exchange root ssh keys
+  hosts: all
+  become: true
+  roles:
+    - ssh-exchange
+  vars:
+    username: root
+    target_group: all

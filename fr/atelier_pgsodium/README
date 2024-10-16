@@ -1,0 +1,9 @@
+# Atelier chiffrement de donnée
+
+Auteurs:
+* Frédéric Yhuel
+* Jehan-Guillaume de Rorthais
+
+Le but de l'atelier est de construire une instance contenant des
+colonnes chiffrées en utilisant l'extension pgsodium.
+

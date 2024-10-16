@@ -1,0 +1,33 @@
+---
+systemd: {}
+postgresql:
+  default_version: '15'
+  auth:
+    local: 'peer'
+    host: 'scram-sha-256'
+  surole:
+    name: 'postgres'
+  backuprole:
+    name: 'backup'
+  datadir: '/pgdata/{version}/{name}/data'
+  logpath: '/pgdata/log/postgresql'
+  dumps_directory: '/pgdata/backup/dumps/{version}-{name}'
+  socket_directory: '/var/run/postgresql/'
+  dump_commands:
+    -
+      - /usr/bin/pg_back
+      - -c
+      - "/home/postgres/.config/pglift/pg_back/pg_back.conf"
+      - -B
+      - "{bindir}"
+      - -b
+      - "{path}"
+      - -d
+      - "{conninfo}"
+      - "{dbname}"
+pgbackrest:
+  repository:
+    path: '/pgdata/backup/pgbackrest'
+    mode: 'path'
+prometheus:
+  execpath: '/usr/bin/postgres_exporter'

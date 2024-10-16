@@ -1,0 +1,10 @@
+---
+
+# compréhension et utilisation de pglift
+- ansible.builtin.import_playbook: playbooks/prerequisites.yml
+- ansible.builtin.import_playbook: playbooks/setup_repositories.yml
+- ansible.builtin.import_playbook: playbooks/install_postgresql.yml
+- ansible.builtin.import_playbook: playbooks/install_pgbackrest.yml
+- ansible.builtin.import_playbook: playbooks/install_prometheus_postgres_exporter.yml
+- ansible.builtin.import_playbook: playbooks/install_pglift.yml
+- ansible.builtin.import_playbook: playbooks/init_pglift_config.yml

@@ -1,0 +1,75 @@
+body:after {
+  content: url(images/logo_dalibo_landscape_blue_tagline.186x50.png);
+  position: fixed;
+  bottom: 1em;
+  left: 1em;
+}
+
+h1 {
+  font-weight: bolder;
+  /* background: #f8f8f8; */
+  color: #318ce7;      /* bleu dalibo */
+}
+
+h2 {
+  font-weight: bolder;
+  color: #318ce7;      /* bleu dalibo */
+  /* background: #f8f8f8; */
+  /* border-bottom: 2px solid black; */
+}
+
+h3 {
+  font-weight: bold;
+  /* background: #fafafa; */
+  border-bottom: 1px solid #318ce7;
+}
+
+/* Pour les infos de version dans le titre */
+/* FIXME  : @media semble overrider ceci !! et passe à 52px !*/
+.uk-heading-large h3 {
+  font-weight: normal;
+  font-size: 20px;
+}
+
+/*
+ * Style des bloc "slides" dans le handout
+ * https://gitlab.dalibo.info/formation/manuels/-/issues/666
+ */
+.slide-content {
+  -moz-box-shadow: 2px 2px 5px #888;
+  -webkit-box-shadow: 2px 2px 5px #888;
+  box-shadow: 2px 2px 5px #888;
+  /*background-color: rgba(153, 204, 255, 0.4); */  /* #99CCFF */
+  background-color: #F0F8FF;  /* Alice Blue (le bleu Dalibo est trop violent) */
+  padding: 5px;
+  margin: 5px;
+}
+
+/*
+ * Style des mots-clés
+ * /!\ A garder en cohérence avec revealjs
+ * https://gitlab.dalibo.info/formation/manuels/-/issues/665
+ */
+code {
+    font-size: 12px;
+    font-family: Consolas, monospace, serif;
+    color: var(--r-main-color)  /* noir du texte par défaut plutôt que bleu marine ! */   /* color: #1a53a1; */
+    white-space: nowrap;
+/*  issue !1377
+    padding: 0 4px;
+    border: 1px solid #ddd; */
+    border-radius: 3px;
+    background: #fafafa;
+}
+/*
+ * On peut "cacher" certains blocs de code dans le handout
+ * avec la syntaxe
+ *
+ * ``` { .hidden-in-html-handout }
+ * Ce texte n'apparait pas dans le handhout HTML !
+ * ```
+ *
+ */
+.hidden-in-html-handout {
+  display: none;
+}

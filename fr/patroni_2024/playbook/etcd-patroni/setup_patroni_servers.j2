@@ -1,0 +1,2 @@
+etcd3:
+  hosts: "{% for item in groups['etcd_servers'] %}{{ hostvars[item]['ansible_host'] }}:2379{% if not loop.last %}, {% endif %}{% endfor %}"

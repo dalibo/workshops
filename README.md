@@ -33,25 +33,40 @@ Compile
 -------------------------------------------------------------------------------
 
 Each workshop is written under its own dedicated folder with standalones markdown
-files (for instance [fr/ws14/140-postgresql_14.md](fr/ws14/140-postgresql_14.md))/
+files (for instance [fr/ws15/150-postgresql_15.md](fr/ws15/150-postgresql_15.md))/
 
 You can export the content using `make` by specifying the file extension you want
 
 ```
-make fr/ws14/140-postgresql_14.handout.html
-make fr/ws14/140-postgresql_14.epub
-make fr/ws14/140-postgresql_14.pdf
+make fr/ws14/140-postgresql_15.handout.html
+make fr/ws14/140-postgresql_15.epub
+make fr/ws14/140-postgresql_15.pdf
 etc.
 ```
 
 You can also build workshops within the same folder in all formats with:
 
 ```
-make ws14
+make ws15
 ```
 
 Previous workshops generated files are versionned under `_archives_` folder with
 the same logic to preserve templates made in the past.
+
+Refresh the github mirror
+------------------------------------------------------------------------------- 
+
+```
+git clone git@github.com:dalibo/workshops.git
+cd workshops
+git remote add upstream git@gitlab.dalibo.info:formation/workshops.git
+git fetch upstream
+git rebase upstream/master
+git push --force-with-lease
+```
+
+> DO NOT use `git push --force` on the master branch.
+
 
 Contribute
 ------------------------------------------------------------------------------- 

@@ -1,0 +1,8 @@
+---
+
+- hosts: database, helper
+  become: true
+  tasks:
+    - name: Install pgbackrest RPM package
+      ansible.builtin.package:
+        name: pgbackrest
